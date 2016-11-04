@@ -69,7 +69,7 @@ def fillMainDB(data):
 
 	maxIndex = -1
 
-	con = sqlite3.connect("./databases/STATIC.db") # Warning: This file is created in the current directory
+	con = sqlite3.connect("./databases/static_db.db") # Warning: This file is created in the current directory
 	try:
 		cursor = con.cursor()
 		cursor.execute("CREATE TABLE IF NOT EXISTS test (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `name` TEXT NOT NULL, `author` TEXT, `nbInstances` TEXT, `nbSteps` TEXT, `nbConsistencySteps` TEXT, `nbIntroductionSteps` TEXT, `description` TEXT, `start` TEXT, `end` TEXT)")
