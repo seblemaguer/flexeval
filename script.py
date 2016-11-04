@@ -22,8 +22,8 @@ def createDB(JSONfile):
 	dbName = "tests"
 	con = sqlite3.connect(dbName+".db") # Warning: This file is created in the current directory
 	# con.execute("attach DATABASE '"+dbName+".db' as tests")
-	con.execute("CREATE TABLE sample (sample_id INTEGER NOT NULL AUTOINCREMENT UNIQUE, type TEXT NOT NULL, name TEXT NOT NULL, symbole TEXT NOT NULL DEFAULT 'A', index_sym INTEGER NOT NULL, nb_processed INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(sample_id))")
-	con.execute("CREATE TABLE answer (id_answer INTEGER NOT NULL AUTOINCREMENT UNIQUE, type_question INTEGER NOT NULL, date TEXT NOT NULL, sample1 INTEGER, sample2 INTEGER, sample3 INTEGER, PRIMARY KEY(id_answer))")
+	con.execute("CREATE TABLE sample (`sample_id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `type` TEXT NOT NULL, `name` TEXT NOT NULL, `symbole` TEXT NOT NULL DEFAULT 'A', `index_sym` INTEGER NOT NULL, `nb_processed` INTEGER NOT NULL DEFAULT 0)")
+	con.execute("CREATE TABLE answer (`id_answer` INTEGER NOT NULL PRIMARY KEY  AUTOINCREMENT UNIQUE, `type_question` INTEGER NOT NULL, `date` TEXT NOT NULL, `sample1` INTEGER, `sample2` INTEGER, `sample3` INTEGER)")
 	con.commit()
 
 	print("------------")
