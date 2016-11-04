@@ -1,5 +1,6 @@
-import sqlite3
 import json
+import sqlite3
+import sys
 from pprint import pprint
 
 def parseJSON(JSONfile):
@@ -65,7 +66,7 @@ def fillMainDB(data):
 	print("v-----------------v")
 
 	try:
-		con = sqlite3.connect("main.db") # Warning: This file is created in the current directory
+		con = sqlite3.connect("./databases/STATIC.db") # Warning: This file is created in the current directory
 		con.execute("CREATE TABLE IF NOT EXISTS test (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `name` TEXT NOT NULL, `author` TEXT, `nbInstances` TEXT, `nbSteps` TEXT, `nbConsistencySteps` TEXT, `nbIntroductionSteps` TEXT, `description` TEXT, `start` TEXT, `end` TEXT)")
 
 		conf = data["test"]["configuration"]
