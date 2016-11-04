@@ -76,8 +76,8 @@ def process_test(test):
 	#check if the test isn't finished yet
 	if model.get_nb_step_user(test,user) < model.get_nb_step(test) :
 		#proceed to a new step
-		samples = model.get_test_sample(test,user)
-		data={"test_code":test,"samples" : samples, "system": 1, "index": 1}
+		(samples,index) = model.get_test_sample(test,user)
+		data={"test_code":test,"samples" : samples, "systems": model.get_systems(test), "index": index}
 		return bottle.template(test,data)
 	else :
 		return "<p>You have already done this test</p>"
@@ -96,14 +96,14 @@ def process_test_post(test):
 	nb=model.get_nb_question(test)
 	answers=[]
 	for i in range(1,nb+1) :
-		answers.append(post_get("question"+str(i)))
-	post_data = {"user":user,"answers": answers}
+		answers.append({"index": i, "content": post_get("question"+str(i))})
+	post_data = {"user":user,"answers": answers,"index": post_get("index")}
 	model.insert_data(test,post_data)
 	#check if the test isn't finished yet
 	if model.get_nb_step_user(test,user) < model.get_nb_step(test) :
 		#proceed to a new step
-		samples = model.get_test_sample(test,user)
-		data={"test_code":test, "samples" : samples, "system": 1, "index": 1}
+		(samples,index) = model.get_test_sample(test,user)
+		data={"test_code":test, "samples" : samples, "systems": model.get_systems(test), "index": index}
 		return bottle.template(test,data)
 	else :
 		return "<p>Test finished thank you for your cooperation</p>"
