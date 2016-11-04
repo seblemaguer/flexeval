@@ -23,8 +23,8 @@ def createDB(dbName,data):
 	print("| DB creation |")
 	print("v-------------v")
 
+	con = sqlite3.connect("./databases/"+dbName+".db") # Warning: This file is created in the current directory
 	try:
-		con = sqlite3.connect(dbName+".db") # Warning: This file is created in the current directory
 		con.execute("CREATE TABLE system (`id` TEXT NOT NULL PRIMARY KEY UNIQUE, `name` TEXT NOT NULL, `comment` TEXT NOT NULL)")
 		con.execute("CREATE TABLE sample (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `path` TEXT NOT NULL, `type` TEXT NOT NULL, `id_system` TEXT NOT NULL , `syst_index` INTEGER NOT NULL, `nb_processed` INTEGER NOT NULL DEFAULT 0, FOREIGN KEY(id_system) REFERENCES system(id))")
 		con.execute("CREATE TABLE answer (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `user` TEXT NOT NULL, `date` TEXT NOT NULL, `content` TEXT NOT NULL, `syst_index` INTEGER NOT NULL, `question_index` INTEGER NOT NULL)")
@@ -49,44 +49,54 @@ def createDB(dbName,data):
 					systemIndex = systemIndex + 1
 					sampleToInsert=(samplePath, sampleType, system["-id"], systemIndex)
 					con.execute("INSERT INTO sample(path, type, id_system, syst_index) VALUES (?,?,?,?)", sampleToInsert)
+
 		con.commit()
+
 		print("Successfully filled database.")
 	except Exception as e:
+		print("EXCEPTION")
 		con.rollback()
 		raise e
 	finally:
 		con.close()
 
-
 def fillMainDB(data):
-	print("\n> fillDB\n")
+	print("\n> fillMainDB\n")
 
 	print("|-----------------|")
 	print("| main DB filling |")
 	print("v-----------------v")
 
+	maxIndex = -1
+
+	con = sqlite3.connect("./databases/STATIC.db") # Warning: This file is created in the current directory
 	try:
-		con = sqlite3.connect("./databases/STATIC.db") # Warning: This file is created in the current directory
-		con.execute("CREATE TABLE IF NOT EXISTS test (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `name` TEXT NOT NULL, `author` TEXT, `nbInstances` TEXT, `nbSteps` TEXT, `nbConsistencySteps` TEXT, `nbIntroductionSteps` TEXT, `description` TEXT, `start` TEXT, `end` TEXT)")
+		cursor = con.cursor()
+		cursor.execute("CREATE TABLE IF NOT EXISTS test (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `name` TEXT NOT NULL, `author` TEXT, `nbInstances` TEXT, `nbSteps` TEXT, `nbConsistencySteps` TEXT, `nbIntroductionSteps` TEXT, `description` TEXT, `start` TEXT, `end` TEXT)")
 
 		conf = data["test"]["configuration"]
 		confToInsert = (conf["name"], conf["author"], conf["nbInstances"], conf["nbSteps"], conf["nbConsistencySteps"], conf["nbIntroductionSteps"], conf["description"], conf["start"], conf["end"])
-		con.execute("INSERT INTO test(name, author, nbInstances, nbSteps, nbConsistencySteps, nbIntroductionSteps, description, start, end) VALUES (?,?,?,?,?,?,?,?,?)", confToInsert)
+		cursor.execute("INSERT INTO test(name, author, nbInstances, nbSteps, nbConsistencySteps, nbIntroductionSteps, description, start, end) VALUES (?,?,?,?,?,?,?,?,?)", confToInsert)
 
 		con.commit()
 
 		print("Successfully filled database.")
+
+		cursor.execute("SELECT max(id) FROM test")
+		maxIndex = cursor.fetchone()[0]
+		print "Max index =", maxIndex
 	except Exception as e:
+		print("EXCEPTION")
 		con.rollback()
 		raise e
 	finally:
 		con.close()
-
+		return maxIndex
 
 
 dataFromJSON = parseJSON("./test.json")
-createDB("tests", dataFromJSON)
-fillMainDB(dataFromJSON)
+lastIndex = fillMainDB(dataFromJSON)
+createDB(str(lastIndex), dataFromJSON)
 
 # print json.dumps(['foo', {'bar': ('baz', None, 1.0, 2)}])
 
