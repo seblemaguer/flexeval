@@ -1,3 +1,4 @@
+import model
 import sys
 import bottle
 import sqlite3
@@ -19,6 +20,7 @@ session_opts = {
 app_middlware = SessionMiddleware(app, session_opts)
 app_session = bottle.request.environ.get('beaker.session')
 
+@app.route('/login')
 @app.post('/login')
 def login():
 	mail = post_get("email")
@@ -27,10 +29,10 @@ def login():
 	app_session['pseudo'] = mail
 	return "<p>Welcome!</p>"
 
+@app.route('/logout')
 @app.post('/logout')
 def logout():
-	bottle.request.environ.get('beaker.session')['pseudo'] = None
-	redirect('/login')
+	bottle.request.environ.get('beaker.session').delete()
 
 @app.route('/login')
 def toto():
@@ -58,54 +60,53 @@ def testLogin():
 #home page
 @app.route('/')
 def home():
-	return "<p>Nothing to see here!</p>"
+	return "<p>Hi! Welcome on our test plateform, if you want to get a free example, please go <a href=\"http://localhost:8080/test/1\">Here</a>!</p>"
 
 
 @app.route('/test/:test')
 def process_test(test):
 	app_session = bottle.request.environ.get('beaker.session')
-	if testLogin():
-		redirect('/login')
+	#the following lines are to be uncommented later
+	if not testLogin() :
+		bottle.redirect('/login')
+	user = app_session['pseudo']
 	if not os.path.exists('databases/'+test+'.db') :
 		return "<p>This test is not valid!! (no database linked)</p>"
-	conn = sqlite3.connect('databases/'+test+'.db')
-	c = conn.cursor()
-	#load all the sample, see later for a strategic uses
-	c.execute("select * from sample")
-	sampleContent = c.fetchall()
-	conn.close()
-	s1 = "/test_sound/"+test+"/bird.wav"
-	s2 = "/test_sound/"+test+"/dolphin.wav"
-	samples = [{"id" : 1, "path" : s1},{"id" : 2, "path" : s2}]
-	
-	data={"test_code":test,"sample_content":str(sampleContent),"samples" : samples}
-	return bottle.template(test,data)
+	#proceed to the test
+	#check if the test isn't finished yet
+	if model.get_nb_step_user(test,user) < model.get_nb_step(test) :
+		#proceed to a new step
+		samples = model.get_test_sample(test,user)
+		data={"test_code":test,"samples" : samples, "system": 1, "index": 1}
+		return bottle.template(test,data)
+	else :
+		return "<p>You have already done this test</p>"
 
 @app.post('/test/:test')
 def process_test_post(test):
 	app_session = bottle.request.environ.get('beaker.session')
-	if testLogin():
-		redirect('/login')
-	conn = sqlite3.connect('databases/'+test+'.db')
-
-	s = post_get("sample1")
-	if post_get("sample2") != "":
-		s = samples +","+post_get("sample2")
-	if post_get("sample3") != "":
-		s = samples +","+post_get("sample3")
-	c = conn.cursor()
-	#insert the answer first
-	#c.execute("insert into answer (type_qestion,date,sample1,sample2,sample3) values(\"AB\",CURRENT_TIMESTAMP,"+s+")")
-	#load all the sample, see later for a strategic uses
-	c.execute("select * from sample")
-	sampleContent = c.fetchall()
-	#c.commit()
-	conn.close()
-	s1 = "/test_sound/"+test+"/bird.wav"
-	s2 = "/test_sound/"+test+"/dolphin.wav"
-	samples = [{"id" : 1, "path" : s1},{"id" : 2, "path" : s2}]
-	data={"test_code":test,"sample_content":str(sampleContent),"samples" : samples}
-	return bottle.template(test,data)
+	#the following lines are to be uncommented later
+	
+	if not testLogin() :
+		bottle.redirect('/login')
+	user = app_session['pseudo']
+	if not os.path.exists('databases/'+test+'.db') :
+		return "<p>This test is not valid!! (no database linked)</p>"
+	#get the post data and insert into db
+	nb=model.get_nb_question(test)
+	answers=[]
+	for i in range(1,nb+1) :
+		answers.append(post_get("question"+str(i)))
+	post_data = {"user":user,"answers": answers}
+	model.insert_data(test,post_data)
+	#check if the test isn't finished yet
+	if model.get_nb_step_user(test,user) < model.get_nb_step(test) :
+		#proceed to a new step
+		samples = model.get_test_sample(test,user)
+		data={"test_code":test, "samples" : samples, "system": 1, "index": 1}
+		return bottle.template(test,data)
+	else :
+		return "<p>Test finished thank you for your cooperation</p>"
 
 
 #access to local static sound files
