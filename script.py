@@ -2,53 +2,90 @@ import sqlite3
 import json
 from pprint import pprint
 
-def createDB(JSONfile):
-	print("createDB\n")
-	print("--------------")
-	print(" parsing JSON ")
-	print("--------------")
+def parseJSON(JSONfile):
+	print("\n> parseJSON\n")
+
+	print("|--------------|")
+	print("| parsing JSON |")
+	print("v--------------v")
+
 	with open(JSONfile) as data_file:
 		data = json.load(data_file)
-
 	pprint(data)
 
-	print("-------------")
-	print(" DB creation ")
-	print("-------------")
+	return data
 
-	# print(data["test"]["configuration"]["author"])
-	# print(data["test"]["systems"]["system"][0]["-id"])
+def createDB(dbName,data):
+	print("\n> createDB\n")
 
-	dbName = "tests"
-	con = sqlite3.connect(dbName+".db") # Warning: This file is created in the current directory
-	# con.execute("attach DATABASE '"+dbName+".db' as tests")
-	con.execute("CREATE TABLE system (`id` TEXT NOT NULL PRIMARY KEY UNIQUE, `name` TEXT NOT NULL, `comment` TEXT NOT NULL)")
-	con.execute("CREATE TABLE sample (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `path` TEXT NOT NULL, `type` TEXT NOT NULL, `id_system` TEXT NOT NULL , `syst_index` INTEGER NOT NULL, `nb_processed` INTEGER NOT NULL DEFAULT 0)")
-	con.execute("CREATE TABLE answer (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `user` TEXT NOT NULL, `date` TEXT NOT NULL, `content` TEXT NOT NULL, `syst_index` INTEGER NOT NULL, `question_index` INTEGER NOT NULL)")
+	print("|-------------|")
+	print("| DB creation |")
+	print("v-------------v")
 
-	con.commit()
+	try:
+		con = sqlite3.connect(dbName+".db") # Warning: This file is created in the current directory
+		con.execute("CREATE TABLE system (`id` TEXT NOT NULL PRIMARY KEY UNIQUE, `name` TEXT NOT NULL, `comment` TEXT NOT NULL)")
+		con.execute("CREATE TABLE sample (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `path` TEXT NOT NULL, `type` TEXT NOT NULL, `id_system` TEXT NOT NULL , `syst_index` INTEGER NOT NULL, `nb_processed` INTEGER NOT NULL DEFAULT 0, FOREIGN KEY(id_system) REFERENCES system(id))")
+		con.execute("CREATE TABLE answer (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `user` TEXT NOT NULL, `date` TEXT NOT NULL, `content` TEXT NOT NULL, `syst_index` INTEGER NOT NULL, `question_index` INTEGER NOT NULL)")
+		con.commit()
+		print("Successfully created database.")
+	except Exception as e:
+		con.rollback()
+		raise e
 
-	print("------------")
-	print(" DB filling ")
-	print("------------")
+	print("|------------|")
+	print("| DB filling |")
+	print("v------------v")
 
-	for system in data["test"]["systems"]["system"]:
-		systemIndex = 0
-		systemToInsert=(system["-id"],system["-name"],system["comment"])
-		con.execute("INSERT INTO system(id, name, comment) VALUES (?,?,?)", systemToInsert)
-		for samples in system["samples"]:
-			sampleType=samples["-type"]
-			for samplePath in samples["sample"]:
-				systemIndex = systemIndex + 1
-				sampleToInsert=(samplePath, sampleType, system["-id"], systemIndex)
-				con.execute("INSERT INTO sample(path, type, id_system, syst_index) VALUES (?,?,?,?)", sampleToInsert)
-	con.commit()
-	con.close()
+	try:
+		for system in data["test"]["systems"]["system"]:
+			systemIndex = 0
+			systemToInsert=(system["-id"],system["-name"],system["comment"])
+			con.execute("INSERT INTO system(id, name, comment) VALUES (?,?,?)", systemToInsert)
+			for samples in system["samples"]:
+				sampleType=samples["-type"]
+				for samplePath in samples["sample"]:
+					systemIndex = systemIndex + 1
+					sampleToInsert=(samplePath, sampleType, system["-id"], systemIndex)
+					con.execute("INSERT INTO sample(path, type, id_system, syst_index) VALUES (?,?,?,?)", sampleToInsert)
+		con.commit()
+		print("Successfully filled database.")
+	except Exception as e:
+		con.rollback()
+		raise e
+	finally:
+		con.close()
+
+
+def fillMainDB(data):
+	print("\n> fillDB\n")
+
+	print("|-----------------|")
+	print("| main DB filling |")
+	print("v-----------------v")
+
+	try:
+		con = sqlite3.connect("main.db") # Warning: This file is created in the current directory
+		con.execute("CREATE TABLE IF NOT EXISTS test (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `name` TEXT NOT NULL, `author` TEXT, `nbInstances` TEXT, `nbSteps` TEXT, `nbConsistencySteps` TEXT, `nbIntroductionSteps` TEXT, `description` TEXT, `start` TEXT, `end` TEXT)")
+
+		conf = data["test"]["configuration"]
+		confToInsert = (conf["name"], conf["author"], conf["nbInstances"], conf["nbSteps"], conf["nbConsistencySteps"], conf["nbIntroductionSteps"], conf["description"], conf["start"], conf["end"])
+		con.execute("INSERT INTO test(name, author, nbInstances, nbSteps, nbConsistencySteps, nbIntroductionSteps, description, start, end) VALUES (?,?,?,?,?,?,?,?,?)", confToInsert)
+
+		con.commit()
+
+		print("Successfully filled database.")
+	except Exception as e:
+		con.rollback()
+		raise e
+	finally:
+		con.close()
 
 
 
-
-createDB("test.json")
+dataFromJSON = parseJSON("./test.json")
+createDB("tests", dataFromJSON)
+fillMainDB(dataFromJSON)
 
 # print json.dumps(['foo', {'bar': ('baz', None, 1.0, 2)}])
 
