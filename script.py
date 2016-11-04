@@ -23,7 +23,7 @@ def createDB(JSONfile):
 	con = sqlite3.connect(dbName+".db") # Warning: This file is created in the current directory
 	# con.execute("attach DATABASE '"+dbName+".db' as tests")
 	con.execute("CREATE TABLE system (`id` TEXT NOT NULL PRIMARY KEY UNIQUE, `name` TEXT NOT NULL, `comment` TEXT NOT NULL)")
-	con.execute("CREATE TABLE sample (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `path` TEXT NOT NULL, `type` TEXT NOT NULL, `id_system` INTEGER NOT NULL , `syst_index` INTEGER NOT NULL, `nb_processed` INTEGER NOT NULL DEFAULT 0)")
+	con.execute("CREATE TABLE sample (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `path` TEXT NOT NULL, `type` TEXT NOT NULL, `id_system` TEXT NOT NULL , `syst_index` INTEGER NOT NULL, `nb_processed` INTEGER NOT NULL DEFAULT 0)")
 	con.execute("CREATE TABLE answer (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `user` TEXT NOT NULL, `date` TEXT NOT NULL, `content` TEXT NOT NULL, `syst_index` INTEGER NOT NULL, `question_index` INTEGER NOT NULL)")
 
 	con.commit()
@@ -33,12 +33,14 @@ def createDB(JSONfile):
 	print("------------")
 
 	for system in data["test"]["systems"]["system"]:
+		systemIndex = 0
 		systemToInsert=(system["-id"],system["-name"],system["comment"])
 		con.execute("INSERT INTO system(id, name, comment) VALUES (?,?,?)", systemToInsert)
 		for samples in system["samples"]:
 			sampleType=samples["-type"]
 			for samplePath in samples["sample"]:
-				sampleToInsert=(samplePath, sampleType, 0, 0)
+				systemIndex = systemIndex + 1
+				sampleToInsert=(samplePath, sampleType, system["-id"], systemIndex)
 				con.execute("INSERT INTO sample(path, type, id_system, syst_index) VALUES (?,?,?,?)", sampleToInsert)
 	con.commit()
 	con.close()
