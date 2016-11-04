@@ -20,7 +20,9 @@
 					"samples": [
 						{
 							"-type": "intro",
-							"sample": "./wav/jmf/jmf_0029_ref1.wav"
+							"sample": [
+								"./wav/jmf/jmf_0029_ref1.wav"
+							]
 						},
 						{
 							"-type": "test",
@@ -53,7 +55,9 @@
 					"samples": [
 						{
 							"-type": "intro",
-							"sample": "./wav/jnf/jnf_0029_ref1.wav"
+							"sample": [
+								"./wav/jnf/jnf_0029_ref1.wav"
+							]
 						},
 						{
 							"-type": "test",
