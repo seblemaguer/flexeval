@@ -27,7 +27,7 @@ def login():
 	app_session = bottle.request.environ.get('beaker.session')
 	app_session['logged_in'] = True
 	app_session['pseudo'] = mail
-	return "<p>Welcome!</p>"
+	bottle.redirect('/')
 
 @app.route('/logout')
 @app.post('/logout')

@@ -9,6 +9,7 @@
 
 	<!-- Bootstrap Core CSS -->
 	<link href="/static/css/bootstrap.min.css" rel="stylesheet">
+	<link href="/static/css/tests.css" rel="stylesheet">
 
 </head>
 
@@ -19,10 +20,10 @@
 			<div class="col-md-6 col-md-offset-3">
 				<h1>Test {{test_code}}</h1><span><h3>Made by gcoulomb (<small><a href="mailto:gcoulomb@enssat.fr" target="_top">gcoulomb@enssat.fr</a></small>)</h3>
 				<p class="lead">Ceci est un test d'affichage !</p>
-				% for sample in samples:
-				<p>Sample A</p>
-				<audio controls>
-					<source src="{{sample["path"]}}">
+				% for i in range(len(samples)):
+				<p>Sample {{i+1}}</p>
+				<audio id="player" controls>
+					<source src="{{samples[i]["path"]}}">
 				</audio>
 				% end
 			</div>
@@ -31,19 +32,37 @@
 	<div class="container">
 		<div class="col-md-6 col-md-offset-3">
 			<p>The question that follows here is just an example and not generated from any script!</p>
+			<p>Your role as a test maker is to edit this part!</p>
 			<form role="form" action="/test/{{test_code}}" method="POST">
-				<h3>Question </h3>
+				<input type="hidden" name="ref" value="{{index}}">
+				<h3>Question 1</h3>
 				<div class="alert alert-info" role="alert">Ceci est l'intitulé de ma question</div>
 				<div class="col-md-offset-2">
 					<div class="radio">
 						<label>
-							<input type="radio" id="radioA" name="radioAB" value="A"checked>
+							<input type="radio" id="radioA" name="question1" value="{{systems[0]}}"checked>
 							Option A
 						</label>
 					</div>
 					<div class="radio">
 						<label>
-							<input type="radio" id="radioB" name="radioAB" value="B">
+							<input type="radio" id="radioB" name="question1" value="{{systems[1]}}">
+							Option B
+						</label>
+					</div>
+				</div>
+				<h3>Question 2</h3>
+				<div class="alert alert-info" role="alert">Une autre question ici</div>
+				<div class="col-md-offset-2">
+					<div class="radio">
+						<label>
+							<input type="radio" id="radioA" name="question2" value="{{systems[0]}}"checked>
+							Option A
+						</label>
+					</div>
+					<div class="radio">
+						<label>
+							<input type="radio" id="radioB" name="question2" value="{{systems[1]}}">
 							Option B
 						</label>
 					</div>
@@ -52,9 +71,8 @@
 			</form>
 		</div>
 	</div>
-
-<!-- Bootstrap Core JavaScript -->
-<!-- <script src="/js/bootstrap.min.js"></script> -->
+	<br>
+	<br>
 
 </body>
 
