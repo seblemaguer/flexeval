@@ -14,6 +14,30 @@ def get_nb_system(test) :
 	conn.close()
 	return int(res[0][0])
 
+def get_author(test):
+	conn = sqlite3.connect('databases/static_db.db')
+	c = conn.cursor()
+	c.execute("select author from test where id="+str(test))
+	res = c.fetchall()
+	conn.close()
+	return res[0][0]
+
+def get_description(test):
+	conn = sqlite3.connect('databases/static_db.db')
+	c = conn.cursor()
+	c.execute("select description from test where id="+str(test))
+	res = c.fetchall()
+	conn.close()
+	return res[0][0]
+
+def get_name(test):
+	conn = sqlite3.connect('databases/static_db.db')
+	c = conn.cursor()
+	c.execute("select name from test where id="+str(test))
+	res = c.fetchall()
+	conn.close()
+	return res[0][0]
+
 def get_systems(test) :
 	conn = sqlite3.connect('databases/'+str(test)+'.db')
 	c = conn.cursor()
