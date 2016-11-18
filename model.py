@@ -14,6 +14,9 @@ def get_nb_system(test) :
 	conn.close()
 	return int(res[0][0])
 
+def get_nb_questions(test) :
+	return 2
+
 def get_author(test):
 	conn = sqlite3.connect('databases/static_db.db')
 	c = conn.cursor()
@@ -45,11 +48,9 @@ def get_systems(test) :
 	res = c.fetchall()
 	conn.close()
 	res2=[]
-	res3=[]
 	for r in res :
 		res2.append(r[0])
-		res3.insert(0,r[0])
-	return (res2,res3)
+	return res2
 
 def get_nb_question(test) :
 	#return the number of sample for a test, query to make !
@@ -110,8 +111,6 @@ def get_test_sample(test,user) :
 	nb=0
 	stop = False
 	samples=[]
-	(sysL,sysR) = get_systems(test)
-	sys=[]
 	while not stop and i<len(sampleList)/2 :
 		#check if user has not already processed this sample
 		c.execute("select count(*) from answer where user=\""+user+"\" and syst_index=\""+str(sampleList[i][4])+"\"")
@@ -126,13 +125,7 @@ def get_test_sample(test,user) :
 			for j in range(nbSy) :
 				s = sampleList[i+j*nbSa][1].split('/')
 				s1 = "/test_sound/"+test+"/"+s[len(s)-1]
-				ra = random.randint(0,1)
-				if ra==1 :
-					samples.append(s1)
-					sys=sysL
-				else :
-					samples.insert(0,s1)
-					sys=sysR
+				samples.append(s1)
 		i=i+1
 	#we have the first unprocessed step
 	#now check if there is another test which have been processed less times
@@ -150,16 +143,10 @@ def get_test_sample(test,user) :
 			for j in range(nbSy) :
 				s = sampleList[i+j*nbSa][1].split('/')
 				s1 = "/test_sound/"+test+"/"+s[len(s)-1]
-				ra = random.randint(0,1)
-				if ra==1 :
-					samples.append(s1)
-					sys=sysL
-				else :
-					samples.insert(0,s1)
-					sys=sysR
+				samples.append(s1)
 		i=i+1
 	conn.close()
-	return (samples,index,systems)
+	return (samples,index)
 
 
 def insert_data(test,data) :

@@ -4,6 +4,7 @@ import bottle
 import sqlite3
 import json
 import os
+import random
 from beaker.middleware import SessionMiddleware
 
 bottle.debug(True)
@@ -76,8 +77,13 @@ def process_test(test):
 	#check if the test isn't finished yet
 	if model.get_nb_step_user(test,user) < model.get_nb_step(test) :
 		#proceed to a new step
-		(samples,index,systems) = model.get_test_sample(test,user)
-		data={"test_code":test,"samples" : samples, "systems": systems, "index": index}
+		nbq = model.get_nb_questions(test)
+		keys =[]
+		for i in range(nbq) :
+			keys.append(random.randint(0,1))
+		(samples,index) = model.get_test_sample(test,user)
+		systems = model.get_systems(test)
+		data={"author":model.get_author(test),"description": model.get_description(test),"test_code":test,"samples" : samples, "systems": systems, "index": index}
 		return bottle.template(test,data)
 	else :
 		return "<p>You have already done this test</p>"
@@ -86,27 +92,30 @@ def process_test(test):
 def process_test_post(test):
 	app_session = bottle.request.environ.get('beaker.session')
 	#the following lines are to be uncommented later
-	
 	if not testLogin() :
 		bottle.redirect('/login')
 	user = app_session['pseudo']
 	if not os.path.exists('databases/'+test+'.db') :
 		return "<p>This test is not valid!! (no database linked)</p>"
 	#get the post data and insert into db
-	#nb=model.get_nb_question(test)
 	answers=[]
 	i=1
 	while post_get("question"+str(i))!="" :
 	#for i in range(1,int(nb)+1) :
 		answers.append({"index": i, "content": post_get("question"+str(i))})
 		i=i+1
-	post_data = {"user":user,"answers": answers,"index": post_get("ref")}
+	post_data = {"author":model.get_author(test),"description": model.get_description(test),user":user,"answers": answers,"index": post_get("ref")}
 	model.insert_data(test,post_data)
 	#check if the test isn't finished yet
 	if model.get_nb_step_user(test,user) < model.get_nb_step(test) :
 		#proceed to a new step
-		(samples,index,systems) = model.get_test_sample(test,user)
-		data={"test_code":test, "samples" : samples, "systems": systems, "index": index}
+		systems = model.get_systems(test)
+		nbq = model.get_nb_questions(test)
+		keys =[]
+		for i in range(nbq) :
+			keys.append(random.randint(0,1))
+		(samples,index) = model.get_test_sample(test,user)
+		data={"test_code":test, "samples" : samples, "systems": systems, "random_keys": keys, "index": index}
 		return bottle.template(test,data)
 	else :
 		return "<p>Test finished thank you for your cooperation</p>"
