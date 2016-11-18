@@ -11,7 +11,7 @@ app = bottle.Bottle()
 
 session_opts = {
     'session.type': 'file',
-    'session.cookie_expires': 300,
+    'session.cookie_expires': False,
     'session.data_dir': './data',
     'session.auto': True
 }
@@ -93,11 +93,14 @@ def process_test_post(test):
 	if not os.path.exists('databases/'+test+'.db') :
 		return "<p>This test is not valid!! (no database linked)</p>"
 	#get the post data and insert into db
-	nb=model.get_nb_question(test)
+	#nb=model.get_nb_question(test)
 	answers=[]
-	for i in range(1,int(nb)+1) :
+	i=1
+	while post_get("question"+str(i))!="" :
+	#for i in range(1,int(nb)+1) :
 		answers.append({"index": i, "content": post_get("question"+str(i))})
-	post_data = {"user":user,"answers": answers,"index": post_get("index")}
+		i=i+1
+	post_data = {"user":user,"answers": answers,"index": post_get("ref")}
 	model.insert_data(test,post_data)
 	#check if the test isn't finished yet
 	if model.get_nb_step_user(test,user) < model.get_nb_step(test) :

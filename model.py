@@ -11,7 +11,7 @@ def get_nb_system(test) :
 	c.execute("select count(*) from system")
 	res = c.fetchall()
 	conn.close()
-	return res[0][0]
+	return int(res[0][0])
 
 def get_systems(test) :
 	conn = sqlite3.connect('databases/'+str(test)+'.db')
@@ -28,19 +28,28 @@ def get_nb_question(test) :
 	#return the number of sample for a test, query to make !
 	conn = sqlite3.connect('databases/static_db.db')
 	c = conn.cursor()
-	c.execute("select nbInstances from test where id="+test)
+	c.execute("select nbInstances from test where id="+str(test))
 	res = c.fetchall()
 	conn.close()
-	return res[0][0]
+	return int(res[0][0])
+
+def get_nb_sample_by_system(test) :
+	#return the number of samples of each system
+	conn = sqlite3.connect('databases/static_db.db')
+	c = conn.cursor()
+	c.execute("select nbSteps from test where id="+str(test))
+	res = c.fetchall()
+	conn.close()
+	return int(res[0][0])
 
 def get_nb_step(test) :
 	#return the number of step required on a test
 	conn = sqlite3.connect('databases/static_db.db')
 	c = conn.cursor()
-	c.execute("select nbSteps from test")
+	c.execute("select nbInstances from test")
 	res = c.fetchall()
 	conn.close()
-	return res[0][0]
+	return int(res[0][0])
 
 def get_nb_step_user(test,user) :
 	#return the number of step made by a user on the test
@@ -49,46 +58,67 @@ def get_nb_step_user(test,user) :
 	c.execute("select count(*) from answer where user=\""+user+"\"")
 	res = c.fetchall()
 	conn.close()
-	return res[0][0]
+	#return int(res[0][0])
+	return 0
 
 def get_metadata(test) :
 	conn = sqlite3.connect('databases/static_db.db')
 	c = conn.cursor()
-	c.execute("select * from test where id="+test)
+	c.execute("select * from test where id="+str(test))
 	res = c.fetchall()
 	conn.close()
 	return res[0]
 
 def get_test_sample(test,user) :
 	#load a tuple of sample depending of the user and the number of time processed
-	conn = sqlite3.connect('databases/'+test+'.db')
+	nbSa = get_nb_sample_by_system(test)
+	nbSy = get_nb_system(test)
+	conn = sqlite3.connect('databases/'+str(test)+'.db')
 	c = conn.cursor()
 	c.execute("select * from sample")
 	sampleList = c.fetchall()
-	nb = sampleList[0][5]
-	samples=[{"id" : 1, "path" : ""},{"id" : 2, "path" : ""}]
-	index=0
+	index=-1
 	i=0
-	for sample in sampleList :
+	nb=0
+	stop = False
+	samples=[]
+	while not stop and i<len(sampleList)/2 :
 		#check if user has not already processed this sample
-		c.execute("select count(*) from answer where user=\""+user+"\" and syst_index=\""+sample[3]+"\"")
-		#if it is the case then go to the next sample
-		#then take the sample which has been processed the fewest time
-		if sample[5] < nb :
-			index=i
-			nb = sample[5]
+		c.execute("select count(*) from answer where user=\""+user+"\" and syst_index=\""+str(sampleList[i][4])+"\"")
+		b = c.fetchall()
+		#print b[0][0]
+		if b[0][0]==0 :
+			index = i+1
+			stop = True
+			nb=sampleList[i][5]
+			samples=[]
 			#keep the sample
-			s = sample[1].split('/')
-			s1 = "/test_sound/"+test+"/"+s[len(s)-1]
-			s2 = "/test_sound/"+test+"/"+s[len(s)-1]
-			samples = [{"id" : 1, "path" : s1},{"id" : 2, "path" : s2}]
+			for j in range(nbSy) :
+				s = sampleList[i+j*nbSa][1].split('/')
+				s1 = "/test_sound/"+test+"/"+s[len(s)-1]
+				samples.append(s1)
 		i=i+1
-	#overwrite for tests
-	s1 = "/test_sound/"+test+"/bird.wav"
-	s2 = "/test_sound/"+test+"/dolphin.wav"
-	samples = [{"id" : 1, "path" : s1},{"id" : 2, "path" : s2}]
+	#we have the first unprocessed step
+	#now check if there is another test which have been processed less times
+	#we start from where we finished previous loop
+	while i < len(sampleList)/2 :
+		#check if user has not already processed this sample
+		c.execute("select count(*) from answer where user=\""+user+"\" and syst_index=\""+str(sampleList[i][4])+"\"")
+		b = c.fetchall()
+		if b[0][0]==0 and sampleList[i][5]<nb:
+			nb = sampleList[i][5]
+			index = i+1
+			stop = True
+			samples=[]
+			#keep the sample
+			for j in range(nbSy) :
+				s = sampleList[i+j*nbSa][1].split('/')
+				s1 = "/test_sound/"+test+"/"+s[len(s)-1]
+				samples.append(s1)
+		i=i+1
 	conn.close()
 	return (samples,index)
+
 
 def insert_data(test,data) :
 	now = datetime.now()
@@ -98,5 +128,9 @@ def insert_data(test,data) :
 	for answer in answers :
 		val = (data["user"],str(now),answer["content"],data["index"],answer["index"])
 		c.execute("insert into answer(user,date,content,syst_index,question_index) values (?,?,?,?,?)",val)
+	#update the number of time processed for the sapmles
+	c.execute("select nb_processed from sample where syst_index="+str(data["index"]))
+	n = c.fetchall()[0][0]
+	c.execute("update sample set nb_processed="+str(n+1)+" where syst_index="+str(data["index"]))
 	conn.commit()
 	conn.close()

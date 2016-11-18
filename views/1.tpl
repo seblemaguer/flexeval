@@ -23,7 +23,7 @@
 				% for i in range(len(samples)):
 				<p>Sample {{i+1}}</p>
 				<audio id="player" controls>
-					<source src="{{samples[i]["path"]}}">
+					<source src="{{samples[i]}}">
 				</audio>
 				% end
 			</div>
