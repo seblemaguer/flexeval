@@ -76,8 +76,8 @@ def process_test(test):
 	#check if the test isn't finished yet
 	if model.get_nb_step_user(test,user) < model.get_nb_step(test) :
 		#proceed to a new step
-		(samples,index) = model.get_test_sample(test,user)
-		data={"test_code":test,"samples" : samples, "systems": model.get_systems(test), "index": index}
+		(samples,index,systems) = model.get_test_sample(test,user)
+		data={"test_code":test,"samples" : samples, "systems": systems, "index": index}
 		return bottle.template(test,data)
 	else :
 		return "<p>You have already done this test</p>"
@@ -105,8 +105,8 @@ def process_test_post(test):
 	#check if the test isn't finished yet
 	if model.get_nb_step_user(test,user) < model.get_nb_step(test) :
 		#proceed to a new step
-		(samples,index) = model.get_test_sample(test,user)
-		data={"test_code":test, "samples" : samples, "systems": model.get_systems(test), "index": index}
+		(samples,index,systems) = model.get_test_sample(test,user)
+		data={"test_code":test, "samples" : samples, "systems": systems, "index": index}
 		return bottle.template(test,data)
 	else :
 		return "<p>Test finished thank you for your cooperation</p>"

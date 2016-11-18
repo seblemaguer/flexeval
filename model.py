@@ -1,5 +1,6 @@
 import sqlite3
 from datetime import date, datetime
+import random
 
 def get_nb_system(test) :
 	#return the number of sample for a test, query to make !
@@ -35,12 +36,13 @@ def get_nb_question(test) :
 
 def get_nb_sample_by_system(test) :
 	#return the number of samples of each system
+	total=0
 	conn = sqlite3.connect('databases/static_db.db')
 	c = conn.cursor()
-	c.execute("select nbSteps from test where id="+str(test))
+	c.execute("select nbSteps,nbConsistencySteps,nbIntroductionSteps,nbIntroductionSteps from test where id="+str(test))
 	res = c.fetchall()
 	conn.close()
-	return int(res[0][0])
+	return int(res[0][0])+int(res[0][1])+int(res[0][2])
 
 def get_nb_step(test) :
 	#return the number of step required on a test
@@ -82,6 +84,7 @@ def get_test_sample(test,user) :
 	nb=0
 	stop = False
 	samples=[]
+	sysL = get_systems(test)
 	while not stop and i<len(sampleList)/2 :
 		#check if user has not already processed this sample
 		c.execute("select count(*) from answer where user=\""+user+"\" and syst_index=\""+str(sampleList[i][4])+"\"")
@@ -96,7 +99,11 @@ def get_test_sample(test,user) :
 			for j in range(nbSy) :
 				s = sampleList[i+j*nbSa][1].split('/')
 				s1 = "/test_sound/"+test+"/"+s[len(s)-1]
-				samples.append(s1)
+				ra = random.randint(0,1)
+				if ra==1 :
+					samples.append(s1)
+				else :
+					samples.insert(0,s1)
 		i=i+1
 	#we have the first unprocessed step
 	#now check if there is another test which have been processed less times
@@ -114,10 +121,14 @@ def get_test_sample(test,user) :
 			for j in range(nbSy) :
 				s = sampleList[i+j*nbSa][1].split('/')
 				s1 = "/test_sound/"+test+"/"+s[len(s)-1]
-				samples.append(s1)
+				ra = random.randint(0,1)
+				if ra==1 :
+					samples.append(s1)
+				else :
+					samples.insert(0,s1)
 		i=i+1
 	conn.close()
-	return (samples,index)
+	return (samples,index,systems)
 
 
 def insert_data(test,data) :
