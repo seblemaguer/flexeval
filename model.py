@@ -19,13 +19,16 @@ def get_systems(test) :
 	c.execute("select id from system")
 	res = c.fetchall()
 	conn.close()
-	return res
+	res2=[]
+	for r in res :
+		res2.append(r[0])
+	return res2
 
 def get_nb_question(test) :
 	#return the number of sample for a test, query to make !
 	conn = sqlite3.connect('databases/static_db.db')
 	c = conn.cursor()
-	c.execute("select nbInstances from test where test="+test)
+	c.execute("select nbInstances from test where id="+test)
 	res = c.fetchall()
 	conn.close()
 	return res[0][0]
@@ -49,9 +52,9 @@ def get_nb_step_user(test,user) :
 	return res[0][0]
 
 def get_metadata(test) :
-	conn = sqlite3.connect('databases/'+test+'.db')
+	conn = sqlite3.connect('databases/static_db.db')
 	c = conn.cursor()
-	c.execute("select * from test where test_id="+test)
+	c.execute("select * from test where id="+test)
 	res = c.fetchall()
 	conn.close()
 	return res[0]
@@ -93,7 +96,7 @@ def insert_data(test,data) :
 	c = conn.cursor()
 	answers = data["answers"]
 	for answer in answers :
-		val = "\""+data["user"]+"\",\""+str(now)+"\",\""+answer+"\","+data["index"]+",1";
-		c.execute("insert into answer(user,date,content,syst_index,question_index) values ("+val+")")
+		val = (data["user"],str(now),answer["content"],data["index"],answer["index"])
+		c.execute("insert into answer(user,date,content,syst_index,question_index) values (?,?,?,?,?)",val)
 	conn.commit()
 	conn.close()

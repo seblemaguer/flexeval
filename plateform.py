@@ -95,7 +95,7 @@ def process_test_post(test):
 	#get the post data and insert into db
 	nb=model.get_nb_question(test)
 	answers=[]
-	for i in range(1,nb+1) :
+	for i in range(1,int(nb)+1) :
 		answers.append({"index": i, "content": post_get("question"+str(i))})
 	post_data = {"user":user,"answers": answers,"index": post_get("index")}
 	model.insert_data(test,post_data)
