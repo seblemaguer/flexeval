@@ -7,6 +7,8 @@
 	<!-- Bootstrap Core CSS -->
 	<link href="/static/css/bootstrap.min.css" rel="stylesheet">
 	<link href="/static/css/tests.css" rel="stylesheet">
+	<script src="/static/js/jquery.js"></script>
+	<script src="/static/js/jquery-ui.min.js"></script>
 </head>
 
 <body>

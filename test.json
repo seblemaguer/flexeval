@@ -9,7 +9,8 @@
 			"nbIntroductionSteps": "1",
 			"description": "Test AB",
 			"start": "2012-01-31",
-			"end": "2014-12-31"
+			"end": "2014-12-31",
+			"fixedPosition": "True"
 		},
 		"systems": {
 			"system": [
@@ -89,17 +90,15 @@
 			"question" : [
 				{
 					"id" : 1,
-					"description" : "Question 1",
-					"type" : "AB"
+					"type" : "radio",
+					"description" : "Question 1"
 				},
 				{
 					"id" : 2,
-					"description" : "Question 2",
-					"type" : "ABX"
+					"type" : "range",
+					"description" : "Question 2"
 				}
 			]
 		}
-
-
 	}
 }

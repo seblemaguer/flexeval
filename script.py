@@ -1,4 +1,5 @@
 import json
+import os
 import sqlite3
 import sys
 from pprint import pprint
@@ -83,6 +84,23 @@ def generateTemplate(type):
 
 	tpl = open("template.tpl", "w")
 
+def generateConfig(data):
+	print("|-------------------|")
+	print("| config generation |")
+	print("v-------------------v")
+
+	tpl = open("template.tpl", "w")
+
+def generateArchi(data):
+	print("|-----------------------------|")
+	print("| new architecture generation |")
+	print("v-----------------------------v")
+
+	if not os.path.exists("./tests"):
+		print("No")
+    	os.makedirs("./tests")
+    print("yes")
+
 
 dataFromJSON = parseJSON("./test.json")
 lastIndex = fillMainDB(dataFromJSON)
@@ -92,19 +110,10 @@ generateTemplate("toto")
 
 
 
-# def getTableDump(db_file, table_to_dump):
-# 	conn = sqlite3.connect(':memory:')
-# 	cursor = conn.cursor()
-# 	cursor.execute("attach database '" + db_file + "' as attached_db")
-# 	cursor.execute("select sql from attached_db.sqlite_master where type='table' and name='" + table_to_dump + "'")
-# 	sql_create_table = cursor.fetchone()[0]
-# 	cursor.execute(sql_create_table);
-# 	cursor.execute("insert into " + table_to_dump + " select * from attached_db." + table_to_dump)
-# 	conn.commit()
-# 	cursor.execute("detach database attached_db")
-# 	return "\n".join(conn.iterdump())
 
-# TABLE_TO_DUMP = 'table_to_dump'
-# DB_FILE = 'db_file'
-
-# print getTableDump(DB_FILE, TABLE_TO_DUMP)
+# platform.py
+# model.py
+# config.py
+# db.db
+# audio/*.wav
+# template.tpl
