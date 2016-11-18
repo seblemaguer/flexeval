@@ -4,6 +4,8 @@ import sqlite3
 import sys
 from pprint import pprint
 
+
+
 def parseJSON(JSONfile):
 	print("|--------------|")
 	print("| parsing JSON |")
@@ -15,12 +17,12 @@ def parseJSON(JSONfile):
 
 	return data
 
-def createDB(dbName,data):
+def createDB(data, directory):
 	print("|-------------|")
 	print("| DB creation |")
 	print("v-------------v")
 
-	con = sqlite3.connect("./databases/"+dbName+".db") # Warning: This file is created in the current directory
+	con = sqlite3.connect(directory+"/data.db")
 	try:
 		con.execute("CREATE TABLE system (`id` TEXT NOT NULL PRIMARY KEY UNIQUE, `name` TEXT NOT NULL, `comment` TEXT NOT NULL)")
 		con.execute("CREATE TABLE sample (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `path` TEXT NOT NULL, `type` TEXT NOT NULL, `id_system` TEXT NOT NULL , `syst_index` INTEGER NOT NULL, `nb_processed` INTEGER NOT NULL DEFAULT 0, FOREIGN KEY(id_system) REFERENCES system(id))")
@@ -89,31 +91,43 @@ def generateConfig(data):
 	print("| config generation |")
 	print("v-------------------v")
 
-	tpl = open("template.tpl", "w")
+	tpl = open(testDirectory+"/"+"config.py", "w")
 
-def generateArchi(data):
-	print("|-----------------------------|")
-	print("| new architecture generation |")
-	print("v-----------------------------v")
 
-	if not os.path.exists("./tests"):
-		print("No")
-    	os.makedirs("./tests")
-    print("yes")
 
+mainDirectory = "./tests"
+if not os.path.exists(mainDirectory):
+	os.makedirs(mainDirectory)
+
+name = "newTest"
+if len(sys.argv) == 2:
+	name = sys.argv[1]
+if os.path.exists(mainDirectory+"/"+name):
+	sys.exit("ERREUR : dossier deja existant !")
+
+testDirectory = mainDirectory+"/"+name
+os.makedirs(testDirectory)
 
 dataFromJSON = parseJSON("./test.json")
-lastIndex = fillMainDB(dataFromJSON)
-createDB("test-"+str(lastIndex), dataFromJSON)
-generateTemplate("toto")
+
+generateConfig(dataFromJSON)
+
+createDB(dataFromJSON, testDirectory)
+
+
+
+
+# lastIndex = fillMainDB(dataFromJSON)
+# createDB("test-"+str(lastIndex), dataFromJSON)
+# generateTemplate("toto")
 
 
 
 
 
-# platform.py
-# model.py
-# config.py
-# db.db
-# audio/*.wav
-# template.tpl
+# platform.py		à copier
+# model.py			à copier
+# config.py			à remplir
+# db.db				OK
+# audio/*.wav		à copier
+# template.tpl		à copier et vérifier
