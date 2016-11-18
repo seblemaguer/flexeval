@@ -4,7 +4,6 @@ import sys
 from pprint import pprint
 
 def parseJSON(JSONfile):
-	print("\n> parseJSON\n")
 
 	print("|--------------|")
 	print("| parsing JSON |")
@@ -17,7 +16,6 @@ def parseJSON(JSONfile):
 	return data
 
 def createDB(dbName,data):
-	print("\n> createDB\n")
 
 	print("|-------------|")
 	print("| DB creation |")
@@ -50,7 +48,6 @@ def createDB(dbName,data):
 		con.close()
 
 def fillMainDB(data):
-	print("\n> fillMainDB\n")
 
 	print("|-----------------|")
 	print("| main DB filling |")
@@ -85,7 +82,7 @@ def fillMainDB(data):
 
 dataFromJSON = parseJSON("./test.json")
 lastIndex = fillMainDB(dataFromJSON)
-createDB(str(lastIndex), dataFromJSON)
+createDB("test-"+str(lastIndex), dataFromJSON)
 
 # print json.dumps(['foo', {'bar': ('baz', None, 1.0, 2)}])
 
