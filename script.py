@@ -4,7 +4,6 @@ import sys
 from pprint import pprint
 
 def parseJSON(JSONfile):
-
 	print("|--------------|")
 	print("| parsing JSON |")
 	print("v--------------v")
@@ -16,7 +15,6 @@ def parseJSON(JSONfile):
 	return data
 
 def createDB(dbName,data):
-
 	print("|-------------|")
 	print("| DB creation |")
 	print("v-------------v")
@@ -48,7 +46,6 @@ def createDB(dbName,data):
 		con.close()
 
 def fillMainDB(data):
-
 	print("|-----------------|")
 	print("| main DB filling |")
 	print("v-----------------v")
@@ -79,12 +76,21 @@ def fillMainDB(data):
 		con.close()
 		return maxIndex
 
+def generateTemplate(type):
+	print("|---------------------|")
+	print("| template generation |")
+	print("v---------------------v")
+
+	tpl = open("template.tpl", "w")
+
 
 dataFromJSON = parseJSON("./test.json")
 lastIndex = fillMainDB(dataFromJSON)
 createDB("test-"+str(lastIndex), dataFromJSON)
+generateTemplate("toto")
 
-# print json.dumps(['foo', {'bar': ('baz', None, 1.0, 2)}])
+
+
 
 # def getTableDump(db_file, table_to_dump):
 # 	conn = sqlite3.connect(':memory:')
