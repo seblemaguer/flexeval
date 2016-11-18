@@ -29,16 +29,6 @@ def createDB(dbName,data):
 		con.execute("CREATE TABLE sample (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `path` TEXT NOT NULL, `type` TEXT NOT NULL, `id_system` TEXT NOT NULL , `syst_index` INTEGER NOT NULL, `nb_processed` INTEGER NOT NULL DEFAULT 0, FOREIGN KEY(id_system) REFERENCES system(id))")
 		con.execute("CREATE TABLE answer (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `user` TEXT NOT NULL, `date` TEXT NOT NULL, `content` TEXT NOT NULL, `syst_index` INTEGER NOT NULL, `question_index` INTEGER NOT NULL)")
 		con.commit()
-		print("Successfully created database.")
-	except Exception as e:
-		con.rollback()
-		raise e
-
-	print("|------------|")
-	print("| DB filling |")
-	print("v------------v")
-
-	try:
 		for system in data["test"]["systems"]["system"]:
 			systemIndex = 0
 			systemToInsert=(system["-id"],system["-name"],system["comment"])
@@ -49,10 +39,9 @@ def createDB(dbName,data):
 					systemIndex = systemIndex + 1
 					sampleToInsert=(samplePath, sampleType, system["-id"], systemIndex)
 					con.execute("INSERT INTO sample(path, type, id_system, syst_index) VALUES (?,?,?,?)", sampleToInsert)
-
 		con.commit()
 
-		print("Successfully filled database.")
+		print("Successfully created and filled database.")
 	except Exception as e:
 		print("EXCEPTION")
 		con.rollback()
