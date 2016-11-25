@@ -122,15 +122,15 @@ def generateConfig(json):
 	config.write("# Each configuration variable is necessarily a string\n")
 	for var in configJson:
 		config.write(var+"=\""+configJson[var]+"\"\n")
-	questions = configJson["questions"]
+	questions = json["test"]["questions"]
+	print(questions)
 	config.write("nbQuestions=\""+str(len(questions["question"]))+"\"\n")
-	samples = configJson["systems"]["system"][0]["samples"]
+	samples = json["test"]["systems"]["system"][0]["samples"]
 	nbsbs = 0
 	for s in samples :
-		if s["-type"]="test" :
+		if s["-type"]=="test" :
 			nbsbs = len(s["sample"])
 	config.write("nbSampleBySystem=\""+str(nbsbs)+"\"\n")
-	config.write("\n")
 	print("Done.\n")
 
 def generateTemplate():
