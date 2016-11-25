@@ -117,7 +117,7 @@ def process_test_post(test):
 	#for i in range(1,int(nb)+1) :
 		answers.append({"index": i, "content": post_get("question"+str(i))})
 		i=i+1
-	post_data = {"author":model.get_author(test),"description": model.get_description(test),user":user,"answers": answers,"index": post_get("ref")}
+	post_data = {"author":model.get_author(test),"description": model.get_description(test),"user":user,"answers": answers,"index": post_get("ref")}
 	model.insert_data(test,post_data)
 	#check if the test isn't finished yet
 	if model.get_nb_step_user(test,user) < model.get_nb_step(test) :
