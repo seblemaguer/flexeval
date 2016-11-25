@@ -9,22 +9,23 @@ from optparse import OptionParser
 
 execfile("./p&m_bodies.py")
 
-parser = OptionParser()
-parser.add_option("-j", "--json", dest="inputJSON", help="input JSON file", metavar="FILE")
-parser.add_option("-t", "--tpl", dest="inputTemplate", help="input template file", metavar="FILE")
-inputJSON = ""
-inputTemplate = ""
-(options, args) = parser.parse_args()
-if(options.inputJSON==None or options.inputJSON=="") :
-	sys.exit("Invalid JSON file name")
-else :
-	inputJSON = options.inputJSON
 
-if(options.inputTemplate==None or options.inputTemplate=="") :
-	sys.exit("Invalid template file name")
-else :
-	inputTemplate = options.inputTemplate
-
+def parserOptionsJT():
+	parser = OptionParser()
+	parser.add_option("-j", "--json", dest="inputJSON", help="input JSON file", metavar="FILE")
+	parser.add_option("-t", "--tpl", dest="inputTemplate", help="input template file", metavar="FILE")
+	inputJSON = None
+	inputTemplate = None
+	(options, args) = parser.parse_args()
+	if(options.inputJSON==None) :
+		sys.exit("Invalid JSON file name")
+	else :
+		inputJSON = options.inputJSON
+	if(options.inputTemplate==None) :
+		sys.exit("Invalid template file name")
+	else :
+		inputTemplate = options.inputTemplate
+	return inputJSON, inputTemplate
 
 def createArchitecture(testName):
 	print("|-----------------------|")
@@ -185,29 +186,20 @@ def copyMedia(json):
 		if search :
 			filedir = search.group(0)
 		shutil.copy(file, mediaDirectory+filedir)
+		print(file+"  to  "+mediaDirectory+filedir)
 	print("Done.\n")
 
 
-
+(inputJSON, inputTemplate) = parserOptionsJT()
 dataFromJSON = parseJSON(inputJSON)
-
 name = dataFromJSON["test"]["configuration"]["name"]
-
 (mainDirectory, testDirectory, viewsDirectory, staticDirectory, mediaDirectory) = createArchitecture(name)
-
 generateConfig(dataFromJSON)
-
 createDB(dataFromJSON)
-
 generateTemplate()
-
 create_controller()
-
 create_model()
-
 copyMedia(dataFromJSON)
-
-
 
 
 # platform.py		OK
