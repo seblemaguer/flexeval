@@ -6,4 +6,4 @@ then
 		rm -rf ./tests/*
 	fi
 fi
-python generator.py -j test.json -t template.tpl
+python generator.py -j ./test.json -t ./template.tpl

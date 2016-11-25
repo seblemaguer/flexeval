@@ -7,6 +7,8 @@ import sys
 from pprint import pprint
 from optparse import OptionParser
 
+execfile("./static.py")
+
 
 
 controller_body = """
@@ -299,25 +301,47 @@ def insert_data(test,data) :
 """
 
 parser = OptionParser()
-parser.add_option("-j", "--json", dest="inputJSON",
-				  help="input JSON file", metavar="FILE")
-parser.add_option("-t", "--tpl", dest="inputTemplate",
-				  help="input template file", metavar="FILE")
-inputJSON=""
-inputTemplate=""
+parser.add_option("-j", "--json", dest="inputJSON", help="input JSON file", metavar="FILE")
+parser.add_option("-t", "--tpl", dest="inputTemplate", help="input template file", metavar="FILE")
+inputJSON = ""
+inputTemplate = ""
 (options, args) = parser.parse_args()
 if(options.inputJSON==None or options.inputJSON=="") :
-	print "invalid JSON file name"
-	sys.exit()
+	sys.exit("Invalid JSON file name")
 else :
 	inputJSON = options.inputJSON
 
 if(options.inputTemplate==None or options.inputTemplate=="") :
-	print "invalid template file name"
-	sys.exit()
+	sys.exit("Invalid template file name")
 else :
 	inputTemplate = options.inputTemplate
 
+
+def createArchitecture(testName):
+	print("|-----------------------|")
+	print("| architecture creation |")
+	print("v-----------------------v")
+
+	mainDirectory = "./tests/"
+	if not os.path.exists(mainDirectory):
+		os.makedirs(mainDirectory)
+
+	testDirectory = mainDirectory+testName+"/"
+	if os.path.exists(testDirectory):
+		sys.exit("ERREUR : dossier deja existant : "+testDirectory)
+	os.makedirs(testDirectory)
+	
+	viewsDirectory = testDirectory+"views/"
+	if os.path.exists(viewsDirectory):
+		sys.exit("ERREUR : dossier deja existant : "+viewsDirectory)
+	os.makedirs(viewsDirectory)
+
+	staticDirectory = testDirectory+"static/"
+	if os.path.exists(staticDirectory):
+		sys.exit("ERREUR : dossier deja existant : "+staticDirectory)
+	os.makedirs(staticDirectory)
+
+	return mainDirectory, testDirectory, viewsDirectory, staticDirectory
 
 def parseJSON(JSONfile):
 	print("|--------------|")
@@ -397,7 +421,9 @@ def generateTemplate():
 	print("| template generation |")
 	print("v---------------------v")
 
-	shutil.copy(inputTemplate, testDirectory)
+	print(inputTemplate)
+	print(testDirectory)
+	shutil.copy(inputTemplate, viewsDirectory)
 
 	# TODO Verifier le template
 
@@ -457,19 +483,10 @@ def copyAudios(json):
 	print("Done.\n")
 
 
-mainDirectory = "./tests/"
-if not os.path.exists(mainDirectory):
-	os.makedirs(mainDirectory)
 
 dataFromJSON = parseJSON(inputJSON)
 
-name = dataFromJSON["test"]["configuration"]["name"]
-
-if os.path.exists(mainDirectory+"/"+name):
-	sys.exit("ERREUR : dossier deja existant !")
-
-testDirectory = mainDirectory+"/"+name+"/"
-os.makedirs(testDirectory)
+(mainDirectory, testDirectory, viewsDirectory, staticDirectory) = createArchitecture(dataFromJSON["test"]["configuration"]["name"])
 
 generateConfig(dataFromJSON)
 
