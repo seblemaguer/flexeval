@@ -74,7 +74,7 @@ def testLogin():
 #home page
 @app.route('/')
 def home():
-	return "<p>Hi! Welcome on our test plateform, if you want to get a free example, please go <a href='http://localhost:8080/test/1'>Here</a>!</p>"
+	bottle.redirect('/test/1')
 
 
 @app.route('/test/:test')
@@ -117,7 +117,7 @@ def process_test_post(test):
 	#for i in range(1,int(nb)+1) :
 		answers.append({"index": i, "content": post_get("question"+str(i))})
 		i=i+1
-	post_data = {"author":model.get_author(test),"description": model.get_description(test),user":user,"answers": answers,"index": post_get("ref")}
+	post_data = {"author":model.get_author(test),"description": model.get_description(test),"user":user,"answers": answers,"index": post_get("ref")}
 	model.insert_data(test,post_data)
 	#check if the test isn't finished yet
 	if model.get_nb_step_user(test,user) < model.get_nb_step(test) :
@@ -449,7 +449,6 @@ def copyAudios(json):
 		if search :
 			filedir = search.group(0)
 		shutil.copy(file, testDirectory+filedir)
-
 
 
 mainDirectory = "./tests/"
