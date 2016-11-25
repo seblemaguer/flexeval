@@ -5,7 +5,27 @@ import shutil
 import sqlite3
 import sys
 from pprint import pprint
+from optparse import OptionParser
 
+parser = OptionParser()
+parser.add_option("-j", "--json", dest="inputJSON",
+				  help="input JSON file", metavar="FILE")
+parser.add_option("-t", "--tpl", dest="inputTemplate",
+				  help="input template file", metavar="FILE")
+inputJSON=""
+inputTemplate=""
+(options, args) = parser.parse_args()
+if(options.inputJSON==None or options.inputJSON=="") :
+	print "invalid JSON file name"
+	sys.exit()
+else :
+	inputJSON = options.inputJSON
+
+if(options.inputTemplate==None or options.inputTemplate=="") :
+	print "invalid template file name"
+	sys.exit()
+else :
+	inputTemplate = options.inputTemplate
 
 controller_body = """
 import model
@@ -429,24 +449,19 @@ def copyAudios(json):
 		shutil.copy(file, testDirectory+filedir)
 
 
-
-inputJSON = "./test.json"
-inputTemplate = "./template.tpl"
-
-mainDirectory = "./tests/"
+mainDirectory = "./tests"
 if not os.path.exists(mainDirectory):
 	os.makedirs(mainDirectory)
 
-name = "newTest"
-if len(sys.argv) == 2:
-	name = sys.argv[1]
+dataFromJSON = parseJSON(inputJSON)
+
+name = dataFromJSON["test"]["configuration"]["name"]
+
 if os.path.exists(mainDirectory+"/"+name):
 	sys.exit("ERREUR : dossier deja existant !")
 
-testDirectory = mainDirectory+"/"+name+"/"
+testDirectory = mainDirectory+"/"+name
 os.makedirs(testDirectory)
-
-dataFromJSON = parseJSON(inputJSON)
 
 generateConfig(dataFromJSON)
 
