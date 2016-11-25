@@ -74,7 +74,7 @@ def testLogin():
 #home page
 @app.route('/')
 def home():
-	return "<p>Hi! Welcome on our test plateform, if you want to get a free example, please go <a href='http://localhost:8080/test/1'>Here</a>!</p>"
+	bottle.redirect('/test/1')
 
 
 @app.route('/test/:test')

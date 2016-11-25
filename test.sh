@@ -19,5 +19,5 @@ then
 		echo "NOTHING TO DO!"
 	fi
 else
-	python generator.py newTest
+	python generator.py -j test.json -t template.tpl
 fi
