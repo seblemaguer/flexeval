@@ -46,9 +46,10 @@ def createArchitecture(testName):
 	testDirectory = createDir(mainDirectory, testName)
 	viewsDirectory = createDir(testDirectory, "views")
 	staticDirectory = createDir(testDirectory, "static")
+	mediaDirectory = createDir(testDirectory, "media")
 
 	print("Done.\n")
-	return mainDirectory, testDirectory, viewsDirectory, staticDirectory
+	return mainDirectory, testDirectory, viewsDirectory, staticDirectory, mediaDirectory
 
 def parseJSON(JSONfile):
 	print("|--------------|")
@@ -154,14 +155,15 @@ def create_model():
 	fo.close()
 	print("Done.\n")
 
-def copyAudios(json):
+def copyMedia(json):
 	print("|-----------------|")
-	print("| audio file copy |")
+	print("| media file copy |")
 	print("v-----------------v")
 
 	audio = []
 	audioFolders = []
 	systems = []
+	regexp = "^.*\/"
 	if 'test' in json:
 		systems = json["test"]["systems"]["system"]
 	else:
@@ -170,23 +172,19 @@ def copyAudios(json):
 		for sample in samples["samples"]:
 			for wav in sample["sample"]:
 				audio.append(wav)
-				# search = re.search("^.*\/", wav)
-				# if search :
-				# 	if search.group(0) not in audioFolders:
-				# 		audioFolders.append(search.group(0))
 	for wav in audio:
-		search = re.search("^.*\/", wav)
+		search = re.search(regexp, wav)
 		if search :
 			if search.group(0) not in audioFolders:
 				audioFolders.append(search.group(0))
 	for folder in audioFolders:
-		os.makedirs(testDirectory+folder)
+		os.makedirs(mediaDirectory+folder)
 	for file in audio:
 		filedir = ""
-		search = re.search("^.*\/", file)
+		search = re.search(regexp, file)
 		if search :
 			filedir = search.group(0)
-		shutil.copy(file, testDirectory+filedir)
+		shutil.copy(file, mediaDirectory+filedir)
 	print("Done.\n")
 
 
@@ -195,7 +193,7 @@ dataFromJSON = parseJSON(inputJSON)
 
 name = dataFromJSON["test"]["configuration"]["name"]
 
-(mainDirectory, testDirectory, viewsDirectory, staticDirectory) = createArchitecture(name)
+(mainDirectory, testDirectory, viewsDirectory, staticDirectory, mediaDirectory) = createArchitecture(name)
 
 generateConfig(dataFromJSON)
 
@@ -207,7 +205,7 @@ create_controller()
 
 create_model()
 
-copyAudios(dataFromJSON)
+copyMedia(dataFromJSON)
 
 
 
