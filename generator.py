@@ -1,5 +1,6 @@
 import json
 import os
+import shutil
 import sqlite3
 import sys
 from pprint import pprint
@@ -79,21 +80,46 @@ def fillMainDB(data):
 		con.close()
 		return maxIndex
 
-def generateTemplate(type):
-	print("|---------------------|")
-	print("| template generation |")
-	print("v---------------------v")
-
-	tpl = open("template.tpl", "w")
-
-def generateConfig(data):
+def generateConfig(json):
 	print("|-------------------|")
 	print("| config generation |")
 	print("v-------------------v")
 
-	tpl = open(testDirectory+"/"+"config.py", "w")
+	config = open(testDirectory+"/"+"config.py", "w")
+	if 'test' in json:	# TODO : penser a simplifier ce bout de code...
+		configJson = json["test"]
+		if 'configuration' in configJson:
+			configJson = configJson["configuration"]
+		elif 'config' in configJson:
+			configJson = configJson["config"]
+		elif 'conf' in configJson:
+			configJson = configJson["conf"]
+	elif 'configuration' in json:
+		configJson = json["configuration"]
+	elif 'config' in json:
+		configJson = json["config"]
+	elif 'conf' in json:
+		configJson = json["conf"]
+	print(configJson)
+
+	config.write("# === CONFIGURATION VARIABLES ===\n")
+	config.write("# Each configuration variable is necessarily a string\n")
+	for var in configJson:
+		config.write(var+"=\""+configJson[var]+"\"\n")
+	config.write("\n")
+
+def generateTemplate(tplPath):
+	print("|---------------------|")
+	print("| template generation |")
+	print("v---------------------v")
+
+	shutil.copy(tplPath, testDirectory)
+
+	# TODO Verifier le template
 
 
+inputJSON = "./test.json"
+inputTemplate = "./template.tpl"
 
 mainDirectory = "./tests"
 if not os.path.exists(mainDirectory):
@@ -108,18 +134,18 @@ if os.path.exists(mainDirectory+"/"+name):
 testDirectory = mainDirectory+"/"+name
 os.makedirs(testDirectory)
 
-dataFromJSON = parseJSON("./test.json")
+dataFromJSON = parseJSON(inputJSON)
 
 generateConfig(dataFromJSON)
 
 createDB(dataFromJSON, testDirectory)
 
+generateTemplate(inputTemplate)
 
 
 
 # lastIndex = fillMainDB(dataFromJSON)
 # createDB("test-"+str(lastIndex), dataFromJSON)
-# generateTemplate("toto")
 
 
 
