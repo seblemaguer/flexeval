@@ -138,18 +138,40 @@ def generateTemplate():
 	print("| template generation |")
 	print("v---------------------v")
 
-	print(inputTemplate)
-	print(testDirectory)
 	shutil.copy(inputTemplate, viewsDirectory)
+	print("template correctly moved to "+viewsDirectory)
 
-	# TODO Verifier le template
+	print("TEMPLATE VERIFICATION")
 
+	tplPath = ""
+	regexName = "[^\/]+$"
+	regexLink = "<(l|L)(i|I)(n|N)(k|K).*>"
+	regexScript = "<(s|S)(c|C)(r|R)(i|I)(p|P)(t|T).*>"
+	linkArray = []
+	scriptArray = []
+
+	search = re.search(regexName, inputTemplate)
+	if search :
+		tplPath = viewsDirectory+search.group(0)
+	print("template at "+tplPath)
+
+	tpl = open(tplPath, "r").read()
+	print(tpl)
+	for finditer in re.finditer(regexLink, tpl):
+		linkArray.append(finditer.group(0))
+	for finditer in re.finditer(regexScript, tpl):
+		scriptArray.append(finditer.group(0))
+	print(linkArray)
+	print(scriptArray)
+	# search = re.search(regex, tpl)
+	# if search :
+	# 	print(search)
 	print("Done.\n")
 
 def create_plateform():
-	print("|---------------------|")
-	print("| controller creation |")
-	print("v---------------------v")
+	print("|--------------------|")
+	print("| plateform creation |")
+	print("v--------------------v")
 	fo = open(testDirectory+"plateform.py", "wb")
 	fo.write(controller_body)
 	fo.close()
@@ -172,7 +194,7 @@ def copyMedia(json):
 	audio = []
 	audioFolders = []
 	systems = []
-	regexp = "^.*\/"
+	regex = "^.*\/"
 	if 'test' in json:
 		systems = json["test"]["systems"]["system"]
 	else:
@@ -182,7 +204,7 @@ def copyMedia(json):
 			for wav in sample["sample"]:
 				audio.append(wav)
 	for wav in audio:
-		search = re.search(regexp, wav)
+		search = re.search(regex, wav)
 		if search :
 			if search.group(0) not in audioFolders:
 				audioFolders.append(search.group(0))
@@ -190,7 +212,7 @@ def copyMedia(json):
 		os.makedirs(mediaDirectory+folder)
 	for file in audio:
 		filedir = ""
-		search = re.search(regexp, file)
+		search = re.search(regex, file)
 		if search :
 			filedir = search.group(0)
 		shutil.copy(file, mediaDirectory+filedir)
