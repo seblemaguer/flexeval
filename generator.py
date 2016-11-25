@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import shutil
 import sqlite3
 import sys
@@ -294,7 +295,6 @@ def insert_data(test,data) :
 	conn.commit()
 	conn.close()
 """
-testDirectory = "./tests/test1/"
 
 def create_controller():
 	print("|---------------------|")
@@ -326,12 +326,12 @@ def parseJSON(JSONfile):
 
 	return data
 
-def createDB(data, directory):
+def createDB(data):
 	print("|-------------|")
 	print("| DB creation |")
 	print("v-------------v")
 
-	con = sqlite3.connect(directory+"/data.db")
+	con = sqlite3.connect(testDirectory+"/data.db")
 	try:
 		con.execute("CREATE TABLE system (`id` TEXT NOT NULL PRIMARY KEY UNIQUE, `name` TEXT NOT NULL, `comment` TEXT NOT NULL)")
 		con.execute("CREATE TABLE sample (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `path` TEXT NOT NULL, `type` TEXT NOT NULL, `id_system` TEXT NOT NULL , `syst_index` INTEGER NOT NULL, `nb_processed` INTEGER NOT NULL DEFAULT 0, FOREIGN KEY(id_system) REFERENCES system(id))")
@@ -385,20 +385,55 @@ def generateConfig(json):
 		config.write(var+"=\""+configJson[var]+"\"\n")
 	config.write("\n")
 
-def generateTemplate(tplPath):
+def generateTemplate():
 	print("|---------------------|")
 	print("| template generation |")
 	print("v---------------------v")
 
-	shutil.copy(tplPath, testDirectory)
+	shutil.copy(inputTemplate, testDirectory)
 
 	# TODO Verifier le template
+
+def copyAudios(json):
+	print("|-----------------|")
+	print("| audio file copy |")
+	print("v-----------------v")
+
+	audio = []
+	audioFolders = []
+	systems = []
+	if 'test' in json:
+		systems = json["test"]["systems"]["system"]
+	else:
+		systems = json["systems"]["system"]
+	for samples in systems:
+		for sample in samples["samples"]:
+			for wav in sample["sample"]:
+				audio.append(wav)
+				# search = re.search("^.*\/", wav)
+				# if search :
+				# 	if search.group(0) not in audioFolders:
+				# 		audioFolders.append(search.group(0))
+	for wav in audio:
+		search = re.search("^.*\/", wav)
+		if search :
+			if search.group(0) not in audioFolders:
+				audioFolders.append(search.group(0))
+	for folder in audioFolders:
+		os.makedirs(testDirectory+folder)
+	for file in audio:
+		filedir = ""
+		search = re.search("^.*\/", file)
+		if search :
+			filedir = search.group(0)
+		shutil.copy(file, testDirectory+filedir)
+
 
 
 inputJSON = "./test.json"
 inputTemplate = "./template.tpl"
 
-mainDirectory = "./tests"
+mainDirectory = "./tests/"
 if not os.path.exists(mainDirectory):
 	os.makedirs(mainDirectory)
 
@@ -408,27 +443,29 @@ if len(sys.argv) == 2:
 if os.path.exists(mainDirectory+"/"+name):
 	sys.exit("ERREUR : dossier deja existant !")
 
-testDirectory = mainDirectory+"/"+name
+testDirectory = mainDirectory+"/"+name+"/"
 os.makedirs(testDirectory)
 
 dataFromJSON = parseJSON(inputJSON)
 
 generateConfig(dataFromJSON)
 
-createDB(dataFromJSON, testDirectory)
+createDB(dataFromJSON)
 
-generateTemplate(inputTemplate)
+generateTemplate()
 
 create_controller()
 
 create_model()
 
+copyAudios(dataFromJSON)
 
 
 
-# platform.py		a copier
-# model.py			a copier
-# config.py			a remplir
+
+# platform.py		OK
+# model.py			OK
+# config.py			OK
 # db.db				OK
-# audio/*.wav		a copier
-# template.tpl		a copier et verifier
+# audio/*.wav		OK
+# template.tpl		a verifier
