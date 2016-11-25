@@ -36,7 +36,7 @@
 			<!-- answer part -->
 			<div class="col-md-6 col-md-offset-3">
 				<form role="form" action="/test" method="POST">
-
+					<input type="hidden" name="ref" value="{{index}}">
 					<h3>Question </h3>
 					<div class="alert alert-info" role="alert">...</div>
 					<div class="col-md-offset-2">
@@ -59,13 +59,13 @@
 					<div class="col-md-offset-2">
 						<div class="radio">
 							<label>
-								<input type="radio" id="radioA" name="question1" value="{{systems[0]}}"checked>
+								<input type="radio" id="radioA" name="question2" value="{{systems[0]}}"checked>
 								Option A
 							</label>
 						</div>
 						<div class="radio">
 							<label>
-								<input type="radio" id="radioB" name="question1" value="{{systems[1]}}">
+								<input type="radio" id="radioB" name="question2" value="{{systems[1]}}">
 								Option B
 							</label>
 						</div>

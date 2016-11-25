@@ -197,6 +197,15 @@ def copyMedia(json):
 		print(file+"  to  "+mediaDirectory+filedir)
 	print("Done.\n")
 
+def add_login():
+	print("|-----------------|")
+	print("|  add template   |")
+	print("v-----------------v")
+	fo = open(testDirectory+"views/login_form.tpl", "wb")
+	fo.write(login_form)
+	fo.close()
+	print("Done.\n")
+
 
 (inputJSON, inputTemplate) = parserOptionsJT()
 dataFromJSON = parseJSON(inputJSON)
@@ -207,6 +216,7 @@ createDB(dataFromJSON)
 generateTemplate()
 create_plateform()
 create_model()
+add_login()
 copyMedia(dataFromJSON)
 
 
