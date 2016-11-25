@@ -7,7 +7,7 @@ import sys
 from pprint import pprint
 from optparse import OptionParser
 
-execfile("./p&m_bodies.py")
+execfile("./pm_bodies.py")
 
 
 def parserOptionsJT():
@@ -146,7 +146,7 @@ def generateTemplate():
 
 	print("Done.\n")
 
-def create_controller():
+def create_plateform():
 	print("|---------------------|")
 	print("| controller creation |")
 	print("v---------------------v")
@@ -205,7 +205,7 @@ name = dataFromJSON["test"]["configuration"]["name"]
 generateConfig(dataFromJSON)
 createDB(dataFromJSON)
 generateTemplate()
-create_controller()
+create_plateform()
 create_model()
 copyMedia(dataFromJSON)
 
