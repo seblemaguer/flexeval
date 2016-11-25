@@ -125,9 +125,9 @@ createDB(dataFromJSON, testDirectory)
 
 
 
-# platform.py		à copier
-# model.py			à copier
-# config.py			à remplir
+# platform.py		a copier
+# model.py			a copier
+# config.py			a remplir
 # db.db				OK
-# audio/*.wav		à copier
-# template.tpl		à copier et vérifier
+# audio/*.wav		a copier
+# template.tpl		a copier et verifier

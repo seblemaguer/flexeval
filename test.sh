@@ -5,7 +5,7 @@ then
 		echo "suppression des anciens test"
 		rm -rf ./tests/*
 	else
-		python script.py $1
+		python generator.py $1
 	fi
 elif [ $# = 2 ]
 then
@@ -14,10 +14,10 @@ then
 		echo "suppression des anciens test"
 		rm -rf ./tests/*
 		echo "nouveau test $1"
-		python script.py $1
+		python generator.py $1
 	else
 		echo "NOTHING TO DO!"
 	fi
 else
-	python script.py newTest
+	python generator.py newTest
 fi
