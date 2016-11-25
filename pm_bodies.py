@@ -264,9 +264,9 @@ def insert_data(data) :
 		val = (data["user"],str(now),answer["content"],data["index"],answer["index"])
 		c.execute("insert into answer(user,date,content,syst_index,question_index) values (?,?,?,?,?)",val)
 	#update the number of time processed for the sapmles
-	print("-------------------------------------²")
+	print("-------------------------------------")
 	print(str(data["index"]))
-	print("-------------------------------------²")	
+	print("-------------------------------------")	
 	c.execute("select nb_processed from sample where syst_index="+str(data["index"]))
 	n = c.fetchall()[0][0]
 	c.execute("update sample set nb_processed="+str(n+1)+" where syst_index="+str(data["index"]))
