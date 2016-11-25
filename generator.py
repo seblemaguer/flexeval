@@ -328,6 +328,7 @@ def parseJSON(JSONfile):
 		data = json.load(data_file)
 	pprint(data)
 
+	print("Done.\n")
 	return data
 
 def createDB(data):
@@ -360,6 +361,7 @@ def createDB(data):
 		raise e
 	finally:
 		con.close()
+	print("Done.\n")
 
 def generateConfig(json):
 	print("|-------------------|")
@@ -388,6 +390,7 @@ def generateConfig(json):
 	for var in configJson:
 		config.write(var+"=\""+configJson[var]+"\"\n")
 	config.write("\n")
+	print("Done.\n")
 
 def generateTemplate():
 	print("|---------------------|")
@@ -398,6 +401,8 @@ def generateTemplate():
 
 	# TODO Verifier le template
 
+	print("Done.\n")
+
 def create_controller():
 	print("|---------------------|")
 	print("| controller creation |")
@@ -405,7 +410,7 @@ def create_controller():
 	fo = open(testDirectory+"plateform.py", "wb")
 	fo.write(controller_body)
 	fo.close()
-	print "Done.\n\n"
+	print("Done.\n")
 
 def create_model():
 	print("|---------------------|")
@@ -414,7 +419,7 @@ def create_model():
 	fo = open(testDirectory+"model.py", "wb")
 	fo.write(controller_body)
 	fo.close()
-	print "Done\n\n"
+	print("Done.\n")
 
 def copyAudios(json):
 	print("|-----------------|")
@@ -449,6 +454,7 @@ def copyAudios(json):
 		if search :
 			filedir = search.group(0)
 		shutil.copy(file, testDirectory+filedir)
+	print("Done.\n")
 
 
 mainDirectory = "./tests/"
