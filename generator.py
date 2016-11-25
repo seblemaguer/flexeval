@@ -7,25 +7,7 @@ import sys
 from pprint import pprint
 from optparse import OptionParser
 
-parser = OptionParser()
-parser.add_option("-j", "--json", dest="inputJSON",
-				  help="input JSON file", metavar="FILE")
-parser.add_option("-t", "--tpl", dest="inputTemplate",
-				  help="input template file", metavar="FILE")
-inputJSON=""
-inputTemplate=""
-(options, args) = parser.parse_args()
-if(options.inputJSON==None or options.inputJSON=="") :
-	print "invalid JSON file name"
-	sys.exit()
-else :
-	inputJSON = options.inputJSON
 
-if(options.inputTemplate==None or options.inputTemplate=="") :
-	print "invalid template file name"
-	sys.exit()
-else :
-	inputTemplate = options.inputTemplate
 
 controller_body = """
 import model
@@ -70,7 +52,7 @@ def logout():
 def toto():
 	app_session = bottle.request.environ.get('beaker.session')
 	if('pseudo' in app_session) :
-		return "<p>You are already logged, please logout <a href=\"http://localhost:8080/logout\">here</a></p>"
+		return "<p>You are already logged, please logout <a href='http://localhost:8080/logout'>here</a></p>"
 	return bottle.template('login_form')
 
 #bottle post methods
@@ -92,7 +74,7 @@ def testLogin():
 #home page
 @app.route('/')
 def home():
-	return "<p>Hi! Welcome on our test plateform, if you want to get a free example, please go <a href=\"http://localhost:8080/test/1\">Here</a>!</p>"
+	return "<p>Hi! Welcome on our test plateform, if you want to get a free example, please go <a href='http://localhost:8080/test/1'>Here</a>!</p>"
 
 
 @app.route('/test/:test')
@@ -316,23 +298,25 @@ def insert_data(test,data) :
 	conn.close()
 """
 
-def create_controller():
-	print("|---------------------|")
-	print("| controller creation |")
-	print("v---------------------v")
-	fo = open(testDirectory+"plateform.py", "wb")
-	fo.write(controller_body)
-	fo.close()
-	print "Done.\n\n"
+parser = OptionParser()
+parser.add_option("-j", "--json", dest="inputJSON",
+				  help="input JSON file", metavar="FILE")
+parser.add_option("-t", "--tpl", dest="inputTemplate",
+				  help="input template file", metavar="FILE")
+inputJSON=""
+inputTemplate=""
+(options, args) = parser.parse_args()
+if(options.inputJSON==None or options.inputJSON=="") :
+	print "invalid JSON file name"
+	sys.exit()
+else :
+	inputJSON = options.inputJSON
 
-def create_model():
-	print("|---------------------|")
-	print("|   model creation    |")
-	print("v---------------------v")
-	fo = open(testDirectory+"model.py", "wb")
-	fo.write(controller_body)
-	fo.close()
-	print "Done\n\n"
+if(options.inputTemplate==None or options.inputTemplate=="") :
+	print "invalid template file name"
+	sys.exit()
+else :
+	inputTemplate = options.inputTemplate
 
 
 def parseJSON(JSONfile):
@@ -414,6 +398,24 @@ def generateTemplate():
 
 	# TODO Verifier le template
 
+def create_controller():
+	print("|---------------------|")
+	print("| controller creation |")
+	print("v---------------------v")
+	fo = open(testDirectory+"plateform.py", "wb")
+	fo.write(controller_body)
+	fo.close()
+	print "Done.\n\n"
+
+def create_model():
+	print("|---------------------|")
+	print("|   model creation    |")
+	print("v---------------------v")
+	fo = open(testDirectory+"model.py", "wb")
+	fo.write(controller_body)
+	fo.close()
+	print "Done\n\n"
+
 def copyAudios(json):
 	print("|-----------------|")
 	print("| audio file copy |")
@@ -449,7 +451,7 @@ def copyAudios(json):
 		shutil.copy(file, testDirectory+filedir)
 
 
-mainDirectory = "./tests"
+mainDirectory = "./tests/"
 if not os.path.exists(mainDirectory):
 	os.makedirs(mainDirectory)
 
@@ -460,7 +462,7 @@ name = dataFromJSON["test"]["configuration"]["name"]
 if os.path.exists(mainDirectory+"/"+name):
 	sys.exit("ERREUR : dossier deja existant !")
 
-testDirectory = mainDirectory+"/"+name
+testDirectory = mainDirectory+"/"+name+"/"
 os.makedirs(testDirectory)
 
 generateConfig(dataFromJSON)
