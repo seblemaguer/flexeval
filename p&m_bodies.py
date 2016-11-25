@@ -63,42 +63,38 @@ def testLogin():
 #home page
 @app.route('/')
 def home():
-	bottle.redirect('/test/1')
+	bottle.redirect('/test')
 
 
-@app.route('/test/:test')
-def process_test(test):
+@app.route('/test')
+def process_test():
 	app_session = bottle.request.environ.get('beaker.session')
 	#the following lines are to be uncommented later
 	if not testLogin() :
 		bottle.redirect('/login')
 	user = app_session['pseudo']
-	if not os.path.exists('databases/'+test+'.db') :
-		return "<p>This test is not valid!! (no database linked)</p>"
 	#proceed to the test
 	#check if the test isn't finished yet
-	if model.get_nb_step_user(test,user) < model.get_nb_step(test) :
+	if model.get_nb_step_user(user) < model.get_nb_step() :
 		#proceed to a new step
-		nbq = model.get_nb_questions(test)
+		nbq = model.get_nb_questions()
 		keys =[]
 		for i in range(nbq) :
 			keys.append(random.randint(0,1))
-		(samples,index) = model.get_test_sample(test,user)
-		systems = model.get_systems(test)
-		data={"author":model.get_author(test),"description": model.get_description(test),"test_code":test,"samples" : samples, "systems": systems, "index": index}
-		return bottle.template(test,data)
+		(samples,index) = model.get_test_sample(user)
+		systems = model.get_systems()
+		data={"name":model.get_name(),"author":model.get_author(),"description": model.get_description(),"samples" : samples, "systems": systems, "index": index}
+		return bottle.template('template',data)
 	else :
 		return "<p>You have already done this test</p>"
 
-@app.post('/test/:test')
-def process_test_post(test):
+@app.post('/test')
+def process_test_post():
 	app_session = bottle.request.environ.get('beaker.session')
 	#the following lines are to be uncommented later
 	if not testLogin() :
 		bottle.redirect('/login')
 	user = app_session['pseudo']
-	if not os.path.exists('databases/'+test+'.db') :
-		return "<p>This test is not valid!! (no database linked)</p>"
 	#get the post data and insert into db
 	answers=[]
 	i=1
@@ -106,19 +102,19 @@ def process_test_post(test):
 	#for i in range(1,int(nb)+1) :
 		answers.append({"index": i, "content": post_get("question"+str(i))})
 		i=i+1
-	post_data = {"author":model.get_author(test),"description": model.get_description(test),"user":user,"answers": answers,"index": post_get("ref")}
-	model.insert_data(test,post_data)
+	post_data = {"author":model.get_author(),"description": model.get_description(),"user":user,"answers": answers,"index": post_get("ref")}
+	model.insert_data(post_data)
 	#check if the test isn't finished yet
-	if model.get_nb_step_user(test,user) < model.get_nb_step(test) :
+	if model.get_nb_step_user(user) < model.get_nb_step() :
 		#proceed to a new step
-		systems = model.get_systems(test)
-		nbq = model.get_nb_questions(test)
+		systems = model.get_systems()
+		nbq = model.get_nb_questions()
 		keys =[]
 		for i in range(nbq) :
 			keys.append(random.randint(0,1))
-		(samples,index) = model.get_test_sample(test,user)
-		data={"test_code":test, "samples" : samples, "systems": systems, "random_keys": keys, "index": index}
-		return bottle.template(test,data)
+		(samples,index) = model.get_test_sample(user)
+		data={"name":model.get_name(),"author": model.get_author(),"samples" : samples, "systems": systems, "random_keys": keys, "index": index}
+		return bottle.template('template',data)
 	else :
 		return "<p>Test finished thank you for your cooperation</p>"
 
@@ -166,17 +162,6 @@ def get_author():
 	#get it from config.py
 	return config.author
 
-"name": "Test AB pour validation du XML",
-"author": "Damien",
-"nbInstances": "6",
-"nbSteps": "10",
-"nbConsistencySteps": "2",
-"nbIntroductionSteps": "1",
-"description": "Test AB",
-"start": "2012-01-31",
-"end": "2014-12-31",
-"fixedPosition": "True"
-
 def get_description():
 	#get it from config.py
 	return config.description
@@ -185,7 +170,7 @@ def get_name():
 	#get it from config.py
 	return config.name
 
-def get_systems(test) :
+def get_systems() :
 	conn = sqlite3.connect('data.db')
 	c = conn.cursor()
 	c.execute("select id from system")
@@ -206,24 +191,24 @@ def get_nb_step() :
 	#get it from config.py
 	return config.nb_step
 
-def get_nb_step_user(test,user) :
+def get_nb_step_user(user) :
 	#return the number of step made by a user on the test
 	conn = sqlite3.connect('data.db')
 	c = conn.cursor()
-	c.execute("select count(*) from answer where user=\""+user+"\"")
+	c.execute("select count(*) from answer where user='"+user+"'")
 	res = c.fetchall()
 	conn.close()
 	#return int(res[0][0])
 	return 0
 
-def get_metadata(test) :
+def get_metadata() :
 	#get it from config.py
 	return "mocked result"
 
-def get_test_sample(test,user) :
+def get_test_sample(user) :
 	#load a tuple of sample depending of the user and the number of time processed
-	nbSa = get_nb_sample_by_system(test)
-	nbSy = get_nb_system(test)
+	nbSa = get_nb_sample_by_system()
+	nbSy = get_nb_system()
 	conn = sqlite3.connect('data.db')
 	c = conn.cursor()
 	c.execute("select * from sample")
@@ -235,7 +220,7 @@ def get_test_sample(test,user) :
 	samples=[]
 	while not stop and i<len(sampleList)/2 :
 		#check if user has not already processed this sample
-		c.execute("select count(*) from answer where user=\""+user+"\" and syst_index=\""+str(sampleList[i][4])+"\"")
+		c.execute('select count(*) from answer where user="'+user+'" and syst_index="'+str(sampleList[i][4])+'"')
 		b = c.fetchall()
 		#print b[0][0]
 		if b[0][0]==0 :
@@ -254,7 +239,7 @@ def get_test_sample(test,user) :
 	#we start from where we finished previous loop
 	while i < len(sampleList)/2 :
 		#check if user has not already processed this sample
-		c.execute("select count(*) from answer where user=\""+user+"\" and syst_index=\""+str(sampleList[i][4])+"\"")
+		c.execute('select count(*) from answer where user="'+user+'" and syst_index="'+str(sampleList[i][4])+'"')
 		b = c.fetchall()
 		if b[0][0]==0 and sampleList[i][5]<nb:
 			nb = sampleList[i][5]
@@ -271,7 +256,7 @@ def get_test_sample(test,user) :
 	return (samples,index)
 
 
-def insert_data(test,data) :
+def insert_data(data) :
 	now = datetime.now()
 	conn = sqlite3.connect('data.db')
 	c = conn.cursor()
@@ -282,7 +267,7 @@ def insert_data(test,data) :
 	#update the number of time processed for the sapmles
 	c.execute("select nb_processed from sample where syst_index="+str(data["index"]))
 	n = c.fetchall()[0][0]
-	c.execute("update sample set nb_processed="+str(n+1)+" where syst_index="+str(data["index"]))
+	c.execute('update sample set nb_processed="'+str(n+1)+'" where syst_index="'+str(data["index"])+'"')
 	conn.commit()
 	conn.close()
 """

@@ -122,6 +122,14 @@ def generateConfig(json):
 	config.write("# Each configuration variable is necessarily a string\n")
 	for var in configJson:
 		config.write(var+"=\""+configJson[var]+"\"\n")
+	questions = configJson["questions"]
+	config.write("nbQuestions=\""+str(len(questions["question"]))+"\"\n")
+	samples = configJson["systems"]["system"][0]["samples"]
+	nbsbs = 0
+	for s in samples :
+		if s["-type"]="test" :
+			nbsbs = len(s["sample"])
+	config.write("nbSampleBySystem=\""+str(nbsbs)+"\"\n")
 	config.write("\n")
 	print("Done.\n")
 
@@ -152,7 +160,7 @@ def create_model():
 	print("| model creation |")
 	print("v----------------v")
 	fo = open(testDirectory+"model.py", "wb")
-	fo.write(controller_body)
+	fo.write(model_body)
 	fo.close()
 	print("Done.\n")
 
