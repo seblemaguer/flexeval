@@ -294,7 +294,6 @@ def insert_data(test,data) :
 	conn.commit()
 	conn.close()
 """
-testDirectory = "./tests/test1/"
 
 def create_controller():
 	print("|---------------------|")
