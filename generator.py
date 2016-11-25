@@ -7,7 +7,7 @@ import sys
 from pprint import pprint
 from optparse import OptionParser
 
-execfile("./p&m_bodies.py")
+execfile("./pm_bodies.py")
 
 
 def parserOptionsJT():
