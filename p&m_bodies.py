@@ -141,6 +141,7 @@ if __name__ == "__main__":
 """
 
 model_body="""
+
 import sqlite3
 from datetime import date, datetime
 import random
@@ -156,7 +157,7 @@ def get_nb_system() :
 	return int(res[0][0])
 
 def get_nb_questions() :
-	return config.nb_questions
+	return int(config.nbQuestions)
 
 def get_author():
 	#get it from config.py
@@ -184,18 +185,18 @@ def get_systems() :
 def get_nb_sample_by_system() :
 	#return the number of samples of each system
 	#get it from config.py
-	return config.nb_sample_by_system
+	return int(config.nbSampleBySystem)
 
 def get_nb_step() :
 	#return the number of step required on a test
 	#get it from config.py
-	return config.nb_step
+	return int(config.nbInstances)
 
 def get_nb_step_user(user) :
 	#return the number of step made by a user on the test
 	conn = sqlite3.connect('data.db')
 	c = conn.cursor()
-	c.execute("select count(*) from answer where user='"+user+"'")
+	c.execute('select count(*) from answer where user="'+user+'"')
 	res = c.fetchall()
 	conn.close()
 	#return int(res[0][0])
@@ -230,9 +231,8 @@ def get_test_sample(user) :
 			samples=[]
 			#keep the sample
 			for j in range(nbSy) :
-				s = sampleList[i+j*nbSa][1].split('/')
-				s1 = "/test_sound/"+test+"/"+s[len(s)-1]
-				samples.append(s1)
+				s = sampleList[i+j*nbSa][1]
+				samples.append(s)
 		i=i+1
 	#we have the first unprocessed step
 	#now check if there is another test which have been processed less times
@@ -248,9 +248,8 @@ def get_test_sample(user) :
 			samples=[]
 			#keep the sample
 			for j in range(nbSy) :
-				s = sampleList[i+j*nbSa][1].split('/')
-				s1 = "/test_sound/"+test+"/"+s[len(s)-1]
-				samples.append(s1)
+				s = sampleList[i+j*nbSa][1]
+				samples.append(s)
 		i=i+1
 	conn.close()
 	return (samples,index)
@@ -265,9 +264,12 @@ def insert_data(data) :
 		val = (data["user"],str(now),answer["content"],data["index"],answer["index"])
 		c.execute("insert into answer(user,date,content,syst_index,question_index) values (?,?,?,?,?)",val)
 	#update the number of time processed for the sapmles
+	print("-------------------------------------²")
+	print(str(data["index"]))
+	print("-------------------------------------²")	
 	c.execute("select nb_processed from sample where syst_index="+str(data["index"]))
 	n = c.fetchall()[0][0]
-	c.execute('update sample set nb_processed="'+str(n+1)+'" where syst_index="'+str(data["index"])+'"')
+	c.execute("update sample set nb_processed="+str(n+1)+" where syst_index="+str(data["index"]))
 	conn.commit()
 	conn.close()
 """
