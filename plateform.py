@@ -5,6 +5,7 @@ import sqlite3
 import json
 import os
 import random
+import config
 from beaker.middleware import SessionMiddleware
 
 bottle.debug(True)
