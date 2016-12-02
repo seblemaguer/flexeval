@@ -129,12 +129,10 @@ def generateConfig(json):
 			nbsbs = len(s['sample'])
 	config.write('nbSampleBySystem=\"'+str(nbsbs)+'\"\n')
 	questions = json['test']['questions']['question']
-	qtype='['
+	qtype=[]
 	for i in range(len(questions)):
-		qtype=qtype+'\"'+questions[i]['type']+'\"'
-		if i<len(questions)-1 :
-			qtype=qtype+''
-	config.write('questionsType='+qtype+']\n')
+		qtype.append('"'+questions[i]['type']+'"')
+	config.write('questionsType=['+','.join(qtype)+']\n')
 	print('Done.\n')
 
 def generateTemplate():
