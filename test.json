@@ -101,7 +101,12 @@
 				{
 					"id" : 3,
 					"type" : "range",
-					"description" : "Test 3"
+					"description" : "Question 3"
+				},
+				{
+					"id" : 4,
+					"type" : "range",
+					"description" : "Question 4"
 				}
 			]
 		}

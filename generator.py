@@ -221,6 +221,35 @@ def copyMedia(json):
 		print(file+'  to  '+mediaDirectory+filedir)
 	print('Done.\n')
 
+
+def verif_template():
+	authorized_tags=["{{name}}","{{author}}","{{description}}","{{index}}"]
+	warning_tags=["samples","systems"]
+	regexp = '{{[A-z,0-9]+}}'
+	textfile = open(inputTemplate, 'r')
+	filetext = textfile.read()
+	textfile.close()
+	matches = re.findall(regexp, filetext)
+	for m in matches : 
+		if not m in authorized_tags :
+			b = False
+			for t in warning_tags:
+				pattern1 = re.compile("{{"+t+"\[[0-9]+\]}}")
+				pattern2 = re.compile("{{"+t+"\[[A-z]\]}}")
+				if pattern1.match(m) or pattern2.match(m):
+					b = True
+			if b :
+				print m + " \t:: OK - but be on your guards please"
+			else :
+				error_tag(m)
+		else :
+			print m + " \t:: OK"
+
+def error_tag(tag):
+	print tag + " \t:: WARN : maybe you have an error in your template, please check if your application works fine !"
+def unknown_tag(tag):
+	print tag + " \t:: WARN : Tag unknown..."
+
 def add_login():
 	print('|-----------------|')
 	print('|  add template   |')
@@ -242,6 +271,7 @@ create_plateform()
 create_model()
 add_login()
 copyMedia(dataFromJSON)
+verif_template()
 
 
 # platform.py		OK

@@ -21,7 +21,7 @@
 	<div class="jumbotron">
 		<div class="container">
 			<div class="col-md-6 col-md-offset-3">
-				<h1>{{name}}</h1><span><h3>Made by {{author}}</h3>
+				<h1>{{ name}}</h1><span><h3>Made by {{author}}</h3>
 				<p class="lead">{{description}}</p>
 				% for i in range(len(samples)):
 				<p>Sample {{i+1}}</p>
