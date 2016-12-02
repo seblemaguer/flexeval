@@ -95,8 +95,13 @@
 				},
 				{
 					"id" : 2,
-					"type" : "range",
+					"type" : "radio",
 					"description" : "Question 2"
+				},
+				{
+					"id" : 3,
+					"type" : "range",
+					"description" : "Test 3"
 				}
 			]
 		}
