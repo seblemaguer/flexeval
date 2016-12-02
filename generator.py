@@ -7,7 +7,7 @@ import sys
 from pprint import pprint
 from optparse import OptionParser
 
-execfile("./pm_bodies.py")
+execfile(os.path.join(os.path.dirname(__file__),"pm_bodies.py"))
 
 
 def parserOptionsJT():
@@ -40,7 +40,7 @@ def createArchitecture(testName):
 		print(dir+" created.")
 		return dir
 
-	mainDirectory = "./tests/"
+	mainDirectory = os.path.join(os.path.dirname(__file__),'tests/')
 	if not os.path.exists(mainDirectory):
 		os.makedirs(mainDirectory)
 
