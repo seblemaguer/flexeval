@@ -1,4 +1,3 @@
 *.pyc
-/sound/1/*
 /tests/*
 /wav/
