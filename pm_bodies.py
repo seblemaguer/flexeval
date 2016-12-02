@@ -128,7 +128,6 @@ def send_static(type, filename):
 @app.route('/media/:media/:syst/:filename#.*#')
 @app.route('/media/:media/./:syst/:filename#.*#')
 def send_static(media, syst, filename):
-	print os.path.join(os.path.dirname(__file__),"media/%s/") % media
 	return bottle.static_file(filename, root=os.path.join(os.path.dirname(__file__),"media/%s/") % media+"/"+syst)
 
 
@@ -310,7 +309,7 @@ login_form="""
             <div class="col-md-4 col-md-offset-4">
                 <div class="login-panel panel panel-default">
                     <div class="panel-heading">
-                        <h3 class="panel-title">Please Sign In</h3>
+                        <h3 class="panel-title">Please Log In</h3>
                     </div>
                     <div class="panel-body">
                         <form role="form" action="/login" method="POST">
