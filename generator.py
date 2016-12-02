@@ -223,6 +223,9 @@ def copyMedia(json):
 
 
 def verif_template():
+	print('|-----------------|')
+	print('| template check  |')
+	print('v-----------------v')
 	authorized_tags=["{{name}}","{{author}}","{{description}}","{{index}}"]
 	warning_tags=["samples","systems"]
 	regexp = '{{[A-z,0-9]+}}'
