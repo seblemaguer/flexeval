@@ -129,15 +129,11 @@ def generateConfig(json):
 			nbsbs = len(s['sample'])
 	config.write('nbSampleBySystem=\"'+str(nbsbs)+'\"\n')
 	questions = json['test']['questions']['question']
-	qtxt='['
 	qtype='['
 	for i in range(len(questions)):
-		qtxt=qtxt+'\"'+questions[i]['description']+'\"'
 		qtype=qtype+'\"'+questions[i]['type']+'\"'
 		if i<len(questions)-1 :
-			qtxt=qtxt+','
 			qtype=qtype+''
-	config.write('questionsTxt='+qtxt+']\n')
 	config.write('questionsType='+qtype+']\n')
 	print('Done.\n')
 
