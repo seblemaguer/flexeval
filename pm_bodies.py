@@ -102,7 +102,7 @@ def process_test_post():
 	#for i in range(1,int(nb)+1) :
 		answers.append({"index": i, "content": post_get("question"+str(i))})
 		i=i+1
-	post_data = {"author":model.get_author(),"description": model.get_description(),"user":user,"answers": answers,"index": post_get("ref")}
+	post_data = {"author":model.get_author(),"user":user,"answers": answers,"index": post_get("ref")}
 	model.insert_data(post_data)
 	#check if the test isn't finished yet
 	if model.get_nb_step_user(user) < model.get_nb_step() :
@@ -113,24 +113,23 @@ def process_test_post():
 		for i in range(nbq) :
 			keys.append(random.randint(0,1))
 		(samples,index) = model.get_test_sample(user)
-		data={"name":model.get_name(),"author": model.get_author(),"samples" : samples, "systems": systems, "random_keys": keys, "index": index}
+		data={"name":model.get_name(),"description": model.get_description(),"author": model.get_author(),"samples" : samples, "systems": systems, "random_keys": keys, "index": index}
 		return bottle.template('template',data)
 	else :
 		return "<p>Test finished thank you for your cooperation</p>"
 
 
-#access to local static sound files
-@app.route('/test_sound/:test/:filename#.*#')
-def send_static(test, filename):
-	return bottle.static_file(filename, root="./sound/%s/" % test)
-
 #access to local static files
 @app.route('/static/:type/:filename#.*#')
 def send_static(type, filename):
-	if type in ['css', 'js', 'img', 'fonts']:
-		return bottle.static_file(filename, root="./static/%s/" % type)
-	else:
-		bottle.abort(404, "File not found")
+	return bottle.static_file(filename, root="./static/%s/" % type)
+
+#access to local static sound files
+@app.route('/:media/:syst/:filename#.*#')
+def send_static(media, syst, filename):
+	path = media+"/"+syst
+	return bottle.static_file(filename, root="./media/%s/" % path)
+
 
 def main():
 	application = app
@@ -272,4 +271,56 @@ def insert_data(data) :
 	c.execute("update sample set nb_processed="+str(n+1)+" where syst_index="+str(data["index"]))
 	conn.commit()
 	conn.close()
+"""
+
+login_form="""
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Subjective tests plateform - login</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 col-md-offset-4">
+                <div class="login-panel panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Please Sign In</h3>
+                    </div>
+                    <div class="panel-body">
+                        <form role="form" action="/login" method="POST">
+                            <fieldset>
+                                <div class="form-group">
+                                    <input class="form-control" placeholder="E-mail" name="email" autofocus>
+                                </div>
+                                <!-- Change this to a button or input when using this as a form -->
+                                <input type="submit" class="btn btn-lg btn-success btn-block" value="Login">
+                            </fieldset>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="/static/js/bootstrap.min.js"></script>
+
+</body>
+
+</html>
 """
