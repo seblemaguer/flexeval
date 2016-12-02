@@ -198,8 +198,7 @@ def get_nb_step_user(user) :
 	c.execute('select count(*) from answer where user="'+user+'"')
 	res = c.fetchall()
 	conn.close()
-	#return int(res[0][0])
-	return 0
+	return int(res[0][0])
 
 def get_metadata() :
 	#get it from config.py
