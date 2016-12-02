@@ -143,7 +143,6 @@ if __name__ == "__main__":
 """
 
 model_body="""
-
 import os
 import sqlite3
 from datetime import date, datetime
@@ -206,8 +205,8 @@ def get_nb_step_user(user) :
 	c.execute('select count(*) from answer where user="'+user+'"')
 	res = c.fetchall()
 	conn.close()
-	#return int(res[0][0])
-	return 0
+	nbans = res[0][0]
+	return nbans/get_nb_questions()
 
 def get_metadata() :
 	#get it from config.py
