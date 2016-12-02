@@ -210,7 +210,14 @@ def get_nb_step_user(user) :
 
 def get_metadata() :
 	#get it from config.py
-	return "mocked result"
+	metadata=dict()
+	for i in dir(config):
+		#i,"  ",getattr(config,i)
+		print str(i)
+		b = re.search(r'__.+__',str(i))
+		if not b:
+			metadata[str(i)]=getattr(config,i)
+	return metadata
 
 def get_test_sample(user) :
 	#load a tuple of sample depending of the user and the number of time processed
