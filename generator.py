@@ -7,37 +7,37 @@ import sys
 from pprint import pprint
 from optparse import OptionParser
 
-execfile(os.path.join(os.path.dirname(__file__),"pm_bodies.py"))
+execfile(os.path.join(os.path.dirname(__file__),'pm_bodies.py'))
 
 
 def parserOptionsJT():
 	parser = OptionParser()
-	parser.add_option("-j", "--json", dest="inputJSON", help="input JSON file", metavar="FILE")
-	parser.add_option("-t", "--tpl", dest="inputTemplate", help="input template file", metavar="FILE")
+	parser.add_option('-j', '--json', dest='inputJSON', help='input JSON file', metavar='FILE')
+	parser.add_option('-t', '--tpl', dest='inputTemplate', help='input template file', metavar='FILE')
 	inputJSON = None
 	inputTemplate = None
 	(options, args) = parser.parse_args()
 	if(options.inputJSON==None) :
-		sys.exit("Invalid JSON file name")
+		sys.exit('Invalid JSON file name')
 	else :
 		inputJSON = options.inputJSON
 	if(options.inputTemplate==None) :
-		sys.exit("Invalid template file name")
+		sys.exit('Invalid template file name')
 	else :
 		inputTemplate = options.inputTemplate
 	return inputJSON, inputTemplate
 
 def createArchitecture(testName):
-	print("|-----------------------|")
-	print("| architecture creation |")
-	print("v-----------------------v")
+	print('|-----------------------|')
+	print('| architecture creation |')
+	print('v-----------------------v')
 
 	def createDir(path, name):
-		dir = str(path)+str(name)+"/"
+		dir = str(path)+str(name)+'/'
 		if os.path.exists(dir):
-			sys.exit("Folder already exist : "+dir)
+			sys.exit('Folder already exist : '+dir)
 		os.makedirs(dir)
-		print(dir+" created.")
+		print(dir+' created.')
 		return dir
 
 	mainDirectory = os.path.join(os.path.dirname(__file__),'tests/')
@@ -45,128 +45,125 @@ def createArchitecture(testName):
 		os.makedirs(mainDirectory)
 
 	testDirectory = createDir(mainDirectory, testName)
-	viewsDirectory = createDir(testDirectory, "views")
-	staticDirectory = createDir(testDirectory, "static")
-	mediaDirectory = createDir(testDirectory, "media")
+	viewsDirectory = createDir(testDirectory, 'views')
+	staticDirectory = createDir(testDirectory, 'static')
+	mediaDirectory = createDir(testDirectory, 'media')
 
-	print("Done.\n")
+	print('Done.\n')
 	return mainDirectory, testDirectory, viewsDirectory, staticDirectory, mediaDirectory
 
 def parseJSON(JSONfile):
-	print("|--------------|")
-	print("| parsing JSON |")
-	print("v--------------v")
+	print('|--------------|')
+	print('| parsing JSON |')
+	print('v--------------v')
 
 	with open(JSONfile) as data_file:
 		data = json.load(data_file)
 	pprint(data)
 
-	print("Done.\n")
+	print('Done.\n')
 	return data
 
 def createDB(data):
-	print("|---------------|")
-	print("| DB generation |")
-	print("v---------------v")
+	print('|---------------|')
+	print('| DB generation |')
+	print('v---------------v')
 
-	con = sqlite3.connect(testDirectory+"/data.db")
+	con = sqlite3.connect(testDirectory+'/data.db')
 	try:
 		con.execute("CREATE TABLE system (`id` TEXT NOT NULL PRIMARY KEY UNIQUE, `name` TEXT NOT NULL, `comment` TEXT NOT NULL)")
 		con.execute("CREATE TABLE sample (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `path` TEXT NOT NULL, `type` TEXT NOT NULL, `id_system` TEXT NOT NULL , `syst_index` INTEGER NOT NULL, `nb_processed` INTEGER NOT NULL DEFAULT 0, FOREIGN KEY(id_system) REFERENCES system(id))")
 		con.execute("CREATE TABLE answer (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `user` TEXT NOT NULL, `date` TEXT NOT NULL, `content` TEXT NOT NULL, `syst_index` INTEGER NOT NULL, `question_index` INTEGER NOT NULL)")
 		con.commit()
-		for system in data["test"]["systems"]["system"]:
+		print('Database successfully created.')
+		for system in data['test']['systems']['system']:
 			systemIndex = 0
-			systemToInsert=(system["-id"],system["-name"],system["comment"])
+			systemToInsert=(system['-id'],system['-name'],system['comment'])
 			con.execute("INSERT INTO system(id, name, comment) VALUES (?,?,?)", systemToInsert)
-			for samples in system["samples"]:
-				sampleType=samples["-type"]
-				for samplePath in samples["sample"]:
+			for samples in system['samples']:
+				sampleType=samples['-type']
+				for samplePath in samples['sample']:
 					systemIndex = systemIndex + 1
-					sampleToInsert=(samplePath, sampleType, system["-id"], systemIndex)
+					sampleToInsert=(samplePath, sampleType, system['-id'], systemIndex)
 					con.execute("INSERT INTO sample(path, type, id_system, syst_index) VALUES (?,?,?,?)", sampleToInsert)
 		con.commit()
-
-		print("Successfully created and filled database.")
+		print('Database successfully filled.')
 	except Exception as e:
-		print("EXCEPTION")
+		print('EXCEPTION')
 		con.rollback()
 		raise e
 	finally:
 		con.close()
-	print("Done.\n")
+	print('Done.\n')
 
 def generateConfig(json):
-	print("|-------------------|")
-	print("| config generation |")
-	print("v-------------------v")
+	print('|-------------------|')
+	print('| config generation |')
+	print('v-------------------v')
 
-	config = open(testDirectory+"/"+"config.py", "w")
-	if 'test' in json:	# TODO : penser a simplifier ce bout de code...
-		configJson = json["test"]
-		if 'configuration' in configJson:
-			configJson = configJson["configuration"]
-		elif 'config' in configJson:
-			configJson = configJson["config"]
-		elif 'conf' in configJson:
-			configJson = configJson["conf"]
-	elif 'configuration' in json:
-		configJson = json["configuration"]
-	elif 'config' in json:
-		configJson = json["config"]
-	elif 'conf' in json:
-		configJson = json["conf"]
+	configJson = json
+	if 'test' in configJson:	# TODO : penser a simplifier ce bout de code...
+		configJson = configJson['test']
+	if 'configuration' in configJson:
+		configJson = configJson['configuration']
+	elif 'config' in configJson:
+		configJson = configJson['config']
+	elif 'conf' in configJson:
+		configJson = configJson['conf']
+	print('Configuration JSON:')
 	print(configJson)
 
-	config.write("# === CONFIGURATION VARIABLES ===\n")
-	config.write("# Each configuration variable is necessarily a string\n")
+	config = open(testDirectory+'/'+'config.py', 'w')
+	config.write('# === CONFIGURATION VARIABLES ===\n')
+	config.write('# Each configuration variable is necessarily a string\n')
 	for var in configJson:
-		config.write(var+"=\""+configJson[var]+"\"\n")
-	questions = json["test"]["questions"]
+		config.write(var+'=\"'+configJson[var]+'\"\n')
+	questions = json['test']['questions']
+	print('Questions JSON:')
 	print(questions)
-	config.write("nbQuestions=\""+str(len(questions["question"]))+"\"\n")
-	samples = json["test"]["systems"]["system"][0]["samples"]
+	config.write('nbQuestions=\"'+str(len(questions['question']))+'\"\n')
+	samples = json['test']['systems']['system'][0]['samples']
 	nbsbs = 0
 	for s in samples :
-		if s["-type"]=="test" :
-			nbsbs = len(s["sample"])
-	config.write("nbSampleBySystem=\""+str(nbsbs)+"\"\n")
-	questions = json["test"]["questions"]["question"]
-	qtxt="["
-	qtype="["
+		if s['-type']=='test' :
+			nbsbs = len(s['sample'])
+	config.write('nbSampleBySystem=\"'+str(nbsbs)+'\"\n')
+	questions = json['test']['questions']['question']
+	qtxt='['
+	qtype='['
 	for i in range(len(questions)):
-		qtxt=qtxt+"\""+questions[i]["description"]+"\""
-		qtype=qtype+"\""+questions[i]["type"]+"\""
+		qtxt=qtxt+'\"'+questions[i]['description']+'\"'
+		qtype=qtype+'\"'+questions[i]['type']+'\"'
 		if i<len(questions)-1 :
-			qtxt=qtxt+","
-			qtype=qtype+""
-	config.write("questionsTxt="+qtxt+"]\n")
-	config.write("questionsType="+qtype+"]\n")
-	print("Done.\n")
+			qtxt=qtxt+','
+			qtype=qtype+''
+	config.write('questionsTxt='+qtxt+']\n')
+	config.write('questionsType='+qtype+']\n')
+	print('Done.\n')
 
 def generateTemplate():
-	print("|---------------------|")
-	print("| template generation |")
-	print("v---------------------v")
+	print('|---------------------|')
+	print('| template generation |')
+	print('v---------------------v')
 
 	shutil.copy(inputTemplate, viewsDirectory)
-	print("template correctly moved to "+viewsDirectory)
+	print('template correctly moved to '+viewsDirectory)
 
-	print("TEMPLATE VERIFICATION")
+	print('TEMPLATE VERIFICATION:')
 
-	tplPath = ""
-	regexName = "[^\/]+$"
-	regexLink = "<(l|L)(i|I)(n|N)(k|K).+href=.+>"
-	regexScript = "<(s|S)(c|C)(r|R)(i|I)(p|P)(t|T).+src=.+>"
+	tplPath = ''
+	regexName = '[^\/]+$'
+	regexLink = '<(l|L)(i|I)(n|N)(k|K).+href=.+>'
+	regexScript = '<(s|S)(c|C)(r|R)(i|I)(p|P)(t|T).+src=.+>'
 	linkArray = []
 	scriptArray = []
 
 	search = re.search(regexName, inputTemplate)
 	if search :
 		tplPath = viewsDirectory+search.group(0)
-	print("template at "+tplPath)
+	print('template at "'+tplPath+'":')
 
-	tpl = open(tplPath, "r").read()
+	tpl = open(tplPath, 'r').read()
 	print(tpl)
 	for finditer in re.finditer(regexLink, tpl):
 		linkArray.append(finditer.group(0))
@@ -177,42 +174,42 @@ def generateTemplate():
 	# search = re.search(regex, tpl)
 	# if search :
 	# 	print(search)
-	print("Done.\n")
+	print('Done.\n')
 
 def create_plateform():
-	print("|--------------------|")
-	print("| plateform creation |")
-	print("v--------------------v")
-	fo = open(testDirectory+"plateform.py", "wb")
+	print('|--------------------|')
+	print('| plateform creation |')
+	print('v--------------------v')
+	fo = open(testDirectory+'plateform.py', 'wb')
 	fo.write(controller_body)
 	fo.close()
-	print("Done.\n")
+	print('Done.\n')
 
 def create_model():
-	print("|----------------|")
-	print("| model creation |")
-	print("v----------------v")
-	fo = open(testDirectory+"model.py", "wb")
+	print('|----------------|')
+	print('| model creation |')
+	print('v----------------v')
+	fo = open(testDirectory+'model.py', 'wb')
 	fo.write(model_body)
 	fo.close()
-	print("Done.\n")
+	print('Done.\n')
 
 def copyMedia(json):
-	print("|-----------------|")
-	print("| media file copy |")
-	print("v-----------------v")
+	print('|-----------------|')
+	print('| media file copy |')
+	print('v-----------------v')
 
 	audio = []
 	audioFolders = []
 	systems = []
-	regex = "^.*\/"
+	regex = '^.*\/'
 	if 'test' in json:
-		systems = json["test"]["systems"]["system"]
+		systems = json['test']['systems']['system']
 	else:
-		systems = json["systems"]["system"]
+		systems = json['systems']['system']
 	for samples in systems:
-		for sample in samples["samples"]:
-			for wav in sample["sample"]:
+		for sample in samples['samples']:
+			for wav in sample['sample']:
 				audio.append(wav)
 	for wav in audio:
 		search = re.search(regex, wav)
@@ -222,27 +219,27 @@ def copyMedia(json):
 	for folder in audioFolders:
 		os.makedirs(mediaDirectory+folder)
 	for file in audio:
-		filedir = ""
+		filedir = ''
 		search = re.search(regex, file)
 		if search :
 			filedir = search.group(0)
 		shutil.copy(file, mediaDirectory+filedir)
-		print(file+"  to  "+mediaDirectory+filedir)
-	print("Done.\n")
+		print(file+'  to  '+mediaDirectory+filedir)
+	print('Done.\n')
 
 def add_login():
-	print("|-----------------|")
-	print("|  add template   |")
-	print("v-----------------v")
-	fo = open(viewsDirectory+"login_form.tpl", "wb")
+	print('|-----------------|')
+	print('|  add template   |')
+	print('v-----------------v')
+	fo = open(viewsDirectory+'login_form.tpl', 'wb')
 	fo.write(login_form)
 	fo.close()
-	print("Done.\n")
+	print('Done.\n')
 
 
 (inputJSON, inputTemplate) = parserOptionsJT()
 dataFromJSON = parseJSON(inputJSON)
-name = dataFromJSON["test"]["configuration"]["name"]
+name = dataFromJSON['test']['configuration']['name']
 (mainDirectory, testDirectory, viewsDirectory, staticDirectory, mediaDirectory) = createArchitecture(name)
 generateConfig(dataFromJSON)
 createDB(dataFromJSON)
