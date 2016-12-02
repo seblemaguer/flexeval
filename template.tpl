@@ -41,7 +41,7 @@
 				<form role="form" action="/test" method="POST">
 					<input type="hidden" name="ref" value="{{index}}">
 					<h3>Question </h3>
-					<div class="alert alert-info" role="alert">{{questions[0]}}</div>
+					<div class="alert alert-info" role="alert">Question 1</div>
 					<div class="col-md-offset-2">
 						<div class="radio">
 							<label>
@@ -58,7 +58,7 @@
 					</div>
 					
 					<h3>Question </h3>
-					<div class="alert alert-info" role="alert">{{questions[1]}}</div>
+					<div class="alert alert-info" role="alert">Question 2</div>
 					<div class="col-md-offset-2">
 						<div class="radio">
 							<label>
@@ -75,7 +75,7 @@
 					</div>
 
 					<h3>Question </h3>
-					<div class="alert alert-info" role="alert">{{questions[2]}}</div>
+					<div class="alert alert-info" role="alert">Test 3</div>
 					<!-- use the slider -->
 					<div class="answer">
 						<label>Avis : </label>
