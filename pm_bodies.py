@@ -10,6 +10,10 @@ import config
 from beaker.middleware import SessionMiddleware
 
 bottle.debug(True)
+
+views_path = os.path.join(os.path.dirname(__file__), 'views/')
+bottle.TEMPLATE_PATH.insert(0, views_path)
+#bottle.TEMPLATE_PATH.insert(0,os.path.dirname(__file__))
 app = bottle.Bottle()
 
 session_opts = {
@@ -83,7 +87,7 @@ def process_test():
 			keys.append(random.randint(0,1))
 		(samples,index) = model.get_test_sample(user)
 		systems = model.get_systems()
-		data={"name":model.get_name(),"author":model.get_author(),"description": model.get_description(),"samples" : samples, "systems": systems, "index": index, "questions":model.get_questions_text()}
+		data={"name":model.get_name(),"author":model.get_author(),"description": model.get_description(),"samples" : samples, "systems": systems, "index": index}
 		return bottle.template('template',data)
 	else :
 		return "<p>You have already done this test</p>"
@@ -99,7 +103,6 @@ def process_test_post():
 	answers=[]
 	i=1
 	while post_get("question"+str(i))!="" :
-	#for i in range(1,int(nb)+1) :
 		answers.append({"index": i, "content": post_get("question"+str(i))})
 		i=i+1
 	post_data = {"author":model.get_author(),"user":user,"answers": answers,"index": post_get("ref")}
@@ -113,7 +116,7 @@ def process_test_post():
 		for i in range(nbq) :
 			keys.append(random.randint(0,1))
 		(samples,index) = model.get_test_sample(user)
-		data={"name":model.get_name(),"description": model.get_description(),"author": model.get_author(),"samples" : samples, "systems": systems, "random_keys": keys, "index": index, "questions":model.get_questions_text()}
+		data={"name":model.get_name(),"description": model.get_description(),"author": model.get_author(),"samples" : samples, "systems": systems, "random_keys": keys, "index": index}
 		return bottle.template('template',data)
 	else :
 		return "<p>Test finished thank you for your cooperation</p>"
@@ -140,6 +143,7 @@ if __name__ == "__main__":
 """
 
 model_body="""
+
 import os
 import sqlite3
 from datetime import date, datetime
@@ -161,10 +165,6 @@ def get_nb_questions() :
 def get_author():
 	#get it from config.py
 	return config.author
-
-def get_questions_text():
-	#get the text of questions as an array
-	return config.questionsTxt
 	
 def get_questions_type():
 	#get the text of questions as an array
@@ -206,14 +206,14 @@ def get_nb_step_user(user) :
 	c.execute('select count(*) from answer where user="'+user+'"')
 	res = c.fetchall()
 	conn.close()
-	return int(res[0][0])
+	#return int(res[0][0])
+	return 0
 
 def get_metadata() :
 	#get it from config.py
 	metadata=dict()
 	for i in dir(config):
 		#i,"  ",getattr(config,i)
-		print str(i)
 		b = re.search(r'__.+__',str(i))
 		if not b:
 			metadata[str(i)]=getattr(config,i)
@@ -246,7 +246,6 @@ def get_test_sample(user) :
 			#keep the sample
 			for j in range(nbSy) :
 				s = sampleList[i+j*nbSa][1]
-				print(os.path.join(dir,'media',s))
 				samples.append(os.path.join('media',s))
 		i=i+1
 	#we have the first unprocessed step
@@ -264,7 +263,6 @@ def get_test_sample(user) :
 			#keep the sample
 			for j in range(nbSy) :
 				s = sampleList[i+j*nbSa][1]
-				print(os.path.join(dir,'media',s))
 				samples.append(os.path.join('media',s))
 		i=i+1
 	conn.close()
@@ -279,10 +277,7 @@ def insert_data(data) :
 	for answer in answers :
 		val = (data["user"],str(now),answer["content"],data["index"],answer["index"])
 		c.execute("insert into answer(user,date,content,syst_index,question_index) values (?,?,?,?,?)",val)
-	#update the number of time processed for the sapmles
-	print("-------------------------------------")
-	print(str(data["index"]))
-	print("-------------------------------------")	
+	#update the number of time processed for the samples
 	c.execute("select nb_processed from sample where syst_index="+str(data["index"]))
 	n = c.fetchall()[0][0]
 	c.execute("update sample set nb_processed="+str(n+1)+" where syst_index="+str(data["index"]))
