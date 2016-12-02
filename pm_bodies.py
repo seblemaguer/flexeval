@@ -220,51 +220,32 @@ def get_metadata() :
 
 def get_test_sample(user) :
 	#load a tuple of sample depending of the user and the number of time processed
-	dir=os.path.dirname(__file__)
-	nbSa = get_nb_sample_by_system()
-	nbSy = get_nb_system()
+	dir = os.path.dirname(__file__)
 	conn = sqlite3.connect(os.path.join(dir,'data.db'))
 	c = conn.cursor()
 	c.execute("select * from sample")
 	sampleList = c.fetchall()
+	# print(sampleList)
 	index=-1
 	i=0
-	nb=0
 	stop = False
 	samples=[]
+	#get right index
 	while not stop and i<len(sampleList)/2 :
 		#check if user has not already processed this sample
 		c.execute('select count(*) from answer where user="'+user+'" and syst_index="'+str(sampleList[i][4])+'"')
 		b = c.fetchall()
-		#print b[0][0]
 		if b[0][0]==0 :
-			index = i+1
 			stop = True
-			nb=sampleList[i][5]
-			samples=[]
-			#keep the sample
-			for j in range(nbSy) :
-				s = sampleList[i+j*nbSa][1]
-				samples.append(os.path.join('media',s))
-		i=i+1
-	#we have the first unprocessed step
-	#now check if there is another test which have been processed less times
-	#we start from where we finished previous loop
-	while i < len(sampleList)/2 :
-		#check if user has not already processed this sample
-		c.execute('select count(*) from answer where user="'+user+'" and syst_index="'+str(sampleList[i][4])+'"')
-		b = c.fetchall()
-		if b[0][0]==0 and sampleList[i][5]<nb:
-			nb = sampleList[i][5]
 			index = i+1
-			stop = True
-			samples=[]
-			#keep the sample
-			for j in range(nbSy) :
-				s = sampleList[i+j*nbSa][1]
-				samples.append(os.path.join('media',s))
+			# print(index)
 		i=i+1
+	#find the samples matching with the index
+	c.execute('select path from sample where syst_index='+str(index))
+	for sample in c.fetchall():
+		samples.append(os.path.join('media',sample[0]))
 	conn.close()
+	print(samples,index)
 	return (samples,index)
 
 
