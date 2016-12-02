@@ -7,3 +7,4 @@ then
 	fi
 fi
 python generator.py -j ./test.json -t ./template.tpl
+cp -rf static/* ./tests/Test\ AB\ pour\ validation\ du\ XML/static/
