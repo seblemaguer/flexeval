@@ -10,7 +10,7 @@
 			"description": "Test AB",
 			"start": "2012-01-31",
 			"end": "2014-12-31",
-			"fixedPosition": "True"
+			"fixedPosition": "False"
 		},
 		"systems": {
 			"system": [

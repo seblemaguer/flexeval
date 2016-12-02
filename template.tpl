@@ -46,13 +46,13 @@
 						<div class="radio">
 							<label>
 								<input type="radio" id="radioA" name="question1" value="{{systems[0]}}"checked>
-								Sample 1
+								Sample 1 {{systems[0]}}
 							</label>
 						</div>
 						<div class="radio">
 							<label>
 								<input type="radio" id="radioB" name="question1" value="{{systems[1]}}">
-								Sample 2
+								Sample 2 {{systems[1]}}
 							</label>
 						</div>
 					</div>
@@ -63,13 +63,13 @@
 						<div class="radio">
 							<label>
 								<input type="radio" id="radioA" name="question2" value="{{systems[0]}}"checked>
-								Sample 1
+								Sample 1 {{systems[0]}}
 							</label>
 						</div>
 						<div class="radio">
 							<label>
 								<input type="radio" id="radioB" name="question2" value="{{systems[1]}}">
-								Sample 2
+								Sample 2 {{systems[1]}}
 							</label>
 						</div>
 					</div>

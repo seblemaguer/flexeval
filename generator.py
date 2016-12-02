@@ -117,7 +117,7 @@ def generateConfig(json):
 	config.write('# === CONFIGURATION VARIABLES ===\n')
 	config.write('# Each configuration variable is necessarily a string\n')
 	for var in configJson:
-		config.write(var+'=\"'+configJson[var]+'\"\n')
+		config.write(var+'=\''+configJson[var]+'\'\n')
 	questions = json['test']['questions']
 	print('Questions JSON:')
 	print(questions)
@@ -127,7 +127,7 @@ def generateConfig(json):
 	for s in samples :
 		if s['-type']=='test' :
 			nbsbs = len(s['sample'])
-	config.write('nbSampleBySystem=\"'+str(nbsbs)+'\"\n')
+	config.write('nbSampleBySystem=\''+str(nbsbs)+'\'\n')
 	questions = json['test']['questions']['question']
 	qtype=[]
 	for i in range(len(questions)):
@@ -175,7 +175,7 @@ def create_plateform():
 	print('| plateform creation |')
 	print('v--------------------v')
 	fo = open(testDirectory+'plateform.py', 'wb')
-	fo.write(controller_body)
+	fo.write(plateform_body)
 	fo.close()
 	print('Done.\n')
 

@@ -1,4 +1,4 @@
-controller_body = """
+plateform_body = """
 import model
 import sys
 import bottle
@@ -22,7 +22,6 @@ session_opts = {
 	'session.data_dir': os.path.join(os.path.dirname(__file__),'data'),
 	'session.auto': True
 }
-
 
 app_middlware = SessionMiddleware(app, session_opts)
 app_session = bottle.request.environ.get('beaker.session')
@@ -52,23 +51,20 @@ def toto():
 def postd():
 	return bottle.request.forms
 
-
 def post_get(name, default=''):
 	return bottle.request.POST.get(name, default).strip()
 
 def testLogin():
-    app_session = bottle.request.environ.get('beaker.session')
-    if 'pseudo' in app_session:
-        return True
-    else:
-        return False
-
+	app_session = bottle.request.environ.get('beaker.session')
+	if 'pseudo' in app_session:
+		return True
+	else:
+		return False
 
 #home page
 @app.route('/')
 def home():
 	bottle.redirect('/test')
-
 
 @app.route('/test')
 def process_test():
@@ -85,8 +81,7 @@ def process_test():
 		keys =[]
 		for i in range(nbq) :
 			keys.append(random.randint(0,1))
-		(samples,index) = model.get_test_sample(user)
-		systems = model.get_systems()
+		(samples, systems, index) = model.get_test_sample(user)
 		data={"name":model.get_name(),"author":model.get_author(),"description": model.get_description(),"samples" : samples, "systems": systems, "index": index}
 		return bottle.template('template',data)
 	else :
@@ -110,17 +105,15 @@ def process_test_post():
 	#check if the test isn't finished yet
 	if model.get_nb_step_user(user) < model.get_nb_step() :
 		#proceed to a new step
-		systems = model.get_systems()
 		nbq = model.get_nb_questions()
 		keys =[]
 		for i in range(nbq) :
 			keys.append(random.randint(0,1))
-		(samples,index) = model.get_test_sample(user)
+		(samples, systems, index) = model.get_test_sample(user)
 		data={"name":model.get_name(),"description": model.get_description(),"author": model.get_author(),"samples" : samples, "systems": systems, "random_keys": keys, "index": index}
 		return bottle.template('template',data)
 	else :
 		return "<p>Test finished thank you for your cooperation</p>"
-
 
 #access to local static files
 @app.route('/static/:type/:filename#.*#')
@@ -133,7 +126,6 @@ def send_static(type, filename):
 def send_static(media, syst, filename):
 	return bottle.static_file(filename, root=os.path.join(os.path.dirname(__file__),"media/%s/") % media+"/"+syst)
 
-
 def main():
 	application = app
 	bottle.run(app_middlware, host='localhost', port=8080)
@@ -141,6 +133,7 @@ def main():
 if __name__ == "__main__":
 	main()
 """
+
 
 model_body="""
 import os
@@ -177,16 +170,16 @@ def get_name():
 	#get it from config.py
 	return config.name
 
-def get_systems() :
-	conn = sqlite3.connect(os.path.join(os.path.dirname(__file__),'data.db'))
-	c = conn.cursor()
-	c.execute("select id from system")
-	res = c.fetchall()
-	conn.close()
-	res2=[]
-	for r in res :
-		res2.append(r[0])
-	return res2
+# def get_systems() :
+# 	conn = sqlite3.connect(os.path.join(os.path.dirname(__file__),'data.db'))
+# 	c = conn.cursor()
+# 	c.execute("select id from system")
+# 	res = c.fetchall()
+# 	conn.close()
+# 	systems=[]
+# 	for r in res :
+# 		systems.append(r[0])
+# 	return systems
 
 def get_nb_sample_by_system() :
 	#return the number of samples of each system
@@ -230,6 +223,7 @@ def get_test_sample(user) :
 	i=0
 	stop = False
 	samples=[]
+	systems=[]
 	#get right index
 	while not stop and i<len(sampleList)/2 :
 		#check if user has not already processed this sample
@@ -241,77 +235,79 @@ def get_test_sample(user) :
 			# print(index)
 		i=i+1
 	#find the samples matching with the index
-	c.execute('select path from sample where syst_index='+str(index))
-	for sample in c.fetchall():
-		samples.append(os.path.join('media',sample[0]))
+	c.execute('select path, id_system from sample where syst_index='+str(index))
+	b = c.fetchall()
+	for res in b:
+		samples.append(os.path.join('media',res[0]))
+		systems.append(res[1])
 	conn.close()
-	print(samples,index)
-	return (samples,index)
-
+	print(samples, systems, index)
+	if config.fixedPosition=='False': #'False' to false ?
+		r = random.random()
+		random.shuffle(samples, lambda: r)
+		random.shuffle(systems, lambda: r)
+		print(samples, systems, index)
+	return (samples, systems, index)
 
 def insert_data(data) :
 	now = datetime.now()
 	conn = sqlite3.connect(os.path.join(os.path.dirname(__file__),'data.db'))
 	c = conn.cursor()
-	answers = data["answers"]
+	answers = data['answers']
 	for answer in answers :
-		val = (data["user"],str(now),answer["content"],data["index"],answer["index"])
-		c.execute("insert into answer(user,date,content,syst_index,question_index) values (?,?,?,?,?)",val)
+		val = (data['user'],str(now),answer['content'],data['index'],answer['index'])
+		c.execute('insert into answer(user,date,content,syst_index,question_index) values (?,?,?,?,?)',val)
 	#update the number of time processed for the samples
-	c.execute("select nb_processed from sample where syst_index="+str(data["index"]))
+	c.execute('select nb_processed from sample where syst_index='+str(data['index']))
 	n = c.fetchall()[0][0]
-	c.execute("update sample set nb_processed="+str(n+1)+" where syst_index="+str(data["index"]))
+	c.execute('update sample set nb_processed='+str(n+1)+' where syst_index='+str(data['index']))
 	conn.commit()
 	conn.close()
 """
+
 
 login_form="""
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="">
+	<meta name="author" content="">
 
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <meta name="author" content="">
+	<title>Subjective tests plateform - login</title>
 
-    <title>Subjective tests plateform - login</title>
-
-    <!-- Bootstrap Core CSS -->
-    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
-
+	<!-- Bootstrap Core JavaScript -->
+	<script src="/static/js/bootstrap.min.js"></script>
+	<!-- Bootstrap Core CSS -->
+	<link href="/static/css/bootstrap.min.css" rel="stylesheet">
 </head>
 
 <body>
-
-    <div class="container">
-        <div class="row">
-            <div class="col-md-4 col-md-offset-4">
-                <div class="login-panel panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Please Log In</h3>
-                    </div>
-                    <div class="panel-body">
-                        <form role="form" action="/login" method="POST">
-                            <fieldset>
-                                <div class="form-group">
-                                    <input class="form-control" placeholder="E-mail" name="email" autofocus>
-                                </div>
-                                <!-- Change this to a button or input when using this as a form -->
-                                <input type="submit" class="btn btn-lg btn-success btn-block" value="Login">
-                            </fieldset>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Bootstrap Core JavaScript -->
-    <script src="/static/js/bootstrap.min.js"></script>
-
+	<div class="container">
+		<div class="row">
+			<div class="col-md-4 col-md-offset-4">
+				<div class="login-panel panel panel-default">
+					<div class="panel-heading">
+						<h3 class="panel-title">Please Log In</h3>
+					</div>
+					<div class="panel-body">
+						<form role="form" action="/login" method="POST">
+							<fieldset>
+								<div class="form-group">
+									<input class="form-control" placeholder="E-mail" name="email" autofocus>
+								</div>
+								<!-- Change this to a button or input when using this as a form -->
+								<input type="submit" class="btn btn-lg btn-success btn-block" value="Login">
+							</fieldset>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 </body>
 
 </html>
