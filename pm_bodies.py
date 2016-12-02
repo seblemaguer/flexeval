@@ -125,8 +125,10 @@ def send_static(type, filename):
 	return bottle.static_file(filename, root=os.path.join(os.path.dirname(__file__),"static/%s/") % type)
 
 #access to local static sound files
-@app.route('/:media/:syst/:filename#.*#')
+@app.route('/media/:media/:syst/:filename#.*#')
+@app.route('/media/:media/./:syst/:filename#.*#')
 def send_static(media, syst, filename):
+	print os.path.join(os.path.dirname(__file__),"media/%s/") % media
 	return bottle.static_file(filename, root=os.path.join(os.path.dirname(__file__),"media/%s/") % media+"/"+syst)
 
 
