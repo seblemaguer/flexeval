@@ -145,8 +145,8 @@ def generateTemplate():
 
 	tplPath = ""
 	regexName = "[^\/]+$"
-	regexLink = "<(l|L)(i|I)(n|N)(k|K).*>"
-	regexScript = "<(s|S)(c|C)(r|R)(i|I)(p|P)(t|T).*>"
+	regexLink = "<(l|L)(i|I)(n|N)(k|K).+href=.+>"
+	regexScript = "<(s|S)(c|C)(r|R)(i|I)(p|P)(t|T).+src=.+>"
 	linkArray = []
 	scriptArray = []
 
@@ -223,7 +223,7 @@ def add_login():
 	print("|-----------------|")
 	print("|  add template   |")
 	print("v-----------------v")
-	fo = open(testDirectory+"views/login_form.tpl", "wb")
+	fo = open(viewsDirectory+"login_form.tpl", "wb")
 	fo.write(login_form)
 	fo.close()
 	print("Done.\n")
