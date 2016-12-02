@@ -15,7 +15,7 @@ app = bottle.Bottle()
 session_opts = {
 	'session.type': 'file',
 	'session.cookie_expires': False,
-	'session.data_dir': os.path.join(os.path.dirname(__file__),'/data'),
+	'session.data_dir': os.path.join(os.path.dirname(__file__),'data'),
 	'session.auto': True
 }
 
