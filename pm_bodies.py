@@ -122,13 +122,12 @@ def process_test_post():
 #access to local static files
 @app.route('/static/:type/:filename#.*#')
 def send_static(type, filename):
-	return bottle.static_file(filename, root="./static/%s/" % type)
+	return bottle.static_file(filename, root=os.path.join(os.path.dirname(__file__),"static/%s/") % type)
 
 #access to local static sound files
 @app.route('/:media/:syst/:filename#.*#')
 def send_static(media, syst, filename):
-	path = media+"/"+syst
-	return bottle.static_file(filename, root="./media/%s/" % path)
+	return bottle.static_file(filename, root=os.path.join(os.path.dirname(__file__),"media/%s/") % media+"/"+syst)
 
 
 def main():
@@ -140,7 +139,7 @@ if __name__ == "__main__":
 """
 
 model_body="""
-
+import os
 import sqlite3
 from datetime import date, datetime
 import random
@@ -148,7 +147,7 @@ import config
 
 def get_nb_system() :
 	#return the number of sample for a test!
-	conn = sqlite3.connect('data.db')
+	conn = sqlite3.connect(os.path.join(os.path.dirname(__file__),'data.db'))
 	c = conn.cursor()
 	c.execute("select count(*) from system")
 	res = c.fetchall()
@@ -171,7 +170,7 @@ def get_name():
 	return config.name
 
 def get_systems() :
-	conn = sqlite3.connect('data.db')
+	conn = sqlite3.connect(os.path.join(os.path.dirname(__file__),'data.db'))
 	c = conn.cursor()
 	c.execute("select id from system")
 	res = c.fetchall()
@@ -193,7 +192,7 @@ def get_nb_step() :
 
 def get_nb_step_user(user) :
 	#return the number of step made by a user on the test
-	conn = sqlite3.connect('data.db')
+	conn = sqlite3.connect(os.path.join(os.path.dirname(__file__),'data.db'))
 	c = conn.cursor()
 	c.execute('select count(*) from answer where user="'+user+'"')
 	res = c.fetchall()
@@ -206,9 +205,10 @@ def get_metadata() :
 
 def get_test_sample(user) :
 	#load a tuple of sample depending of the user and the number of time processed
+	dir=os.path.dirname(__file__)
 	nbSa = get_nb_sample_by_system()
 	nbSy = get_nb_system()
-	conn = sqlite3.connect('data.db')
+	conn = sqlite3.connect(os.path.join(dir,'data.db'))
 	c = conn.cursor()
 	c.execute("select * from sample")
 	sampleList = c.fetchall()
@@ -230,7 +230,8 @@ def get_test_sample(user) :
 			#keep the sample
 			for j in range(nbSy) :
 				s = sampleList[i+j*nbSa][1]
-				samples.append(s)
+				print(os.path.join(dir,'media',s))
+				samples.append(os.path.join('media',s))
 		i=i+1
 	#we have the first unprocessed step
 	#now check if there is another test which have been processed less times
@@ -247,7 +248,8 @@ def get_test_sample(user) :
 			#keep the sample
 			for j in range(nbSy) :
 				s = sampleList[i+j*nbSa][1]
-				samples.append(s)
+				print(os.path.join(dir,'media',s))
+				samples.append(os.path.join('media',s))
 		i=i+1
 	conn.close()
 	return (samples,index)
@@ -255,7 +257,7 @@ def get_test_sample(user) :
 
 def insert_data(data) :
 	now = datetime.now()
-	conn = sqlite3.connect('data.db')
+	conn = sqlite3.connect(os.path.join(os.path.dirname(__file__),'data.db'))
 	c = conn.cursor()
 	answers = data["answers"]
 	for answer in answers :
