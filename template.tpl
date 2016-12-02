@@ -10,6 +10,9 @@
 	<!-- Bootstrap Core CSS -->
 	<link href="/static/css/bootstrap.min.css" rel="stylesheet">
 	<link href="/static/css/tests.css" rel="stylesheet">
+	<link href="/static/css/jquery-ui.min.css" rel="stylesheet">
+	<script src="/static/js/jquery.js"></script>
+	<script src="/static/js/jquery-ui.min.js"></script>
 
 </head>
 
@@ -38,7 +41,7 @@
 				<form role="form" action="/test" method="POST">
 					<input type="hidden" name="ref" value="{{index}}">
 					<h3>Question </h3>
-					<div class="alert alert-info" role="alert">...</div>
+					<div class="alert alert-info" role="alert">{{questions[0]}}</div>
 					<div class="col-md-offset-2">
 						<div class="radio">
 							<label>
@@ -55,7 +58,7 @@
 					</div>
 					
 					<h3>Question </h3>
-					<div class="alert alert-info" role="alert">...</div>
+					<div class="alert alert-info" role="alert">{{questions[1]}}</div>
 					<div class="col-md-offset-2">
 						<div class="radio">
 							<label>
@@ -70,6 +73,18 @@
 							</label>
 						</div>
 					</div>
+
+					<h3>Question </h3>
+					<div class="alert alert-info" role="alert">{{questions[2]}}</div>
+					<!-- use the slider -->
+					<div class="answer">
+						<label>Avis : </label>
+						<label id="rate">3</label>
+						<label> étoiles</label>
+						<div id="slider"></div>
+						<label>Mauvais</label>
+						<label style="float: right;">Excellent</label>
+					</div>
 					<div class="alert alert-success" role="alert">If you have any pertinent thing to say here please write it below!</div>	
 					<div class="form-group">
 						<textarea id="comments" rows="3" class="form-control" placeholder="Comments" style="resize:vertical"></textarea>
@@ -81,6 +96,22 @@
 			</div>
 		</div>
 	</div>
+
+	<script>
+		$( function() {
+			$( "#slider" ).slider({
+				range: "min",
+				value:3,
+				min: 0,
+				max: 6,
+				step: 1,
+				slide: function( event, ui ) {
+					$( "#rate" ).html(ui.value );
+				}
+			});
+		} );
+	</script>
+
 
 <!-- Bootstrap Core JavaScript -->
 <!-- <script src="/js/bootstrap.min.js"></script> -->

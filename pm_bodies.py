@@ -83,7 +83,7 @@ def process_test():
 			keys.append(random.randint(0,1))
 		(samples,index) = model.get_test_sample(user)
 		systems = model.get_systems()
-		data={"name":model.get_name(),"author":model.get_author(),"description": model.get_description(),"samples" : samples, "systems": systems, "index": index}
+		data={"name":model.get_name(),"author":model.get_author(),"description": model.get_description(),"samples" : samples, "systems": systems, "index": index, "questions":model.get_questions_text()}
 		return bottle.template('template',data)
 	else :
 		return "<p>You have already done this test</p>"
@@ -113,7 +113,7 @@ def process_test_post():
 		for i in range(nbq) :
 			keys.append(random.randint(0,1))
 		(samples,index) = model.get_test_sample(user)
-		data={"name":model.get_name(),"description": model.get_description(),"author": model.get_author(),"samples" : samples, "systems": systems, "random_keys": keys, "index": index}
+		data={"name":model.get_name(),"description": model.get_description(),"author": model.get_author(),"samples" : samples, "systems": systems, "random_keys": keys, "index": index, "questions":model.get_questions_text()}
 		return bottle.template('template',data)
 	else :
 		return "<p>Test finished thank you for your cooperation</p>"
@@ -161,6 +161,14 @@ def get_nb_questions() :
 def get_author():
 	#get it from config.py
 	return config.author
+
+def get_questions_text():
+	#get the text of questions as an array
+	return config.questionsTxt
+	
+def get_questions_type():
+	#get the text of questions as an array
+	return config.questionsType
 
 def get_description():
 	#get it from config.py
