@@ -1,6 +1,3 @@
-/data/
-/data/*
-/databases/*
 *.pyc
 /sound/1/*
 /tests/*
