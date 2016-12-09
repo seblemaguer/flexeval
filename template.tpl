@@ -23,13 +23,14 @@
 			<div class="col-md-6 col-md-offset-3">
 				<h1>{{ name}}</h1><span><h3>Made by {{author}}</h3>
 				<p class="lead">{{description}}</p>
-				% for i in range(len(samples)):
-				<p>Sample {{i+1}}</p>
+				<p>Sample {{1}}</p>
 				<audio id="player" controls>
-					<source src="{{samples[i]}}">
+					<source src="{{samples[0]}}">
 				</audio>
-				% end
-				</div>
+				<p>Sample {{2}}</p>
+				<audio id="player" controls>
+					<source src="{{samples[1]}}">
+				</audio>
 			</div>
 		</div>
 	</div>
