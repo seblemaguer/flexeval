@@ -215,7 +215,7 @@ def get_test_sample(user) :
 	dir = os.path.dirname(__file__)
 	conn = sqlite3.connect(os.path.join(dir,'data.db'))
 	c = conn.cursor()
-	c.execute("select syst_index, sum(nb_processed) from sample group by syst_index")
+	c.execute("select syst_index, sum(nb_processed) from sample where type='test' group by syst_index")
 	res= c.fetchall()
 	index= res[0][0]
 	mini = res[0][1]
