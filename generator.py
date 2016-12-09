@@ -10,7 +10,7 @@ from optparse import OptionParser
 execfile(os.path.join(os.path.dirname(__file__),'pm_bodies.py'))
 
 
-def parserOptionsJT():
+def parser_options_jt():
 	parser = OptionParser()
 	parser.add_option('-j', '--json', dest='inputJSON', help='input JSON file', metavar='FILE')
 	parser.add_option('-t', '--tpl', dest='inputTemplate', help='input template file', metavar='FILE')
@@ -27,12 +27,12 @@ def parserOptionsJT():
 		inputTemplate = options.inputTemplate
 	return inputJSON, inputTemplate
 
-def createArchitecture(testName):
+def create_architecture(testName):
 	print('|-----------------------|')
 	print('| architecture creation |')
 	print('v-----------------------v')
 
-	def createDir(path, name):
+	def create_dir(path, name):
 		dir = str(path)+str(name)+'/'
 		if os.path.exists(dir):
 			sys.exit('Folder already exist : '+dir)
@@ -44,15 +44,15 @@ def createArchitecture(testName):
 	if not os.path.exists(mainDirectory):
 		os.makedirs(mainDirectory)
 
-	testDirectory = createDir(mainDirectory, testName)
-	viewsDirectory = createDir(testDirectory, 'views')
-	staticDirectory = createDir(testDirectory, 'static')
-	mediaDirectory = createDir(testDirectory, 'media')
+	testDirectory = create_dir(mainDirectory, testName)
+	viewsDirectory = create_dir(testDirectory, 'views')
+	staticDirectory = create_dir(testDirectory, 'static')
+	mediaDirectory = create_dir(testDirectory, 'media')
 
 	print('Done.\n')
 	return mainDirectory, testDirectory, viewsDirectory, staticDirectory, mediaDirectory
 
-def parseJSON(JSONfile):
+def parse_json(JSONfile):
 	print('|--------------|')
 	print('| parsing JSON |')
 	print('v--------------v')
@@ -64,7 +64,7 @@ def parseJSON(JSONfile):
 	print('Done.\n')
 	return data
 
-def createDB(data):
+def create_db(data):
 	print('|---------------|')
 	print('| DB generation |')
 	print('v---------------v')
@@ -96,7 +96,7 @@ def createDB(data):
 		con.close()
 	print('Done.\n')
 
-def generateConfig(json):
+def generate_config(json):
 	print('|-------------------|')
 	print('| config generation |')
 	print('v-------------------v')
@@ -135,7 +135,7 @@ def generateConfig(json):
 	config.write('questionsType=['+','.join(qtype)+']\n')
 	print('Done.\n')
 
-def generateTemplate():
+def generate_template():
 	print('|---------------------|')
 	print('| template generation |')
 	print('v---------------------v')
@@ -188,7 +188,7 @@ def create_model():
 	fo.close()
 	print('Done.\n')
 
-def copyMedia(json):
+def copy_media(json):
 	print('|-----------------|')
 	print('| media file copy |')
 	print('v-----------------v')
@@ -255,27 +255,38 @@ def verif_template():
 
 
 def add_login():
-	print('|-----------------|')
-	print('|  add template   |')
-	print('v-----------------v')
+	print('|----------------------|')
+	print('|  add login template  |')
+	print('v----------------------v')
 	fo = open(viewsDirectory+'login_form.tpl', 'wb')
 	fo.write(login_form)
 	fo.close()
 	print('Done.\n')
 
 
+def add_extra_pages():
+	print('|-----------------------|')
+	print('|  add extra templates  |')
+	print('v-----------------------v')
+	fo = open(viewsDirectory+'index.tpl', 'wb')
+	fo.write(index_form)
+	fo.close()
+	print('Done.\n')
 
-(inputJSON, inputTemplate) = parserOptionsJT()
-dataFromJSON = parseJSON(inputJSON)
+
+
+(inputJSON, inputTemplate) = parser_options_jt()
+dataFromJSON = parse_json(inputJSON)
 name = dataFromJSON['test']['configuration']['name']
-(mainDirectory, testDirectory, viewsDirectory, staticDirectory, mediaDirectory) = createArchitecture(name)
-generateConfig(dataFromJSON)
-createDB(dataFromJSON)
-generateTemplate()
+(mainDirectory, testDirectory, viewsDirectory, staticDirectory, mediaDirectory) = create_architecture(name)
+generate_config(dataFromJSON)
+create_db(dataFromJSON)
+generate_template()
 create_plateform()
 create_model()
 add_login()
-copyMedia(dataFromJSON)
+add_extra_pages()
+copy_media(dataFromJSON)
 verif_template()
 
 

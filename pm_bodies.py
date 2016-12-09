@@ -26,6 +26,11 @@ session_opts = {
 app_middlware = SessionMiddleware(app, session_opts)
 app_session = bottle.request.environ.get('beaker.session')
 
+@app.route('/')
+def badroute():
+	data={"name":model.get_name(), "author":model.get_author(), "description":model.get_description(), "welcomeText":model.get_welcome_text()}
+	return bottle.template('index', data)
+
 @app.route('/login')
 @app.post('/login')
 def login():
@@ -33,7 +38,7 @@ def login():
 	app_session = bottle.request.environ.get('beaker.session')
 	app_session['logged_in'] = True
 	app_session['pseudo'] = mail
-	bottle.redirect('/')
+	bottle.redirect('/test')
 
 @app.route('/logout')
 @app.post('/logout')
@@ -77,8 +82,8 @@ def process_test():
 		for i in range(nbq) :
 			keys.append(random.randint(0,1))
 		(samples, systems, index) = model.get_test_sample(user)
-		data={"name":model.get_name(),"author":model.get_author(),"description": model.get_description(),"samples" : samples, "systems": systems, "index": index}
-		return bottle.template('template',data)
+		data={"name":model.get_name(), "author":model.get_author(), "description":model.get_description(), "samples":samples, "systems":systems, "index":index}
+		return bottle.template('template', data)
 	else :
 		return "<p>You have already done this test</p>"
 
@@ -120,10 +125,6 @@ def send_static(type, filename):
 @app.route('/media/:media/./:syst/:filename#.*#')
 def send_static(media, syst, filename):
 	return bottle.static_file(filename, root=os.path.join(os.path.dirname(__file__),"media/%s/") % media+"/"+syst)
-
-@app.route('/')
-def badroute():
-	bottle.redirect('/test')
 
 @app.route('/:badroute')
 def badroute(badroute):
@@ -168,6 +169,10 @@ def get_questions_type():
 def get_description():
 	#get it from config.py
 	return config.description
+
+def get_welcome_text():
+	#get it from config.py
+	return config.welcomeText
 
 def get_name():
 	#get it from config.py
@@ -297,6 +302,49 @@ login_form="""
 		</div>
 	</div>
 </body>
+
+</html>
+"""
+
+
+index_form="""
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+	<meta charset="utf-8">
+
+	<title>Subjective tests plateform - {{name}}</title>
+
+	<!-- Bootstrap Core CSS -->
+	<link href="/static/css/bootstrap.min.css" rel="stylesheet">
+	<link href="/static/css/tests.css" rel="stylesheet">
+	<link href="/static/css/jquery-ui.min.css" rel="stylesheet">
+	<script src="/static/js/jquery.js"></script>
+	<script src="/static/js/jquery-ui.min.js"></script>
+
+</head>
+
+<body>
+
+	<div class="jumbotron">
+		<img src="/static/img/logo.jpg" class="img-responsive pull-left" alt="logo">
+		<div class="container">
+			<div class="col-md-6 col-md-offset-3">
+				<h1>{{name}}</h1><span>
+				<h3>Made by {{author}}</h3>
+				<p class="lead">{{description}}</p>
+			</div>
+		</div>
+	</div>
+
+	<div class="container">
+		<p>{{welcomeText}}</p>
+		<p>Veuillez cliquer <a href="/test">ICI</a> afin de commencer le test.</p>
+	</div>
+
+	</body>
 
 </html>
 """
