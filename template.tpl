@@ -45,7 +45,7 @@
 					<div class="col-md-offset-2">
 						<div class="radio">
 							<label>
-								<input type="radio" id="radioA" name="question1" value="{{systems[0]}}"checked>
+								<input type="radio" id="radioA" name="question1" value="{{systems[0]}}">
 								Sample 1
 							</label>
 						</div>
@@ -62,7 +62,7 @@
 					<div class="col-md-offset-2">
 						<div class="radio">
 							<label>
-								<input type="radio" id="radioA" name="question2" value="{{systems[0]}}"checked>
+								<input type="radio" id="radioA" name="question2" value="{{systems[0]}}">
 								Sample 1
 							</label>
 						</div>

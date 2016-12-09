@@ -247,16 +247,12 @@ def verif_template():
 			if b :
 				print m + " \t:: OK - but be on your guards please"
 			else :
-				error_tag(m)
+				print m + " \t:: WARN : maybe you have an error in your template, please check if your application works fine !"
 		else :
 			print m + " \t:: OK"
 		checked.append(m)
 	print('Done.\n')
 
-def error_tag(tag):
-	print tag + " \t:: WARN : maybe you have an error in your template, please check if your application works fine !"
-def unknown_tag(tag):
-	print tag + " \t:: WARN : Tag unknown..."
 
 def add_login():
 	print('|-----------------|')
@@ -266,6 +262,7 @@ def add_login():
 	fo.write(login_form)
 	fo.close()
 	print('Done.\n')
+
 
 
 (inputJSON, inputTemplate) = parserOptionsJT()
