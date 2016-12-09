@@ -234,7 +234,7 @@ def get_test_sample(user) :
 	i=0
 	while i<nbToKeep :
 		systems.append(systs[i][1])
-		samples.append(systs[i][2])
+		samples.append('media/'+systs[i][2])
 		i=i+1
 	conn.close()
 	return (samples, systems, index)

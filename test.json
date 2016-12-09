@@ -5,7 +5,6 @@
 			"author": "Damien",
 			"nbInstances": "6",
 			"nbSteps": "10",
-			"nbConsistencySteps": "2",
 			"nbIntroductionSteps": "1",
 			"nbSystemDisplayed" : "1",
 			"description": "Test AB",
@@ -68,13 +67,6 @@
 								"./wav/jnf/jnf_0091_ref1.wav",
 								"./wav/jnf/jnf_0130_ref1.wav",
 								"./wav/jnf/jnf_0179_ref1.wav"
-							]
-						},
-						{
-							"-type": "consistency",
-							"sample": [
-								"./wav/jnf/jnf_0492_ref1.wav",
-								"./wav/jnf/jnf_0507_ref1.wav"
 							]
 						}
 					]
