@@ -46,30 +46,30 @@
 						<div class="radio">
 							<label>
 								<input type="radio" id="radioA" name="question1" value="{{systems[0]}}"checked>
-								Sample 1 {{systems[0]}}
+								Sample 1
 							</label>
 						</div>
 						<div class="radio">
 							<label>
 								<input type="radio" id="radioB" name="question1" value="{{systems[1]}}">
-								Sample 2 {{systems[1]}}
+								Sample 2
 							</label>
 						</div>
 					</div>
 					
 					<h3>Question </h3>
-					<div class="alert alert-info" role="alert">Meuilleure qualité générale</div>
+					<div class="alert alert-info" role="alert">Meilleure qualité générale</div>
 					<div class="col-md-offset-2">
 						<div class="radio">
 							<label>
 								<input type="radio" id="radioA" name="question2" value="{{systems[0]}}"checked>
-								Sample 1 {{systems[0]}}
+								Sample 1
 							</label>
 						</div>
 						<div class="radio">
 							<label>
 								<input type="radio" id="radioB" name="question2" value="{{systems[1]}}">
-								Sample 2 {{systems[1]}}
+								Sample 2
 							</label>
 						</div>
 					</div>
@@ -98,10 +98,6 @@
 						<label style="float: right;">Excellent</label>
 					</div>
 					<input type="hidden" id="question4" name="question4" value="3">
-					<div class="alert alert-success" role="alert">If you have any pertinent thing to say here please write it below!</div>	
-					<div class="form-group">
-						<textarea id="comments" rows="3" class="form-control" placeholder="Comments" style="resize:vertical"></textarea>
-					</div>
 					<input type="submit" class="btn btn-lg btn-success btn-block pull-right" value="Next">
 				</form>
 			</div>

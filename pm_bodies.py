@@ -61,11 +61,6 @@ def testLogin():
 	else:
 		return False
 
-#home page
-@app.route('/')
-def home():
-	bottle.redirect('/test')
-
 @app.route('/test')
 def process_test():
 	app_session = bottle.request.environ.get('beaker.session')
@@ -126,6 +121,14 @@ def send_static(type, filename):
 def send_static(media, syst, filename):
 	return bottle.static_file(filename, root=os.path.join(os.path.dirname(__file__),"media/%s/") % media+"/"+syst)
 
+@app.route('/')
+def badroute():
+	bottle.redirect('/test')
+
+@app.route('/:badroute')
+def badroute(badroute):
+	bottle.redirect('/test')
+
 def main():
 	application = app
 	bottle.run(app_middlware, host='localhost', port=8080)
@@ -170,17 +173,6 @@ def get_name():
 	#get it from config.py
 	return config.name
 
-# def get_systems() :
-# 	conn = sqlite3.connect(os.path.join(os.path.dirname(__file__),'data.db'))
-# 	c = conn.cursor()
-# 	c.execute("select id from system")
-# 	res = c.fetchall()
-# 	conn.close()
-# 	systems=[]
-# 	for r in res :
-# 		systems.append(r[0])
-# 	return systems
-
 def get_nb_sample_by_system() :
 	#return the number of samples of each system
 	#get it from config.py
@@ -218,7 +210,6 @@ def get_test_sample(user) :
 	c = conn.cursor()
 	c.execute("select * from sample")
 	sampleList = c.fetchall()
-	# print(sampleList)
 	index=-1
 	i=0
 	stop = False
@@ -232,7 +223,6 @@ def get_test_sample(user) :
 		if b[0][0]==0 :
 			stop = True
 			index = i+1
-			# print(index)
 		i=i+1
 	#find the samples matching with the index
 	c.execute('select path, id_system from sample where syst_index='+str(index))
@@ -241,12 +231,10 @@ def get_test_sample(user) :
 		samples.append(os.path.join('media',res[0]))
 		systems.append(res[1])
 	conn.close()
-	print(samples, systems, index)
 	if config.fixedPosition=='False': #'False' to false ?
 		r = random.random()
 		random.shuffle(samples, lambda: r)
 		random.shuffle(systems, lambda: r)
-		print(samples, systems, index)
 	return (samples, systems, index)
 
 def insert_data(data) :

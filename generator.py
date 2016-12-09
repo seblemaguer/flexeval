@@ -232,8 +232,11 @@ def verif_template():
 	textfile = open(inputTemplate, 'r')
 	filetext = textfile.read()
 	textfile.close()
+	checked=[]
 	matches = re.findall(regexp, filetext)
-	for m in matches : 
+	for m in matches :
+		if m in checked :
+			continue
 		if not m in authorized_tags :
 			b = False
 			for t in warning_tags:
@@ -247,6 +250,7 @@ def verif_template():
 				error_tag(m)
 		else :
 			print m + " \t:: OK"
+		checked.append(m)
 	print('Done.\n')
 
 def error_tag(tag):
