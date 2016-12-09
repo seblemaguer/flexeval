@@ -18,33 +18,15 @@
 
 <body>
 
-	<nav class="navbar navbar-default" style="margin-bottom:0">
-		<div class="container-fluid">
-			<div class="navbar-header">
-				<img src="/static/img/log.png" class="mg-responsive pull-left" alt="logo">
-				<h1>{{name}}</h1>
-				<h3>Made by {{author}}</h3>
-			</div>
-			<div class="navbar-collapse collapse">
-				<ul class="nav navbar-nav navbar-right">
-					<li><a href="/logout">Déconnexion</a></li>
-				</ul>
-			</div>
-		</div>
-	</nav>
-
-
 	<div class="jumbotron">
+		<img src="/static/img/logo.jpg" class="mg-responsive pull-left" alt="logo">
 		<div class="container">
 			<div class="col-md-6 col-md-offset-3">
+				<h1>{{ name}}</h1><span><h3>Made by {{author}}</h3>
 				<p class="lead">{{description}}</p>
 				<p>Sample 1</p>
 				<audio id="player" controls>
 					<source src="{{samples[0]}}">
-				</audio>
-				<p>Sample 2</p>
-				<audio id="player" controls>
-					<source src="{{samples[1]}}">
 				</audio>
 			</div>
 		</div>
@@ -65,30 +47,8 @@
 								Sample 1
 							</label>
 						</div>
-						<div class="radio">
-							<label>
-								<input type="radio" id="radioB" name="question1" value="{{systems[1]}}">
-								Sample 2
-							</label>
-						</div>
 					</div>
 					
-					<h3>Question </h3>
-					<div class="alert alert-info" role="alert">Meilleure qualité générale</div>
-					<div class="col-md-offset-2">
-						<div class="radio">
-							<label>
-								<input type="radio" id="radioA" name="question2" value="{{systems[0]}}">
-								Sample 1
-							</label>
-						</div>
-						<div class="radio">
-							<label>
-								<input type="radio" id="radioB" name="question2" value="{{systems[1]}}">
-								Sample 2
-							</label>
-						</div>
-					</div>
 
 					<h3>Question </h3>
 					<div class="alert alert-info" role="alert">Veuillez évaluer le sample 1</div>
