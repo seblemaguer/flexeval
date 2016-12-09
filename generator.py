@@ -247,6 +247,7 @@ def verif_template():
 				error_tag(m)
 		else :
 			print m + " \t:: OK"
+	print('Done.\n')
 
 def error_tag(tag):
 	print tag + " \t:: WARN : maybe you have an error in your template, please check if your application works fine !"
