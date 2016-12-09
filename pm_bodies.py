@@ -44,6 +44,7 @@ def login():
 @app.post('/logout')
 def logout():
 	bottle.request.environ.get('beaker.session').delete()
+	bottle.redirect('/')
 
 @app.route('/login')
 def toto():

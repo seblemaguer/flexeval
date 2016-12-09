@@ -18,11 +18,25 @@
 
 <body>
 
+	<nav class="navbar navbar-default" style="margin-bottom:0">
+		<div class="container-fluid">
+			<div class="navbar-header">
+				<img src="/static/img/log.png" class="mg-responsive pull-left" alt="logo">
+				<h1>{{name}}</h1>
+				<h3>Made by {{author}}</h3>
+			</div>
+			<div class="navbar-collapse collapse">
+				<ul class="nav navbar-nav navbar-right">
+					<li><a href="/logout">Déconnexion</a></li>
+				</ul>
+			</div>
+		</div>
+	</nav>
+
+
 	<div class="jumbotron">
-		<img src="/static/img/logo.jpg" class="mg-responsive pull-left" alt="logo">
 		<div class="container">
 			<div class="col-md-6 col-md-offset-3">
-				<h1>{{ name}}</h1><span><h3>Made by {{author}}</h3>
 				<p class="lead">{{description}}</p>
 				<p>Sample 1</p>
 				<audio id="player" controls>
