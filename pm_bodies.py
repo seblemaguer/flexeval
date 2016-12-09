@@ -140,6 +140,7 @@ if __name__ == "__main__":
 
 
 model_body="""
+
 import os
 import sqlite3
 from datetime import date, datetime
@@ -209,37 +210,32 @@ def get_metadata() :
 	return metadata
 
 def get_test_sample(user) :
-	#load a tuple of sample depending of the user and the number of time processed
+	nbToKeep = int(config.nbSystemDisplayed)
 	dir = os.path.dirname(__file__)
 	conn = sqlite3.connect(os.path.join(dir,'data.db'))
 	c = conn.cursor()
-	c.execute("select * from sample")
-	sampleList = c.fetchall()
-	index=-1
-	i=0
-	stop = False
+	c.execute("select syst_index, sum(nb_processed) from sample group by syst_index")
+	res= c.fetchall()
+	index= res[0][0]
+	mini = res[0][1]
+	for r in res :
+		if r[1]<mini :
+			#check if user have already done it
+			c.execute("select count(*) from answer where user=\""+user+"\" and syst_index="+str(r[0]))
+			nb = c.fetchall()
+			if nb[0][0] ==0:
+				index = r[0]
+				mini = r[1]
 	samples=[]
 	systems=[]
-	#get right index
-	while not stop and i<len(sampleList)/2 :
-		#check if user has not already processed this sample
-		c.execute('select count(*) from answer where user="'+user+'" and syst_index="'+str(sampleList[i][4])+'"')
-		b = c.fetchall()
-		if b[0][0]==0 :
-			stop = True
-			index = i+1
+	c.execute("select nb_processed, id_system, path from sample where syst_index="+str(index)+" order by nb_processed asc")
+	systs = c.fetchall()
+	i=0
+	while i<nbToKeep :
+		systems.append(systs[i][1])
+		samples.append(systs[i][2])
 		i=i+1
-	#find the samples matching with the index
-	c.execute('select path, id_system from sample where syst_index='+str(index))
-	b = c.fetchall()
-	for res in b:
-		samples.append(os.path.join('media',res[0]))
-		systems.append(res[1])
 	conn.close()
-	if config.fixedPosition=='False': #'False' to false ?
-		r = random.random()
-		random.shuffle(samples, lambda: r)
-		random.shuffle(systems, lambda: r)
 	return (samples, systems, index)
 
 def insert_data(data) :
