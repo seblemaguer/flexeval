@@ -222,14 +222,14 @@ def get_test_sample(user) :
 	for r in res :
 		if r[1]<mini :
 			#check if user have already done it
-			c.execute("select count(*) from answer where user=\""+user+"\" and syst_index="+str(r[0]))
+			c.execute('select count(*) from answer where user="'+user+'" and syst_index='+str(r[0]))
 			nb = c.fetchall()
 			if nb[0][0] ==0:
 				index = r[0]
 				mini = r[1]
 	samples=[]
 	systems=[]
-	c.execute("select nb_processed, id_system, path from sample where syst_index="+str(index)+" order by nb_processed asc")
+	c.execute('select nb_processed, id_system, path from sample where syst_index='+str(index)+' order by nb_processed asc')
 	systs = c.fetchall()
 	i=0
 	while i<nbToKeep :
