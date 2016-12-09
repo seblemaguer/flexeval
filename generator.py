@@ -8,7 +8,7 @@ from pprint import pprint
 from optparse import OptionParser
 
 execfile(os.path.join(os.path.dirname(__file__),'pm_bodies.py'))
-
+nbSystemToDisplay=2
 
 def parser_options_jt():
 	parser = OptionParser()
@@ -71,9 +71,12 @@ def create_db(data):
 
 	con = sqlite3.connect(testDirectory+'/data.db')
 	try:
+		systs="`system1` TEXT NOT NULL"
+		for i in range(1,int(nbSystemToDisplay)):
+			systs=systs + ", `system"+str(i+1)+"` TEXT NOT NULL"
 		con.execute("CREATE TABLE system (`id` TEXT NOT NULL PRIMARY KEY UNIQUE, `name` TEXT NOT NULL, `comment` TEXT NOT NULL)")
 		con.execute("CREATE TABLE sample (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `path` TEXT NOT NULL, `type` TEXT NOT NULL, `id_system` TEXT NOT NULL , `syst_index` INTEGER NOT NULL, `nb_processed` INTEGER NOT NULL DEFAULT 0, FOREIGN KEY(id_system) REFERENCES system(id))")
-		con.execute("CREATE TABLE answer (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `user` TEXT NOT NULL, `date` TEXT NOT NULL, `content` TEXT NOT NULL, `syst_index` INTEGER NOT NULL, `question_index` INTEGER NOT NULL, `systems` TEXT NOT NULL)")
+		con.execute("CREATE TABLE answer (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `user` TEXT NOT NULL, `date` TEXT NOT NULL, `content` TEXT NOT NULL, `syst_index` INTEGER NOT NULL, `question_index` INTEGER NOT NULL,"+systs+" )")
 		con.commit()
 		print('Database successfully created.')
 		for system in data['test']['systems']['system']:
@@ -100,7 +103,7 @@ def generate_config(json):
 	print('|-------------------|')
 	print('| config generation |')
 	print('v-------------------v')
-
+	global nbSystemToDisplay
 	configJson = json
 	if 'test' in configJson:	# TODO : penser a simplifier ce bout de code...
 		configJson = configJson['test']
@@ -118,6 +121,8 @@ def generate_config(json):
 	config.write('# Each configuration variable is necessarily a string\n')
 	for var in configJson:
 		config.write(var+'=\''+configJson[var]+'\'\n')
+		if var=="nbSystemDisplayed" :
+			nbSystemToDisplay = int(configJson[var])
 	questions = json['test']['questions']
 	print('Questions JSON:')
 	print(questions)
@@ -158,7 +163,6 @@ def generate_template():
 	print('template at "'+tplPath+'":')
 
 	tpl = open(tplPath, 'r').read()
-	print(tpl)
 	for finditer in re.finditer(regexLink, tpl):
 		linkArray.append(finditer.group(0))
 	for finditer in re.finditer(regexScript, tpl):
