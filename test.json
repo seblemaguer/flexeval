@@ -40,13 +40,6 @@
 								"./wav/jmf/jmf_0130_ref1.wav",
 								"./wav/jmf/jmf_0179_ref1.wav"
 							]
-						},
-						{
-							"-type": "consistency",
-							"sample": [
-								"./wav/jmf/jmf_0492_ref1.wav",
-								"./wav/jmf/jmf_0507_ref1.wav"
-							]
 						}
 					]
 				},
