@@ -56,7 +56,7 @@
 				<form role="form" action="/test" method="POST">
 					<input type="hidden" name="ref" value="{{index}}">
 					<input type="hidden" name="system1" value="{{systems[0]}}">
-					<input type="hidden" name="system1" value="{{systems[1]}}">
+					<input type="hidden" name="system2" value="{{systems[1]}}">
 					<h3>Question </h3>
 					<div class="alert alert-info" role="alert">Langage le plus naturel?</div>
 					<div class="col-md-offset-2">
