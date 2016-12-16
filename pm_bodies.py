@@ -82,7 +82,8 @@ def process_test():
 		keys = []
 		for i in range(nbq) :
 			keys.append(random.randint(0,1))
-		if model.get_nb_step_user(user) == 0:
+		if model.get_nb_step_user(user) == 0 and not 'intro_done' in app_session:
+			app_session['intro_done'] = True
 			(samples, systems, index) = model.get_intro_sample(user)
 		else:
 			(samples, systems, index) = model.get_test_sample(user)
