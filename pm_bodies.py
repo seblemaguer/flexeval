@@ -79,10 +79,13 @@ def process_test():
 	if model.get_nb_step_user(user) < model.get_nb_step() :
 		#proceed to a new step
 		nbq = model.get_nb_questions()
-		keys =[]
+		keys = []
 		for i in range(nbq) :
 			keys.append(random.randint(0,1))
-		(samples, systems, index) = model.get_test_sample(user)
+		if model.get_nb_step_user(user) == 0:
+			(samples, systems, index) = model.get_intro_sample(user)
+		else:
+			(samples, systems, index) = model.get_test_sample(user)
 		data={"name":model.get_name(), "author":model.get_author(), "description":model.get_description(), "samples":samples, "systems":systems, "index":index, "user":user}
 		return bottle.template('template', data)
 	else :
@@ -110,14 +113,7 @@ def process_test_post():
 	model.insert_data(post_data)
 	#check if the test isn't finished yet
 	if model.get_nb_step_user(user) < model.get_nb_step() :
-		#proceed to a new step
-		nbq = model.get_nb_questions()
-		keys =[]
-		for i in range(nbq) :
-			keys.append(random.randint(0,1))
-		(samples, systems, index) = model.get_test_sample(user)
-		data={"name":model.get_name(),"description": model.get_description(),"author": model.get_author(),"samples" : samples, "systems": systems, "random_keys": keys, "index": index, "user":user}
-		return bottle.template('template',data)
+		bottle.redirect('/test')
 	else :
 		return "<p>Test finished thank you for your cooperation</p>"
 

@@ -148,7 +148,7 @@
 				}
 			});
 		});
-		mediaFini=[false,false];
+		mediaFini = [false,false];
 		function verifyMedia() {
 			ready = true;
 			mediaFini.forEach(function(element) {
