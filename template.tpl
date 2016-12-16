@@ -38,11 +38,11 @@
 		<div class="container">
 			<div class="col-md-6 col-md-offset-3">
 				<p>Sample 1</p>
-				<audio id="player" controls>
+				<audio id="player" class="player" controls>
 					<source src="{{samples[0]}}">
 				</audio>
 				<p>Sample 2</p>
-				<audio id="player1" controls>
+				<audio id="player1" class="player" controls>
 					<source src="{{samples[1]}}">
 				</audio>
 			</div>
@@ -55,6 +55,7 @@
 			<div class="col-md-6 col-md-offset-3">
 				<form role="form" action="/test" method="POST">
 					<input type="hidden" name="ref" value="{{index}}">
+					<input type="hidden" name="system1" value="{{systems[0]}}">
 					<h3>Question </h3>
 					<div class="alert alert-info" role="alert">Langage le plus naturel?</div>
 					<div class="col-md-offset-2">

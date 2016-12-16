@@ -96,12 +96,17 @@ def process_test_post():
 		bottle.redirect('/login')
 	user = app_session['pseudo']
 	#get the post data and insert into db
+	systems=[]
+	i=1
+	while post_get("system"+str(i))!="" :
+		systems.append(post_get("system"+str(i)))
+		i=i+1
 	answers=[]
 	i=1
 	while post_get("question"+str(i))!="" :
 		answers.append({"index": i, "content": post_get("question"+str(i))})
 		i=i+1
-	post_data = {"author":model.get_author(),"user":user,"answers": answers,"index": post_get("ref")}
+	post_data = {"author":model.get_author(),"user":user,"answers": answers,"systems": systems,"index": post_get("ref")}
 	model.insert_data(post_data)
 	#check if the test isn't finished yet
 	if model.get_nb_step_user(user) < model.get_nb_step() :
