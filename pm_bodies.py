@@ -338,7 +338,7 @@ login_form="""
 						<form role="form" action="/login" method="POST">
 							<fieldset>
 								<div class="form-group">
-									<input class="form-control" placeholder="E-mail" name="email" autofocus>
+									<input type="email" class="form-control" placeholder="E-mail" name="email" autofocus>
 								</div>
 								<!-- Change this to a button or input when using this as a form -->
 								<input type="submit" class="btn btn-lg btn-success btn-block" value="Login">
