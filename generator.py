@@ -286,7 +286,7 @@ copy_media(dataFromJSON)
 verif_template()
 
 print('='*30)
-print('  GENERATION TERMINEE !!!')
+print('    GENERATION TERMINEE !!')
 print('='*30)
 
 # platform.py		OK
