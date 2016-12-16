@@ -108,7 +108,7 @@ def process_test_post():
 	answers=[]
 	i=1
 	while post_get("question"+str(i))!="" :
-		qt = post_get("question"+str(i)).split(";")
+		qt = post_get("question"+str(i)).split(";;")
 		if len(qt)==1 :
 			answers.append({"index": i, "content": post_get("question"+str(i))})
 		else :
