@@ -83,9 +83,15 @@ def process_test():
 		for i in range(nbq) :
 			keys.append(random.randint(0,1))
 		if model.get_nb_step_user(user) == 0 and not 'intro_done' in app_session:
-			app_session['intro_done'] = True
+			if not 'nb_intro_passed' in app_session:
+				app_session['nb_intro_passed'] = 1
+			else :
+				app_session['nb_intro_passed'] += 1
+			if (app_session['nb_intro_passed'] >= int(config.nbIntroductionSteps)):
+				app_session['intro_done'] = False
 			(samples, systems, index) = model.get_intro_sample(user)
 		else:
+			app_session['intro_done'] = True
 			(samples, systems, index) = model.get_test_sample(user)
 		data={"name":model.get_name(), "author":model.get_author(), "description":model.get_description(), "samples":samples, "systems":systems, "index":index, "user":user}
 		return bottle.template('template', data)
@@ -100,22 +106,19 @@ def process_test_post():
 		bottle.redirect('/login')
 	user = app_session['pseudo']
 	#get the post data and insert into db
-	systems=[]
-	i=1
-	while post_get("system"+str(i))!="" :
-		systems.append(post_get("system"+str(i)))
-		i=i+1
-	answers=[]
-	i=1
-	while post_get("question"+str(i))!="" :
-		qt = post_get("question"+str(i)).split(";;")
-		if len(qt)==1 :
+	if 'intro_done' in app_session and app_session['intro_done'] == True:
+		systems=[]
+		i=1
+		while post_get("system"+str(i))!="" :
+			systems.append(post_get("system"+str(i)))
+			i=i+1
+		answers=[]
+		i=1
+		while post_get("question"+str(i))!="" :
 			answers.append({"index": i, "content": post_get("question"+str(i))})
-		else :
-			answers.append({"index": i, "content": qt[0], "target": qt[1]})
-		i=i+1
-	post_data = {"author":model.get_author(),"user":user,"answers": answers,"systems": systems,"index": post_get("ref")}
-	model.insert_data(post_data)
+			i=i+1
+		post_data = {"author":model.get_author(),"user":user,"answers": answers,"systems": systems,"index": post_get("ref")}
+		model.insert_data(post_data)
 	#check if the test isn't finished yet
 	if model.get_nb_step_user(user) < model.get_nb_step() :
 		bottle.redirect('/test')
