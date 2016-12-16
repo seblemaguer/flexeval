@@ -239,6 +239,10 @@ def get_test_sample(user) :
 		systems.append(systs[i][1])
 		samples.append('media/'+systs[i][2])
 		i=i+1
+	if config.fixedPosition=='False': #'False' to false ?
+		r = random.random()
+		random.shuffle(samples, lambda: r)
+		random.shuffle(systems, lambda: r)
 	conn.close()
 	return (samples, systems, index)
 
