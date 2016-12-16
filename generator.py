@@ -118,7 +118,7 @@ def generate_config(json):
 	config.write('# === CONFIGURATION VARIABLES ===\n')
 	config.write('# Each configuration variable is necessarily a string\n')
 	for var in configJson:
-		config.write(var+'=\''+configJson[var]+'\'\n')
+		config.write(var+'=\''+str(configJson[var])+'\'\n')
 		if var=="nbSystemDisplayed" :
 			nbSystemToDisplay = int(configJson[var])
 	questions = json['questions']
@@ -133,9 +133,9 @@ def generate_config(json):
 	config.write('nbSampleBySystem=\''+str(nbsbs)+'\'\n')
 	questions = json['questions']['question']
 	qtype=[]
-	for i in range(len(questions)):
-		qtype.append('"'+questions[i]['type']+'"')
-	config.write('questionsType=['+','.join(qtype)+']\n')
+	# for i in range(len(questions)):
+	# 	qtype.append('"'+questions[i]['type']+'"')
+	# config.write('questionsType=['+','.join(qtype)+']\n')
 	print('Done.\n')
 
 def generate_template():
