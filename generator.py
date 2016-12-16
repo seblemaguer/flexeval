@@ -236,10 +236,10 @@ def verif_template():
 	for et in essentials_tags :
 		matches = re.findall(et, filetext)
 		if len(matches)==0:
-			print "ERRROR \t :: "+ et + " not found! Please add it our you will get trouble..."
+			print "ERRROR \t:: "+ et + " not found! Please add it our you will get trouble..."
 			miss=miss+1
 	if miss==0 :
-		print "Static Files \t :: OK!"
+		print "Static Files \t:: OK"
 	miss=0
 	for t in warning_tags:
 		for i in range(nbSystemToDisplay) :
@@ -248,7 +248,7 @@ def verif_template():
 			if len(matches)==0:
 				print m + " \t:: ERROR - missing "+t+"["+str(i)+"] tag in your template!"
 	if miss==0 :
-		print "Dynamics tags \t :: OK!"
+		print "Dynamics tags \t:: OK"
 	matches = re.findall(regexp, filetext)
 	for m in matches :
 		if m in checked :

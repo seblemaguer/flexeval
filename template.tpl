@@ -102,7 +102,7 @@
 						<label>Mauvais</label>
 						<label style="float: right;">Excellent</label>
 					</div>
-					<input type="hidden" id="question3" name="question3" value="3;;{{systems[1]}}">
+					<input type="hidden" id="question3" name="question3" value="3;;{{systems[0]}}">
 					<h3>Question </h3>
 					<div class="alert alert-info" role="alert">Veuillez évaluer le sample 2</div>
 					<!-- use the slider -->
@@ -114,7 +114,7 @@
 						<label>Mauvais</label>
 						<label style="float: right;">Excellent</label>
 					</div>
-					<input type="hidden" id="question4" name="question4" value="3;;{{systems[0]}}">
+					<input type="hidden" id="question4" name="question4" value="3;;{{systems[1]}}">
 					<input id="next" type="submit" class="btn btn-lg btn-success btn-block pull-right" value="Next" disabled>
 				</form>
 			</div>
