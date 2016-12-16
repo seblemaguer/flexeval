@@ -5,7 +5,7 @@
 		"nbInstances": "6",
 		"nbSteps": "10",
 		"nbIntroductionSteps": "1",
-		"nbSystemDisplayed" : "1",
+		"nbSystemDisplayed" : "2",
 		"description": "Test AB",
 		"start": "2012-01-31",
 		"end": "2014-12-31",
