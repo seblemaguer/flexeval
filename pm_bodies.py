@@ -243,6 +243,31 @@ def get_test_sample(user) :
 	conn.close()
 	return (samples, systems, index)
 
+def get_intro_sample(user) :
+	nbToKeep = int(config.nbSystemDisplayed)
+	dir = os.path.dirname(__file__)
+	conn = sqlite3.connect(os.path.join(dir,'data.db'))
+	c = conn.cursor()
+	c.execute("select syst_index from sample where type='intro' group by syst_index")
+	res= c.fetchall()
+	index= res[0][0]
+	for r in res :
+		c.execute('select count(*) from answer where user="'+user+'" and syst_index='+str(r[0]))
+		nb = c.fetchall()
+		if nb[0][0] ==0:
+			index = r[0]
+	samples=[]
+	systems=[]
+	c.execute('select nb_processed, id_system, path from sample where syst_index='+str(index)+' order by nb_processed asc')
+	systs = c.fetchall()
+	i=0
+	while i<nbToKeep :
+		systems.append(systs[i][1])
+		samples.append('media/'+systs[i][2])
+		i=i+1
+	conn.close()
+	return (samples, systems, index)
+
 def insert_data(data) :
 	now = datetime.now()
 	conn = sqlite3.connect(os.path.join(os.path.dirname(__file__),'data.db'))

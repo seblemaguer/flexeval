@@ -38,7 +38,7 @@
 		<div class="container">
 			<div class="col-md-6 col-md-offset-3">
 				<p>Sample 1</p>
-				<audio id="player" class="player" controls>
+				<audio id="player0" class="player" controls>
 					<source src="{{samples[0]}}">
 				</audio>
 				<p>Sample 2</p>
@@ -149,19 +149,25 @@
 			});
 		});
 		mediaFini=[false,false];
-		function verifyMedia(i) {
-			mediaFini[i] = true;
+		function verifyMedia() {
+			ready = true;
 			mediaFini.forEach(function(element) {
-				console.log(element);
 				if(element===false) {
-					return;
+					ready = false;
 				}
 			});
-			console.log("GOOD!");
-			$('#next').prop('disabled', false);
+			if(ready) {
+				$('#next').prop('disabled', false);
+			}
 		}
-		document.getElementById("player0").addEventListener("ended", verifyMedia(0), true);
-		document.getElementById("player1").addEventListener("ended", verifyMedia(1), true);
+		document.getElementById("player0").addEventListener("ended", function() {
+			mediaFini[0] = true;
+			verifyMedia();
+		}, true);
+		document.getElementById("player1").addEventListener("ended", function() {
+			mediaFini[1] = true;
+			verifyMedia();
+		}, true);
 	</script>
 
 </body>
