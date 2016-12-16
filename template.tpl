@@ -21,7 +21,7 @@
 	<nav class="navbar navbar-default" style="margin-bottom:0">
 		<div class="container-fluid">
 			<div class="navbar-header">
-				<img src="/static/img/logo.jpg" class="mg-responsive pull-left" alt="logo">
+				<img class="img-responsive pull-left" src="/static/img/logo.jpg" alt="logo">
 				<h1>{{name}}</h1>
 				<h3>Made by {{author}}</h3>
 			</div>
