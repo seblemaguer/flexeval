@@ -111,7 +111,7 @@ def process_test_post():
 		for i in range(nbq) :
 			keys.append(random.randint(0,1))
 		(samples, systems, index) = model.get_test_sample(user)
-		data={"name":model.get_name(),"description": model.get_description(),"author": model.get_author(),"samples" : samples, "systems": systems, "random_keys": keys, "index": index}
+		data={"name":model.get_name(),"description": model.get_description(),"author": model.get_author(),"samples" : samples, "systems": systems, "random_keys": keys, "index": index, "user":user}
 		return bottle.template('template',data)
 	else :
 		return "<p>Test finished thank you for your cooperation</p>"

@@ -27,6 +27,7 @@
 			</div>
 			<div class="navbar-collapse collapse">
 				<ul class="nav navbar-nav navbar-right">
+					<li><a>{{user}}</a></li>
 					<li><a href="/logout">Déconnexion</a></li>
 				</ul>
 			</div>

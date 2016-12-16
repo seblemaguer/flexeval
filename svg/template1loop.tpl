@@ -27,6 +27,7 @@
 			</div>
 			<div class="navbar-collapse collapse">
 				<ul class="nav navbar-nav navbar-right">
+					<li><a>{{user}}</a></li>
 					<li><a href="/logout">Déconnexion</a></li>
 				</ul>
 			</div>
@@ -59,13 +60,13 @@
 					<div class="col-md-offset-2">
 						<div class="radio">
 							<label>
-								<input type="radio" id="radioA" name="question1" value="{{systems[0]}}">
+								<input type="radio" id="radioA" name="question1" value="{{systems[0]}}" required>
 								Sample 1
 							</label>
 						</div>
 						<div class="radio">
 							<label>
-								<input type="radio" id="radioB" name="question1" value="{{systems[1]}}">
+								<input type="radio" id="radioB" name="question1" value="{{systems[1]}}" required>
 								Sample 2
 							</label>
 						</div>
@@ -76,13 +77,13 @@
 					<div class="col-md-offset-2">
 						<div class="radio">
 							<label>
-								<input type="radio" id="radioA" name="question2" value="{{systems[0]}}">
+								<input type="radio" id="radioA" name="question2" value="{{systems[0]}}" required>
 								Sample 1
 							</label>
 						</div>
 						<div class="radio">
 							<label>
-								<input type="radio" id="radioB" name="question2" value="{{systems[1]}}">
+								<input type="radio" id="radioB" name="question2" value="{{systems[1]}}" required>
 								Sample 2
 							</label>
 						</div>
