@@ -78,20 +78,11 @@ def process_test():
 	#check if the test isn't finished yet
 	if model.get_nb_step_user(user) < model.get_nb_step() :
 		#proceed to a new step
-		nbq = model.get_nb_questions()
-		keys = []
-		for i in range(nbq) :
-			keys.append(random.randint(0,1))
 		if model.get_nb_step_user(user) == 0 and not 'intro_done' in app_session:
 			if not 'nb_intro_passed' in app_session:
-				app_session['nb_intro_passed'] = 1
-			else :
-				app_session['nb_intro_passed'] += 1
-			if (app_session['nb_intro_passed'] >= int(config.nbIntroductionSteps)):
-				app_session['intro_done'] = False
+				app_session['nb_intro_passed'] = 0
 			(samples, systems, index) = model.get_intro_sample(user)
 		else:
-			app_session['intro_done'] = True
 			(samples, systems, index) = model.get_test_sample(user)
 		data={"name":model.get_name(), "author":model.get_author(), "description":model.get_description(), "samples":samples, "systems":systems, "index":index, "user":user}
 		return bottle.template('template', data)
@@ -119,6 +110,10 @@ def process_test_post():
 			i=i+1
 		post_data = {"author":model.get_author(),"user":user,"answers": answers,"systems": systems,"index": post_get("ref")}
 		model.insert_data(post_data)
+	else:
+		app_session['nb_intro_passed'] += 1
+		if (app_session['nb_intro_passed'] >= int(config.nbIntroductionSteps)):
+			app_session['intro_done'] = True
 	#check if the test isn't finished yet
 	if model.get_nb_step_user(user) < model.get_nb_step() :
 		bottle.redirect('/test')
