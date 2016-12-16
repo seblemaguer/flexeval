@@ -141,7 +141,6 @@ if __name__ == "__main__":
 
 
 model_body="""
-
 import os
 import sqlite3
 from datetime import date, datetime
@@ -245,8 +244,18 @@ def insert_data(data) :
 	c = conn.cursor()
 	answers = data['answers']
 	for answer in answers :
-		val = (data['user'],str(now),answer['content'],data['index'],answer['index'])
-		c.execute('insert into answer(user,date,content,syst_index,question_index) values (?,?,?,?,?)',val)
+		#val = (data['user'],str(now),answer['content'],data['index'],answer['index'])
+		#c.execute('insert into answer(user,date,content,syst_index,question_index) values (?,?,?,?,?)',val)
+		sysval=""
+		systs=""
+		for i in range(int(config.nbSystemDisplayed)):
+			sysval=sysval+data['systems'][i]
+			systs=systs+"system"+str(i+1)
+			if(i<int(config.nbSystemDisplayed)-1):
+				sysval=sysval+","
+				systs=systs+","
+		val = "\""+str(data['user'])+"\",\""+str(now)+"\",\""+answer['content']+"\",\""+str(data['index'])+"\",\""+str(answer['index'])+"\",\""+sysval+"\""
+		c.execute("insert into answer(user,date,content,syst_index,question_index,"+systs+") values ("+val+")")
 	#update the number of time processed for the samples
 	c.execute('select nb_processed from sample where syst_index='+str(data['index']))
 	n = c.fetchall()[0][0]

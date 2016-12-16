@@ -21,31 +21,29 @@
 	<nav class="navbar navbar-default" style="margin-bottom:0">
 		<div class="container-fluid">
 			<div class="navbar-header">
-				<img src="/static/img/logo.jpg" class="mg-responsive pull-left" alt="logo">
+				<img src="/static/img/log.png" class="mg-responsive pull-left" alt="logo">
 				<h1>{{name}}</h1>
 				<h3>Made by {{author}}</h3>
 			</div>
 			<div class="navbar-collapse collapse">
 				<ul class="nav navbar-nav navbar-right">
-					<li><a>{{user}}</a></li>
 					<li><a href="/logout">Déconnexion</a></li>
 				</ul>
 			</div>
 		</div>
 	</nav>
 
+
 	<div class="jumbotron">
-		<img src="/static/img/logo.jpg" class="mg-responsive pull-left" alt="logo">
 		<div class="container">
 			<div class="col-md-6 col-md-offset-3">
-				<h1>{{ name}}</h1><span><h3>Made by {{author}}</h3>
 				<p class="lead">{{description}}</p>
 				<p>Sample 1</p>
 				<audio id="player" controls>
 					<source src="{{samples[0]}}">
 				</audio>
 				<p>Sample 2</p>
-				<audio id="player1" controls>
+				<audio id="player" controls>
 					<source src="{{samples[1]}}">
 				</audio>
 			</div>
@@ -63,13 +61,13 @@
 					<div class="col-md-offset-2">
 						<div class="radio">
 							<label>
-								<input type="radio" id="radioA" name="question1" value="{{systems[0]}}" required>
+								<input type="radio" id="radioA" name="question1" value="{{systems[0]}}">
 								Sample 1
 							</label>
 						</div>
 						<div class="radio">
 							<label>
-								<input type="radio" id="radioB" name="question1" value="{{systems[1]}}" required>
+								<input type="radio" id="radioB" name="question1" value="{{systems[1]}}">
 								Sample 2
 							</label>
 						</div>
@@ -80,13 +78,13 @@
 					<div class="col-md-offset-2">
 						<div class="radio">
 							<label>
-								<input type="radio" id="radioA" name="question2" value="{{systems[0]}}" required>
+								<input type="radio" id="radioA" name="question2" value="{{systems[0]}}">
 								Sample 1
 							</label>
 						</div>
 						<div class="radio">
 							<label>
-								<input type="radio" id="radioB" name="question2" value="{{systems[1]}}" required>
+								<input type="radio" id="radioB" name="question2" value="{{systems[1]}}">
 								Sample 2
 							</label>
 						</div>
@@ -97,18 +95,6 @@
 					<!-- use the slider -->
 					<div class="answer">
 						<label>Avis : </label>
-						<label id="rate2">3</label>
-						<label> étoiles</label>
-						<div id="slider2"></div>
-						<label>Mauvais</label>
-						<label style="float: right;">Excellent</label>
-					</div>
-					<input type="hidden" id="question2" name="question2" value="3">
-					<h3>Question </h3>
-					<div class="alert alert-info" role="alert">Veuillez évaluer le sample 2</div>
-					<!-- use the slider -->
-					<div class="answer">
-						<label>Avis : </label>
 						<label id="rate3">3</label>
 						<label> étoiles</label>
 						<div id="slider3"></div>
@@ -116,6 +102,18 @@
 						<label style="float: right;">Excellent</label>
 					</div>
 					<input type="hidden" id="question3" name="question3" value="3">
+					<h3>Question </h3>
+					<div class="alert alert-info" role="alert">Veuillez évaluer le sample 2</div>
+					<!-- use the slider -->
+					<div class="answer">
+						<label>Avis : </label>
+						<label id="rate4">3</label>
+						<label> étoiles</label>
+						<div id="slider4"></div>
+						<label>Mauvais</label>
+						<label style="float: right;">Excellent</label>
+					</div>
+					<input type="hidden" id="question4" name="question4" value="3">
 					<input type="submit" class="btn btn-lg btn-success btn-block pull-right" value="Next">
 				</form>
 			</div>
@@ -123,19 +121,6 @@
 	</div>
 	<br><br><br>
 	<script>
-		$( function() {
-			$( "#slider2" ).slider({
-				range: "min",
-				value:3,
-				min: 0,
-				max: 6,
-				step: 1,
-				slide: function( event, ui ) {
-					$( "#rate2" ).html(ui.value );
-					$("#question2").attr("value",ui.value);
-				}
-			});
-		} );
 		$( function() {
 			$( "#slider3" ).slider({
 				range: "min",
@@ -148,23 +133,26 @@
 					$("#question3").attr("value",ui.value);
 				}
 			});
-		});
-		mediaFini=[false,false];
-		function verifyMedia(i) {
-			mediaFini[i] = true;
-			mediaFini.forEach(function(element) {
-				console.log(element);
-				if(element===false) {
-					return;
+		} );
+		$( function() {
+			$( "#slider4" ).slider({
+				range: "min",
+				value:3,
+				min: 0,
+				max: 6,
+				step: 1,
+				slide: function( event, ui ) {
+					$( "#rate4" ).html(ui.value );
+					$("#question4").attr("value",ui.value);
 				}
 			});
-			console.log("GOOD!");
-			$('#next').prop('disabled', false);
-		}
-		document.getElementById("player0").addEventListener("ended", verifyMedia(0), true);
-		document.getElementById("player1").addEventListener("ended", verifyMedia(1), true);
+		} );
 	</script>
 
-</body>
+
+<!-- Bootstrap Core JavaScript -->
+<!-- <script src="/js/bootstrap.min.js"></script> -->
+
+	</body>
 
 </html>
