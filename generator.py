@@ -79,7 +79,7 @@ def create_db(data):
 		con.execute("CREATE TABLE answer (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `user` TEXT NOT NULL, `date` TEXT NOT NULL, `content` TEXT NOT NULL, `syst_index` INTEGER NOT NULL, `question_index` INTEGER NOT NULL,"+systs+" )")
 		con.commit()
 		print('Database successfully created.')
-		for system in data['test']['systems']['system']:
+		for system in data['systems']['system']:
 			systemIndex = 0
 			systemToInsert=(system['-id'],system['-name'],system['comment'])
 			con.execute("INSERT INTO system(id, name, comment) VALUES (?,?,?)", systemToInsert)
@@ -105,8 +105,6 @@ def generate_config(json):
 	print('v-------------------v')
 	global nbSystemToDisplay
 	configJson = json
-	if 'test' in configJson:	# TODO : penser a simplifier ce bout de code...
-		configJson = configJson['test']
 	if 'configuration' in configJson:
 		configJson = configJson['configuration']
 	elif 'config' in configJson:
@@ -123,17 +121,17 @@ def generate_config(json):
 		config.write(var+'=\''+configJson[var]+'\'\n')
 		if var=="nbSystemDisplayed" :
 			nbSystemToDisplay = int(configJson[var])
-	questions = json['test']['questions']
+	questions = json['questions']
 	print('Questions JSON:')
 	print(questions)
 	config.write('nbQuestions=\"'+str(len(questions['question']))+'\"\n')
-	samples = json['test']['systems']['system'][0]['samples']
+	samples = json['systems']['system'][0]['samples']
 	nbsbs = 0
 	for s in samples :
 		if s['-type']=='test' :
 			nbsbs = len(s['sample'])
 	config.write('nbSampleBySystem=\''+str(nbsbs)+'\'\n')
-	questions = json['test']['questions']['question']
+	questions = json['questions']['question']
 	qtype=[]
 	for i in range(len(questions)):
 		qtype.append('"'+questions[i]['type']+'"')
@@ -201,10 +199,7 @@ def copy_media(json):
 	audioFolders = []
 	systems = []
 	regex = '^.*\/'
-	if 'test' in json:
-		systems = json['test']['systems']['system']
-	else:
-		systems = json['systems']['system']
+	systems = json['systems']['system']
 	for samples in systems:
 		for sample in samples['samples']:
 			for wav in sample['sample']:
@@ -278,7 +273,7 @@ def add_extra_pages():
 
 (inputJSON, inputTemplate) = parser_options_jt()
 dataFromJSON = parse_json(inputJSON)
-name = dataFromJSON['test']['configuration']['name']
+name = dataFromJSON['configuration']['name']
 (mainDirectory, testDirectory, viewsDirectory, staticDirectory, mediaDirectory) = create_architecture(name)
 generate_config(dataFromJSON)
 create_db(dataFromJSON)
