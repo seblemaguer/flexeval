@@ -4,8 +4,8 @@ import re
 import shutil
 import sqlite3
 import sys
-from pprint import pprint
 from optparse import OptionParser
+from pprint import pprint
 
 execfile(os.path.join(os.path.dirname(__file__),'pm_bodies.py'))
 nbSystemToDisplay=2
