@@ -21,7 +21,7 @@
 	<nav class="navbar navbar-default" style="margin-bottom:0">
 		<div class="container-fluid">
 			<div class="navbar-header">
-				<img class="img-responsive pull-left" src="/static/img/logo.jpg" alt="logo">
+				<img src="/static/img/logo.jpg" class="mg-responsive pull-left" alt="logo">
 				<h1>{{name}}</h1>
 				<h3>Made by {{author}}</h3>
 			</div>
@@ -37,9 +37,13 @@
 		<div class="container">
 			<div class="col-md-6 col-md-offset-3">
 				<p class="lead">{{description}}</p>
-				<p>Sample</p>
-				<audio id="player" controls>
+				<p>Sample 1</p>
+				<audio id="player0" controls>
 					<source src="{{samples[0]}}">
+				</audio>
+				<p>Sample 2</p>
+				<audio id="player1" controls>
+					<source src="{{samples[1]}}">
 				</audio>
 			</div>
 		</div>
@@ -52,16 +56,38 @@
 				<form role="form" action="/test" method="POST">
 					<input type="hidden" name="ref" value="{{index}}">
 					<h3>Question </h3>
-					<div class="alert alert-info" role="alert">Langage le plus naturel ?</div>
+					<div class="alert alert-info" role="alert">Langage le plus naturel?</div>
 					<div class="col-md-offset-2">
 						<div class="radio">
 							<label>
-								<input type="radio" id="radioA" name="question1" value="{{systems[0]}}">
+								<input type="radio" id="radioA" name="question1" value="{{systems[0]}}" required>
 								Sample 1
+							</label>
+						</div>
+						<div class="radio">
+							<label>
+								<input type="radio" id="radioB" name="question1" value="{{systems[1]}}" required>
+								Sample 2
 							</label>
 						</div>
 					</div>
 					
+					<h3>Question </h3>
+					<div class="alert alert-info" role="alert">Meilleure qualité générale</div>
+					<div class="col-md-offset-2">
+						<div class="radio">
+							<label>
+								<input type="radio" id="radioA" name="question2" value="{{systems[0]}}" required>
+								Sample 1
+							</label>
+						</div>
+						<div class="radio">
+							<label>
+								<input type="radio" id="radioB" name="question2" value="{{systems[1]}}" required>
+								Sample 2
+							</label>
+						</div>
+					</div>
 
 					<h3>Question </h3>
 					<div class="alert alert-info" role="alert">Veuillez évaluer le sample 1</div>
@@ -87,7 +113,7 @@
 						<label style="float: right;">Excellent</label>
 					</div>
 					<input type="hidden" id="question4" name="question4" value="3">
-					<input type="submit" id="next" class="btn btn-lg btn-success btn-block pull-right" value="Next">
+					<input type="submit" id="next" class="btn btn-lg btn-success btn-block pull-right" disabled="true" value="Next">
 				</form>
 			</div>
 		</div>
@@ -101,8 +127,8 @@
 				min: 0,
 				max: 6,
 				step: 1,
-				slide: function(event, ui) {
-					$("#rate3").html(ui.value);
+				slide: function( event, ui ) {
+					$("#rate3").html(ui.value );
 					$("#question3").attr("value",ui.value);
 				}
 			});
@@ -114,14 +140,26 @@
 				min: 0,
 				max: 6,
 				step: 1,
-				slide: function(event, ui) {
-					$("#rate4").html(ui.value);
+				slide: function( event, ui ) {
+					$("#rate4").html(ui.value );
 					$("#question4").attr("value",ui.value);
 				}
 			});
 		});
-		var audio = document.getElementById("player");
-		audio.addEventListener("ended", function() { $('#next').prop('disabled', false); }, true);
+		mediaFini=[false,false];
+		function verifyMedia(i) {
+			mediaFini[i] = true;
+			mediaFini.forEach(function(element) {
+				console.log(element);
+				if(element===false) {
+					return;
+				}
+			});
+			console.log("GOOD!");
+			$('#next').prop('disabled', false);
+		}
+		document.getElementById("player0").addEventListener("ended", verifyMedia(0), true);
+		document.getElementById("player1").addEventListener("ended", verifyMedia(1), true);
 	</script>
 
 </body>

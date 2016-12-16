@@ -21,7 +21,7 @@
 	<nav class="navbar navbar-default" style="margin-bottom:0">
 		<div class="container-fluid">
 			<div class="navbar-header">
-				<img src="/static/img/log.png" class="mg-responsive pull-left" alt="logo">
+				<img src="/static/img/logo.jpg" class="mg-responsive pull-left" alt="logo">
 				<h1>{{name}}</h1>
 				<h3>Made by {{author}}</h3>
 			</div>
@@ -38,11 +38,11 @@
 			<div class="col-md-6 col-md-offset-3">
 				<p class="lead">{{description}}</p>
 				<p>Sample 1</p>
-				<audio id="player" controls>
+				<audio id="player0" controls>
 					<source src="{{samples[0]}}">
 				</audio>
 				<p>Sample 2</p>
-				<audio id="player" controls>
+				<audio id="player1" controls>
 					<source src="{{samples[1]}}">
 				</audio>
 			</div>
@@ -60,13 +60,13 @@
 					<div class="col-md-offset-2">
 						<div class="radio">
 							<label>
-								<input type="radio" id="radioA" name="question1" value="{{systems[0]}}">
+								<input type="radio" id="radioA" name="question1" value="{{systems[0]}}" required>
 								Sample 1
 							</label>
 						</div>
 						<div class="radio">
 							<label>
-								<input type="radio" id="radioB" name="question1" value="{{systems[1]}}">
+								<input type="radio" id="radioB" name="question1" value="{{systems[1]}}" required>
 								Sample 2
 							</label>
 						</div>
@@ -77,13 +77,13 @@
 					<div class="col-md-offset-2">
 						<div class="radio">
 							<label>
-								<input type="radio" id="radioA" name="question2" value="{{systems[0]}}">
+								<input type="radio" id="radioA" name="question2" value="{{systems[0]}}" required>
 								Sample 1
 							</label>
 						</div>
 						<div class="radio">
 							<label>
-								<input type="radio" id="radioB" name="question2" value="{{systems[1]}}">
+								<input type="radio" id="radioB" name="question2" value="{{systems[1]}}" required>
 								Sample 2
 							</label>
 						</div>
@@ -113,45 +113,61 @@
 						<label style="float: right;">Excellent</label>
 					</div>
 					<input type="hidden" id="question4" name="question4" value="3">
-					<input type="submit" class="btn btn-lg btn-success btn-block pull-right" value="Next">
+					<input type="submit" id="next" class="btn btn-lg btn-success btn-block pull-right" disabled="true" value="Next">
 				</form>
 			</div>
 		</div>
 	</div>
 	<br><br><br>
 	<script>
-		$( function() {
-			$( "#slider3" ).slider({
+		$(function() {
+			$("#slider3").slider({
 				range: "min",
 				value:3,
 				min: 0,
 				max: 6,
 				step: 1,
 				slide: function( event, ui ) {
-					$( "#rate3" ).html(ui.value );
+					$("#rate3").html(ui.value );
 					$("#question3").attr("value",ui.value);
 				}
 			});
-		} );
-		$( function() {
-			$( "#slider4" ).slider({
+		});
+		$(function() {
+			$("#slider4").slider({
 				range: "min",
 				value:3,
 				min: 0,
 				max: 6,
 				step: 1,
 				slide: function( event, ui ) {
-					$( "#rate4" ).html(ui.value );
+					$("#rate4").html(ui.value );
 					$("#question4").attr("value",ui.value);
 				}
 			});
-		} );
+		});
+		mediaFini=[false,false];
+		function verifyMedia() {
+			ready = true;
+			mediaFini.forEach(function(element) {
+				if(element===false) {
+					ready = false;
+				}
+			});
+			if(ready) {
+				$('#next').prop('disabled', false);
+			}
+		}
+		document.getElementById("player0").addEventListener("ended", function() {
+			mediaFini[0] = true;
+			verifyMedia();
+		}, true);
+		document.getElementById("player1").addEventListener("ended", function() {
+			mediaFini[1] = true;
+			verifyMedia();
+		}, true);
 	</script>
 
-
-<!-- Bootstrap Core JavaScript -->
-<!-- <script src="/js/bootstrap.min.js"></script> -->
-
-	</body>
+</body>
 
 </html>
