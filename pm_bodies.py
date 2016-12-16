@@ -106,7 +106,11 @@ def process_test_post():
 		answers=[]
 		i=1
 		while post_get("question"+str(i))!="" :
-			answers.append({"index": i, "content": post_get("question"+str(i))})
+			ct = post_get("question"+str(i)).split(";;")
+			if len(ct)==1:
+				answers.append({"index": i, "content": ct[0]})
+			else :
+				answers.append({"index": i, "content": ct[0], "target": ct[1]})
 			i=i+1
 		post_data = {"author":model.get_author(),"user":user,"answers": answers,"systems": systems,"index": post_get("ref")}
 		model.insert_data(post_data)

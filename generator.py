@@ -224,28 +224,37 @@ def verif_template():
 	print('|-----------------|')
 	print('| template check  |')
 	print('v-----------------v')
-	authorized_tags=["{{name}}","{{author}}","{{description}}","{{index}}"]
+	authorized_tags=["{{name}}","{{author}}","{{description}}","{{index}}","{{user}}"]
 	warning_tags=["samples","systems"]
+	essentials_tags=["bootstrap.min.css","jquery.js","jquery-ui.min.js","jquery-ui.min.css","addEventListener"]
 	regexp = '{{[A-z,0-9]+}}'
 	textfile = open(inputTemplate, 'r')
 	filetext = textfile.read()
 	textfile.close()
 	checked=[]
+	miss=0
+	for et in essentials_tags :
+		matches = re.findall(et, filetext)
+		if len(matches)==0:
+			print "ERRROR \t :: "+ et + " not found! Please add it our you will get trouble..."
+			miss=miss+1
+	if miss==0 :
+		print "Static Files \t :: OK!"
+	miss=0
+	for t in warning_tags:
+		for i in range(nbSystemToDisplay) :
+			matches = re.findall("{{"+t+"\[["+str(i)+"]+\]}}", filetext)
+			checked.append("{{"+t+"["+str(i)+"]}}")
+			if len(matches)==0:
+				print m + " \t:: ERROR - missing "+t+"["+str(i)+"] tag in your template!"
+	if miss==0 :
+		print "Dynamics tags \t :: OK!"
 	matches = re.findall(regexp, filetext)
 	for m in matches :
 		if m in checked :
 			continue
 		if not m in authorized_tags :
-			b = False
-			for t in warning_tags:
-				pattern1 = re.compile("{{"+t+"\[[0-9]+\]}}")
-				pattern2 = re.compile("{{"+t+"\[[A-z]\]}}")
-				if pattern1.match(m) or pattern2.match(m):
-					b = True
-			if b :
-				print m + " \t:: OK - but be on your guards please"
-			else :
-				print m + " \t:: WARN : maybe you have an error in your template, please check if your application works fine !"
+			print m + " \t:: WARN : maybe you have an error in your template, please check if your application works fine !"
 		else :
 			print m + " \t:: OK"
 		checked.append(m)
