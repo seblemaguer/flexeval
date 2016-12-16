@@ -225,7 +225,6 @@ def copy_media(json):
 		print(file+'  to  '+mediaDirectory+filedir)
 	print('Done.\n')
 
-
 def verif_template():
 	print('|-----------------|')
 	print('| template check  |')
@@ -257,7 +256,6 @@ def verif_template():
 		checked.append(m)
 	print('Done.\n')
 
-
 def add_login():
 	print('|----------------------|')
 	print('|  add login template  |')
@@ -266,7 +264,6 @@ def add_login():
 	fo.write(login_form)
 	fo.close()
 	print('Done.\n')
-
 
 def add_extra_pages():
 	print('|-----------------------|')

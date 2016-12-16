@@ -87,45 +87,43 @@
 						<label style="float: right;">Excellent</label>
 					</div>
 					<input type="hidden" id="question4" name="question4" value="3">
-					<input type="submit" class="btn btn-lg btn-success btn-block pull-right" value="Next">
+					<input type="submit" id="next" class="btn btn-lg btn-success btn-block pull-right" value="Next">
 				</form>
 			</div>
 		</div>
 	</div>
 	<br><br><br>
 	<script>
-		$( function() {
-			$( "#slider3" ).slider({
+		$(function() {
+			$("#slider3").slider({
 				range: "min",
 				value:3,
 				min: 0,
 				max: 6,
 				step: 1,
-				slide: function( event, ui ) {
-					$( "#rate3" ).html(ui.value );
+				slide: function(event, ui) {
+					$("#rate3").html(ui.value);
 					$("#question3").attr("value",ui.value);
 				}
 			});
-		} );
-		$( function() {
-			$( "#slider4" ).slider({
+		});
+		$(function() {
+			$("#slider4").slider({
 				range: "min",
 				value:3,
 				min: 0,
 				max: 6,
 				step: 1,
-				slide: function( event, ui ) {
-					$( "#rate4" ).html(ui.value );
+				slide: function(event, ui) {
+					$("#rate4").html(ui.value);
 					$("#question4").attr("value",ui.value);
 				}
 			});
-		} );
+		});
+		var audio = document.getElementById("player");
+		audio.addEventListener("ended", function() { $('#next').prop('disabled', false); }, true);
 	</script>
 
-
-<!-- Bootstrap Core JavaScript -->
-<!-- <script src="/js/bootstrap.min.js"></script> -->
-
-	</body>
+</body>
 
 </html>
