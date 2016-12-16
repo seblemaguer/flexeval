@@ -108,7 +108,11 @@ def process_test_post():
 	answers=[]
 	i=1
 	while post_get("question"+str(i))!="" :
-		answers.append({"index": i, "content": post_get("question"+str(i))})
+		qt = post_get("question"+str(i)).split(";")
+		if len(qt)==1 :
+			answers.append({"index": i, "content": post_get("question"+str(i))})
+		else :
+			answers.append({"index": i, "content": qt[0], "target": qt[1]})
 		i=i+1
 	post_data = {"author":model.get_author(),"user":user,"answers": answers,"systems": systems,"index": post_get("ref")}
 	model.insert_data(post_data)
@@ -262,6 +266,10 @@ def get_intro_sample(user) :
 		systems.append(systs[i][1])
 		samples.append('media/'+systs[i][2])
 		i=i+1
+	if config.fixedPosition=='False': #'False' to false ?
+		r = random.random()
+		random.shuffle(samples, lambda: r)
+		random.shuffle(systems, lambda: r)
 	conn.close()
 	return (samples, systems, index)
 
@@ -281,8 +289,13 @@ def insert_data(data) :
 			if(i<int(config.nbSystemDisplayed)-1):
 				sysval=sysval+","
 				systs=systs+","
-		val = "\\""+str(data['user'])+"\\",\\""+str(now)+"\\",\\""+answer['content']+"\\",\\""+str(data['index'])+"\\",\\""+str(answer['index'])+"\\","+sysval
-		c.execute("insert into answer(user,date,content,syst_index,question_index,"+systs+") values ("+val+")")
+		
+		if "target" in answer :
+			val = "\\""+str(data['user'])+"\\",\\""+str(now)+"\\",\\""+answer['content']+"\\",\\""+str(data['index'])+"\\",\\""+str(answer['index'])+"\\",\\""+answer["target"]+"\\","+sysval
+			c.execute("insert into answer(user,date,content,syst_index,question_index,content_target,"+systs+") values ("+val+")")
+		else :
+			val = "\\""+str(data['user'])+"\\",\\""+str(now)+"\\",\\""+answer['content']+"\\",\\""+str(data['index'])+"\\",\\""+str(answer['index'])+"\\","+sysval
+			c.execute("insert into answer(user,date,content,syst_index,question_index,"+systs+") values ("+val+")")
 	#update the number of time processed for the samples
 	c.execute('select nb_processed from sample where syst_index='+str(data['index']))
 	n = c.fetchall()[0][0]
