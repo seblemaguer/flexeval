@@ -35,11 +35,8 @@
 	</nav>
 
 	<div class="jumbotron">
-		<img src="/static/img/logo.jpg" class="mg-responsive pull-left" alt="logo">
 		<div class="container">
 			<div class="col-md-6 col-md-offset-3">
-				<h1>{{ name}}</h1><span><h3>Made by {{author}}</h3>
-				<p class="lead">{{description}}</p>
 				<p>Sample 1</p>
 				<audio id="player" controls>
 					<source src="{{samples[0]}}">

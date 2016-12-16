@@ -83,7 +83,7 @@ def process_test():
 		for i in range(nbq) :
 			keys.append(random.randint(0,1))
 		(samples, systems, index) = model.get_test_sample(user)
-		data={"name":model.get_name(), "author":model.get_author(), "description":model.get_description(), "samples":samples, "systems":systems, "index":index}
+		data={"name":model.get_name(), "author":model.get_author(), "description":model.get_description(), "samples":samples, "systems":systems, "index":index, "user":user}
 		return bottle.template('template', data)
 	else :
 		return "<p>You have already done this test</p>"
