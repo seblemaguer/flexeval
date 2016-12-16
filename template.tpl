@@ -96,25 +96,25 @@
 					<!-- use the slider -->
 					<div class="answer">
 						<label>Avis : </label>
-						<label id="rate2">3</label>
-						<label> étoiles</label>
-						<div id="slider2"></div>
-						<label>Mauvais</label>
-						<label style="float: right;">Excellent</label>
-					</div>
-					<input type="hidden" id="question2" name="question2" value="3;{{systems[1]}}">
-					<h3>Question </h3>
-					<div class="alert alert-info" role="alert">Veuillez évaluer le sample 2</div>
-					<!-- use the slider -->
-					<div class="answer">
-						<label>Avis : </label>
 						<label id="rate3">3</label>
 						<label> étoiles</label>
 						<div id="slider3"></div>
 						<label>Mauvais</label>
 						<label style="float: right;">Excellent</label>
 					</div>
-					<input type="hidden" id="question3" name="question3" value="3;{{systems[0]}}">
+					<input type="hidden" id="question3" name="question3" value="3;{{systems[1]}}">
+					<h3>Question </h3>
+					<div class="alert alert-info" role="alert">Veuillez évaluer le sample 2</div>
+					<!-- use the slider -->
+					<div class="answer">
+						<label>Avis : </label>
+						<label id="rate4">3</label>
+						<label> étoiles</label>
+						<div id="slider4"></div>
+						<label>Mauvais</label>
+						<label style="float: right;">Excellent</label>
+					</div>
+					<input type="hidden" id="question4" name="question4" value="3;{{systems[0]}}">
 					<input type="submit" class="btn btn-lg btn-success btn-block pull-right" value="Next">
 				</form>
 			</div>
@@ -122,19 +122,6 @@
 	</div>
 	<br><br><br>
 	<script>
-		$(function() {
-			$("#slider2").slider({
-				range: "min",
-				value:3,
-				min: 0,
-				max: 6,
-				step: 1,
-				slide: function(event, ui) {
-					$("#rate2").html(ui.value);
-					$("#question2").attr("value",ui.value+";{{systems[1]}}");
-				}
-			});
-		} );
 		$(function() {
 			$("#slider3").slider({
 				range: "min",
@@ -144,7 +131,20 @@
 				step: 1,
 				slide: function(event, ui) {
 					$("#rate3").html(ui.value);
-					$("#question3").attr("value",ui.value+";{{systems[0]}}");
+					$("#question3").attr("value",ui.value+";{{systems[1]}}");
+				}
+			});
+		} );
+		$(function() {
+			$("#slider4").slider({
+				range: "min",
+				value:3,
+				min: 0,
+				max: 6,
+				step: 1,
+				slide: function(event, ui) {
+					$("#rate4").html(ui.value);
+					$("#question4").attr("value",ui.value+";{{systems[0]}}");
 				}
 			});
 		});
