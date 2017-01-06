@@ -1,0 +1,99 @@
+{
+	"configuration": {
+		"name": "Test AB pour validation du XML",
+		"author": "Damien",
+		"nbInstances": 6,
+		"nbSteps": 10,
+		"nbIntroductionSteps": 1,
+		"nbSystemDisplayed" : 2,
+		"description": "Test AB",
+		"start": "2012-01-31",
+		"end": "2014-12-31",
+		"fixedPosition": false,
+		"welcomeText": "Bienvenue sur ce super test !"
+	},
+	"systems": {
+		"system": [
+			{
+				"-id": "_system_jmf",
+				"-name": "jmf",
+				"comment": "Système JMF",
+				"samples": [
+					{
+						"-type": "intro",
+						"sample": [
+							"./wav/jmf/jmf_0029_ref1.wav"
+						]
+					},
+					{
+						"-type": "test",
+						"sample": [
+							"./wav/jmf/jmf_0230_ref1.wav",
+							"./wav/jmf/jmf_0365_ref1.wav",
+							"./wav/jmf/jmf_0501_ref1.wav",
+							"./wav/jmf/jmf_0601_ref1.wav",
+							"./wav/jmf/jmf_0676_ref1.wav",
+							"./wav/jmf/jmf_0003_ref1.wav",
+							"./wav/jmf/jmf_0022_ref1.wav",
+							"./wav/jmf/jmf_0091_ref1.wav",
+							"./wav/jmf/jmf_0130_ref1.wav",
+							"./wav/jmf/jmf_0179_ref1.wav"
+						]
+					}
+				]
+			},
+			{
+				"-id": "_system_jnf",
+				"-name": "jnf",
+				"comment": "Système JNF",
+				"samples": [
+					{
+						"-type": "intro",
+						"sample": [
+							"./wav/jnf/jnf_0029_ref1.wav"
+						]
+					},
+					{
+						"-type": "test",
+						"sample": [
+							"./wav/jnf/jnf_0230_ref1.wav",
+							"./wav/jnf/jnf_0365_ref1.wav",
+							"./wav/jnf/jnf_0501_ref1.wav",
+							"./wav/jnf/jnf_0601_ref1.wav",
+							"./wav/jnf/jnf_0676_ref1.wav",
+							"./wav/jnf/jnf_0003_ref1.wav",
+							"./wav/jnf/jnf_0022_ref1.wav",
+							"./wav/jnf/jnf_0091_ref1.wav",
+							"./wav/jnf/jnf_0130_ref1.wav",
+							"./wav/jnf/jnf_0179_ref1.wav"
+						]
+					}
+				]
+			}
+		]
+	},
+	"questions": {
+		"question" : [
+			{
+				"id" : 1,
+				"type" : "radio",
+				"description" : "Question 1"
+			},
+			{
+				"id" : 2,
+				"type" : "radio",
+				"description" : "Question 2"
+			},
+			{
+				"id" : 3,
+				"type" : "range",
+				"description" : "Question 3"
+			},
+			{
+				"id" : 4,
+				"type" : "range",
+				"description" : "Question 4"
+			}
+		]
+	}
+}

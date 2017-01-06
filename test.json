@@ -1,71 +1,123 @@
 {
 	"configuration": {
-		"name": "Test AB pour validation du XML",
-		"author": "Damien",
+		"name": "Test grandeur nature",
+		"author": "nous",
 		"nbInstances": 6,
 		"nbSteps": 10,
-		"nbIntroductionSteps": 1,
-		"nbSystemDisplayed" : 2,
-		"description": "Test AB",
-		"start": "2012-01-31",
-		"end": "2014-12-31",
+		"nbIntroductionSteps": 0,
+		"nbSystemDisplayed" : 5,
+		"description": "Test du test",
 		"fixedPosition": false,
-		"welcomeText": "Bienvenue sur ce super test !"
+		"welcomeText": "WELCOME TEXT"
 	},
 	"systems": {
 		"system": [
 			{
-				"-id": "_system_jmf",
-				"-name": "jmf",
-				"comment": "Système JMF",
+				"-id": "_s0",
+				"-name": "s0",
+				"comment": "Système 0",
 				"samples": [
-					{
-						"-type": "intro",
-						"sample": [
-							"./wav/jmf/jmf_0029_ref1.wav"
-						]
-					},
 					{
 						"-type": "test",
 						"sample": [
-							"./wav/jmf/jmf_0230_ref1.wav",
-							"./wav/jmf/jmf_0365_ref1.wav",
-							"./wav/jmf/jmf_0501_ref1.wav",
-							"./wav/jmf/jmf_0601_ref1.wav",
-							"./wav/jmf/jmf_0676_ref1.wav",
-							"./wav/jmf/jmf_0003_ref1.wav",
-							"./wav/jmf/jmf_0022_ref1.wav",
-							"./wav/jmf/jmf_0091_ref1.wav",
-							"./wav/jmf/jmf_0130_ref1.wav",
-							"./wav/jmf/jmf_0179_ref1.wav"
+							"system 0 | sample 0",
+							"system 0 | sample 1",
+							"system 0 | sample 2",
+							"system 0 | sample 3",
+							"system 0 | sample 4",
+							"system 0 | sample 5",
+							"system 0 | sample 6",
+							"system 0 | sample 7",
+							"system 0 | sample 8",
+							"system 0 | sample 9"
 						]
 					}
 				]
 			},
 			{
-				"-id": "_system_jnf",
-				"-name": "jnf",
-				"comment": "Système JNF",
+				"-id": "_s1",
+				"-name": "s1",
+				"comment": "Système 1",
 				"samples": [
-					{
-						"-type": "intro",
-						"sample": [
-							"./wav/jnf/jnf_0029_ref1.wav"
-						]
-					},
 					{
 						"-type": "test",
 						"sample": [
-							"./wav/jnf/jnf_0230_ref1.wav",
-							"./wav/jnf/jnf_0365_ref1.wav",
-							"./wav/jnf/jnf_0501_ref1.wav",
-							"./wav/jnf/jnf_0601_ref1.wav",
-							"./wav/jnf/jnf_0676_ref1.wav",
-							"./wav/jnf/jnf_0003_ref1.wav",
-							"./wav/jnf/jnf_0022_ref1.wav",
-							"./wav/jnf/jnf_0091_ref1.wav",
-							"./wav/jnf/jnf_0130_ref1.wav",
-							"./wav/jnf/jnf_0179_ref1.wav"
+							"system 1 | sample 0",
+							"system 1 | sample 1",
+							"system 1 | sample 2",
+							"system 1 | sample 3",
+							"system 1 | sample 4",
+							"system 1 | sample 5",
+							"system 1 | sample 6",
+							"system 1 | sample 7",
+							"system 1 | sample 8",
+							"system 1 | sample 9"
+						]
+					}
+				]
+			},
+			{
+				"-id": "_s2",
+				"-name": "s2",
+				"comment": "Système 2",
+				"samples": [
+					{
+						"-type": "test",
+						"sample": [
+							"system 2 | sample 0",
+							"system 2 | sample 1",
+							"system 2 | sample 2",
+							"system 2 | sample 3",
+							"system 2 | sample 4",
+							"system 2 | sample 5",
+							"system 2 | sample 6",
+							"system 2 | sample 7",
+							"system 2 | sample 8",
+							"system 2 | sample 9"
+						]
+					}
+				]
+			},
+			{
+				"-id": "_s3",
+				"-name": "s3",
+				"comment": "Système 3",
+				"samples": [
+					{
+						"-type": "test",
+						"sample": [
+							"system 3 | sample 0",
+							"system 3 | sample 1",
+							"system 3 | sample 2",
+							"system 3 | sample 3",
+							"system 3 | sample 4",
+							"system 3 | sample 5",
+							"system 3 | sample 6",
+							"system 3 | sample 7",
+							"system 3 | sample 8",
+							"system 3 | sample 9"
+						]
+					}
+				]
+			},
+			{
+				"-id": "_s4",
+				"-name": "s4",
+				"comment": "Système 4",
+				"samples": [
+					{
+						"-type": "test",
+						"sample": [
+							"system 4 | sample 0",
+							"system 4 | sample 1",
+							"system 4 | sample 2",
+							"system 4 | sample 3",
+							"system 4 | sample 4",
+							"system 4 | sample 5",
+							"system 4 | sample 6",
+							"system 4 | sample 7",
+							"system 4 | sample 8",
+							"system 4 | sample 9"
 						]
 					}
 				]
@@ -76,23 +128,8 @@
 		"question" : [
 			{
 				"id" : 1,
-				"type" : "radio",
-				"description" : "Question 1"
-			},
-			{
-				"id" : 2,
-				"type" : "radio",
-				"description" : "Question 2"
-			},
-			{
-				"id" : 3,
 				"type" : "range",
-				"description" : "Question 3"
-			},
-			{
-				"id" : 4,
-				"type" : "range",
-				"description" : "Question 4"
+				"description" : "Question unique"
 			}
 		]
 	}

@@ -78,7 +78,7 @@ def process_test():
 	#check if the test isn't finished yet
 	if model.get_nb_step_user(user) < model.get_nb_step() :
 		#proceed to a new step
-		if model.get_nb_step_user(user) == 0 and not 'intro_done' in app_session:
+		if int(config.nbIntroductionSteps) > 0 and model.get_nb_step_user(user) == 0 and not 'intro_done' in app_session:
 			if not 'nb_intro_passed' in app_session:
 				app_session['nb_intro_passed'] = 0
 			(samples, systems, index) = model.get_intro_sample(user)

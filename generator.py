@@ -250,7 +250,7 @@ def verif_template():
 			matches = re.findall("{{"+t+"\[["+str(i)+"]+\]}}", filetext)
 			checked.append("{{"+t+"["+str(i)+"]}}")
 			if len(matches)==0:
-				print m + " \t:: ERROR - missing "+t+"["+str(i)+"] tag in your template!"
+				print t + " \t:: ERROR - missing "+t+"["+str(i)+"] tag in your template!"
 	if miss==0 :
 		print "Dynamics tags \t:: OK"
 	matches = re.findall(regexp, filetext)
