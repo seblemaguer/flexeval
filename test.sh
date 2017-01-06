@@ -9,4 +9,4 @@ then
 	fi
 fi
 python ./generator.py -j ./test.json -t ./template.tpl -n
-cp -rf ./static/* ./tests/Test\ AB\ pour\ validation\ du\ XML/static/
+cp -rf ./static/* ./tests/Test\ grandeur\ nature/static/
