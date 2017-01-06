@@ -225,16 +225,22 @@ def get_test_sample(user) :
 	c = conn.cursor()
 	c.execute("select syst_index, sum(nb_processed) from sample where type='test' group by syst_index")
 	res= c.fetchall()
-	index= res[0][0]
-	mini = res[0][1]
+	validlist=[]
+	min=0
 	for r in res :
-		if r[1]<mini :
-			#check if user have already done it
-			c.execute('select count(*) from answer where user="'+user+'" and syst_index='+str(r[0]))
-			nb = c.fetchall()
-			if nb[0][0] ==0:
-				index = r[0]
-				mini = r[1]
+		#check if user have already done it
+		c.execute('select count(*) from answer where user="'+user+'" and syst_index='+str(r[0]))
+		nb = c.fetchall()
+		if nb[0][0] ==0:
+			if validlist==[]:
+				min = r[1]
+			if r[1] < min :
+				min = r[1]
+				validlist=[r]
+			elif r[1]==min:
+				validlist.append(r)
+	print validlist
+	index = validlist[random.randint(0,len(validlist))][0]
 	samples=[]
 	systems=[]
 	c.execute('select nb_processed, id_system, path from sample where syst_index='+str(index)+' order by nb_processed asc')
