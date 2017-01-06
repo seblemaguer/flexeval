@@ -14,8 +14,10 @@ def parser_options_jt():
 	parser = OptionParser()
 	parser.add_option('-j', '--json', dest='inputJSON', help='input JSON file', metavar='FILE')
 	parser.add_option('-t', '--tpl', dest='inputTemplate', help='input template file', metavar='FILE')
+	parser.add_option('-n', '--nomedia', dest='noMedia', help='no media used (text only)', action="store_true")
 	inputJSON = None
 	inputTemplate = None
+	noMedia=False
 	(options, args) = parser.parse_args()
 	if(options.inputJSON==None) :
 		sys.exit('Invalid JSON file name')
@@ -25,7 +27,9 @@ def parser_options_jt():
 		sys.exit('Invalid template file name')
 	else :
 		inputTemplate = options.inputTemplate
-	return inputJSON, inputTemplate
+	if(options.noMedia!=None and options.noMedia):
+		noMedia = options.noMedia
+	return inputJSON, inputTemplate, noMedia
 
 def create_architecture(testName):
 	print('|-----------------------|')
@@ -280,7 +284,7 @@ def add_extra_pages():
 
 
 
-(inputJSON, inputTemplate) = parser_options_jt()
+(inputJSON, inputTemplate, noMedia) = parser_options_jt()
 dataFromJSON = parse_json(inputJSON)
 name = dataFromJSON['configuration']['name']
 (mainDirectory, testDirectory, viewsDirectory, staticDirectory, mediaDirectory) = create_architecture(name)
@@ -291,7 +295,8 @@ create_plateform()
 create_model()
 add_login()
 add_extra_pages()
-copy_media(dataFromJSON)
+if noMedia==None:
+	copy_media(dataFromJSON)
 verif_template()
 
 print('='*30)

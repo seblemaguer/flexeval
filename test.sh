@@ -1,5 +1,4 @@
 #!/bin/bash
-DIR="~/Documents/PROJET/GIT"
 
 if [ $# = 1 ]
 then
