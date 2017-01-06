@@ -240,7 +240,7 @@ def get_test_sample(user) :
 			elif r[1]==min:
 				validlist.append(r)
 	print validlist
-	index = validlist[random.randint(0,len(validlist))][0]
+	index = validlist[random.randint(0,len(validlist)-1)][0]
 	samples=[]
 	systems=[]
 	c.execute('select nb_processed, id_system, path from sample where syst_index='+str(index)+' order by nb_processed asc')
