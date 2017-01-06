@@ -87,6 +87,7 @@ def process_test():
 			data={"name":model.get_name(), "author":model.get_author(), "description":model.get_description(), "samples":samples, "systems":systems, "index":index, "user":user}
 		return bottle.template('template', data)
 	else :
+		bottle.request.environ.get('beaker.session').delete()
 		return "<p>You have already done this test</p>"
 
 @app.post('/test')
@@ -119,7 +120,7 @@ def process_test_post():
 		if (app_session['nb_intro_passed'] >= int(config.nbIntroductionSteps)):
 			app_session['intro_done'] = True
 	#check if the test isn't finished yet
-	if model.get_nb_step_user(user) < model.get_nb_step() :
+	if model.get_nb_step_user(user) < model.get_nb_step()-1 :
 		bottle.redirect('/test')
 	else :
 		bottle.request.environ.get('beaker.session').delete()
