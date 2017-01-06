@@ -36,6 +36,9 @@
 
 	<div class="jumbotron">
 		<div class="container">
+			% if defined('introduction') and introduction==True :
+				<div class="alert alert-warning" role="alert"><span class="glyphicon glyphicon-alert" aria-hidden="true"></span>  This is an <strong>introduction</strong> step !</div>
+			%end
 			<div class="col-md-6 col-md-offset-3">
 				<p>Sample 1</p>
 				<audio id="player0" class="player" controls>
