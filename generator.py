@@ -127,13 +127,17 @@ def generate_config(json):
 	print('Configuration JSON:')
 	print(configJson)
 
-	expectedConfig = ['name', 'author', 'nbInstances', 'nbSteps', 'nbIntroductionSteps', 'nbSystemDisplayed', 'description', 'fixedPosition', 'welcomeText', 'useMedia', 'nbQuestions']
+	expectedConfig = ['name', 'author', 'nbSteps', 'nbIntroductionSteps', 'nbSystemDisplayed', 'description', 'welcomeText', 'useMedia', 'nbQuestions', 'nbFixedPosition']
 
 	config = open(testDirectory+'/config.py', 'w')
 	config.write('# === CONFIGURATION VARIABLES ===\n')
 	config.write('# Each configuration variable is necessarily a string\n')
+	samples = json['systems']['system'][0]['samples']
+	nbsbs = 0
+	for s in samples :
+		if s['type']=='test' :
+			nbsbs = len(s['sample'])
 	for var in configJson:
-		config.write(var+'=\''+str(configJson[var])+'\'\n')
 		if var in expectedConfig:
 			print(var+'\t:: OK')
 			expectedConfig.remove(var)
@@ -141,15 +145,16 @@ def generate_config(json):
 			nbSystemToDisplay = int(configJson[var])
 		elif var == 'useMedia':
 			useMedia = configJson[var]=="True"
+		elif var == 'nbFixedPosition' :
+			if configJson[var] < 0 or configJson[var] > configJson['nbSteps'] :
+				configJson[var]=nbsbs
+		config.write(var+'=\''+str(configJson[var])+'\'\n')
 	for expected in expectedConfig:
 		print(expected+' not found!')
 		if expected == 'name':
 			config.write(expected+'=\'TEST\'\n')
 		if expected == 'author':
 			config.write(expected+'=\'unknow\'\n')
-		if expected == 'nbInstances':
-			print('ERROR :: '+expected)
-			sys.exit('Abort: Invalid JSON file')
 		if expected == 'nbQuestions':
 			print('ERROR :: '+expected)
 			sys.exit('Abort: Invalid JSON file')
@@ -163,17 +168,12 @@ def generate_config(json):
 			sys.exit('Abort: Invalid JSON file')
 		if expected == 'description':
 			config.write(expected+'=\'\'\n')
-		if expected == 'fixedPosition':
-			config.write(expected+'=\'True\'\n')
 		if expected == 'welcomeText':
 			config.write(expected+'=\'\'\n')
 		if expected == 'useMedia':
 			config.write(expected+'=\'True\'\n')
-	samples = json['systems']['system'][0]['samples']
-	nbsbs = 0
-	for s in samples :
-		if s['type']=='test' :
-			nbsbs = len(s['sample'])
+		if expected == 'nbFixedPosition' :
+			config.write(expected+'=\'0\'\n')
 	config.write('nbSampleBySystem=\''+str(nbsbs)+'\'\n')
 	print('Done.\n')
 

@@ -2,13 +2,12 @@
 	"configuration": {
 		"name": "Test grandeur nature",
 		"author": "nous",
-		"nbInstances": 6,
-		"nbSteps": 10,
+		"nbSteps": 6,
 		"nbSystemDisplayed" : 5,
 		"description": "Test du test",
-		"fixedPosition": false,
 		"useMedia":false,
-		"nbQuestions":5
+		"nbQuestions":5,
+		"nbFixedPosition":1
 	},
 	"systems": {
 		"system": [

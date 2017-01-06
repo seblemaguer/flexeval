@@ -39,9 +39,13 @@
 			%end
 			<div class="col-md-6 col-md-offset-3">
 				<form role="form" action="/test" method="POST">
-				<p>Sample 1</p>
+				<p>Reference sample</p>
 				<div>
 					{{!samples[0]}}
+				</div>
+				<p>Sample 1</p>
+				<div>
+					{{!samples[1]}}
 				</div>
 				<div class="answer">
 						<label>Avis : </label>
@@ -51,10 +55,10 @@
 						<label>Mauvais</label>
 						<label style="float: right;">Excellent</label>
 					</div>
-					<input type="hidden" id="question1" name="question1" value="3;;{{systems[0]}}">
+					<input type="hidden" id="question1" name="question1" value="3;;{{systems[1]}}">
 				<p>Sample 2</p>
 				<div>
-					{{!samples[1]}}
+					{{!samples[2]}}
 				</div>
 				<div class="answer">
 						<label>Avis : </label>
@@ -64,10 +68,10 @@
 						<label>Mauvais</label>
 						<label style="float: right;">Excellent</label>
 					</div>
-					<input type="hidden" id="question2" name="question2" value="3;;{{systems[1]}}">
+					<input type="hidden" id="question2" name="question2" value="3;;{{systems[2]}}">
 				<p>Sample 3</p>
 				<div>
-					{{!samples[2]}}
+					{{!samples[3]}}
 				</div>
 				<div class="answer">
 						<label>Avis : </label>
@@ -77,10 +81,10 @@
 						<label>Mauvais</label>
 						<label style="float: right;">Excellent</label>
 					</div>
-					<input type="hidden" id="question3" name="question3" value="3;;{{systems[2]}}">
+					<input type="hidden" id="question3" name="question3" value="3;;{{systems[3]}}">
 				<p>Sample 4</p>
 				<div>
-					{{!samples[3]}}
+					{{!samples[4]}}
 				</div>
 				<div class="answer">
 						<label>Avis : </label>
@@ -90,20 +94,7 @@
 						<label>Mauvais</label>
 						<label style="float: right;">Excellent</label>
 					</div>
-					<input type="hidden" id="question4" name="question4" value="3;;{{systems[3]}}">
-				<p>Sample 5</p>
-				<div>
-					{{!samples[4]}}
-				</div>
-				<div class="answer">
-						<label>Avis : </label>
-						<label id="rate5">3</label>
-						<label> étoiles</label>
-						<div id="slider5"></div>
-						<label>Mauvais</label>
-						<label style="float: right;">Excellent</label>
-					</div>
-					<input type="hidden" id="question5" name="question5" value="3;;{{systems[4]}}">
+					<input type="hidden" id="question4" name="question4" value="3;;{{systems[4]}}">
 			</div>
 		</div>
 	</div>
@@ -119,7 +110,6 @@
 					<input type="hidden" name="system3" value="{{systems[2]}}">
 					<input type="hidden" name="system4" value="{{systems[3]}}">
 					<input type="hidden" name="system5" value="{{systems[4]}}">
-										
 					
 					<input id="next" type="submit" class="btn btn-lg btn-success btn-block pull-right" value="Next">
 				</form>
@@ -137,7 +127,7 @@
 				step: 1,
 				slide: function(event, ui) {
 					$("#rate1").html(ui.value);
-					$("#question1").attr("value",ui.value+";;{{systems[0]}}");
+					$("#question1").attr("value",ui.value+";;{{systems[1]}}");
 				}
 			});
 		});
@@ -150,7 +140,7 @@
 				step: 1,
 				slide: function(event, ui) {
 					$("#rate2").html(ui.value);
-					$("#question2").attr("value",ui.value+";;{{systems[1]}}");
+					$("#question2").attr("value",ui.value+";;{{systems[2]}}");
 				}
 			});
 		});
@@ -163,7 +153,7 @@
 				step: 1,
 				slide: function(event, ui) {
 					$("#rate3").html(ui.value);
-					$("#question3").attr("value",ui.value+";;{{systems[2]}}");
+					$("#question3").attr("value",ui.value+";;{{systems[3]}}");
 				}
 			});
 		});
@@ -176,20 +166,7 @@
 				step: 1,
 				slide: function(event, ui) {
 					$("#rate4").html(ui.value);
-					$("#question4").attr("value",ui.value+";;{{systems[3]}}");
-				}
-			});
-		});
-		$(function() {
-			$("#slider5").slider({
-				range: "min",
-				value:3,
-				min: 0,
-				max: 6,
-				step: 1,
-				slide: function(event, ui) {
-					$("#rate5").html(ui.value);
-					$("#question5").attr("value",ui.value+";;{{systems[4]}}");
+					$("#question4").attr("value",ui.value+";;{{systems[4]}}");
 				}
 			});
 		});

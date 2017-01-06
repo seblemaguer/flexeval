@@ -1,0 +1,6 @@
+script de test : 				./test.sh rm
+lancement de l'application : 	python plateforme.py
+template utilisé :				template.tpl
+
+
+Module python utilisés : beaker, bottle, sqlite3

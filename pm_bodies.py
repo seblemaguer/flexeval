@@ -81,10 +81,10 @@ def process_test():
 			if not 'nb_intro_passed' in app_session:
 				app_session['nb_intro_passed'] = 0
 			(samples, systems, index) = model.get_intro_sample(user)
-			data={"name":model.get_name(), "author":model.get_author(), "description":model.get_description(), "samples":samples, "systems":systems, "index":index, "user":user, "introduction": True}
+			data={"name":model.get_name(), "author":model.get_author(), "description":model.get_description(), "samples":samples, "systems":systems, "index":index, "user":user, "introduction": True, "step": model.get_nb_step_user(user), "totalstep" : model.get_nb_step()}
 		else:
 			(samples, systems, index) = model.get_test_sample(user)
-			data={"name":model.get_name(), "author":model.get_author(), "description":model.get_description(), "samples":samples, "systems":systems, "index":index, "user":user}
+			data={"name":model.get_name(), "author":model.get_author(), "description":model.get_description(), "samples":samples, "systems":systems, "index":index, "user":user, "step": model.get_nb_step_user(user), "totalstep" : model.get_nb_step()}
 		return bottle.template('template', data)
 	else :
 		bottle.request.environ.get('beaker.session').delete()
@@ -120,7 +120,7 @@ def process_test_post():
 		if (app_session['nb_intro_passed'] >= int(config.nbIntroductionSteps)):
 			app_session['intro_done'] = True
 	#check if the test isn't finished yet
-	if model.get_nb_step_user(user) < model.get_nb_step()-1 :
+	if model.get_nb_step_user(user) < model.get_nb_step() :
 		bottle.redirect('/test')
 	else :
 		bottle.request.environ.get('beaker.session').delete()
@@ -165,6 +165,12 @@ def get_nb_system() :
 	conn.close()
 	return int(res[0][0])
 
+def get_nb_position_fixed():
+	return int(config.nbFixedPosition)
+
+def get_nb_system_display() :
+	return int(config.nbSystemDisplayed)
+
 def get_nb_questions() :
 	return int(config.nbQuestions)
 
@@ -196,7 +202,7 @@ def get_nb_sample_by_system() :
 def get_nb_step() :
 	#return the number of step required on a test
 	#get it from config.py
-	return int(config.nbInstances)
+	return int(config.nbSteps)
 
 def get_nb_step_user(user) :
 	#return the number of step made by a user on the test
@@ -253,10 +259,25 @@ def get_test_sample(user) :
 		else :
 			samples.append(systs[i][2])
 		i=i+1
-	if config.fixedPosition=='False': #'False' to false ?
+	n = get_nb_position_fixed()
+	if n<=0:
 		r = random.random()
 		random.shuffle(samples, lambda: r)
 		random.shuffle(systems, lambda: r)
+	elif n>=get_nb_system_display(): #'False' to false ?
+		pass
+	else :
+		sa1 = samples[0:n]
+		sa2 = samples[n:]
+		sy1 = systems[0:n]
+		sy2 = systems[n:]
+		r = random.random()
+		random.shuffle(sa2, lambda: r)
+		random.shuffle(sy2, lambda: r)
+		sa1.extend(sa2)
+		samples=sa1
+		sy1.extend(sy2)
+		systems=sy1
 	conn.close()
 	return (samples, systems, index)
 
@@ -286,10 +307,25 @@ def get_intro_sample(user) :
 		else :
 			samples.append(systs[i][2])
 		i=i+1
-	if config.fixedPosition=='False': #'False' to false ?
+	n = get_nb_position_fixed()
+	if n<=0:
 		r = random.random()
 		random.shuffle(samples, lambda: r)
 		random.shuffle(systems, lambda: r)
+	elif n>=get_nb_system_display(): #'False' to false ?
+		pass
+	else :
+		sa1 = samples[0:n]
+		sa2 = samples[n:]
+		sy1 = systems[0:n]
+		sy2 = systems[n:]
+		r = random.random()
+		random.shuffle(sa2, lambda: r)
+		random.shuffle(sy2, lambda: r)
+		sa1.extend(sa2)
+		samples=sa1
+		sy1.extend(sy2)
+		systems=sy1
 	conn.close()
 	return (samples, systems, index)
 
