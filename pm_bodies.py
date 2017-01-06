@@ -219,6 +219,7 @@ def get_metadata() :
 	return metadata
 
 def get_test_sample(user) :
+	random.seed()
 	nbToKeep = int(config.nbSystemDisplayed)
 	dir = os.path.dirname(__file__)
 	conn = sqlite3.connect(os.path.join(dir,'data.db'))
@@ -260,6 +261,7 @@ def get_test_sample(user) :
 	return (samples, systems, index)
 
 def get_intro_sample(user) :
+	random.seed()
 	nbToKeep = int(config.nbSystemDisplayed)
 	dir = os.path.dirname(__file__)
 	conn = sqlite3.connect(os.path.join(dir,'data.db'))
