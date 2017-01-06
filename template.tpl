@@ -48,6 +48,18 @@
 				<div>
 					{{samples[1]}}
 				</div>
+				<p>Sample 3</p>
+				<div>
+					{{samples[2]}}
+				</div>
+				<p>Sample 4</p>
+				<div>
+					{{samples[3]}}
+				</div>
+				<p>Sample 5</p>
+				<div>
+					{{samples[4]}}
+				</div>
 			</div>
 		</div>
 	</div>
