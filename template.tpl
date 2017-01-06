@@ -72,6 +72,9 @@
 					<input type="hidden" name="ref" value="{{index}}">
 					<input type="hidden" name="system1" value="{{systems[0]}}">
 					<input type="hidden" name="system2" value="{{systems[1]}}">
+					<input type="hidden" name="system3" value="{{systems[2]}}">
+					<input type="hidden" name="system4" value="{{systems[3]}}">
+					<input type="hidden" name="system5" value="{{systems[4]}}">
 										
 					<h3>Question</h3>
 					<div class="alert alert-info" role="alert">Veuillez donner une note</div>

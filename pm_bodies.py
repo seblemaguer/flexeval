@@ -1,5 +1,4 @@
-plateform_body = """
-import model
+plateform_body = """import model
 import sys
 import bottle
 import sqlite3
@@ -149,8 +148,7 @@ if __name__ == "__main__":
 """
 
 
-model_body="""
-import os
+model_body="""import os
 import sqlite3
 from datetime import date, datetime
 import random
@@ -319,8 +317,7 @@ def insert_data(data) :
 """
 
 
-login_form="""
-<!DOCTYPE html>
+login_form="""<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -367,8 +364,7 @@ login_form="""
 """
 
 
-index_form="""
-<!DOCTYPE html>
+index_form="""<!DOCTYPE html>
 <html lang="en">
 
 <head>

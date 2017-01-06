@@ -76,7 +76,7 @@ def create_db(data):
 	con = sqlite3.connect(testDirectory+'/data.db')
 	try:
 		systs="`system1` TEXT NOT NULL"
-		for i in range(1,int(nbSystemToDisplay)):
+		for i in range(1,nbSystemToDisplay):
 			systs=systs + ", `system"+str(i+1)+"` TEXT NOT NULL"
 		con.execute("CREATE TABLE system (`id` TEXT NOT NULL PRIMARY KEY UNIQUE, `name` TEXT NOT NULL, `comment` TEXT NOT NULL)")
 		con.execute("CREATE TABLE sample (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `path` TEXT NOT NULL, `type` TEXT NOT NULL, `id_system` TEXT NOT NULL , `syst_index` INTEGER NOT NULL, `nb_processed` INTEGER NOT NULL DEFAULT 0, FOREIGN KEY(id_system) REFERENCES system(id))")
@@ -111,24 +111,46 @@ def generate_config(json):
 	configJson = json
 	if 'configuration' in configJson:
 		configJson = configJson['configuration']
-	elif 'config' in configJson:
-		configJson = configJson['config']
-	elif 'conf' in configJson:
-		configJson = configJson['conf']
+	else:
+		sys.exit('Invalid JSON file')
+
 	print('Configuration JSON:')
 	print(configJson)
+
+	expectedConfig = ['name', 'author', 'nbInstances', 'nbSteps', 'nbIntroductionSteps', 'nbSystemDisplayed', 'description', 'fixedPosition']
 
 	config = open(testDirectory+'/'+'config.py', 'w')
 	config.write('# === CONFIGURATION VARIABLES ===\n')
 	config.write('# Each configuration variable is necessarily a string\n')
 	for var in configJson:
 		config.write(var+'=\''+str(configJson[var])+'\'\n')
-		if var=="nbSystemDisplayed" :
+		if var in expectedConfig:
+			print(var+'\t:: OK')
+			expectedConfig.remove(var)
+		if var=='nbSystemDisplayed':
 			nbSystemToDisplay = int(configJson[var])
+	for expected in expectedConfig:
+		print('WARN :: '+expected)
+		if var == 'name':
+			config.write(var+'=\'TEST\'\n')
+		if var == 'author':
+			config.write(var+'=\'unknow\'\n')
+		if var == 'nbInstances':
+			print('WARN :: '+expected)
+		if var == 'nbSteps':
+			print('WARN :: '+expected)
+		if var == 'nbIntroductionSteps':
+			config.write(var+'=\'0\'\n')
+		if var == 'nbSystemDisplayed':
+			print('WARN :: '+expected)
+		if var == 'description':
+			config.write(var+'=\'\'\n')
+		if var == 'fixedPosition':
+			config.write(var+'=\'True\'\n')
 	questions = json['questions']
 	print('Questions JSON:')
 	print(questions)
-	config.write('nbQuestions=\"'+str(len(questions['question']))+'\"\n')
+	config.write('nbQuestions=\''+str(len(questions['question']))+'\'\n')
 	samples = json['systems']['system'][0]['samples']
 	nbsbs = 0
 	for s in samples :
@@ -136,10 +158,6 @@ def generate_config(json):
 			nbsbs = len(s['sample'])
 	config.write('nbSampleBySystem=\''+str(nbsbs)+'\'\n')
 	questions = json['questions']['question']
-	qtype=[]
-	# for i in range(len(questions)):
-	# 	qtype.append('"'+questions[i]['type']+'"')
-	# config.write('questionsType=['+','.join(qtype)+']\n')
 	print('Done.\n')
 
 def generate_template():
