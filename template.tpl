@@ -20,20 +20,15 @@
 
 	<nav class="navbar navbar-default" style="margin-bottom:0">
 		<div class="container-fluid">
-			<div class="navbar-brand">
-				<img src="/static/img/logo.jpg" class="mg-responsive pull-left" alt="logo" width="120px" height="auto">
-  				<span style="display: inline-block;"><h1>{{name}}</h1>
-				<h3>Made by {{author}}</h3></span>
-				
+			<div class="navbar-header">
+				<img src="/static/img/logo.jpg" class="mg-responsive pull-left" alt="logo" height="120px", width="auto">
 			</div>
-			<div class="navbar-collapse collapse">
-				<ul class="nav navbar-nav navbar-right">
-					<li><a>{{user}}</a></li>
-					<li><a href="/logout">Déconnexion</a></li>
-				</ul>
-			</div>
-			
-				
+			<ul class="nav navbar-nav navbar-right">
+				<li><a>{{user}}</a></li>
+				<li><a href="/logout">Déconnexion</a></li>
+			</ul>
+			<h1>{{name}}</h1>
+			<h3>Made by {{author}}</h3>
 		</div>
 	</nav>
 

@@ -19,16 +19,16 @@
 					{
 						"type": "test",
 						"sample": [
-							"system 0 | sample 0",
-							"system 0 | sample 1",
-							"system 0 | sample 2",
-							"system 0 | sample 3",
-							"system 0 | sample 4",
-							"system 0 | sample 5",
-							"system 0 | sample 6",
-							"system 0 | sample 7",
-							"system 0 | sample 8",
-							"system 0 | sample 9"
+							"<b>system 0</b> | sample 0",
+							"<b>system 0</b> | sample 1",
+							"<b>system 0</b> | sample 2",
+							"<b>system 0</b> | sample 3",
+							"<b>system 0</b> | sample 4",
+							"<b>system 0</b> | sample 5",
+							"<b>system 0</b> | sample 6",
+							"<b>system 0</b> | sample 7",
+							"<b>system 0</b> | sample 8",
+							"<b>system 0</b> | sample 9"
 						]
 					}
 				]
