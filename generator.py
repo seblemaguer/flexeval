@@ -8,8 +8,9 @@ from optparse import OptionParser
 from pprint import pprint
 
 execfile(os.path.join(os.path.dirname(__file__),'pm_bodies.py'))
-nbSystemToDisplay=2
-useMedia=True
+nbSystemToDisplay = 2
+useMedia = True
+
 def parser_options_jt():
 	parser = OptionParser()
 	parser.add_option('-j', '--json', dest='inputJSON', help='input JSON file', metavar='FILE')
@@ -17,11 +18,11 @@ def parser_options_jt():
 	inputJSON = None
 	inputTemplate = None
 	(options, args) = parser.parse_args()
-	if(options.inputJSON==None) :
+	if options.inputJSON==None:
 		sys.exit('Invalid JSON file name')
 	else :
 		inputJSON = options.inputJSON
-	if(options.inputTemplate==None) :
+	if options.inputTemplate==None:
 		sys.exit('Invalid template file name')
 	else :
 		inputTemplate = options.inputTemplate
