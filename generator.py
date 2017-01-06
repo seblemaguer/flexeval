@@ -9,15 +9,13 @@ from pprint import pprint
 
 execfile(os.path.join(os.path.dirname(__file__),'pm_bodies.py'))
 nbSystemToDisplay=2
-
+useMedia=True
 def parser_options_jt():
 	parser = OptionParser()
 	parser.add_option('-j', '--json', dest='inputJSON', help='input JSON file', metavar='FILE')
 	parser.add_option('-t', '--tpl', dest='inputTemplate', help='input template file', metavar='FILE')
-	parser.add_option('-n', '--nomedia', dest='noMedia', help='no media used (text only)', action="store_true")
 	inputJSON = None
 	inputTemplate = None
-	noMedia=False
 	(options, args) = parser.parse_args()
 	if(options.inputJSON==None) :
 		sys.exit('Invalid JSON file name')
@@ -27,9 +25,7 @@ def parser_options_jt():
 		sys.exit('Invalid template file name')
 	else :
 		inputTemplate = options.inputTemplate
-	if(options.noMedia!=None and options.noMedia):
-		noMedia = options.noMedia
-	return inputJSON, inputTemplate, noMedia
+	return inputJSON, inputTemplate
 
 def create_architecture(testName):
 	print('|-----------------------|')
@@ -108,6 +104,7 @@ def generate_config(json):
 	print('| config generation |')
 	print('v-------------------v')
 	global nbSystemToDisplay
+	global useMedia
 	configJson = json
 	if 'configuration' in configJson:
 		configJson = configJson['configuration']
@@ -129,6 +126,8 @@ def generate_config(json):
 			expectedConfig.remove(var)
 		if var=='nbSystemDisplayed':
 			nbSystemToDisplay = int(configJson[var])
+		elif var == 'useMedia':
+			useMedia = configJson[var]=="True"
 	for expected in expectedConfig:
 		print(expected+' not found!')
 		if expected == 'name':
@@ -303,7 +302,7 @@ def add_extra_pages():
 
 
 
-(inputJSON, inputTemplate, noMedia) = parser_options_jt()
+(inputJSON, inputTemplate) = parser_options_jt()
 dataFromJSON = parse_json(inputJSON)
 name = dataFromJSON['configuration']['name']
 (mainDirectory, testDirectory, viewsDirectory, staticDirectory, mediaDirectory) = create_architecture(name)
@@ -314,7 +313,7 @@ create_plateform()
 create_model()
 add_login()
 add_extra_pages()
-if noMedia==None:
+if useMedia:
 	copy_media(dataFromJSON)
 verif_template()
 
