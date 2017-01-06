@@ -1,32 +1,45 @@
 import json
+import csv
 import os
 import re
 import shutil
 import sqlite3
 import sys
-from optparse import OptionParser
+import argparse
 from pprint import pprint
+
 
 execfile(os.path.join(os.path.dirname(__file__),'pm_bodies.py'))
 nbSystemToDisplay = 2
 useMedia = True
 
-def parser_options_jt():
-	parser = OptionParser()
-	parser.add_option('-j', '--json', dest='inputJSON', help='input JSON file', metavar='FILE')
-	parser.add_option('-t', '--tpl', dest='inputTemplate', help='input template file', metavar='FILE')
-	inputJSON = None
-	inputTemplate = None
-	(options, args) = parser.parse_args()
-	if options.inputJSON==None:
-		sys.exit('Invalid JSON file name')
-	else :
-		inputJSON = options.inputJSON
-	if options.inputTemplate==None:
-		sys.exit('Invalid template file name')
-	else :
-		inputTemplate = options.inputTemplate
-	return inputJSON, inputTemplate
+def parse_arguments():
+	JSONFile = None
+	TemplateFile = None
+	# parser = OptionParser()
+	parser = argparse.ArgumentParser(description='Generator for subjective test web plateform')
+	parser.add_argument('-j', '--json', help='input JSON file', type=argparse.FileType('r'), required=True)
+	parser.add_argument('-t', '--tpl', help='input template file', type=str, required=True)
+	parser.add_argument('-s', '--systems', nargs='+', help='list of systems', type=str, required=True)
+	parser.add_argument('-n', '--name', help='systems with names after', action='store_true')
+	args = parser.parse_args()
+
+	print(args.systems)
+
+	lsPath = []
+	lsName = []
+	for index, elt in enumerate(args.systems):
+		if index%2==0:
+			lsPath.append(elt)
+		else:
+			lsName.append(elt)
+
+	print(lsName)
+	print(lsPath)
+	if len(lsName) != len(lsPath):
+		sys.exit('Abort: Bad number of arguments')
+
+	return args.json, args.tpl
 
 def create_architecture(testName):
 	print('|-----------------------|')
@@ -36,7 +49,7 @@ def create_architecture(testName):
 	def create_dir(path, name):
 		dir = str(path)+str(name)+'/'
 		if os.path.exists(dir):
-			sys.exit('Folder already exist : '+dir)
+			sys.exit('Abort: Folder already exist : '+dir)
 		os.makedirs(dir)
 		print(dir+' created.')
 		return dir
@@ -58,8 +71,7 @@ def parse_json(JSONfile):
 	print('| parsing JSON |')
 	print('v--------------v')
 
-	with open(JSONfile) as data_file:
-		data = json.load(data_file)
+	data = json.load(JSONfile)
 	pprint(data)
 
 	print('Done.\n')
@@ -110,7 +122,7 @@ def generate_config(json):
 	if 'configuration' in configJson:
 		configJson = configJson['configuration']
 	else:
-		sys.exit('Invalid JSON file')
+		sys.exit('Abort: Invalid JSON file')
 
 	print('Configuration JSON:')
 	print(configJson)
@@ -137,18 +149,18 @@ def generate_config(json):
 			config.write(expected+'=\'unknow\'\n')
 		if expected == 'nbInstances':
 			print('ERROR :: '+expected)
-			sys.exit('Invalid JSON file')
+			sys.exit('Abort: Invalid JSON file')
 		if expected == 'nbQuestions':
 			print('ERROR :: '+expected)
-			sys.exit('Invalid JSON file')
+			sys.exit('Abort: Invalid JSON file')
 		if expected == 'nbSteps':
 			print('ERROR :: '+expected)
-			sys.exit('Invalid JSON file')
+			sys.exit('Abort: Invalid JSON file')
 		if expected == 'nbIntroductionSteps':
 			config.write(expected+'=\'0\'\n')
 		if expected == 'nbSystemDisplayed':
 			print('ERROR :: '+expected)
-			sys.exit('Invalid JSON file')
+			sys.exit('Abort: Invalid JSON file')
 		if expected == 'description':
 			config.write(expected+'=\'\'\n')
 		if expected == 'fixedPosition':
@@ -304,7 +316,7 @@ def add_extra_pages():
 
 
 
-(inputJSON, inputTemplate) = parser_options_jt()
+(inputJSON, inputTemplate) = parse_arguments()
 dataFromJSON = parse_json(inputJSON)
 name = dataFromJSON['configuration']['name']
 (mainDirectory, testDirectory, viewsDirectory, staticDirectory, mediaDirectory) = create_architecture(name)
@@ -322,10 +334,3 @@ verif_template()
 print('='*30)
 print('    GENERATION TERMINEE !!')
 print('='*30)
-
-# platform.py		OK
-# model.py			OK
-# config.py			OK
-# db.db				OK
-# audio/*.wav		OK
-# template.tpl		a verifier
