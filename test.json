@@ -4,11 +4,9 @@
 		"author": "nous",
 		"nbInstances": 6,
 		"nbSteps": 10,
-		"nbIntroductionSteps": 0,
 		"nbSystemDisplayed" : 5,
 		"description": "Test du test",
-		"fixedPosition": false,
-		"welcomeText": "WELCOME TEXT"
+		"fixedPosition": false
 	},
 	"systems": {
 		"system": [

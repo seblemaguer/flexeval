@@ -117,7 +117,7 @@ def generate_config(json):
 	print('Configuration JSON:')
 	print(configJson)
 
-	expectedConfig = ['name', 'author', 'nbInstances', 'nbSteps', 'nbIntroductionSteps', 'nbSystemDisplayed', 'description', 'fixedPosition']
+	expectedConfig = ['name', 'author', 'nbInstances', 'nbSteps', 'nbIntroductionSteps', 'nbSystemDisplayed', 'description', 'fixedPosition', 'welcomeText']
 
 	config = open(testDirectory+'/'+'config.py', 'w')
 	config.write('# === CONFIGURATION VARIABLES ===\n')
@@ -131,22 +131,24 @@ def generate_config(json):
 			nbSystemToDisplay = int(configJson[var])
 	for expected in expectedConfig:
 		print('WARN :: '+expected)
-		if var == 'name':
-			config.write(var+'=\'TEST\'\n')
-		if var == 'author':
-			config.write(var+'=\'unknow\'\n')
-		if var == 'nbInstances':
+		if expected == 'name':
+			config.write(expected+'=\'TEST\'\n')
+		if expected == 'author':
+			config.write(expected+'=\'unknow\'\n')
+		if expected == 'nbInstances':
 			print('WARN :: '+expected)
-		if var == 'nbSteps':
+		if expected == 'nbSteps':
 			print('WARN :: '+expected)
-		if var == 'nbIntroductionSteps':
-			config.write(var+'=\'0\'\n')
-		if var == 'nbSystemDisplayed':
+		if expected == 'nbIntroductionSteps':
+			config.write(expected+'=\'0\'\n')
+		if expected == 'nbSystemDisplayed':
 			print('WARN :: '+expected)
-		if var == 'description':
-			config.write(var+'=\'\'\n')
-		if var == 'fixedPosition':
-			config.write(var+'=\'True\'\n')
+		if expected == 'description':
+			config.write(expected+'=\'\'\n')
+		if expected == 'fixedPosition':
+			config.write(expected+'=\'True\'\n')
+		if expected == 'welcomeText':
+			config.write(expected+'=\'\'\n')
 	questions = json['questions']
 	print('Questions JSON:')
 	print(questions)
