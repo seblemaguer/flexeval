@@ -239,7 +239,6 @@ def get_test_sample(user) :
 				validlist=[r]
 			elif r[1]==min:
 				validlist.append(r)
-	print validlist
 	index = validlist[random.randint(0,len(validlist)-1)][0]
 	samples=[]
 	systems=[]
@@ -286,6 +285,7 @@ def get_intro_sample(user) :
 	conn.close()
 	return (samples, systems, index)
 
+
 def insert_data(data) :
 	now = datetime.now()
 	conn = sqlite3.connect(os.path.join(os.path.dirname(__file__),'data.db'))
@@ -297,22 +297,23 @@ def insert_data(data) :
 		sysval=""
 		systs=""
 		for i in range(int(config.nbSystemDisplayed)):
-			sysval=sysval+"\\""+data['systems'][i]+"\\""
+			sysval=sysval+"\""+data['systems'][i]+"\""
 			systs=systs+"system"+str(i+1)
 			if(i<int(config.nbSystemDisplayed)-1):
 				sysval=sysval+","
 				systs=systs+","
 		
 		if "target" in answer :
-			val = "\\""+str(data['user'])+"\\",\\""+str(now)+"\\",\\""+answer['content']+"\\",\\""+str(data['index'])+"\\",\\""+str(answer['index'])+"\\",\\""+answer["target"]+"\\","+sysval
-			c.execute("insert into answer(user,date,content,syst_index,question_index,content_target,"+systs+") values ("+val+")")
+			val = "\""+str(data['user'])+"\",\""+str(now)+"\",\""+answer['content']+"\",\""+str(data['index'])+"\",\""+str(answer['index'])+"\",\""+answer["target"]+"\","+sysval
+			conn.execute("insert into answer(user,date,content,syst_index,question_index,content_target,"+systs+") values ("+val+")")
 		else :
-			val = "\\""+str(data['user'])+"\\",\\""+str(now)+"\\",\\""+answer['content']+"\\",\\""+str(data['index'])+"\\",\\""+str(answer['index'])+"\\","+sysval
-			c.execute("insert into answer(user,date,content,syst_index,question_index,"+systs+") values ("+val+")")
+			val = "\""+str(data['user'])+"\",\""+str(now)+"\",\""+answer['content']+"\",\""+str(data['index'])+"\",\""+str(answer['index'])+"\","+sysval
+			conn.execute("insert into answer(user,date,content,syst_index,question_index,"+systs+") values ("+val+")")
+	conn.commit()
 	#update the number of time processed for the samples
 	c.execute('select nb_processed from sample where syst_index='+str(data['index']))
 	n = c.fetchall()[0][0]
-	c.execute('update sample set nb_processed='+str(n+1)+' where syst_index='+str(data['index']))
+	conn.execute('update sample set nb_processed='+str(n+1)+' where syst_index='+str(data['index']))
 	conn.commit()
 	conn.close()
 """
