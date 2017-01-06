@@ -81,12 +81,12 @@ def create_db(data):
 		print('Database successfully created.')
 		for system in data['systems']['system']:
 			systemIndex = 0
-			systemToInsert = (system['-id'],system['-name'],system['comment'])
+			systemToInsert = (system['id'],system['name'],system['comment'])
 			con.execute("INSERT INTO system(id, name, comment) VALUES (?,?,?)", systemToInsert)
 			for samples in system['samples']:
-				sampleType = samples['-type']
+				sampleType = samples['type']
 				for samplePath in samples['sample']:
-					sampleToInsert=(samplePath, sampleType, system['-id'], systemIndex)
+					sampleToInsert=(samplePath, sampleType, system['id'], systemIndex)
 					con.execute("INSERT INTO sample(path, type, id_system, syst_index) VALUES (?,?,?,?)", sampleToInsert)
 					systemIndex += 1
 		con.commit()
@@ -135,13 +135,16 @@ def generate_config(json):
 		if expected == 'author':
 			config.write(expected+'=\'unknow\'\n')
 		if expected == 'nbInstances':
-			print('WARN :: '+expected)
+			print('ERROR :: '+expected)
+			sys.exit('Invalid JSON file')
 		if expected == 'nbSteps':
-			print('WARN :: '+expected)
+			print('ERROR :: '+expected)
+			sys.exit('Invalid JSON file')
 		if expected == 'nbIntroductionSteps':
 			config.write(expected+'=\'0\'\n')
 		if expected == 'nbSystemDisplayed':
-			print('WARN :: '+expected)
+			print('ERROR :: '+expected)
+			sys.exit('Invalid JSON file')
 		if expected == 'description':
 			config.write(expected+'=\'\'\n')
 		if expected == 'fixedPosition':
@@ -157,7 +160,7 @@ def generate_config(json):
 	samples = json['systems']['system'][0]['samples']
 	nbsbs = 0
 	for s in samples :
-		if s['-type']=='test' :
+		if s['type']=='test' :
 			nbsbs = len(s['sample'])
 	config.write('nbSampleBySystem=\''+str(nbsbs)+'\'\n')
 	questions = json['questions']['question']
@@ -258,27 +261,27 @@ def verif_template():
 	for et in essentials_tags :
 		matches = re.findall(et, filetext)
 		if len(matches)==0:
-			print "ERRROR \t:: "+ et + " not found! Please add it our you will get trouble..."
+			print("ERRROR \t:: "+ et + " not found! Please add it our you will get trouble...")
 			miss=miss+1
 	if miss==0 :
-		print "Static Files \t:: OK"
+		print("Static Files \t:: OK")
 	miss=0
 	for t in warning_tags:
 		for i in range(nbSystemToDisplay) :
 			matches = re.findall("{{"+t+"\[["+str(i)+"]+\]}}", filetext)
 			checked.append("{{"+t+"["+str(i)+"]}}")
 			if len(matches)==0:
-				print t + " \t:: ERROR - missing "+t+"["+str(i)+"] tag in your template!"
+				print(t + " \t:: ERROR - missing "+t+"["+str(i)+"] tag in your template!")
 	if miss==0 :
-		print "Dynamics tags \t:: OK"
+		print("Dynamics tags \t:: OK")
 	matches = re.findall(regexp, filetext)
 	for m in matches :
 		if m in checked :
 			continue
 		if not m in authorized_tags :
-			print m + " \t:: WARN : maybe you have an error in your template, please check if your application works fine !"
+			print(m + " \t:: WARN : maybe you have an error in your template, please check if your application works fine !")
 		else :
-			print m + " \t:: OK"
+			print(m + " \t:: OK")
 		checked.append(m)
 	print('Done.\n')
 
