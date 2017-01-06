@@ -6,7 +6,8 @@
 		"nbSteps": 10,
 		"nbSystemDisplayed" : 5,
 		"description": "Test du test",
-		"fixedPosition": false
+		"fixedPosition": false,
+		"useMedia":false
 	},
 	"systems": {
 		"system": [

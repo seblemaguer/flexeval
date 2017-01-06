@@ -75,9 +75,9 @@ def create_db(data):
 
 	con = sqlite3.connect(testDirectory+'/data.db')
 	try:
-		systs="`system1` TEXT NOT NULL"
+		systs = "`system1` TEXT NOT NULL"
 		for i in range(1,nbSystemToDisplay):
-			systs=systs + ", `system"+str(i+1)+"` TEXT NOT NULL"
+			systs = systs + ", `system"+str(i+1) + "` TEXT NOT NULL"
 		con.execute("CREATE TABLE system (`id` TEXT NOT NULL PRIMARY KEY UNIQUE, `name` TEXT NOT NULL, `comment` TEXT NOT NULL)")
 		con.execute("CREATE TABLE sample (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `path` TEXT NOT NULL, `type` TEXT NOT NULL, `id_system` TEXT NOT NULL , `syst_index` INTEGER NOT NULL, `nb_processed` INTEGER NOT NULL DEFAULT 0, FOREIGN KEY(id_system) REFERENCES system(id))")
 		con.execute("CREATE TABLE answer (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `user` TEXT NOT NULL, `date` TEXT NOT NULL, `content` TEXT NOT NULL, `content_target` TEXT, `syst_index` INTEGER NOT NULL, `question_index` INTEGER NOT NULL,"+systs+" )")
@@ -85,14 +85,14 @@ def create_db(data):
 		print('Database successfully created.')
 		for system in data['systems']['system']:
 			systemIndex = 0
-			systemToInsert=(system['-id'],system['-name'],system['comment'])
+			systemToInsert = (system['-id'],system['-name'],system['comment'])
 			con.execute("INSERT INTO system(id, name, comment) VALUES (?,?,?)", systemToInsert)
 			for samples in system['samples']:
-				sampleType=samples['-type']
+				sampleType = samples['-type']
 				for samplePath in samples['sample']:
-					systemIndex = systemIndex + 1
 					sampleToInsert=(samplePath, sampleType, system['-id'], systemIndex)
 					con.execute("INSERT INTO sample(path, type, id_system, syst_index) VALUES (?,?,?,?)", sampleToInsert)
+					systemIndex += 1
 		con.commit()
 		print('Database successfully filled.')
 	except Exception as e:
@@ -117,9 +117,9 @@ def generate_config(json):
 	print('Configuration JSON:')
 	print(configJson)
 
-	expectedConfig = ['name', 'author', 'nbInstances', 'nbSteps', 'nbIntroductionSteps', 'nbSystemDisplayed', 'description', 'fixedPosition', 'welcomeText']
+	expectedConfig = ['name', 'author', 'nbInstances', 'nbSteps', 'nbIntroductionSteps', 'nbSystemDisplayed', 'description', 'fixedPosition', 'welcomeText', 'useMedia']
 
-	config = open(testDirectory+'/'+'config.py', 'w')
+	config = open(testDirectory+'/config.py', 'w')
 	config.write('# === CONFIGURATION VARIABLES ===\n')
 	config.write('# Each configuration variable is necessarily a string\n')
 	for var in configJson:
@@ -130,7 +130,7 @@ def generate_config(json):
 		if var=='nbSystemDisplayed':
 			nbSystemToDisplay = int(configJson[var])
 	for expected in expectedConfig:
-		print('WARN :: '+expected)
+		print(expected+' not found!')
 		if expected == 'name':
 			config.write(expected+'=\'TEST\'\n')
 		if expected == 'author':
@@ -149,6 +149,8 @@ def generate_config(json):
 			config.write(expected+'=\'True\'\n')
 		if expected == 'welcomeText':
 			config.write(expected+'=\'\'\n')
+		if expected == 'useMedia':
+			config.write(expected+'=\'True\'\n')
 	questions = json['questions']
 	print('Questions JSON:')
 	print(questions)
@@ -191,9 +193,6 @@ def generate_template():
 		scriptArray.append(finditer.group(0))
 	print(linkArray)
 	print(scriptArray)
-	# search = re.search(regex, tpl)
-	# if search :
-	# 	print(search)
 	print('Done.\n')
 
 def create_plateform():
