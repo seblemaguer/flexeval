@@ -245,7 +245,10 @@ def get_test_sample(user) :
 	i=0
 	while i<nbToKeep :
 		systems.append(systs[i][1])
-		samples.append('media/'+systs[i][2])
+		if config.useMedia :
+			samples.append('media/'+systs[i][2])
+		else :
+			samples.append(systs[i][2])
 		i=i+1
 	if config.fixedPosition=='False': #'False' to false ?
 		r = random.random()
@@ -274,7 +277,10 @@ def get_intro_sample(user) :
 	i=0
 	while i<nbToKeep :
 		systems.append(systs[i][1])
-		samples.append('media/'+systs[i][2])
+		if config.useMedia :
+			samples.append('media/'+systs[i][2])
+		else :
+			samples.append(systs[i][2])
 		i=i+1
 	if config.fixedPosition=='False': #'False' to false ?
 		r = random.random()
