@@ -20,10 +20,11 @@
 
 	<nav class="navbar navbar-default" style="margin-bottom:0">
 		<div class="container-fluid">
-			<div class="navbar-header">
-				<img src="/static/img/logo.jpg" class="mg-responsive pull-left" alt="logo">
-				<h1>{{name}}</h1>
-				<h3>Made by {{author}}</h3>
+			<div class="navbar-brand">
+				<img src="/static/img/logo.jpg" class="mg-responsive pull-left" alt="logo" width="120px" height="auto">
+  				<span style="display: inline-block;"><h1>{{name}}</h1>
+				<h3>Made by {{author}}</h3></span>
+				
 			</div>
 			<div class="navbar-collapse collapse">
 				<ul class="nav navbar-nav navbar-right">
@@ -31,6 +32,8 @@
 					<li><a href="/logout">Déconnexion</a></li>
 				</ul>
 			</div>
+			
+				
 		</div>
 	</nav>
 
@@ -40,26 +43,72 @@
 				<div class="alert alert-warning" role="alert"><span class="glyphicon glyphicon-alert" aria-hidden="true"></span>  This is an <strong>introduction</strong> step !</div>
 			%end
 			<div class="col-md-6 col-md-offset-3">
+				<form role="form" action="/test" method="POST">
 				<p>Sample 1</p>
 				<div>
-					{{samples[0]}}
+					{{!samples[0]}}
 				</div>
+				<div class="answer">
+						<label>Avis : </label>
+						<label id="rate1">3</label>
+						<label> étoiles</label>
+						<div id="slider1"></div>
+						<label>Mauvais</label>
+						<label style="float: right;">Excellent</label>
+					</div>
+					<input type="hidden" id="question1" name="question1" value="3;;{{systems[0]}}">
 				<p>Sample 2</p>
 				<div>
-					{{samples[1]}}
+					{{!samples[1]}}
 				</div>
+				<div class="answer">
+						<label>Avis : </label>
+						<label id="rate2">3</label>
+						<label> étoiles</label>
+						<div id="slider2"></div>
+						<label>Mauvais</label>
+						<label style="float: right;">Excellent</label>
+					</div>
+					<input type="hidden" id="question2" name="question2" value="3;;{{systems[1]}}">
 				<p>Sample 3</p>
 				<div>
-					{{samples[2]}}
+					{{!samples[2]}}
 				</div>
+				<div class="answer">
+						<label>Avis : </label>
+						<label id="rate3">3</label>
+						<label> étoiles</label>
+						<div id="slider3"></div>
+						<label>Mauvais</label>
+						<label style="float: right;">Excellent</label>
+					</div>
+					<input type="hidden" id="question3" name="question3" value="3;;{{systems[2]}}">
 				<p>Sample 4</p>
 				<div>
-					{{samples[3]}}
+					{{!samples[3]}}
 				</div>
+				<div class="answer">
+						<label>Avis : </label>
+						<label id="rate4">3</label>
+						<label> étoiles</label>
+						<div id="slider4"></div>
+						<label>Mauvais</label>
+						<label style="float: right;">Excellent</label>
+					</div>
+					<input type="hidden" id="question4" name="question4" value="3;;{{systems[3]}}">
 				<p>Sample 5</p>
 				<div>
-					{{samples[4]}}
+					{{!samples[4]}}
 				</div>
+				<div class="answer">
+						<label>Avis : </label>
+						<label id="rate5">3</label>
+						<label> étoiles</label>
+						<div id="slider5"></div>
+						<label>Mauvais</label>
+						<label style="float: right;">Excellent</label>
+					</div>
+					<input type="hidden" id="question5" name="question5" value="3;;{{systems[4]}}">
 			</div>
 		</div>
 	</div>
@@ -68,7 +117,7 @@
 		<div class="row">
 			<!-- answer part -->
 			<div class="col-md-6 col-md-offset-3">
-				<form role="form" action="/test" method="POST">
+				
 					<input type="hidden" name="ref" value="{{index}}">
 					<input type="hidden" name="system1" value="{{systems[0]}}">
 					<input type="hidden" name="system2" value="{{systems[1]}}">
@@ -76,18 +125,7 @@
 					<input type="hidden" name="system4" value="{{systems[3]}}">
 					<input type="hidden" name="system5" value="{{systems[4]}}">
 										
-					<h3>Question</h3>
-					<div class="alert alert-info" role="alert">Veuillez donner une note</div>
-					<!-- use the slider -->
-					<div class="answer">
-						<label>Avis : </label>
-						<label id="rate1">3</label>
-						<label> étoiles</label>
-						<div id="slider1"></div>
-						<label>Mauvais</label>
-						<label style="float: right;">Excellent</label>
-					</div>
-					<input type="hidden" id="question1" name="question1" value="3;;{{systems[1]}}">
+					
 					<input id="next" type="submit" class="btn btn-lg btn-success btn-block pull-right" value="Next">
 				</form>
 			</div>
@@ -105,6 +143,58 @@
 				slide: function(event, ui) {
 					$("#rate1").html(ui.value);
 					$("#question1").attr("value",ui.value+";;{{systems[0]}}");
+				}
+			});
+		});
+		$(function() {
+			$("#slider2").slider({
+				range: "min",
+				value:3,
+				min: 0,
+				max: 6,
+				step: 1,
+				slide: function(event, ui) {
+					$("#rate2").html(ui.value);
+					$("#question2").attr("value",ui.value+";;{{systems[1]}}");
+				}
+			});
+		});
+		$(function() {
+			$("#slider3").slider({
+				range: "min",
+				value:3,
+				min: 0,
+				max: 6,
+				step: 1,
+				slide: function(event, ui) {
+					$("#rate3").html(ui.value);
+					$("#question3").attr("value",ui.value+";;{{systems[2]}}");
+				}
+			});
+		});
+		$(function() {
+			$("#slider4").slider({
+				range: "min",
+				value:3,
+				min: 0,
+				max: 6,
+				step: 1,
+				slide: function(event, ui) {
+					$("#rate4").html(ui.value);
+					$("#question4").attr("value",ui.value+";;{{systems[3]}}");
+				}
+			});
+		});
+		$(function() {
+			$("#slider5").slider({
+				range: "min",
+				value:3,
+				min: 0,
+				max: 6,
+				step: 1,
+				slide: function(event, ui) {
+					$("#rate5").html(ui.value);
+					$("#question5").attr("value",ui.value+";;{{systems[4]}}");
 				}
 			});
 		});

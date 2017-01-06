@@ -245,7 +245,7 @@ def get_test_sample(user) :
 	i=0
 	while i<nbToKeep :
 		systems.append(systs[i][1])
-		if config.useMedia :
+		if config.useMedia=='True' :
 			samples.append('media/'+systs[i][2])
 		else :
 			samples.append(systs[i][2])
@@ -277,7 +277,7 @@ def get_intro_sample(user) :
 	i=0
 	while i<nbToKeep :
 		systems.append(systs[i][1])
-		if config.useMedia :
+		if config.useMedia=='True' :
 			samples.append('media/'+systs[i][2])
 		else :
 			samples.append(systs[i][2])
