@@ -81,13 +81,13 @@
 					<!-- use the slider -->
 					<div class="answer">
 						<label>Avis : </label>
-						<label id="rate4">3</label>
+						<label id="rate1">3</label>
 						<label> étoiles</label>
-						<div id="slider4"></div>
+						<div id="slider1"></div>
 						<label>Mauvais</label>
 						<label style="float: right;">Excellent</label>
 					</div>
-					<input type="hidden" id="question4" name="question4" value="3;;{{systems[1]}}">
+					<input type="hidden" id="question1" name="question1" value="3;;{{systems[1]}}">
 					<input id="next" type="submit" class="btn btn-lg btn-success btn-block pull-right" value="Next">
 				</form>
 			</div>
@@ -96,15 +96,15 @@
 	<br><br><br>
 	<script>
 		$(function() {
-			$("#slider4").slider({
+			$("#slider1").slider({
 				range: "min",
 				value:3,
 				min: 0,
 				max: 6,
 				step: 1,
 				slide: function(event, ui) {
-					$("#rate4").html(ui.value);
-					$("#question4").attr("value",ui.value+";;{{systems[0]}}");
+					$("#rate1").html(ui.value);
+					$("#question1").attr("value",ui.value+";;{{systems[0]}}");
 				}
 			});
 		});

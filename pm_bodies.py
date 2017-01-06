@@ -295,7 +295,7 @@ def insert_data(data) :
 		sysval=""
 		systs=""
 		for i in range(int(config.nbSystemDisplayed)):
-			sysval=sysval+"\""+data['systems'][i]+"\""
+			sysval=sysval+"\\""+data['systems'][i]+"\\""
 			systs=systs+"system"+str(i+1)
 			if(i<int(config.nbSystemDisplayed)-1):
 				sysval=sysval+","
