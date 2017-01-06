@@ -302,10 +302,10 @@ def insert_data(data) :
 				systs=systs+","
 		
 		if "target" in answer :
-			val = "\""+str(data['user'])+"\",\""+str(now)+"\",\""+answer['content']+"\",\""+str(data['index'])+"\",\""+str(answer['index'])+"\",\""+answer["target"]+"\","+sysval
+			val = "\\""+str(data['user'])+"\\",\\""+str(now)+"\\",\\""+answer['content']+"\\",\\""+str(data['index'])+"\\",\\""+str(answer['index'])+"\\",\\""+answer["target"]+"\\","+sysval
 			conn.execute("insert into answer(user,date,content,syst_index,question_index,content_target,"+systs+") values ("+val+")")
 		else :
-			val = "\""+str(data['user'])+"\",\""+str(now)+"\",\""+answer['content']+"\",\""+str(data['index'])+"\",\""+str(answer['index'])+"\","+sysval
+			val = "\\""+str(data['user'])+"\\",\\""+str(now)+"\\",\\""+answer['content']+"\\",\\""+str(data['index'])+"\\",\\""+str(answer['index'])+"\\","+sysval
 			conn.execute("insert into answer(user,date,content,syst_index,question_index,"+systs+") values ("+val+")")
 	conn.commit()
 	#update the number of time processed for the samples
