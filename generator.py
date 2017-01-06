@@ -115,7 +115,7 @@ def generate_config(json):
 	print('Configuration JSON:')
 	print(configJson)
 
-	expectedConfig = ['name', 'author', 'nbInstances', 'nbSteps', 'nbIntroductionSteps', 'nbSystemDisplayed', 'description', 'fixedPosition', 'welcomeText', 'useMedia']
+	expectedConfig = ['name', 'author', 'nbInstances', 'nbSteps', 'nbIntroductionSteps', 'nbSystemDisplayed', 'description', 'fixedPosition', 'welcomeText', 'useMedia', 'nbQuestions']
 
 	config = open(testDirectory+'/config.py', 'w')
 	config.write('# === CONFIGURATION VARIABLES ===\n')
@@ -138,6 +138,9 @@ def generate_config(json):
 		if expected == 'nbInstances':
 			print('ERROR :: '+expected)
 			sys.exit('Invalid JSON file')
+		if expected == 'nbQuestions':
+			print('ERROR :: '+expected)
+			sys.exit('Invalid JSON file')
 		if expected == 'nbSteps':
 			print('ERROR :: '+expected)
 			sys.exit('Invalid JSON file')
@@ -154,17 +157,12 @@ def generate_config(json):
 			config.write(expected+'=\'\'\n')
 		if expected == 'useMedia':
 			config.write(expected+'=\'True\'\n')
-	questions = json['questions']
-	print('Questions JSON:')
-	print(questions)
-	config.write('nbQuestions=\''+str(len(questions['question']))+'\'\n')
 	samples = json['systems']['system'][0]['samples']
 	nbsbs = 0
 	for s in samples :
 		if s['type']=='test' :
 			nbsbs = len(s['sample'])
 	config.write('nbSampleBySystem=\''+str(nbsbs)+'\'\n')
-	questions = json['questions']['question']
 	print('Done.\n')
 
 def generate_template():

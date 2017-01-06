@@ -122,6 +122,7 @@ def process_test_post():
 	if model.get_nb_step_user(user) < model.get_nb_step() :
 		bottle.redirect('/test')
 	else :
+		bottle.request.environ.get('beaker.session').delete()
 		return "<p>Test finished thank you for your cooperation</p>"
 
 #access to local static files

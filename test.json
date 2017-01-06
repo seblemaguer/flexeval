@@ -7,7 +7,8 @@
 		"nbSystemDisplayed" : 5,
 		"description": "Test du test",
 		"fixedPosition": false,
-		"useMedia":false
+		"useMedia":false,
+		"nbQuestions":5
 	},
 	"systems": {
 		"system": [
@@ -120,15 +121,6 @@
 						]
 					}
 				]
-			}
-		]
-	},
-	"questions": {
-		"question" : [
-			{
-				"id" : 1,
-				"type" : "range",
-				"description" : "Question unique"
 			}
 		]
 	}
