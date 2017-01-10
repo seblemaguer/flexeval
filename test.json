@@ -1,13 +1,16 @@
 {
-	"configuration": {
-		"name": "Test grandeur nature",
-		"author": "nous",
-		"nbSteps": 6,
-		"nbSystemDisplayed" : 5,
-		"description": "Test du test",
+    "configuration": {
+		"name": "Perceptual_Test_A",
+		"author": "IRISA/Expression",
+		"nbSteps": 8,
+		"nbSystemDisplayed" : 6,
+		"description": "Study on spontaneous speech",
 		"useMedia":false,
 		"nbQuestions":5,
-		"nbFixedPosition":1
+	        "nbFixedPosition":1,
+	        "nbIntroductionSteps":0,
+	        "welcomeText": "",
+	        "nbSampleBySystem": 10
 	},
 	"systems": {
 		"system": [
@@ -120,7 +123,30 @@
 						]
 					}
 				]
+			},
+		    			{
+				"id": "_s5",
+				"name": "s5",
+				"comment": "Système 5",
+				"samples": [
+					{
+						"type": "test",
+						"sample": [
+							"system 5 | sample 0",
+							"system 5 | sample 1",
+							"system 5 | sample 2",
+							"system 5 | sample 3",
+							"system 5 | sample 4",
+							"system 5 | sample 5",
+							"system 5 | sample 6",
+							"system 5 | sample 7",
+							"system 5 | sample 8",
+							"system 5 | sample 9"
+						]
+					}
+				]
 			}
+
 		]
 	}
 }

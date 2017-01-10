@@ -1,9 +1,16 @@
-plateform_body = """import model
+platform_body = """
 import sys
+import os
+
+if os.path.dirname(__file__) != '':
+	os.chdir(os.path.dirname(__file__))
+	sys.path.append(os.path.dirname(__file__))
+
+import model
 import bottle
+from bottle import request
 import sqlite3
 import json
-import os
 import random
 import config
 from beaker.middleware import SessionMiddleware
@@ -14,6 +21,11 @@ views_path = os.path.join(os.path.dirname(__file__), 'views/')
 bottle.TEMPLATE_PATH.insert(0, views_path)
 #bottle.TEMPLATE_PATH.insert(0,os.path.dirname(__file__))
 app = bottle.Bottle()
+
+# TO MODIFY DEPENDING ON DEPLOYMENT CONFIGURATION
+# example: '/mytest'
+# DO NOT FORGET TO PUT HEADING /
+app.config['myapp.APP_PREFIX'] = '' 
 
 session_opts = {
 	'session.type': 'file',
@@ -27,7 +39,7 @@ app_session = bottle.request.environ.get('beaker.session')
 
 @app.route('/')
 def badroute():
-	data={"name":model.get_name(), "author":model.get_author(), "description":model.get_description(), "welcomeText":model.get_welcome_text()}
+	data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "name":model.get_name(), "author":model.get_author(), "description":model.get_description(), "welcomeText":model.get_welcome_text()}
 	return bottle.template('index', data)
 
 @app.route('/login')
@@ -37,20 +49,21 @@ def login():
 	app_session = bottle.request.environ.get('beaker.session')
 	app_session['logged_in'] = True
 	app_session['pseudo'] = mail
-	bottle.redirect('/test')
+	bottle.redirect(request.app.config['myapp.APP_PREFIX']+'/test')
 
 @app.route('/logout')
 @app.post('/logout')
 def logout():
 	bottle.request.environ.get('beaker.session').delete()
-	bottle.redirect('/')
+	bottle.redirect(request.app.config['myapp.APP_PREFIX']+'/')
 
 @app.route('/login')
 def toto():
 	app_session = bottle.request.environ.get('beaker.session')
 	if('pseudo' in app_session) :
-		return "<p>You are already logged, please logout <a href='http://localhost:8080/logout'>here</a></p>"
-	return bottle.template('login_form')
+		return "<p>You are already logged, please logout <a href='"+request.app.config['myapp.APP_PREFIX']+"/logout'>here</a></p>"
+	data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "name":model.get_name(), "author":model.get_author(), "description":model.get_description(), "welcomeText":model.get_welcome_text()}
+	return bottle.template('index', data)
 
 #bottle post methods
 def postd():
@@ -71,7 +84,7 @@ def process_test():
 	app_session = bottle.request.environ.get('beaker.session')
 	#the following lines are to be uncommented later
 	if not testLogin() :
-		bottle.redirect('/login')
+		bottle.redirect(request.app.config['myapp.APP_PREFIX']+'/login')
 	user = app_session['pseudo']
 	#proceed to the test
 	#check if the test isn't finished yet
@@ -81,10 +94,10 @@ def process_test():
 			if not 'nb_intro_passed' in app_session:
 				app_session['nb_intro_passed'] = 0
 			(samples, systems, index) = model.get_intro_sample(user)
-			data={"name":model.get_name(), "author":model.get_author(), "description":model.get_description(), "samples":samples, "systems":systems, "index":index, "user":user, "introduction": True, "step": model.get_nb_step_user(user), "totalstep" : model.get_nb_step()}
+			data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "name":model.get_name(), "author":model.get_author(), "description":model.get_description(), "samples":samples, "systems":systems, "index":index, "user":user, "introduction": True, "step": model.get_nb_step_user(user)+1, "totalstep" : model.get_nb_step(), "progress" : model.get_progress(user)}
 		else:
 			(samples, systems, index) = model.get_test_sample(user)
-			data={"name":model.get_name(), "author":model.get_author(), "description":model.get_description(), "samples":samples, "systems":systems, "index":index, "user":user, "step": model.get_nb_step_user(user), "totalstep" : model.get_nb_step()}
+			data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "name":model.get_name(), "author":model.get_author(), "description":model.get_description(), "samples":samples, "systems":systems, "index":index, "user":user, "step": model.get_nb_step_user(user)+1, "totalstep" : model.get_nb_step(), "progress" : model.get_progress(user)}
 		return bottle.template('template', data)
 	else :
 		bottle.request.environ.get('beaker.session').delete()
@@ -95,7 +108,7 @@ def process_test_post():
 	app_session = bottle.request.environ.get('beaker.session')
 	#the following lines are to be uncommented later
 	if not testLogin() :
-		bottle.redirect('/login')
+		bottle.redirect(request.app.config['myapp.APP_PREFIX']+'/login')
 	user = app_session['pseudo']
 	#get the post data and insert into db
 	if ('intro_done' in app_session and app_session['intro_done'] == True) or int(config.nbIntroductionSteps) <= 0:
@@ -121,10 +134,12 @@ def process_test_post():
 			app_session['intro_done'] = True
 	#check if the test isn't finished yet
 	if model.get_nb_step_user(user) < model.get_nb_step() :
-		bottle.redirect('/test')
+		bottle.redirect(request.app.config['myapp.APP_PREFIX']+'/test')
 	else :
+		data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "name":model.get_name(), "author":model.get_author(), "description":model.get_description(), "welcomeText":model.get_welcome_text()}
 		bottle.request.environ.get('beaker.session').delete()
-		return "<p>Test finished thank you for your cooperation</p>"
+		return bottle.template('completed', data)
+		#return "<p>Test finished thank you for your cooperation</p>"
 
 #access to local static files
 @app.route('/static/:type/:filename#.*#')
@@ -137,16 +152,17 @@ def send_static(type, filename):
 def send_static(media, syst, filename):
 	return bottle.static_file(filename, root=os.path.join(os.path.dirname(__file__),"media/%s/") % media+"/"+syst)
 
-@app.route('/:badroute')
+@app.route(':badroute')
 def badroute(badroute):
-	bottle.redirect('/test')
+	bottle.redirect(request.app.config['myapp.APP_PREFIX']+'/test')
 
 def main():
-	application = app
-	bottle.run(app_middlware, host='localhost', port=8080)
+	bottle.run(app_middlware, host='localhost', port=8080, server='paste')
 
 if __name__ == "__main__":
 	main()
+else:
+	application = app_middlware
 """
 
 
@@ -213,6 +229,10 @@ def get_nb_step_user(user) :
 	conn.close()
 	nbans = res[0][0]
 	return nbans/get_nb_questions()
+
+def get_progress(user):
+	# return the ratio of steps achieved by the user over the total number of steps
+	return 100*get_nb_step_user(user)/get_nb_step()
 
 def get_metadata() :
 	#get it from config.py
@@ -360,93 +380,4 @@ def insert_data(data) :
 	conn.execute('update sample set nb_processed='+str(n+1)+' where syst_index='+str(data['index']))
 	conn.commit()
 	conn.close()
-"""
-
-
-login_form="""<!DOCTYPE html>
-<html lang="en">
-
-<head>
-	<meta charset="utf-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta name="description" content="">
-	<meta name="author" content="">
-
-	<title>Subjective tests plateform - login</title>
-
-	<!-- Bootstrap Core JavaScript -->
-	<script src="/static/js/bootstrap.min.js"></script>
-	<!-- Bootstrap Core CSS -->
-	<link href="/static/css/bootstrap.min.css" rel="stylesheet">
-</head>
-
-<body>
-	<div class="container">
-		<div class="row">
-			<div class="col-md-4 col-md-offset-4">
-				<div class="login-panel panel panel-default">
-					<div class="panel-heading">
-						<h3 class="panel-title">Please Log In</h3>
-					</div>
-					<div class="panel-body">
-						<form role="form" action="/login" method="POST">
-							<fieldset>
-								<div class="form-group">
-									<input type="email" class="form-control" placeholder="E-mail" name="email" autofocus>
-								</div>
-								<!-- Change this to a button or input when using this as a form -->
-								<input type="submit" class="btn btn-lg btn-success btn-block" value="Login">
-							</fieldset>
-						</form>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-</body>
-
-</html>
-"""
-
-
-index_form="""<!DOCTYPE html>
-<html lang="en">
-
-<head>
-
-	<meta charset="utf-8">
-
-	<title>Subjective tests plateform - {{name}}</title>
-
-	<!-- Bootstrap Core CSS -->
-	<link href="/static/css/bootstrap.min.css" rel="stylesheet">
-	<link href="/static/css/tests.css" rel="stylesheet">
-	<link href="/static/css/jquery-ui.min.css" rel="stylesheet">
-	<script src="/static/js/jquery.js"></script>
-	<script src="/static/js/jquery-ui.min.js"></script>
-
-</head>
-
-<body>
-
-	<div class="jumbotron">
-		<img src="/static/img/logo.jpg" class="img-responsive pull-left" alt="logo">
-		<div class="container">
-			<div class="col-md-6 col-md-offset-3">
-				<h1>{{name}}</h1><span>
-				<h3>Made by {{author}}</h3>
-				<p class="lead">{{description}}</p>
-			</div>
-		</div>
-	</div>
-
-	<div class="container">
-		<p>{{welcomeText}}</p>
-		<p>Veuillez cliquer <a href="/test">ICI</a> afin de commencer le test.</p>
-	</div>
-
-	</body>
-
-</html>
 """

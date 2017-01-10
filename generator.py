@@ -8,7 +8,6 @@ import sys
 import argparse
 from pprint import pprint
 
-
 execfile(os.path.join(os.path.dirname(__file__),'pm_bodies.py'))
 nbSystemToDisplay = 2
 useMedia = True
@@ -17,9 +16,11 @@ def parse_arguments():
 	JSONFile = None
 	TemplateFile = None
 	# parser = OptionParser()
-	parser = argparse.ArgumentParser(description='Generator for subjective test web plateform')
+	parser = argparse.ArgumentParser(description='Generator for subjective test web platform')
 	parser.add_argument('-j', '--json', help='input JSON file', type=argparse.FileType('r'), required=True)
 	parser.add_argument('-t', '--tpl', help='input template file', type=str, required=True)
+        parser.add_argument('-i', '--index-tpl', help='input index template file', type=str, required=True)
+        parser.add_argument('-c', '--completed-tpl', help='input last page template file', type=str, required=True)
 	parser.add_argument('-s', '--systems', nargs='+', help='list of systems', type=str, required=True)
 	parser.add_argument('-n', '--name', help='systems with names after', action='store_true')
 	args = parser.parse_args()
@@ -39,7 +40,7 @@ def parse_arguments():
 	if len(lsName) != len(lsPath):
 		sys.exit('Abort: Bad number of arguments')
 
-	return args.json, args.tpl
+	return args.json, args.tpl, args.index_tpl, args.completed_tpl
 
 def create_architecture(testName):
 	print('|-----------------------|')
@@ -208,12 +209,12 @@ def generate_template():
 	print(scriptArray)
 	print('Done.\n')
 
-def create_plateform():
+def create_platform():
 	print('|--------------------|')
-	print('| plateform creation |')
+	print('| platform creation |')
 	print('v--------------------v')
-	fo = open(testDirectory+'plateform.py', 'wb')
-	fo.write(plateform_body)
+	fo = open(testDirectory+'platform.py', 'wb')
+	fo.write(platform_body)
 	fo.close()
 	print('Done.\n')
 
@@ -296,40 +297,30 @@ def verif_template():
 		checked.append(m)
 	print('Done.\n')
 
-def add_login():
+def copy_templates(inputTemplate, indexTemplate, completedTemplate):
 	print('|----------------------|')
-	print('|  add login template  |')
+	print('|  copy templates      |')
 	print('v----------------------v')
-	fo = open(viewsDirectory+'login_form.tpl', 'wb')
-	fo.write(login_form)
-	fo.close()
-	print('Done.\n')
-
-def add_extra_pages():
-	print('|-----------------------|')
-	print('|  add extra templates  |')
-	print('v-----------------------v')
-	fo = open(viewsDirectory+'index.tpl', 'wb')
-	fo.write(index_form)
-	fo.close()
+        shutil.copy(indexTemplate, viewsDirectory+'index.tpl')
+        shutil.copy(inputTemplate, viewsDirectory+'template.tpl')
+        shutil.copy(completedTemplate, viewsDirectory+'completed.tpl')
+        
 	print('Done.\n')
 
 
-
-(inputJSON, inputTemplate) = parse_arguments()
+(inputJSON, inputTemplate, indexTemplate, completedTemplate) = parse_arguments()
 dataFromJSON = parse_json(inputJSON)
 name = dataFromJSON['configuration']['name']
 (mainDirectory, testDirectory, viewsDirectory, staticDirectory, mediaDirectory) = create_architecture(name)
 generate_config(dataFromJSON)
 create_db(dataFromJSON)
-generate_template()
-create_plateform()
+#generate_template() # TODO: don't what this function is doing, maybe rewrite needed
+copy_templates(inputTemplate, indexTemplate, completedTemplate)
+create_platform()
 create_model()
-add_login()
-add_extra_pages()
 if useMedia:
 	copy_media(dataFromJSON)
-verif_template()
+#verif_template() # TODO: rewrite this function
 
 print('='*30)
 print('    GENERATION TERMINEE !!')
