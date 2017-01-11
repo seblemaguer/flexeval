@@ -77,7 +77,7 @@
 
 		<br>
 		
-		% for i in range(1,6):
+		% for i in range(nfixed,len(systems)):
 		
 		<input type="hidden" name="system{{i+1}}" value="{{systems[i]}}">
 

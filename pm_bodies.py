@@ -2,9 +2,7 @@ platform_body = """
 import sys
 import os
 
-if os.path.dirname(__file__) != '':
-	os.chdir(os.path.dirname(__file__))
-	sys.path.append(os.path.dirname(__file__))
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 import model
 import bottle
@@ -17,9 +15,9 @@ from beaker.middleware import SessionMiddleware
 
 bottle.debug(True)
 
-views_path = os.path.join(os.path.dirname(__file__), 'views/')
+views_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'views/')
 bottle.TEMPLATE_PATH.insert(0, views_path)
-#bottle.TEMPLATE_PATH.insert(0,os.path.dirname(__file__))
+#bottle.TEMPLATE_PATH.insert(0,os.path.dirname(os.path.abspath(__file__)))
 app = bottle.Bottle()
 
 # TO MODIFY DEPENDING ON DEPLOYMENT CONFIGURATION
@@ -30,7 +28,7 @@ app.config['myapp.APP_PREFIX'] = ''
 session_opts = {
 	'session.type': 'file',
 	'session.cookie_expires': False,
-	'session.data_dir': os.path.join(os.path.dirname(__file__),'data'),
+	'session.data_dir': os.path.join(os.path.dirname(os.path.abspath(__file__)),'data'),
 	'session.auto': True
 }
 
@@ -94,10 +92,10 @@ def process_test():
 			if not 'nb_intro_passed' in app_session:
 				app_session['nb_intro_passed'] = 0
 			(samples, systems, index) = model.get_intro_sample(user)
-			data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "name":model.get_name(), "author":model.get_author(), "description":model.get_description(), "samples":samples, "systems":systems, "index":index, "user":user, "introduction": True, "step": model.get_nb_step_user(user)+1, "totalstep" : model.get_nb_step(), "progress" : model.get_progress(user)}
+			data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "name":model.get_name(), "author":model.get_author(), "description":model.get_description(), "samples":samples, "systems":systems, "nfixed": model.get_nb_position_fixed(), "index":index, "user":user, "introduction": True, "step": model.get_nb_step_user(user)+1, "totalstep" : model.get_nb_step(), "progress" : model.get_progress(user)}
 		else:
 			(samples, systems, index) = model.get_test_sample(user)
-			data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "name":model.get_name(), "author":model.get_author(), "description":model.get_description(), "samples":samples, "systems":systems, "index":index, "user":user, "step": model.get_nb_step_user(user)+1, "totalstep" : model.get_nb_step(), "progress" : model.get_progress(user)}
+			data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "name":model.get_name(), "author":model.get_author(), "description":model.get_description(), "samples":samples, "systems":systems, "nfixed": model.get_nb_position_fixed(), "index":index, "user":user, "step": model.get_nb_step_user(user)+1, "totalstep" : model.get_nb_step(), "progress" : model.get_progress(user)}
 		return bottle.template('template', data)
 	else :
 		bottle.request.environ.get('beaker.session').delete()
@@ -144,13 +142,13 @@ def process_test_post():
 #access to local static files
 @app.route('/static/:type/:filename#.*#')
 def send_static(type, filename):
-	return bottle.static_file(filename, root=os.path.join(os.path.dirname(__file__),"static/%s/") % type)
+	return bottle.static_file(filename, root=os.path.join(os.path.dirname(os.path.abspath(__file__)),"static/%s/") % type)
 
 #access to local static sound files
 @app.route('/media/:media/:syst/:filename#.*#')
 @app.route('/media/:media/./:syst/:filename#.*#')
 def send_static(media, syst, filename):
-	return bottle.static_file(filename, root=os.path.join(os.path.dirname(__file__),"media/%s/") % media+"/"+syst)
+	return bottle.static_file(filename, root=os.path.join(os.path.dirname(os.path.abspath(__file__)),"media/%s/") % media+"/"+syst)
 
 @app.route(':badroute')
 def badroute(badroute):
@@ -174,7 +172,7 @@ import config
 
 def get_nb_system() :
 	#return the number of sample for a test!
-	conn = sqlite3.connect(os.path.join(os.path.dirname(__file__),'data.db'))
+	conn = sqlite3.connect(os.path.join(os.path.dirname(os.path.abspath(__file__)),'data.db'))
 	c = conn.cursor()
 	c.execute("select count(*) from system")
 	res = c.fetchall()
@@ -222,7 +220,7 @@ def get_nb_step() :
 
 def get_nb_step_user(user) :
 	#return the number of step made by a user on the test
-	conn = sqlite3.connect(os.path.join(os.path.dirname(__file__),'data.db'))
+	conn = sqlite3.connect(os.path.join(os.path.dirname(os.path.abspath(__file__)),'data.db'))
 	c = conn.cursor()
 	c.execute('select count(*) from answer where user="'+user+'"')
 	res = c.fetchall()
@@ -247,7 +245,7 @@ def get_metadata() :
 def get_test_sample(user) :
 	random.seed()
 	nbToKeep = int(config.nbSystemDisplayed)
-	dir = os.path.dirname(__file__)
+	dir = os.path.dirname(os.path.abspath(__file__))
 	conn = sqlite3.connect(os.path.join(dir,'data.db'))
 	c = conn.cursor()
 	c.execute("select syst_index, sum(nb_processed) from sample where type='test' group by syst_index")
@@ -304,7 +302,7 @@ def get_test_sample(user) :
 def get_intro_sample(user) :
 	random.seed()
 	nbToKeep = int(config.nbSystemDisplayed)
-	dir = os.path.dirname(__file__)
+	dir = os.path.dirname(os.path.abspath(__file__))
 	conn = sqlite3.connect(os.path.join(dir,'data.db'))
 	c = conn.cursor()
 	c.execute("select syst_index from sample where type='intro' group by syst_index")
@@ -352,7 +350,7 @@ def get_intro_sample(user) :
 
 def insert_data(data) :
 	now = datetime.now()
-	conn = sqlite3.connect(os.path.join(os.path.dirname(__file__),'data.db'))
+	conn = sqlite3.connect(os.path.join(os.path.dirname(os.path.abspath(__file__)),'data.db'))
 	c = conn.cursor()
 	answers = data['answers']
 	for answer in answers :
