@@ -40,7 +40,7 @@
 		<div class="container-fluid">
 			<ul class="nav navbar-nav navbar-right">
 				<li><a>{{user}}</a></li>
-				<li><a href="/logout">Déconnexion</a></li>
+				<li><a href="{{APP_PREFIX}}/logout">Logout</a></li>
 			</ul>
 		</div>
 	</nav>
