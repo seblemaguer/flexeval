@@ -282,6 +282,13 @@ def get_test_sample(user) :
 	index = validlist[random.randint(0,len(validlist)-1)][0]
 	samples=[]
 	systems=[]
+	#fields = congif.getfields()
+	#queryfields = ""
+	#for i in range(len(fields)) :
+	#	queryfields = queryfields+fields[i]
+	#	if i<len(fields)-1 : 
+	#		queryfields=queryfields+","
+	#c.execute('select nb_processed, id_system, '+queryfields+' from sample where syst_index='+str(index)+' order by nb_processed asc')
 	c.execute('select nb_processed, id_system, path from sample where syst_index='+str(index)+' order by nb_processed asc')
 	systs = c.fetchall()
 	i=0
