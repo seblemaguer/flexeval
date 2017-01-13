@@ -8,10 +8,11 @@
 		"useMedia":false,
 		"prefixe":"",
 		"nbQuestions":5,
-	    "nbFixedPosition":1,
-	    "nbIntroductionSteps":0,
-	    "welcomeText": "",
-	    "nbSampleBySystem": 10
+		"nbFixedPosition":1,
+		"nbIntroductionSteps":0,
+		"welcomeText": "",
+		"nbSampleBySystem": 10,
+		"headersCSV": ["text","number","letter"]
 	},
 	"systems": {
 		"system": [
@@ -125,7 +126,7 @@
 					}
 				]
 			},
-		    			{
+						{
 				"id": "_s5",
 				"name": "s5",
 				"comment": "Système 5",

@@ -99,7 +99,7 @@ def load_csv(lsPath, lsName):
 
 	# TODO: return csv_data + csv_headers
 
-def create_db(data):
+def create_db(config, data):
 	print('|---------------|')
 	print('| DB generation |')
 	print('v---------------v')
@@ -109,8 +109,12 @@ def create_db(data):
 		systs = '`system1` TEXT NOT NULL'
 		for i in range(1,nbSystemToDisplay):
 			systs = systs + ', `system'+str(i+1) + '` TEXT NOT NULL'
+		columns = ''
+		for header in data['configuration']['headersCSV']:
+			columns += '`'+header+'` TEXT NOT NULL,'
+		print(columns)
 		con.execute('CREATE TABLE system (`id` TEXT NOT NULL PRIMARY KEY UNIQUE, `name` TEXT NOT NULL, `comment` TEXT NOT NULL)')
-		con.execute('CREATE TABLE sample (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `path` TEXT NOT NULL, `type` TEXT NOT NULL, `id_system` TEXT NOT NULL , `syst_index` INTEGER NOT NULL, `nb_processed` INTEGER NOT NULL DEFAULT 0, FOREIGN KEY(id_system) REFERENCES system(id))')
+		con.execute('CREATE TABLE sample (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, '+columns+' `type` TEXT NOT NULL, `id_system` TEXT NOT NULL , `syst_index` INTEGER NOT NULL, `nb_processed` INTEGER NOT NULL DEFAULT 0, FOREIGN KEY(id_system) REFERENCES system(id))')
 		con.execute('CREATE TABLE answer (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `user` TEXT NOT NULL, `date` TEXT NOT NULL, `content` TEXT NOT NULL, `content_target` TEXT, `syst_index` INTEGER NOT NULL, `question_index` INTEGER NOT NULL,'+systs+' )')
 		con.commit()
 		print('Database successfully created.')
@@ -335,7 +339,7 @@ name = dataFromJSON['configuration']['name']
 (mainDirectory, testDirectory, viewsDirectory, staticDirectory, mediaDirectory) = create_architecture(name)
 generate_config(dataFromJSON)
 load_csv(lsPath, lsName)
-create_db(dataFromJSON)
+create_db(dataFromJSON, dataFromJSON)
 # generate_template() # TODO: not used, move to verif_template
 copy_templates(inputTemplate, indexTemplate, completedTemplate)
 create_platform()
