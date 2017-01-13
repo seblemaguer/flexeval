@@ -194,6 +194,12 @@ def get_book_variable_module_name(module_name):
 def get_prefixe():
 	return config.prefixe
 
+def get_headers():
+	return config.headersCSV
+
+def get_media():
+	return config.useMedia
+
 def get_nb_position_fixed():
 	return int(config.nbFixedPosition)
 
@@ -282,22 +288,27 @@ def get_test_sample(user) :
 	index = validlist[random.randint(0,len(validlist)-1)][0]
 	samples=[]
 	systems=[]
-	#fields = congif.getfields()
-	#queryfields = ""
-	#for i in range(len(fields)) :
-	#	queryfields = queryfields+fields[i]
-	#	if i<len(fields)-1 : 
-	#		queryfields=queryfields+","
-	#c.execute('select nb_processed, id_system, '+queryfields+' from sample where syst_index='+str(index)+' order by nb_processed asc')
-	c.execute('select nb_processed, id_system, path from sample where syst_index='+str(index)+' order by nb_processed asc')
+	headers = get_headers()
+	queryh = ""
+	for i in range(len(headers)) :
+		queryh = queryh+headers[i]
+		if i<len(headers)-1 : 
+			queryh=queryh+", "
+	c.execute('select nb_processed, id_system, '+ queryh +' from sample where syst_index='+str(index)+' order by nb_processed asc')
 	systs = c.fetchall()
 	i=0
+	print systs
 	while i<nbToKeep :
 		systems.append(systs[i][1])
-		if config.useMedia=='True' :
-			samples.append('media/'+systs[i][2])
-		else :
-			samples.append(systs[i][2])
+		t=dict()
+		headerIndex=0
+		for j in range(2,len(systs[i])):
+			if str(j) in get_media() :
+				t[headers[headerIndex]] = get_prefixe()+'/media/'+systs[i][j]
+			else :
+				t[headers[headerIndex]] = systs[i][j]
+			headerIndex+=1
+		samples.append(t)
 		i=i+1
 	n = get_nb_position_fixed()
 	if n<=0:
@@ -337,15 +348,27 @@ def get_intro_sample(user) :
 			index = r[0]
 	samples=[]
 	systems=[]
-	c.execute('select nb_processed, id_system, path from sample where syst_index='+str(index)+' order by nb_processed asc')
+	headers = get_headers()
+	queryh = ""
+	for i in range(len(headers)) :
+		queryh = queryh+headers[i]
+		if i<len(headers)-1 : 
+			queryh=queryh+", "
+	c.execute('select nb_processed, id_system, '+ queryh +' from sample where syst_index='+str(index)+' order by nb_processed asc')
 	systs = c.fetchall()
 	i=0
+	print systs
 	while i<nbToKeep :
 		systems.append(systs[i][1])
-		if config.useMedia=='True' :
-			samples.append('media/'+systs[i][2])
-		else :
-			samples.append(systs[i][2])
+		t=dict()
+		headerIndex=0
+		for j in range(2,len(systs[i])):
+			if str(j) in get_media() :
+				t[headers[headerIndex]] = get_prefixe()+'/media/'+systs[i][j]
+			else :
+				t[headers[headerIndex]] = systs[i][j]
+			headerIndex+=1
+		samples.append(t)
 		i=i+1
 	n = get_nb_position_fixed()
 	if n<=0:

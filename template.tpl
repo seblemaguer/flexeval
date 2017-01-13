@@ -69,7 +69,7 @@
 		<div class="container">
 			<center>
 				<samp class="lead text-center">
-					{{!samples[0]}}
+					{{!samples[0]['text']}}
 				</samp>
 			</center>
 		</div>
@@ -89,7 +89,7 @@
 				<div class="col-xs-12 col-md-7 col-lg-7 vcenter">
 					<blockquote>
 					<samp class="text-justify">
-						{{!samples[i]}}
+						{{!samples[i]['text']}}
 					</samp>
 					</blockquote>
 				</div>
