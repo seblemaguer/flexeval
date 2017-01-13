@@ -27,14 +27,16 @@ def parse_arguments():
 	parser.add_argument('-s', '--systems', nargs='+', help='list of systems', type=str, required=True)
 	parser.add_argument('-n', '--name', help='allow names after each systems (default: no names)', action='store_true')
 	parser.add_argument('-v', '--verbose', help='verbose mode', action='store_true')
-	parser.add_argument('--csv_delimiter', help='define csv delimiter', default=';')
+	parser.add_argument('--csv-delimiter', help='define csv delimiter (default: ;)', default=';')
 	args = parser.parse_args()
 
 	global verbose 
 	verbose = args.verbose
 	global csv_delimiter
-	if len(args.csv_delimiter) == 1:
+	if len(args.csv_delimiter) == 1 or args.csv_delimiter == 'tab':
 		csv_delimiter = args.csv_delimiter
+	elif len(args.csv_delimiter) == 3 and args.csv_delimiter[0] == '\'' and args.csv_delimiter[2] == '\'':
+		csv_delimiter = args.csv_delimiter[1]
 	else:
 		print('Warning: bad csv delimiter. The default delimiter is used.')
 	
@@ -100,7 +102,12 @@ def load_csv(lsPath):
 		if not os.path.isfile(csvPath):
 			sys.exit('ABORT: '+csvPath+' must be a file')
 		with open(csvPath, 'rb') as csvfile:
-			spamreader = csv.reader(csvfile, delimiter=csv_delimiter, quotechar='|')
+			print(csv_delimiter)
+			if csv_delimiter == 'tab':
+				spamreader = csv.reader(csvfile, delimiter='\t', quotechar='"')
+			else:
+				spamreader = csv.reader(csvfile, delimiter=csv_delimiter, quotechar='"')
+
 			data = []
 			for row in spamreader:
 				if verbose:
@@ -121,11 +128,11 @@ def create_db(config, data, lsName):
 	headersCSV = config['configuration']['headersCSV']
 	if not lsName:
 		if verbose:
-			print("No system names defined. Default system names will be created:")
+			print('No system names defined. Default system names will be created:')
 		for index, system in enumerate(data):
-			lsName.append("system_"+str(index))
+			lsName.append('system_'+str(index))
 			if verbose:
-				print("system_"+str(index))
+				print('system_'+str(index))
 	try:
 		systs = '`system1` TEXT NOT NULL'
 		for i in range(1,nbSystemToDisplay):
