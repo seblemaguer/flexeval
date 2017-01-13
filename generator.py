@@ -51,7 +51,7 @@ def parse_arguments():
 	else:
 		lsPath = args.systems
 
-	return args.json, lsPath, lsName, args.tpl, args.index_tpl, args.completed_tpl
+	return args.json, lsPath, lsName, args.main_tpl, args.index_tpl, args.completed_tpl
 
 def create_architecture(testName):
 	print('|-----------------------|')
