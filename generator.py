@@ -9,8 +9,9 @@ import argparse
 from pprint import pprint
 
 execfile(os.path.join(os.path.dirname(__file__),'pm_bodies.py'))
-nbSystemToDisplay = 2
-useMedia = True
+# nbSystemToDisplay = 2
+# useMedia = True
+# verbose = False
 
 def parse_arguments():
 	JSONFile = None
@@ -19,28 +20,30 @@ def parse_arguments():
 	parser = argparse.ArgumentParser(description='Generator for subjective test web platform')
 	parser.add_argument('-j', '--json', help='input JSON file', type=argparse.FileType('r'), required=True)
 	parser.add_argument('-t', '--tpl', help='input template file', type=str, required=True)
-        parser.add_argument('-i', '--index-tpl', help='input index template file', type=str, required=True)
-        parser.add_argument('-c', '--completed-tpl', help='input last page template file', type=str, required=True)
+	parser.add_argument('-i', '--index-tpl', help='input index template file', type=str, required=True)
+	parser.add_argument('-c', '--completed-tpl', help='input last page template file', type=str, required=True)
 	parser.add_argument('-s', '--systems', nargs='+', help='list of systems', type=str, required=True)
 	parser.add_argument('-n', '--name', help='systems with names after', action='store_true')
+	parser.add_argument('-v', '--verbose', help='verbose mode', action='store_true')
 	args = parser.parse_args()
 
-	print(args.systems)
+	global verbose 
+	verbose = args.verbose
 
 	lsPath = []
 	lsName = []
-	for index, elt in enumerate(args.systems):
-		if index%2==0:
-			lsPath.append(elt)
-		else:
-			lsName.append(elt)
+	if(args.name):
+		for index, elt in enumerate(args.systems):
+			if index%2==0:
+				lsPath.append(elt)
+			else:
+				lsName.append(elt)
+		if len(lsName) != len(lsPath):
+			sys.exit('Abort: Bad number of arguments (in systems argument)')
+	else:
+		lsPath = args.systems
 
-	print(lsName)
-	print(lsPath)
-	if len(lsName) != len(lsPath):
-		sys.exit('Abort: Bad number of arguments')
-
-	return args.json, args.tpl, args.index_tpl, args.completed_tpl
+	return args.json, lsPath, lsName, args.tpl, args.index_tpl, args.completed_tpl
 
 def create_architecture(testName):
 	print('|-----------------------|')
@@ -73,7 +76,8 @@ def parse_json(JSONfile):
 	print('v--------------v')
 
 	data = json.load(JSONfile)
-	pprint(data)
+	if verbose:
+		pprint(data)
 
 	print('Done.\n')
 	return data
@@ -301,26 +305,26 @@ def copy_templates(inputTemplate, indexTemplate, completedTemplate):
 	print('|----------------------|')
 	print('|  copy templates      |')
 	print('v----------------------v')
-        shutil.copy(indexTemplate, viewsDirectory+'index.tpl')
-        shutil.copy(inputTemplate, viewsDirectory+'template.tpl')
-        shutil.copy(completedTemplate, viewsDirectory+'completed.tpl')
-        
+	shutil.copy(indexTemplate, viewsDirectory+'index.tpl')
+	shutil.copy(inputTemplate, viewsDirectory+'template.tpl')
+	shutil.copy(completedTemplate, viewsDirectory+'completed.tpl')
+	
 	print('Done.\n')
 
 
-(inputJSON, inputTemplate, indexTemplate, completedTemplate) = parse_arguments()
+(inputJSON, lsPath, lsName, inputTemplate, indexTemplate, completedTemplate) = parse_arguments()
 dataFromJSON = parse_json(inputJSON)
 name = dataFromJSON['configuration']['name']
 (mainDirectory, testDirectory, viewsDirectory, staticDirectory, mediaDirectory) = create_architecture(name)
 generate_config(dataFromJSON)
 create_db(dataFromJSON)
-#generate_template() # TODO: don't what this function is doing, maybe rewrite needed
+# generate_template() # TODO: not used, move to verif_template
 copy_templates(inputTemplate, indexTemplate, completedTemplate)
 create_platform()
 create_model()
 if useMedia:
 	copy_media(dataFromJSON)
-#verif_template() # TODO: rewrite this function
+# verif_template() # TODO: rewrite this function
 
 print('='*30)
 print('    GENERATION TERMINEE !!')
