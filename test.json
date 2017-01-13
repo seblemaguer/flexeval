@@ -8,7 +8,7 @@
 		"prefixe":"",
 		"nbQuestions":4,
 		"nbFixedPosition":1,
-		"nbIntroductionSteps":0,
+		"nbIntroductionSteps":1,
 		"welcomeText": "",
 		"nbSampleBySystem": 10,
 		"headersCSV": ["text","number","letter","path"],

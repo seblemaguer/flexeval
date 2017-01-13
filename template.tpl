@@ -51,8 +51,9 @@
 		<h2><b>Context:</b> Imagine someone tells the text below during a spontaneous conversation.</h2>
 		<h2><b>Question:</b> How likely do you judge the spoken propositions?</h2>
 		</div>
-
-		
+		% if introduction :
+		<div class="alert alert-danger"><strong>Warning !</strong> This is an introduction step !</div>
+		% end 
 		<input type="hidden" name="ref" value="{{index}}">
 		<input type="hidden" name="system1" value="{{systems[0]}}">
 		<div class="container">

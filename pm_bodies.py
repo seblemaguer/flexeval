@@ -99,7 +99,7 @@ def process_test():
 		else:
 			(samples, systems, index) = model.get_test_sample(user)
 			book = model.get_book_variable_module_name('config')
-			data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "name":model.get_name(), "author":model.get_author(), "description":model.get_description(), "samples":samples, "systems":systems, "nfixed": model.get_nb_position_fixed(), "index":index, "user":user, "step": model.get_nb_step_user(user)+1, "totalstep" : model.get_nb_step(), "progress" : model.get_progress(user), "config": book}
+			data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "name":model.get_name(), "author":model.get_author(), "description":model.get_description(), "samples":samples, "systems":systems, "nfixed": model.get_nb_position_fixed(), "index":index, "user":user, "introduction": False, "step": model.get_nb_step_user(user)+1, "totalstep" : model.get_nb_step(), "progress" : model.get_progress(user), "config": book}
 		return bottle.template('template', data)
 	else :
 		bottle.request.environ.get('beaker.session').delete()
