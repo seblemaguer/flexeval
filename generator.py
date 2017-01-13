@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import json
 import csv
 import os
@@ -16,6 +17,11 @@ execfile(os.path.join(os.path.dirname(__file__),'pm_bodies.py'))
 
 
 def parse_arguments():
+	print('	╔════════════════╗')
+	print('	║  GENERATOR.PY  ║')
+	print('	╚════════════════╝')
+	print('')
+
 	JSONFile = None
 	TemplateFile = None
 	# parser = OptionParser()
@@ -32,6 +38,8 @@ def parse_arguments():
 
 	global verbose 
 	verbose = args.verbose
+	if verbose:
+		print('verbose mode enabled')
 	global csv_delimiter
 	if len(args.csv_delimiter) == 1 or args.csv_delimiter == 'tab':
 		csv_delimiter = args.csv_delimiter
@@ -39,6 +47,8 @@ def parse_arguments():
 		csv_delimiter = args.csv_delimiter[1]
 	else:
 		print('Warning: bad csv delimiter. The default delimiter is used.')
+	if verbose:
+		print('csv_delimiter is: '+csv_delimiter)
 	
 	lsPath = []
 	lsName = []
@@ -53,6 +63,7 @@ def parse_arguments():
 	else:
 		lsPath = args.systems
 
+	print('')
 	return args.json, lsPath, lsName, args.main_tpl, args.index_tpl, args.completed_tpl
 
 def create_architecture(testName):
@@ -80,9 +91,9 @@ def create_architecture(testName):
 	print('Done.\n')
 	return mainDirectory, testDirectory, viewsDirectory, staticDirectory, mediaDirectory
 
-def parse_json(JSONfile):
+def load_json(JSONfile):
 	print('|--------------|')
-	print('| parsing JSON |')
+	print('| loading JSON |')
 	print('v--------------v')
 
 	data = json.load(JSONfile)
@@ -93,16 +104,15 @@ def parse_json(JSONfile):
 	return data
 
 def load_csv(lsPath):
-	print('|----------|')
-	print('| load CSV |')
-	print('v----------v')
+	print('|-------------|')
+	print('| loading CSV |')
+	print('v-------------v')
 
 	lsCSV = []
 	for csvPath in lsPath:
 		if not os.path.isfile(csvPath):
 			sys.exit('ABORT: '+csvPath+' must be a file')
 		with open(csvPath, 'rb') as csvfile:
-			print(csv_delimiter)
 			if csv_delimiter == 'tab':
 				spamreader = csv.reader(csvfile, delimiter='\t', quotechar='"')
 			else:
@@ -366,7 +376,7 @@ def verif_template():
 
 def copy_templates(inputTemplate, indexTemplate, completedTemplate):
 	print('|----------------|')
-	print('| copy templates |')
+	print('| templates copy |')
 	print('v----------------v')
 	shutil.copy(indexTemplate, viewsDirectory+'index.tpl')
 	shutil.copy(inputTemplate, viewsDirectory+'template.tpl')
@@ -376,7 +386,7 @@ def copy_templates(inputTemplate, indexTemplate, completedTemplate):
 
 
 (inputJSON, lsPath, lsName, inputTemplate, indexTemplate, completedTemplate) = parse_arguments()
-configJSON = parse_json(inputJSON)
+configJSON = load_json(inputJSON)
 (mainDirectory, testDirectory, viewsDirectory, staticDirectory, mediaDirectory) = create_architecture(configJSON['configuration']['name'])
 generate_config(configJSON, lsPath)
 listDataCSV = load_csv(lsPath)
