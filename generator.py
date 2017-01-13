@@ -190,8 +190,12 @@ def generate_config(json, lsPath):
 		if var=='nbSystemDisplayed':
 			nbSystemToDisplay = int(configJson[var])
 		elif var == 'useMedia':
+<<<<<<< 00c5d1b262a635d3c914fc5965996f4ae697cfed
 <<<<<<< c0a8e99ad9cf31fb2b1af5d4f48e176a0eae1837
 			useMedia = configJson[var]!=[]
+=======
+			useMedia = configJson[var]
+>>>>>>> 2d6085604697a68683e5bbb5f4aaeb65ca4b5794
 =======
 			useMedia = configJson[var]
 >>>>>>> 2d6085604697a68683e5bbb5f4aaeb65ca4b5794
@@ -282,8 +286,12 @@ def create_model():
 	fo.close()
 	print('Done.\n')
 
+<<<<<<< 00c5d1b262a635d3c914fc5965996f4ae697cfed
 <<<<<<< c0a8e99ad9cf31fb2b1af5d4f48e176a0eae1837
 def copy_media(json):
+=======
+def copy_media(csv, mediaColumns, config):
+>>>>>>> 2d6085604697a68683e5bbb5f4aaeb65ca4b5794
 =======
 def copy_media(csv, mediaColumns, config):
 >>>>>>> 2d6085604697a68683e5bbb5f4aaeb65ca4b5794
@@ -380,8 +388,12 @@ copy_templates(inputTemplate, indexTemplate, completedTemplate)
 create_platform()
 create_model()
 if useMedia:
+<<<<<<< 00c5d1b262a635d3c914fc5965996f4ae697cfed
 <<<<<<< c0a8e99ad9cf31fb2b1af5d4f48e176a0eae1837
 	copy_media(configJSON)
+=======
+	copy_media(listDataCSV, useMedia, configJSON)
+>>>>>>> 2d6085604697a68683e5bbb5f4aaeb65ca4b5794
 =======
 	copy_media(listDataCSV, useMedia, configJSON)
 >>>>>>> 2d6085604697a68683e5bbb5f4aaeb65ca4b5794
