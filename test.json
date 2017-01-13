@@ -11,7 +11,7 @@
 		"nbIntroductionSteps":0,
 		"welcomeText": "",
 		"nbSampleBySystem": 10,
-		"headersCSV": ["text","number","letter"],
+		"headersCSV": ["text","number","letter","path"],
 		"useMedia": []
 	}
 }
