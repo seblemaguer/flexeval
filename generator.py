@@ -6,13 +6,14 @@ import shutil
 import sqlite3
 import sys
 import argparse
-
 from pprint import pprint
+
 
 execfile(os.path.join(os.path.dirname(__file__),'pm_bodies.py'))
 # nbSystemToDisplay = 2
 # useMedia = True
 # verbose = False
+
 
 def parse_arguments():
 	JSONFile = None
@@ -20,17 +21,23 @@ def parse_arguments():
 	# parser = OptionParser()
 	parser = argparse.ArgumentParser(description='Generator for subjective test web platform')
 	parser.add_argument('-j', '--json', help='input JSON file', type=argparse.FileType('r'), required=True)
-	parser.add_argument('-t', '--tpl', help='input template file', type=str, required=True)
+	parser.add_argument('-t', '--main-tpl', help='input main template file', type=str, required=True)
 	parser.add_argument('-i', '--index-tpl', help='input index template file', type=str, required=True)
 	parser.add_argument('-c', '--completed-tpl', help='input last page template file', type=str, required=True)
 	parser.add_argument('-s', '--systems', nargs='+', help='list of systems', type=str, required=True)
 	parser.add_argument('-n', '--name', help='systems with names after', action='store_true')
 	parser.add_argument('-v', '--verbose', help='verbose mode', action='store_true')
+	parser.add_argument('--csv_delimiter', help='define csv delimiter', default=';')
 	args = parser.parse_args()
 
 	global verbose 
 	verbose = args.verbose
-
+	global csv_delimiter
+	if len(args.csv_delimiter)==1:
+		csv_delimiter = args.csv_delimiter
+	else:
+		print('Warning: bad csv delimiter')
+	
 	lsPath = []
 	lsName = []
 	if(args.name):
@@ -93,11 +100,11 @@ def load_csv(lsPath):
 		if not os.path.isfile(csvPath):
 			sys.exit('ABORT: '+csvPath+' must be a file')
 		with open(csvPath, 'rb') as csvfile:
-			spamreader = csv.reader(csvfile, delimiter=';', quotechar='|')
+			spamreader = csv.reader(csvfile, delimiter=csv_delimiter, quotechar='|')
 			data = []
 			for row in spamreader:
 				if verbose:
-					print ', '.join(row)
+					print(', '.join(row))
 				data.append(row)
 			lsCSV.append(data)
 	if verbose:
