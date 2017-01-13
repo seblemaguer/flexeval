@@ -303,7 +303,7 @@ def get_test_sample(user) :
 		t=dict()
 		headerIndex=0
 		for j in range(2,len(systs[i])):
-			if str(j) in get_media() :
+			if headers[headerIndex] in get_media() :
 				t[headers[headerIndex]] = get_prefixe()+'/media/'+systs[i][j]
 			else :
 				t[headers[headerIndex]] = systs[i][j]
@@ -363,7 +363,7 @@ def get_intro_sample(user) :
 		t=dict()
 		headerIndex=0
 		for j in range(2,len(systs[i])):
-			if str(j) in get_media() :
+			if headers[headerIndex] in get_media() :
 				t[headers[headerIndex]] = get_prefixe()+'/media/'+systs[i][j]
 			else :
 				t[headers[headerIndex]] = systs[i][j]

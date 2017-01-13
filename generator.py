@@ -183,6 +183,7 @@ def generate_config(json, lsPath):
 	with open(lsPath[0], 'rb') as csvfile:
 		spamreader = csv.reader(csvfile, delimiter=';', quotechar='|')
 		nbsbs = sum(1 for row in spamreader)
+	exception=[]
 	for var in configJson:
 		if var in expectedConfig:
 			print(var+'\t:: OK')
@@ -190,11 +191,17 @@ def generate_config(json, lsPath):
 		if var=='nbSystemDisplayed':
 			nbSystemToDisplay = int(configJson[var])
 		elif var == 'useMedia':
-			useMedia = configJson[var]=="True"
+			useMedia = configJson[var]!=[]
+			config.write(var+'='+str(configJson[var])+'\n')
+			exception.append(var)
+		elif var == 'headersCSV' :
+			config.write(var+'='+str(configJson[var])+'\n')
+			exception.append(var)
 		elif var == 'nbFixedPosition' :
 			if configJson[var] < 0 or configJson[var] > configJson['nbSteps'] :
 				configJson[var]=nbsbs
-		config.write(var+'=\''+str(configJson[var])+'\'\n')
+		if var not in exception:
+			config.write(var+'=\''+str(configJson[var])+'\'\n')
 	for expected in expectedConfig:
 		print(expected+' not found!')
 		if expected == 'name':
@@ -217,7 +224,7 @@ def generate_config(json, lsPath):
 		if expected == 'welcomeText':
 			config.write(expected+'=\'\'\n')
 		if expected == 'useMedia':
-			config.write(expected+'=\'True\'\n')
+			config.write(expected+'=[]\n')
 		if expected == 'nbFixedPosition' :
 			config.write(expected+'=\'0\'\n')
 	config.write('nbSampleBySystem=\''+str(nbsbs)+'\'\n')
@@ -276,7 +283,7 @@ def copy_media(json):
 	print('|-----------------|')
 	print('| media file copy |')
 	print('v-----------------v')
-
+	return 
 	audio = []
 	audioFolders = []
 	systems = []
