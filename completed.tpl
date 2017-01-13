@@ -6,7 +6,7 @@
 
 	<meta charset="utf-8">
 
-	<title>Subjective tests plateform - {{name}}</title>
+	<title>Subjective tests plateform - {{config["name"]}}</title>
 
 	<!-- Bootstrap Core CSS -->
 	<link href="{{APP_PREFIX}}/static/css/bootstrap.min.css" rel="stylesheet">
@@ -22,8 +22,8 @@
 	<div class="container">
 		<div class="row">
 			<div class="col-md-4 col-md-offset-4 text-center">
-			<h1>{{name}}</h1><span>
-			<p class="lead">{{description}}</p>
+			<h1>{{config["name"]}}</h1><span>
+			<p class="lead">{{config["description"]}}</p>
 			</div>
 		</div>
 	</div>

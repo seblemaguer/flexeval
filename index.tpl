@@ -21,8 +21,8 @@
 	<div class="container">
 		<div class="row">
 			<div class="col-md-4 col-md-offset-4 text-center">
-			<h1>{{name}}</h1><span>
-			<p class="lead">{{description}}</p>
+			<h1>{{config["name"]}}</h1><span>
+			<p class="lead">{{config["description"]}}</p>
 			</div>
 		</div>
 	</div>
