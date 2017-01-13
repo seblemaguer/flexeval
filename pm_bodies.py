@@ -23,7 +23,7 @@ app = bottle.Bottle()
 # TO MODIFY DEPENDING ON DEPLOYMENT CONFIGURATION
 # example: '/mytest'
 # DO NOT FORGET TO PUT HEADING /
-app.config['myapp.APP_PREFIX'] = '' 
+app.config['myapp.APP_PREFIX'] = model.get_prefixe()
 
 session_opts = {
 	'session.type': 'file',
@@ -37,7 +37,8 @@ app_session = bottle.request.environ.get('beaker.session')
 
 @app.route('/')
 def badroute():
-	data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "name":model.get_name(), "author":model.get_author(), "description":model.get_description(), "welcomeText":model.get_welcome_text()}
+	book = model.get_book_variable_module_name('config')
+	data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "name":model.get_name(), "author":model.get_author(), "description":model.get_description(), "welcomeText":model.get_welcome_text(), "config": book}
 	return bottle.template('index', data)
 
 @app.route('/login')
@@ -60,7 +61,8 @@ def toto():
 	app_session = bottle.request.environ.get('beaker.session')
 	if('pseudo' in app_session) :
 		return "<p>You are already logged, please logout <a href='"+request.app.config['myapp.APP_PREFIX']+"/logout'>here</a></p>"
-	data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "name":model.get_name(), "author":model.get_author(), "description":model.get_description(), "welcomeText":model.get_welcome_text()}
+	book = model.get_book_variable_module_name('config')
+	data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "name":model.get_name(), "author":model.get_author(), "description":model.get_description(), "welcomeText":model.get_welcome_text(), "config": book}
 	return bottle.template('index', data)
 
 #bottle post methods
@@ -92,10 +94,12 @@ def process_test():
 			if not 'nb_intro_passed' in app_session:
 				app_session['nb_intro_passed'] = 0
 			(samples, systems, index) = model.get_intro_sample(user)
-			data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "name":model.get_name(), "author":model.get_author(), "description":model.get_description(), "samples":samples, "systems":systems, "nfixed": model.get_nb_position_fixed(), "index":index, "user":user, "introduction": True, "step": model.get_nb_step_user(user)+1, "totalstep" : model.get_nb_step(), "progress" : model.get_progress(user)}
+			book = model.get_book_variable_module_name('config')
+			data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "name":model.get_name(), "author":model.get_author(), "description":model.get_description(), "samples":samples, "systems":systems, "nfixed": model.get_nb_position_fixed(), "index":index, "user":user, "introduction": True, "step": model.get_nb_step_user(user)+1, "totalstep" : model.get_nb_step(), "progress" : model.get_progress(user), "config": book}
 		else:
 			(samples, systems, index) = model.get_test_sample(user)
-			data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "name":model.get_name(), "author":model.get_author(), "description":model.get_description(), "samples":samples, "systems":systems, "nfixed": model.get_nb_position_fixed(), "index":index, "user":user, "step": model.get_nb_step_user(user)+1, "totalstep" : model.get_nb_step(), "progress" : model.get_progress(user)}
+			book = model.get_book_variable_module_name('config')
+			data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "name":model.get_name(), "author":model.get_author(), "description":model.get_description(), "samples":samples, "systems":systems, "nfixed": model.get_nb_position_fixed(), "index":index, "user":user, "step": model.get_nb_step_user(user)+1, "totalstep" : model.get_nb_step(), "progress" : model.get_progress(user), "config": book}
 		return bottle.template('template', data)
 	else :
 		bottle.request.environ.get('beaker.session').delete()
@@ -134,7 +138,8 @@ def process_test_post():
 	if model.get_nb_step_user(user) < model.get_nb_step() :
 		bottle.redirect(request.app.config['myapp.APP_PREFIX']+'/test')
 	else :
-		data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "name":model.get_name(), "author":model.get_author(), "description":model.get_description(), "welcomeText":model.get_welcome_text()}
+		book = model.get_book_variable_module_name('config')
+		data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "name":model.get_name(), "author":model.get_author(), "description":model.get_description(), "welcomeText":model.get_welcome_text(), "config": book}
 		bottle.request.environ.get('beaker.session').delete()
 		return bottle.template('completed', data)
 		#return "<p>Test finished thank you for your cooperation</p>"
@@ -178,6 +183,16 @@ def get_nb_system() :
 	res = c.fetchall()
 	conn.close()
 	return int(res[0][0])
+
+def get_book_variable_module_name(module_name):
+	module = globals().get(module_name, None)
+	book = {}
+	if module:
+		book = {key: value for key, value in module.__dict__.iteritems() if not (key.startswith('__') or key.startswith('_'))}
+	return book
+
+def get_prefixe():
+	return config.prefixe
 
 def get_nb_position_fixed():
 	return int(config.nbFixedPosition)

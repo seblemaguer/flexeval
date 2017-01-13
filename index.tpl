@@ -5,7 +5,7 @@
 
 	<meta charset="utf-8">
 
-	<title>Subjective tests platform - {{name}}</title>
+	<title>Subjective tests platform - {{config["name"]}}</title>
 
 	<!-- Bootstrap Core CSS -->
 	<link href="{{APP_PREFIX}}/static/css/bootstrap.min.css" rel="stylesheet">
