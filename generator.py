@@ -94,11 +94,15 @@ def load_csv(lsPath, lsName):
 			sys.exit('ABORT: '+csvPath+' must be a file')
 		with open(csvPath, 'rb') as csvfile:
 			spamreader = csv.reader(csvfile, delimiter=';', quotechar='|')
-			if verbose:
-				for row in spamreader:
+			data = []
+			for row in spamreader:
+				if verbose:
 					print ', '.join(row)
-			lsCSV.append(spamreader)
-
+				data.append(row)
+			lsCSV.append(data)
+	if verbose:
+		print('list of CSV:')
+		print(lsCSV)
 	return lsCSV
 
 def create_db(config, data):
@@ -122,7 +126,10 @@ def create_db(config, data):
 		print('Database successfully created.')
 
 		for system in data:
-			print(system)
+			print('system')
+			for row in system:
+				print ', '.join(row)
+			print('==')
 			systemIndex = 0
 			systemToInsert = (system['id'],system['name'],system['comment'])
 			con.execute('INSERT INTO system(id, name, comment) VALUES (?,?,?)', systemToInsert)
