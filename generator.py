@@ -33,10 +33,10 @@ def parse_arguments():
 	global verbose 
 	verbose = args.verbose
 	global csv_delimiter
-	if len(args.csv_delimiter)==1:
+	if len(args.csv_delimiter) == 1:
 		csv_delimiter = args.csv_delimiter
 	else:
-		print('Warning: bad csv delimiter')
+		print('Warning: bad csv delimiter. The default delimiter is used.')
 	
 	lsPath = []
 	lsName = []
