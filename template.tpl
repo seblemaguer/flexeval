@@ -72,6 +72,9 @@
 				<samp class="lead text-center">
 					{{!samples[0]['text']}}
 				</samp>
+				<audio id="player" controls>
+					<source src="{{samples[0]["path"]}}">
+				</audio>
 			</center>
 		</div>
 
@@ -103,6 +106,13 @@
 						<label style="color: green; margin-top:5px; margin-bottom:5px; float: right;">10: perfectly possible</label>
 					</div>
 					<input type="hidden" id="question{{i}}" name="question{{i}}" value="5;;{{systems[i]}}">
+				</div>
+				<div class="col-xs-12 col-md-7 col-lg-7 vcenter">
+					<blockquote>
+					<audio id="player" controls>
+						<source src="{{samples[i]["path"]}}">
+					</audio>
+					</blockquote>
 				</div>
 			</div>
 				
