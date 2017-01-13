@@ -152,7 +152,7 @@ def create_db(config, data, lsName):
 		con.close()
 	print('Done.\n')
 
-def generate_config(json):
+def generate_config(json, lsPath):
 	print('|-------------------|')
 	print('| config generation |')
 	print('v-------------------v')
@@ -172,11 +172,10 @@ def generate_config(json):
 	config = open(testDirectory+'/config.py', 'w')
 	config.write('# === CONFIGURATION VARIABLES ===\n')
 	config.write('# Each configuration variable is necessarily a string\n')
-	samples = json['systems']['system'][0]['samples']
 	nbsbs = 0
-	for s in samples :
-		if s['type']=='test' :
-			nbsbs = len(s['sample'])
+	with open(lsPath[0], 'rb') as csvfile:
+		spamreader = csv.reader(csvfile, delimiter=';', quotechar='|')
+		nbsbs = sum(1 for row in spamreader)
 	for var in configJson:
 		if var in expectedConfig:
 			print(var+'\t:: OK')
@@ -351,7 +350,7 @@ def copy_templates(inputTemplate, indexTemplate, completedTemplate):
 configJSON = parse_json(inputJSON)
 name = configJSON['configuration']['name']
 (mainDirectory, testDirectory, viewsDirectory, staticDirectory, mediaDirectory) = create_architecture(name)
-generate_config(configJSON)
+generate_config(configJSON, lsPath)
 listDataCSV = load_csv(lsPath)
 create_db(configJSON, listDataCSV, lsName)
 # generate_template() # TODO: not used, move to verif_template
