@@ -88,6 +88,7 @@ def load_csv(lsPath, lsName):
 	print('| load CSV |')
 	print('v----------v')
 
+	lsCSV = []
 	for csvPath in lsPath:
 		if not os.path.isfile(csvPath):
 			sys.exit('ABORT: '+csvPath+' must be a file')
@@ -96,8 +97,9 @@ def load_csv(lsPath, lsName):
 			if verbose:
 				for row in spamreader:
 					print ', '.join(row)
+			lsCSV.append(spamreader)
 
-	# TODO: return csv_data + csv_headers
+	return lsCSV
 
 def create_db(config, data):
 	print('|---------------|')
@@ -110,7 +112,7 @@ def create_db(config, data):
 		for i in range(1,nbSystemToDisplay):
 			systs = systs + ', `system'+str(i+1) + '` TEXT NOT NULL'
 		columns = ''
-		for header in data['configuration']['headersCSV']:
+		for header in config['configuration']['headersCSV']:
 			columns += '`'+header+'` TEXT NOT NULL,'
 		print(columns)
 		con.execute('CREATE TABLE system (`id` TEXT NOT NULL PRIMARY KEY UNIQUE, `name` TEXT NOT NULL, `comment` TEXT NOT NULL)')
@@ -118,7 +120,9 @@ def create_db(config, data):
 		con.execute('CREATE TABLE answer (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `user` TEXT NOT NULL, `date` TEXT NOT NULL, `content` TEXT NOT NULL, `content_target` TEXT, `syst_index` INTEGER NOT NULL, `question_index` INTEGER NOT NULL,'+systs+' )')
 		con.commit()
 		print('Database successfully created.')
-		for system in data['systems']['system']:
+
+		for system in data:
+			print(system)
 			systemIndex = 0
 			systemToInsert = (system['id'],system['name'],system['comment'])
 			con.execute('INSERT INTO system(id, name, comment) VALUES (?,?,?)', systemToInsert)
@@ -334,18 +338,18 @@ def copy_templates(inputTemplate, indexTemplate, completedTemplate):
 
 
 (inputJSON, lsPath, lsName, inputTemplate, indexTemplate, completedTemplate) = parse_arguments()
-dataFromJSON = parse_json(inputJSON)
-name = dataFromJSON['configuration']['name']
+configJSON = parse_json(inputJSON)
+name = configJSON['configuration']['name']
 (mainDirectory, testDirectory, viewsDirectory, staticDirectory, mediaDirectory) = create_architecture(name)
-generate_config(dataFromJSON)
-load_csv(lsPath, lsName)
-create_db(dataFromJSON, dataFromJSON)
+generate_config(configJSON)
+listDataCSV = load_csv(lsPath, lsName)
+create_db(configJSON, listDataCSV)
 # generate_template() # TODO: not used, move to verif_template
 copy_templates(inputTemplate, indexTemplate, completedTemplate)
 create_platform()
 create_model()
 if useMedia:
-	copy_media(dataFromJSON)
+	copy_media(configJSON)
 # verif_template() # TODO: rewrite this function
 
 print('='*30)
