@@ -11,7 +11,7 @@ from pprint import pprint
 
 execfile(os.path.join(os.path.dirname(__file__),'pm_bodies.py'))
 # nbSystemToDisplay = 2
-# useMedia = True
+# useMedia = []
 # verbose = False
 
 
@@ -133,7 +133,6 @@ def create_db(config, data, lsName):
 		print('Database successfully created.')
 		try:
 			for index, system in enumerate(data):
-				print('system '+lsName[index])
 				con.execute('INSERT INTO system(name) VALUES (?)', (lsName[index],))
 				for i, sample in enumerate(system):
 					if i < config['configuration']['nbIntroductionSteps']:
@@ -191,7 +190,11 @@ def generate_config(json, lsPath):
 		if var=='nbSystemDisplayed':
 			nbSystemToDisplay = int(configJson[var])
 		elif var == 'useMedia':
+<<<<<<< c0a8e99ad9cf31fb2b1af5d4f48e176a0eae1837
 			useMedia = configJson[var]!=[]
+=======
+			useMedia = configJson[var]
+>>>>>>> 2d6085604697a68683e5bbb5f4aaeb65ca4b5794
 			config.write(var+'='+str(configJson[var])+'\n')
 			exception.append(var)
 		elif var == 'headersCSV' :
@@ -279,7 +282,11 @@ def create_model():
 	fo.close()
 	print('Done.\n')
 
+<<<<<<< c0a8e99ad9cf31fb2b1af5d4f48e176a0eae1837
 def copy_media(json):
+=======
+def copy_media(csv, mediaColumns, config):
+>>>>>>> 2d6085604697a68683e5bbb5f4aaeb65ca4b5794
 	print('|-----------------|')
 	print('| media file copy |')
 	print('v-----------------v')
@@ -288,11 +295,12 @@ def copy_media(json):
 	audioFolders = []
 	systems = []
 	regex = '^.*\/'
-	systems = json['systems']['system']
-	for samples in systems:
-		for sample in samples['samples']:
-			for wav in sample['sample']:
-				audio.append(wav)
+	systems = csv
+	for system in csv:
+		for sample in system:
+			for col_index,col_content in enumerate(sample):
+				if configJSON['configuration']['headersCSV'][col_index] in mediaColumns:
+					audio.append(col_content)
 	for wav in audio:
 		search = re.search(regex, wav)
 		if search :
@@ -306,7 +314,8 @@ def copy_media(json):
 		if search :
 			filedir = search.group(0)
 		shutil.copy(file, mediaDirectory+filedir)
-		print(file+'  to  '+mediaDirectory+filedir)
+		if verbose:
+			print(file+'  to  '+mediaDirectory+filedir)
 	print('Done.\n')
 
 def verif_template():
@@ -362,8 +371,7 @@ def copy_templates(inputTemplate, indexTemplate, completedTemplate):
 
 (inputJSON, lsPath, lsName, inputTemplate, indexTemplate, completedTemplate) = parse_arguments()
 configJSON = parse_json(inputJSON)
-name = configJSON['configuration']['name']
-(mainDirectory, testDirectory, viewsDirectory, staticDirectory, mediaDirectory) = create_architecture(name)
+(mainDirectory, testDirectory, viewsDirectory, staticDirectory, mediaDirectory) = create_architecture(configJSON['configuration']['name'])
 generate_config(configJSON, lsPath)
 listDataCSV = load_csv(lsPath)
 create_db(configJSON, listDataCSV, lsName)
@@ -372,7 +380,11 @@ copy_templates(inputTemplate, indexTemplate, completedTemplate)
 create_platform()
 create_model()
 if useMedia:
+<<<<<<< c0a8e99ad9cf31fb2b1af5d4f48e176a0eae1837
 	copy_media(configJSON)
+=======
+	copy_media(listDataCSV, useMedia, configJSON)
+>>>>>>> 2d6085604697a68683e5bbb5f4aaeb65ca4b5794
 # verif_template() # TODO: rewrite this function
 
 print('='*30)
