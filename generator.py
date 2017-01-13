@@ -261,9 +261,9 @@ def generate_template():
 	print('Done.\n')
 
 def create_platform():
-	print('|--------------------|')
+	print('|-------------------|')
 	print('| platform creation |')
-	print('v--------------------v')
+	print('v-------------------v')
 	fo = open(testDirectory+'platform.py', 'wb')
 	fo.write(platform_body)
 	fo.close()
@@ -311,9 +311,9 @@ def copy_media(csv, mediaColumns, config):
 	print('Done.\n')
 
 def verif_template():
-	print('|-----------------|')
-	print('| template check  |')
-	print('v-----------------v')
+	print('|----------------|')
+	print('| template check |')
+	print('v----------------v')
 	authorized_tags=["{{name}}","{{author}}","{{description}}","{{index}}","{{user}}"]
 	warning_tags=["samples","systems"]
 	essentials_tags=["bootstrap.min.css","jquery.js","jquery-ui.min.js","jquery-ui.min.css","addEventListener"]
@@ -351,9 +351,9 @@ def verif_template():
 	print('Done.\n')
 
 def copy_templates(inputTemplate, indexTemplate, completedTemplate):
-	print('|----------------------|')
-	print('|  copy templates      |')
-	print('v----------------------v')
+	print('|----------------|')
+	print('| copy templates |')
+	print('v----------------v')
 	shutil.copy(indexTemplate, viewsDirectory+'index.tpl')
 	shutil.copy(inputTemplate, viewsDirectory+'template.tpl')
 	shutil.copy(completedTemplate, viewsDirectory+'completed.tpl')
