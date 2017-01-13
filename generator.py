@@ -119,37 +119,33 @@ def create_db(config, data, lsName):
 		columns = ''
 		for header in headersCSV:
 			columns += '`'+header+'` TEXT NOT NULL,'
-		print(columns)
 		con.execute('CREATE TABLE system (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `name` TEXT NOT NULL)')
 		con.execute('CREATE TABLE sample (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, '+columns+' `type` TEXT NOT NULL, `id_system` TEXT NOT NULL , `syst_index` INTEGER NOT NULL, `nb_processed` INTEGER NOT NULL DEFAULT 0, FOREIGN KEY(id_system) REFERENCES system(id))')
 		con.execute('CREATE TABLE answer (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `user` TEXT NOT NULL, `date` TEXT NOT NULL, `content` TEXT NOT NULL, `content_target` TEXT, `syst_index` INTEGER NOT NULL, `question_index` INTEGER NOT NULL,'+systs+' )')
 		con.commit()
 		print('Database successfully created.')
+		try:
+			for index, system in enumerate(data):
+				print('system '+lsName[index])
+				con.execute('INSERT INTO system(name) VALUES (?)', (lsName[index],))
+				for i, sample in enumerate(system):
+					if i < config['configuration']['nbIntroductionSteps']:
+						sampleType = 'intro'
+					else:
+						sampleType = 'test'
+					sampleTuple = ()
+					for j in sample:
+						sampleTuple += (j,)
+					sampleTuple += (sampleType, index+1, i,)
+					con.execute('INSERT INTO sample('+', '.join(headersCSV)+', type, id_system, syst_index) VALUES ('+'?,'*len(headersCSV)+'?,?,?)', sampleTuple)
+			con.commit()
+			print('Database successfully filled.')
+		except Exception as e:
+			print('Exception in filling')
+			con.rollback()
+			raise e
 	except Exception as e:
-		print('EXCEPTION')
-		con.rollback()
-		raise e
-	finally:
-		con.close()
-	con = sqlite3.connect(testDirectory+'/data.db')
-	try:
-		for index, system in enumerate(data):
-			print('system '+lsName[index])
-			con.execute('INSERT INTO system(name) VALUES (?)', (lsName[index],))
-			for i, sample in enumerate(system):
-				if i < config['configuration']['nbIntroductionSteps']:
-					sampleType = 'intro'
-				else:
-					sampleType = 'test'
-				sampleTuple = ()
-				for j in sample:
-					sampleTuple += (j,)
-				sampleTuple += (sampleType, index+1, i,)
-				con.execute('INSERT INTO sample('+', '.join(headersCSV)+', type, id_system, syst_index) VALUES ('+'?,'*len(headersCSV)+'?,?,?)', sampleTuple)
-		con.commit()
-		print('Database successfully filled.')
-	except Exception as e:
-		print('EXCEPTION')
+		print('Exception in creation')
 		con.rollback()
 		raise e
 	finally:
