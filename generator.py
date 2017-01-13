@@ -25,7 +25,7 @@ def parse_arguments():
 	parser.add_argument('-i', '--index-tpl', help='input index template file', type=str, required=True)
 	parser.add_argument('-c', '--completed-tpl', help='input last page template file', type=str, required=True)
 	parser.add_argument('-s', '--systems', nargs='+', help='list of systems', type=str, required=True)
-	parser.add_argument('-n', '--name', help='systems with names after', action='store_true')
+	parser.add_argument('-n', '--name', help='allow names after each systems (default: no names)', action='store_true')
 	parser.add_argument('-v', '--verbose', help='verbose mode', action='store_true')
 	parser.add_argument('--csv_delimiter', help='define csv delimiter', default=';')
 	args = parser.parse_args()
@@ -119,6 +119,13 @@ def create_db(config, data, lsName):
 
 	con = sqlite3.connect(testDirectory+'/data.db')
 	headersCSV = config['configuration']['headersCSV']
+	if not lsName:
+		if verbose:
+			print("No system names defined. Default system names will be created:")
+		for index, system in enumerate(data):
+			lsName.append("system_"+str(index))
+			if verbose:
+				print("system_"+str(index))
 	try:
 		systs = '`system1` TEXT NOT NULL'
 		for i in range(1,nbSystemToDisplay):
