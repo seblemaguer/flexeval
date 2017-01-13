@@ -282,7 +282,7 @@ def copy_media(csv, mediaColumns, config):
 	print('|-----------------|')
 	print('| media file copy |')
 	print('v-----------------v')
-	return 
+
 	audio = []
 	audioFolders = []
 	systems = []
