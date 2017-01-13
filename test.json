@@ -1,17 +1,17 @@
 {
 "configuration": {
-		"name": "Perceptual_Test_A",
-		"author": "IRISA/Expression",
-		"nbSteps": 8,
-		"nbSystemDisplayed" : 2,
-		"description": "Study on spontaneous speech",
-		"prefixe":"",
-		"nbQuestions":5,
-		"nbFixedPosition":1,
-		"nbIntroductionSteps":0,
-		"welcomeText": "",
-		"nbSampleBySystem": 10,
-		"headersCSV": ["text","number","letter","path"],
-		"useMedia": []
+	"name": "Perceptual_Test_A",
+	"author": "IRISA/Expression",
+	"nbSteps": 8,
+	"nbSystemDisplayed" : 2,
+	"description": "Study on spontaneous speech",
+	"prefixe":"",
+	"nbQuestions":5,
+	"nbFixedPosition":1,
+	"nbIntroductionSteps":0,
+	"welcomeText": "",
+	"nbSampleBySystem": 10,
+	"headersCSV": ["text","number","letter","path"],
+	"useMedia": ["path"]
 	}
 }
