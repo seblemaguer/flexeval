@@ -50,6 +50,8 @@
 		<div class="jumbotron text-center">
 		<h2><b>Context:</b> Imagine someone tells the text below during a spontaneous conversation.</h2>
 		<h2><b>Question:</b> How likely do you judge the spoken propositions?</h2>
+		<br>
+		<h4><i>Remark: Some propositions may be identical, some may differ only very slightly.</i></h4>
 		</div>
 		% if introduction :
 		<div class="alert alert-danger"><strong>Warning !</strong> This is an introduction step !</div>
