@@ -92,10 +92,10 @@ def process_test():
 			if not 'nb_intro_passed' in app_session:
 				app_session['nb_intro_passed'] = 0
 			(samples, systems, index) = model.get_intro_sample(user)
-			data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "name":model.get_name(), "author":model.get_author(), "description":model.get_description(), "samples":samples, "systems":systems, "nfixed": model.get_nb_position_fixed(), "index":index, "user":user, "introduction": True, "step": model.get_nb_step_user(user)+1, "totalstep" : model.get_nb_step(), "progress" : model.get_progress(user)}
+			data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "name":model.get_name(), "author":model.get_author(), "description":model.get_description(), "samples":samples, "systems":systems, "nfixed": model.get_nb_position_fixed(), "index":index, "user":user, "introduction": True, "step": int(model.get_nb_step_user(user)+1), "totalstep" : model.get_nb_step(), "progress" : model.get_progress(user)}
 		else:
 			(samples, systems, index) = model.get_test_sample(user)
-			data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "name":model.get_name(), "author":model.get_author(), "description":model.get_description(), "samples":samples, "systems":systems, "nfixed": model.get_nb_position_fixed(), "index":index, "user":user, "step": model.get_nb_step_user(user)+1, "totalstep" : model.get_nb_step(), "progress" : model.get_progress(user)}
+			data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "name":model.get_name(), "author":model.get_author(), "description":model.get_description(), "samples":samples, "systems":systems, "nfixed": model.get_nb_position_fixed(), "index":index, "user":user, "step": int(model.get_nb_step_user(user)+1), "totalstep" : model.get_nb_step(), "progress" : model.get_progress(user)}
 		return bottle.template('template', data)
 	else :
 		bottle.request.environ.get('beaker.session').delete()
@@ -169,6 +169,8 @@ import sqlite3
 from datetime import date, datetime
 import random
 import config
+import itertools
+import operator
 
 def get_nb_system() :
 	#return the number of sample for a test!
@@ -226,7 +228,7 @@ def get_nb_step_user(user) :
 	res = c.fetchall()
 	conn.close()
 	nbans = res[0][0]
-	return nbans/get_nb_questions()
+	return int(nbans/get_nb_questions())
 
 def get_progress(user):
 	# return the ratio of steps achieved by the user over the total number of steps
@@ -241,6 +243,40 @@ def get_metadata() :
 		if not b:
 			metadata[str(i)]=getattr(config,i)
 	return metadata
+
+def get_shuffled_list_of_system_ids(nbFixed, connection) :
+	# Build the list of system IDs such that fixed position systems are returned in priority,
+	# then systems with lowest number of answers in priority.
+	
+	# Get system IDs
+	connection.execute('select id_system, sum(nb_processed) as nb_answers from sample group by id_system order by id asc')
+	ids = connection.fetchall()
+	# Keep fixed systems aside
+	fixed_ids = []
+	if nbFixed > 0:
+		fixed_ids = ids[0:nbFixed]
+		ids = ids[nbFixed:]
+	# Sort remaining IDs according to number of answers
+	ids = sorted(ids, key=lambda line: int(line[1]))
+	# Let m the minimum number of answers
+	# Shuffle all systems with number of answers ranging between m and m+delta
+	m = ids[0][1]
+	delta = 1
+	low_votes_ids = list(filter(lambda line: line[1] <= m+delta, ids))
+	random.shuffle(low_votes_ids)
+	# and append others
+	higher_votes_ids = list(filter(lambda line: line[1] > m+delta, ids))
+	# Shuffle all systems with similar number of answers
+	def gather_similar_systems(l):
+		it = itertools.groupby(l, operator.itemgetter(1))
+		for key, subiter in it:
+			yield list(subiter)
+	shuffled_higher_votes_ids = []
+	for group in gather_similar_systems(higher_votes_ids):
+		random.shuffle(group)
+		shuffled_higher_votes_ids += group
+	
+	return [line[0] for line in fixed_ids+low_votes_ids+shuffled_higher_votes_ids];
 
 def get_test_sample(user) :
 	random.seed()
@@ -267,17 +303,26 @@ def get_test_sample(user) :
 	index = validlist[random.randint(0,len(validlist)-1)][0]
 	samples=[]
 	systems=[]
-	c.execute('select nb_processed, id_system, path from sample where syst_index='+str(index)+' order by nb_processed asc')
-	systs = c.fetchall()
-	i=0
-	while i<nbToKeep :
-		systems.append(systs[i][1])
-		if config.useMedia=='True' :
-			samples.append('media/'+systs[i][2])
-		else :
-			samples.append(systs[i][2])
-		i=i+1
+	
 	n = get_nb_position_fixed()
+	
+	shuffled_ids = get_shuffled_list_of_system_ids(n, c)
+	
+	c.execute('select nb_processed, id_system, path from sample where syst_index='+str(index)+' order by nb_processed asc')
+	systs = {}
+	for s in c.fetchall():
+		systs[s[1]] = s
+	
+	i=0
+	
+	while i<nbToKeep :
+		systems.append(shuffled_ids[i])
+		if config.useMedia=='True' :
+			samples.append('media/'+systs[shuffled_ids[i][0]][2])
+		else :
+			samples.append(systs[shuffled_ids[i]][2])
+		i=i+1
+	
 	if n<=0:
 		r = random.random()
 		random.shuffle(samples, lambda: r)
@@ -296,6 +341,7 @@ def get_test_sample(user) :
 		samples=sa1
 		sy1.extend(sy2)
 		systems=sy1
+	
 	conn.close()
 	return (samples, systems, index)
 
@@ -315,8 +361,14 @@ def get_intro_sample(user) :
 			index = r[0]
 	samples=[]
 	systems=[]
+	
+	n = get_nb_position_fixed()
+	
+	shuffled_ids = get_shuffled_list_of_system_ids(n, c)
+	
 	c.execute('select nb_processed, id_system, path from sample where syst_index='+str(index)+' order by nb_processed asc')
 	systs = c.fetchall()
+	
 	i=0
 	while i<nbToKeep :
 		systems.append(systs[i][1])
@@ -325,7 +377,7 @@ def get_intro_sample(user) :
 		else :
 			samples.append(systs[i][2])
 		i=i+1
-	n = get_nb_position_fixed()
+
 	if n<=0:
 		r = random.random()
 		random.shuffle(samples, lambda: r)
@@ -371,11 +423,16 @@ def insert_data(data) :
 		else :
 			val = "\\""+str(data['user'])+"\\",\\""+str(now)+"\\",\\""+answer['content']+"\\",\\""+str(data['index'])+"\\",\\""+str(answer['index'])+"\\","+sysval
 			conn.execute("insert into answer(user,date,content,syst_index,question_index,"+systs+") values ("+val+")")
-	conn.commit()
+		
+		#update the number of time processed for the samples
+		c.execute('select nb_processed from sample where id_system="'+answer['target']+'" and syst_index='+str(data['index']))
+		n = c.fetchall()[0][0]
+		conn.execute('update sample set nb_processed='+str(n+1)+' where id_system="'+answer['target']+'" and syst_index='+str(data['index']))
+		conn.commit()
 	#update the number of time processed for the samples
-	c.execute('select nb_processed from sample where syst_index='+str(data['index']))
-	n = c.fetchall()[0][0]
-	conn.execute('update sample set nb_processed='+str(n+1)+' where syst_index='+str(data['index']))
-	conn.commit()
+	#c.execute('select nb_processed from sample where syst_index='+str(data['index']))
+	#n = c.fetchall()[0][0]
+	#conn.execute('update sample set nb_processed='+str(n+1)+' where syst_index='+str(data['index']))
+	#conn.commit()
 	conn.close()
 """
