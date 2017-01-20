@@ -8,13 +8,12 @@ import sqlite3
 import sys
 import argparse
 from pprint import pprint
-
+import random
+import string
 
 execfile(os.path.join(os.path.dirname(__file__),'pm_bodies.py'))
-# nbSystemToDisplay = 2
-# useMedia = []
-# verbose = False
-
+prefix=""
+tok=""
 
 def parse_arguments():
 	print('	╔════════════════╗')
@@ -29,6 +28,7 @@ def parse_arguments():
 	parser.add_argument('-t', '--main-tpl', help='input main template file', type=str, required=True)
 	parser.add_argument('-i', '--index-tpl', help='input index template file', type=str, required=True)
 	parser.add_argument('-c', '--completed-tpl', help='input last page template file', type=str, required=True)
+	parser.add_argument('-e', '--export-tpl', help='export page template file', type=str, required=True)
 	parser.add_argument('-s', '--systems', nargs='+', help='list of systems', type=str, required=True)
 	parser.add_argument('-n', '--name', help='allow names after each systems (default: no names)', action='store_true')
 	parser.add_argument('-v', '--verbose', help='verbose mode', action='store_true')
@@ -63,7 +63,7 @@ def parse_arguments():
 		lsPath = args.systems
 
 	print('')
-	return args.json, lsPath, lsName, args.main_tpl, args.index_tpl, args.completed_tpl
+	return args.json, lsPath, lsName, args.main_tpl, args.index_tpl, args.completed_tpl, args.export_tpl
 
 def create_architecture(testName):
 	print('|-----------------------|')
@@ -187,6 +187,8 @@ def generate_config(json, lsPath):
 	print('v-------------------v')
 	global nbSystemToDisplay
 	global useMedia
+	global prefix
+	global tok
 	configJson = json
 	if 'configuration' in configJson:
 		configJson = configJson['configuration']
@@ -212,6 +214,8 @@ def generate_config(json, lsPath):
 			expectedConfig.remove(var)
 		if var=='nbSystemDisplayed':
 			nbSystemToDisplay = int(configJson[var])
+		elif var=="prefixe":
+			prefix = configJson[var]
 		elif var == 'useMedia':
 			useMedia = configJson[var]
 			config.write(var+'='+str(configJson[var])+'\n')
@@ -224,6 +228,8 @@ def generate_config(json, lsPath):
 				configJson[var]=nbsbs
 		if var not in exception:
 			config.write(var+'=\''+str(configJson[var])+'\'\n')
+	tok = generate_token()
+	config.write("token=\'"+tok+"\'\n")
 	for expected in expectedConfig:
 		print(expected+' not found!')
 		if expected == 'name':
@@ -371,31 +377,42 @@ def verif_template():
 		checked.append(m)
 	print('Done.\n')
 
-def copy_templates(inputTemplate, indexTemplate, completedTemplate):
+def copy_templates(inputTemplate, indexTemplate, completedTemplate, exportTemplate):
 	print('|----------------|')
 	print('| templates copy |')
 	print('v----------------v')
 	shutil.copy(indexTemplate, viewsDirectory+'index.tpl')
 	shutil.copy(inputTemplate, viewsDirectory+'template.tpl')
 	shutil.copy(completedTemplate, viewsDirectory+'completed.tpl')
+	shutil.copy(exportTemplate, viewsDirectory+'export.tpl')
 	
 	print('Done.\n')
 
+def generate_token():
+	return ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(30))
 
-(inputJSON, lsPath, lsName, inputTemplate, indexTemplate, completedTemplate) = parse_arguments()
+
+(inputJSON, lsPath, lsName, inputTemplate, indexTemplate, completedTemplate, exportTemplate) = parse_arguments()
 configJSON = load_json(inputJSON)
 (mainDirectory, testDirectory, viewsDirectory, staticDirectory, mediaDirectory) = create_architecture(configJSON['configuration']['name'])
 generate_config(configJSON, lsPath)
 listDataCSV = load_csv(lsPath)
 create_db(configJSON, listDataCSV, lsName)
 # generate_template() # TODO: not used, move to verif_template
-copy_templates(inputTemplate, indexTemplate, completedTemplate)
+copy_templates(inputTemplate, indexTemplate, completedTemplate, exportTemplate)
 create_platform()
 create_model()
 if useMedia:
 	copy_media(listDataCSV, useMedia, configJSON)
 # verif_template() # TODO: rewrite this function
-
+url=""
+if prefix!= "" : 
+	url="server_url/"+prefix+"/export"
+else :
+	url="server_url/export"
+print("You can access the database from the following url : " + url)
+print("You will need a token for this so keep this one !!")
+print("Token ====  %s" %tok)
 print('='*30)
 print('    GENERATION TERMINEE !!')
 print('='*30)
