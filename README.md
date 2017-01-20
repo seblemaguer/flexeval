@@ -32,7 +32,7 @@ templates utilisés : `template.tpl`, `completed.tpl`, `index.tpl`
 Celui-ci peut êtr lancé avec l'option 'rm' ou sans. Cete option permet de supprimer préalablement l'ensemble du dossier `tests`.
 
 ---
-## Utilisation sans scipt de test
+## Utilisation sans script de test
 Il possible de lancer une génération sans utiliser le script de test en exécutant le script python `generator.py`.
 Ce dernier accepte les arguments suivants :
 
@@ -49,7 +49,7 @@ Ce dernier accepte les arguments suivants :
 
 
 ---
-Dans platform.py, ne pas oublier de changer la valeur de myapp.APP_PREFIX.
+Dans platform.py, ne pas oublier de changer la valeur de `myapp.APP_PREFIX`.
 Ici c'est la valeur '/perceptualTestA' (comme indiqué dans l'exemple de config apache ci-dessous)
 
 ---
