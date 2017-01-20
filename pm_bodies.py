@@ -319,13 +319,13 @@ def get_test_sample(user) :
 	dir = os.path.dirname(os.path.abspath(__file__))
 	conn = sqlite3.connect(os.path.join(dir,'data.db'))
 	c = conn.cursor()
-	c.execute("select syst_index, sum(nb_processed) from sample where type='test' group by syst_index")
+	c.execute("select sample_index, sum(nb_processed) from sample where type='test' group by sample_index")
 	res= c.fetchall()
 	validlist=[]
 	min=0
 	for r in res :
 		#check if user have already done it
-		c.execute('select count(*) from answer where user="'+user+'" and syst_index='+str(r[0]))
+		c.execute('select count(*) from answer where user="'+user+'" and sample_index='+str(r[0]))
 		nb = c.fetchall()
 		if nb[0][0] ==0:
 			if validlist==[]:
@@ -349,7 +349,7 @@ def get_test_sample(user) :
 		queryh = queryh+headers[i]
 		if i<len(headers)-1 : 
 			queryh=queryh+", "
-	c.execute('select nb_processed, id_system, '+ queryh +' from sample where syst_index='+str(index)+' order by nb_processed asc')
+	c.execute('select nb_processed, id_system, '+ queryh +' from sample where sample_index='+str(index)+' order by nb_processed asc')
 	systs = {}
 	for s in c.fetchall():
 		systs[s[1]] = s
@@ -398,11 +398,11 @@ def get_intro_sample(user) :
 	dir = os.path.dirname(os.path.abspath(__file__))
 	conn = sqlite3.connect(os.path.join(dir,'data.db'))
 	c = conn.cursor()
-	c.execute("select syst_index from sample where type='intro' group by syst_index")
+	c.execute("select sample_index from sample where type='intro' group by sample_index")
 	res= c.fetchall()
 	index= res[0][0]
 	for r in res :
-		c.execute('select count(*) from answer where user="'+user+'" and syst_index='+str(r[0]))
+		c.execute('select count(*) from answer where user="'+user+'" and sample_index='+str(r[0]))
 		nb = c.fetchall()
 		if nb[0][0] ==0:
 			index = r[0]
@@ -419,7 +419,7 @@ def get_intro_sample(user) :
 		queryh = queryh+headers[i]
 		if i<len(headers)-1 : 
 			queryh=queryh+", "
-	c.execute('select nb_processed, id_system, '+ queryh +' from sample where syst_index='+str(index)+' order by nb_processed asc')
+	c.execute('select nb_processed, id_system, '+ queryh +' from sample where sample_index='+str(index)+' order by nb_processed asc')
 	systs = {}
 	for s in c.fetchall():
 		systs[s[1]] = s
@@ -469,7 +469,7 @@ def insert_data(data) :
 	answers = data['answers']
 	for answer in answers :
 		#val = (data['user'],str(now),answer['content'],data['index'],answer['index'])
-		#c.execute('insert into answer(user,date,content,syst_index,question_index) values (?,?,?,?,?)',val)
+		#c.execute('insert into answer(user,date,content,sample_index,question_index) values (?,?,?,?,?)',val)
 		sysval=""
 		systs=""
 		for i in range(int(config.nbSystemDisplayed)):
@@ -481,20 +481,20 @@ def insert_data(data) :
 		
 		if "target" in answer :
 			val = "\\""+str(data['user'])+"\\",\\""+str(now)+"\\",\\""+answer['content']+"\\",\\""+str(data['index'])+"\\",\\""+str(answer['index'])+"\\",\\""+answer["target"]+"\\","+sysval
-			conn.execute("insert into answer(user,date,content,syst_index,question_index,content_target,"+systs+") values ("+val+")")
+			conn.execute("insert into answer(user,date,content,sample_index,question_index,content_target,"+systs+") values ("+val+")")
 		else :
 			val = "\\""+str(data['user'])+"\\",\\""+str(now)+"\\",\\""+answer['content']+"\\",\\""+str(data['index'])+"\\",\\""+str(answer['index'])+"\\","+sysval
-			conn.execute("insert into answer(user,date,content,syst_index,question_index,"+systs+") values ("+val+")")
+			conn.execute("insert into answer(user,date,content,sample_index,question_index,"+systs+") values ("+val+")")
 		
 		#update the number of time processed for the samples
-		c.execute('select nb_processed from sample where id_system="'+answer['target']+'" and syst_index='+str(data['index']))
+		c.execute('select nb_processed from sample where id_system="'+answer['target']+'" and sample_index='+str(data['index']))
 		n = c.fetchall()[0][0]
-		conn.execute('update sample set nb_processed='+str(n+1)+' where id_system="'+answer['target']+'" and syst_index='+str(data['index']))
+		conn.execute('update sample set nb_processed='+str(n+1)+' where id_system="'+answer['target']+'" and sample_index='+str(data['index']))
 		conn.commit()
 	#update the number of time processed for the samples
-	#c.execute('select nb_processed from sample where syst_index='+str(data['index']))
+	#c.execute('select nb_processed from sample where sample_index='+str(data['index']))
 	#n = c.fetchall()[0][0]
-	#conn.execute('update sample set nb_processed='+str(n+1)+' where syst_index='+str(data['index']))
+	#conn.execute('update sample set nb_processed='+str(n+1)+' where sample_index='+str(data['index']))
 	#conn.commit()
 	conn.close()
 """
