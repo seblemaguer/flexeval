@@ -116,6 +116,16 @@
 					</audio>
 					</blockquote>
 				</div>
+				<div class="col-xs-12 col-md-7 col-lg-7 vcenter">
+					<blockquote>
+					<img src="{{samples[i]["image"]}}" alt="Mountain View" style="width:304px;height:228px;">
+					</blockquote>
+				</div>
+				<div class="col-xs-12 col-md-7 col-lg-7 vcenter">
+					<blockquote>
+					 <video width="500" height="345" src="{{samples[i]["video"]}}" controls/>
+					</blockquote>
+				</div>
 			</div>
 				
 		</div>
