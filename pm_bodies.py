@@ -62,7 +62,7 @@ def toto():
 	if('pseudo' in app_session) :
 		return "<p>You are already logged, please logout <a href='"+request.app.config['myapp.APP_PREFIX']+"/logout'>here</a></p>"
 	book = model.get_book_variable_module_name('config')
-	data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "welcomeText":model.get_welcome_text(), "config": book}
+	data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "config": book}
 	return bottle.template('index', data)
 
 #bottle post methods
@@ -222,10 +222,6 @@ def get_questions_type():
 def get_description():
 	#get it from config.py
 	return config.description
-
-def get_welcome_text():
-	#get it from config.py
-	return config.welcomeText
 
 def get_name():
 	#get it from config.py
