@@ -347,7 +347,7 @@ def get_test_sample(user) :
 		systems.append(shuffled_ids[i])
 		t=dict()
 		headerIndex=0
-		for j in range(2,len(systs[i])):
+		for j in range(2,len(systs[shuffled_ids[i]])):
 			if headers[headerIndex] in get_media() :
 				t[headers[headerIndex]] = get_prefixe()+'/media/'+systs[shuffled_ids[i][0]][j]
 			else :
@@ -417,7 +417,7 @@ def get_intro_sample(user) :
 		systems.append(shuffled_ids[i])
 		t=dict()
 		headerIndex=0
-		for j in range(2,len(systs[i])):
+		for j in range(2,len(systs[shuffled_ids[i]])):
 			if headers[headerIndex] in get_media() :
 				t[headers[headerIndex]] = get_prefixe()+'/media/'+systs[shuffled_ids[i][0]][j]
 			else :
