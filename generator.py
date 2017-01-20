@@ -79,13 +79,11 @@ def create_architecture(testName):
 		std_dir = str(path)+str(name)
 		dir = std_dir
 		i = 0
-		print(dir)
 		while os.path.exists(dir):
+			if verbose:
+				print('Folder '+dir+' already exist.')
 			i+=1
 			dir = std_dir+'_'+str(i)
-			print(dir)
-			# addWarning('Folder aready exist.')
-			# sys.exit('ABORT: Folder already exist : '+dir)
 		if i>0:
 			addWarning('Folder '+std_dir+' aready exist.')
 			addWarning('New folder at '+dir)
@@ -252,13 +250,10 @@ def generate_config(json, lsPath):
 			if configJson[var] < 0 or configJson[var] > configJson['nbSteps'] :
 				configJson[var]=nbsbs
 		if var not in exception:
-			print sys.stdout.encoding
-			if type(configJson[var]) == int:
-				config.write(var+'=\''+str(configJson[var])+'\'\n')
+			if type(configJson[var]) == unicode:
+				config.write((var+'=\''+configJson[var]+'\'\n').encode("UTF-8"))
 			else:
-				# print(configJson[var])
-				# print(type(configJson[var]))
-				config.write(var+'=\''+configJson[var]+'\'\n')
+				config.write(var+'=\''+str(configJson[var])+'\'\n')
 	tok = generate_token()
 	config.write("token=\'"+tok+"\'\n")
 	for expected in expectedConfig:
