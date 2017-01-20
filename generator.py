@@ -174,7 +174,8 @@ def create_db(config, data, lsName):
 		con.execute('CREATE TABLE sample (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, '+columns+' `type` TEXT NOT NULL, `id_system` TEXT NOT NULL , `syst_index` INTEGER NOT NULL, `nb_processed` INTEGER NOT NULL DEFAULT 0, FOREIGN KEY(id_system) REFERENCES system(id))')
 		con.execute('CREATE TABLE answer (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `user` TEXT NOT NULL, `date` TEXT NOT NULL, `content` TEXT NOT NULL, `content_target` TEXT, `syst_index` INTEGER NOT NULL, `question_index` INTEGER NOT NULL,'+systs+' )')
 		con.commit()
-		print('Database successfully created.')
+		if verbose:
+			print('Database successfully created.')
 		try:
 			for index, system in enumerate(data):
 				con.execute('INSERT INTO system(name) VALUES (?)', (lsName[index],))
@@ -189,7 +190,8 @@ def create_db(config, data, lsName):
 					sampleTuple += (sampleType, index+1, i,)
 					con.execute('INSERT INTO sample('+', '.join(headersCSV)+', type, id_system, syst_index) VALUES ('+'?,'*len(headersCSV)+'?,?,?)', sampleTuple)
 			con.commit()
-			print('Database successfully filled.')
+			if verbose :
+				print('Database successfully filled.')
 		except Exception as e:
 			print('Exception in filling')
 			con.rollback()
@@ -217,9 +219,9 @@ def generate_config(json, lsPath):
 		configJson = configJson['configuration']
 	else:
 		sys.exit('ABORT: Invalid JSON file')
-
-	print('Configuration JSON:')
-	print(configJson)
+	if verbose :
+		print('Configuration JSON:')
+		print(configJson)
 
 	expectedConfig = ['name', 'author', 'nbSteps', 'nbIntroductionSteps', 'nbSystemDisplayed', 'description', 'useMedia', 'nbQuestions', 'nbFixedPosition']
 
