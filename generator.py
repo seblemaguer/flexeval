@@ -12,10 +12,6 @@ import sys
 from pprint import pprint
 
 execfile(os.path.join(os.path.dirname(__file__), 'pm_bodies.py'))
-# global prefix
-# prefix=''
-# global tok
-# tok=''
 global warning
 warning = []
 
@@ -26,8 +22,6 @@ def parse_arguments():
 	print('	╚════════════════╝')
 	print('')
 
-	# JSONFile = None
-	# TemplateFile = None
 	parser = argparse.ArgumentParser(description='Generator for subjective test web platform')
 	parser.add_argument('-j', '--json', help='input JSON file', type=argparse.FileType('r'), required=True)
 	parser.add_argument('-t', '--main-tpl', help='input main template file', type=str, required=True)
@@ -126,14 +120,14 @@ def load_json(JSONfile):
 	return data
 
 
-def load_csv(lsPath):
+def load_csv(listOfPath):
 	if verbose:
 		print('|-------------|')
 		print('| loading CSV |')
 		print('v-------------v')
 
 	lsCSV = []
-	for csvPath in lsPath:
+	for csvPath in listOfPath:
 		if not os.path.isfile(csvPath):
 			sys.exit('ABORT: ' + csvPath + ' must be a file')
 		with open(csvPath, 'rb') as csvfile:
@@ -154,7 +148,7 @@ def load_csv(lsPath):
 	return lsCSV
 
 
-def create_db(config, data, lsName):
+def create_db(config, data, listOfName):
 	if verbose:
 		print('|---------------|')
 		print('| DB generation |')
@@ -162,11 +156,11 @@ def create_db(config, data, lsName):
 
 	con = sqlite3.connect(testDirectory + '/data.db')
 	headersCSV = config['configuration']['headersCSV']
-	if not lsName:
+	if not listOfName:
 		if verbose:
 			print('No system names defined. Default system names will be created:')
 		for index, system in enumerate(data):
-			lsName.append('system_' + str(index))
+			listOfName.append('system_' + str(index))
 			if verbose:
 				print('system_' + str(index))
 	try:
@@ -184,7 +178,7 @@ def create_db(config, data, lsName):
 			print('Database successfully created.')
 		try:
 			for index, system in enumerate(data):
-				con.execute('INSERT INTO system(name) VALUES (?)', (lsName[index],))
+				con.execute('INSERT INTO system(name) VALUES (?)', (listOfName[index],))
 				for i, sample in enumerate(system):
 					if i < config['configuration']['nbIntroductionSteps']:
 						sampleType = 'intro'
@@ -236,7 +230,6 @@ def generate_config(json, lsPath):
 	config = open(testDirectory + '/config.py', 'w')
 	config.write('# === CONFIGURATION VARIABLES ===\n')
 	config.write('# Each configuration variable is necessarily a string\n')
-	nbsbs = 0
 	with open(lsPath[0], 'rb') as csvfile:
 		spamreader = csv.reader(csvfile, delimiter=';', quotechar='|')
 		nbsbs = sum(1 for row in spamreader)
@@ -248,7 +241,7 @@ def generate_config(json, lsPath):
 			expectedConfig.remove(var)
 		if var == 'nbSystemDisplayed':
 			nbSystemToDisplay = int(configJson[var])
-		elif var == "prefixe":
+		elif var == 'prefixe':
 			prefix = configJson[var]
 		elif var == 'useMedia':
 			useMedia = configJson[var]
@@ -274,15 +267,15 @@ def generate_config(json, lsPath):
 		if expected == 'author':
 			config.write(expected + '=\'unknow\'\n')
 		if expected == 'nbQuestions':
-			print('ERROR :: ' + expected)
+			print('ERROR: ' + expected)
 			sys.exit('ABORT: Invalid JSON file')
 		if expected == 'nbSteps':
-			print('ERROR :: ' + expected)
+			print('ERROR: ' + expected)
 			sys.exit('ABORT: Invalid JSON file')
 		if expected == 'nbIntroductionSteps':
 			config.write(expected + '=\'0\'\n')
 		if expected == 'nbSystemDisplayed':
-			print('ERROR :: ' + expected)
+			print('ERROR: ' + expected)
 			sys.exit('ABORT: Invalid JSON file')
 		if expected == 'description':
 			config.write(expected + '=\'\'\n')
@@ -355,7 +348,7 @@ def create_model():
 		print('Done.\n')
 
 
-def copy_media(csv, mediaColumns, config):
+def copy_media(csv, mediaColumns):
 	if verbose:
 		print('|-----------------|')
 		print('| media file copy |')
@@ -363,9 +356,7 @@ def copy_media(csv, mediaColumns, config):
 
 	media = []
 	audioFolders = []
-	systems = []
 	regex = '^.*\/'
-	systems = csv
 	for system in csv:
 		for sample in system:
 			for col_index, col_content in enumerate(sample):
@@ -395,9 +386,9 @@ def verif_template():
 		print('|----------------|')
 		print('| template check |')
 		print('v----------------v')
-	authorized_tags = ["{{name}}", "{{author}}", "{{description}}", "{{index}}", "{{user}}"]
-	warning_tags = ["samples", "systems"]
-	essentials_tags = ["bootstrap.min.css", "jquery.js", "jquery-ui.min.js", "jquery-ui.min.css", "addEventListener"]
+	authorized_tags = ['{{name}}', '{{author}}', '{{description}}', '{{index}}', '{{user}}']
+	warning_tags = ['samples', 'systems']
+	essentials_tags = ['bootstrap.min.css', 'jquery.js', 'jquery-ui.min.js', 'jquery-ui.min.css', 'addEventListener']
 	regexp = '{{[A-z,0-9]+}}'
 	textfile = open(inputTemplate, 'r')
 	filetext = textfile.read()
@@ -414,8 +405,8 @@ def verif_template():
 	miss = 0
 	for t in warning_tags:
 		for i in range(nbSystemToDisplay):
-			matches = re.findall("{{" + t + "\[[" + str(i) + "]+\]}}", filetext)
-			checked.append("{{" + t + "[" + str(i) + "]}}")
+			matches = re.findall('{{{0}\\[[{1}]+\\]}}'.format(t, str(i)), filetext)
+			checked.append('{{' + t + '[' + str(i) + ']}}')
 			if len(matches) == 0:
 				print(t + ' \t:: ERROR - missing ' + t + '[' + str(i) + '] tag in your template!')
 	if miss == 0:
@@ -425,8 +416,8 @@ def verif_template():
 		if m in checked:
 			continue
 		if not m in authorized_tags:
-			print(m + ' \t:: WARN : maybe you have an error in your template, please check if your application works fine !')
-		else :
+			print(m + ' \t:: WARN: maybe you have an error in your template, please check if your application works fine !')
+		else:
 			print(m + ' \t:: OK')
 		checked.append(m)
 	if verbose:
@@ -470,17 +461,17 @@ copy_templates(inputTemplate, indexTemplate, completedTemplate, exportTemplate)
 create_platform()
 create_model()
 if useMedia:
-	copy_media(listDataCSV, useMedia, configJSON)
+	copy_media(listDataCSV, useMedia)
 url = ''
 if prefix != '':
 	url = 'server_url/' + prefix + '/export'
 else:
 	url = 'server_url/export'
 
-print('You can access the database at the following url : ' + url)
-print('You will need a token for that, so keep this one !!')
+print('You can access the database at the following url: ' + url)
+print('You will need a token for that, so keep this one!!')
 print('Token = ' + tok)
 printWarning()
 print('=' * 30)
-print('	GENERATION TERMINEE !!')
+print('    GENERATION TERMINEE !!')
 print('=' * 30)
