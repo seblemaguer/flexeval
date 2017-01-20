@@ -59,7 +59,7 @@ def parse_arguments():
 			else:
 				lsName.append(elt)
 		if len(lsName) != len(lsPath):
-			sys.exit('ABORT: Bad number of arguments (in systems argument)')
+			exit_on_error('ABORT: Bad number of arguments (in systems argument)')
 	else:
 		lsPath = args.systems
 
@@ -212,7 +212,7 @@ def load_csv(listOfPath, config):
 	lsCSV = []
 	for csvPath in listOfPath:
 		if not os.path.isfile(csvPath):
-			sys.exit('ABORT: ' + csvPath + ' must be a file')
+			exit_on_error('ABORT: ' + csvPath + ' must be a file')
 		with open(csvPath, 'rb') as csvfile:
 			if csv_delimiter == 'tab':
 				spamreader = csv.reader(csvfile, delimiter='\t', quotechar='"')
@@ -224,7 +224,7 @@ def load_csv(listOfPath, config):
 				if verbose:
 					print(', '.join(row))
 				if len(row)!=len(headersCSV):
-					sys.exit('ABORT: '+csvPath+' is not valid: columns number is not correct at line '+str(i+1))
+					exit_on_error('ABORT: '+ csvPath +' is not valid: columns number is not correct at line '+str(i+1))
 				data.append(row)
 			lsCSV.append(data)
 	if verbose:
@@ -376,6 +376,10 @@ def printWarning():
 def generate_token():
 	return ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(30))
 
+
+def exit_on_error(fatal_message):
+	shutil.rmtree(testDirectory)
+	sys.exit(fatal_message)
 
 (inputJSON, lsPath, lsName, inputTemplate, indexTemplate, completedTemplate, exportTemplate) = parse_arguments()
 configJSON = load_json(inputJSON)
