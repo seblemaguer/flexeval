@@ -197,7 +197,7 @@ def generate_config(json, lsPath):
 	print('Configuration JSON:')
 	print(configJson)
 
-	expectedConfig = ['name', 'author', 'nbSteps', 'nbIntroductionSteps', 'nbSystemDisplayed', 'description', 'welcomeText', 'useMedia', 'nbQuestions', 'nbFixedPosition']
+	expectedConfig = ['name', 'author', 'nbSteps', 'nbIntroductionSteps', 'nbSystemDisplayed', 'description', 'useMedia', 'nbQuestions', 'nbFixedPosition']
 
 	config = open(testDirectory+'/config.py', 'w')
 	config.write('# === CONFIGURATION VARIABLES ===\n')
@@ -243,8 +243,6 @@ def generate_config(json, lsPath):
 			print('ERROR :: '+expected)
 			sys.exit('ABORT: Invalid JSON file')
 		if expected == 'description':
-			config.write(expected+'=\'\'\n')
-		if expected == 'welcomeText':
 			config.write(expected+'=\'\'\n')
 		if expected == 'useMedia':
 			config.write(expected+'=[]\n')

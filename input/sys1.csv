@@ -1,0 +1,10 @@
+system 1 . sample 0;0;b;./input/wav/jnf/jnf_0230_ref1.wav
+system 1 . sample 1;1;b;./input/wav/jnf/jnf_0365_ref1.wav
+system 1 . sample 2;2;b;./input/wav/jnf/jnf_0501_ref1.wav
+system 1 . sample 3;3;b;./input/wav/jnf/jnf_0601_ref1.wav
+system 1 . sample 4;4;b;./input/wav/jnf/jnf_0676_ref1.wav
+system 1 . sample 5;5;b;./input/wav/jnf/jnf_0003_ref1.wav
+system 1 . sample 6;6;b;./input/wav/jnf/jnf_0022_ref1.wav
+system 1 . sample 7;7;b;./input/wav/jnf/jnf_0091_ref1.wav
+system 1 . sample 8;8;b;./input/wav/jnf/jnf_0130_ref1.wav
+system 1 . sample 9;9;b;./input/wav/jnf/jnf_0179_ref1.wav
