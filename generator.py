@@ -13,9 +13,9 @@ import string
 
 execfile(os.path.join(os.path.dirname(__file__),'pm_bodies.py'))
 global prefix
-prefix=""
+prefix=''
 global tok
-tok=""
+tok=''
 global warning
 warning=[]
 
@@ -254,11 +254,11 @@ def generate_config(json, lsPath):
 				configJson[var]=nbsbs
 		if var not in exception:
 			if type(configJson[var]) == unicode:
-				config.write((var+'=\''+configJson[var]+'\'\n').encode("UTF-8"))
+				config.write((var+'=\''+configJson[var]+'\'\n').encode('UTF-8'))
 			else:
 				config.write(var+'=\''+str(configJson[var])+'\'\n')
 	tok = generate_token()
-	config.write("token=\'"+tok+"\'\n")
+	config.write('token=\''+tok+'\'\n')
 	for expected in expectedConfig:
 		print(expected+' not found!')
 		if expected == 'name':
@@ -392,27 +392,27 @@ def verif_template():
 	for et in essentials_tags :
 		matches = re.findall(et, filetext)
 		if len(matches)==0:
-			print("ERRROR \t:: "+ et + " not found! Please add it our you will get trouble...")
+			print('ERRROR \t:: '+ et + ' not found! Please add it our you will get trouble...')
 			miss=miss+1
 	if miss==0 :
-		print("Static Files \t:: OK")
+		print('Static Files \t:: OK')
 	miss=0
 	for t in warning_tags:
 		for i in range(nbSystemToDisplay) :
 			matches = re.findall("{{"+t+"\[["+str(i)+"]+\]}}", filetext)
 			checked.append("{{"+t+"["+str(i)+"]}}")
 			if len(matches)==0:
-				print(t + " \t:: ERROR - missing "+t+"["+str(i)+"] tag in your template!")
+				print(t + ' \t:: ERROR - missing '+t+'['+str(i)+'] tag in your template!')
 	if miss==0 :
-		print("Dynamics tags \t:: OK")
+		print('Dynamics tags \t:: OK')
 	matches = re.findall(regexp, filetext)
 	for m in matches :
 		if m in checked :
 			continue
 		if not m in authorized_tags :
-			print(m + " \t:: WARN : maybe you have an error in your template, please check if your application works fine !")
+			print(m + ' \t:: WARN : maybe you have an error in your template, please check if your application works fine !')
 		else :
-			print(m + " \t:: OK")
+			print(m + ' \t:: OK')
 		checked.append(m)
 	if verbose:
 		print('Done.\n')
@@ -454,9 +454,9 @@ create_platform()
 create_model()
 if useMedia:
 	copy_media(listDataCSV, useMedia, configJSON)
-url=""
-if prefix!= "" : 
-	url="server_url/"+prefix+"/export"
+url=''
+if prefix!='' : 
+	url='server_url/'+prefix+'/export'
 else :
 	url="server_url/export"
 
