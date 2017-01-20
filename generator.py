@@ -120,12 +120,13 @@ def load_json(JSONfile):
 	return data
 
 
-def load_csv(listOfPath):
+def load_csv(listOfPath, config):
 	if verbose:
 		print('|-------------|')
 		print('| loading CSV |')
 		print('v-------------v')
 
+	headersCSV = config['configuration']['headersCSV']
 	lsCSV = []
 	for csvPath in listOfPath:
 		if not os.path.isfile(csvPath):
@@ -137,9 +138,11 @@ def load_csv(listOfPath):
 				spamreader = csv.reader(csvfile, delimiter=csv_delimiter, quotechar='"')
 
 			data = []
-			for row in spamreader:
+			for i, row in enumerate(spamreader):
 				if verbose:
 					print(', '.join(row))
+				if len(row)!=len(headersCSV):
+					sys.exit('ABORT: '+csvPath+' is not valid: columns number is not correct at line '+str(i+1))
 				data.append(row)
 			lsCSV.append(data)
 	if verbose:
@@ -455,7 +458,7 @@ def generate_token():
 configJSON = load_json(inputJSON)
 (mainDirectory, testDirectory, viewsDirectory, staticDirectory, mediaDirectory) = create_architecture(configJSON['configuration']['name'])
 generate_config(configJSON, lsPath)
-listDataCSV = load_csv(lsPath)
+listDataCSV = load_csv(lsPath, configJSON)
 create_db(configJSON, listDataCSV, lsName)
 copy_templates(inputTemplate, indexTemplate, completedTemplate, exportTemplate)
 create_platform()
