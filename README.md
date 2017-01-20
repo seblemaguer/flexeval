@@ -1,7 +1,7 @@
 # Subjective test web platform
 ***
 ## Utilisation du test
-script de test : `test.sh rm`
+script de test : `test.sh`
 
 lancement de l'application : `python platform.py`
 
@@ -29,7 +29,7 @@ templates utilisés : `template.tpl`, `completed.tpl`, `index.tpl`
 
 
 ## Notes sur le script de test
-Celui-ci peut êtr lancé avec l'option 'rm' ou sans. Cete option permet de supprimer préalablement l'ensemble du dossier `tests`.
+Celui-ci peut être exécuté avec l'option 'rm'. Cete option permet de supprimer préalablement l'ensemble du dossier `tests`.
 
 ---
 ## Utilisation sans script de test
