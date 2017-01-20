@@ -12,8 +12,12 @@ import random
 import string
 
 execfile(os.path.join(os.path.dirname(__file__),'pm_bodies.py'))
+global prefix
 prefix=""
+global tok
 tok=""
+global warning
+warning=[]
 
 def parse_arguments():
 	print('	╔════════════════╗')
