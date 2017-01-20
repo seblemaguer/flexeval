@@ -233,7 +233,8 @@ def generate_config(json, lsPath):
 	exception=[]
 	for var in configJson:
 		if var in expectedConfig:
-			print(var+'\t:: OK')
+			if verbose :
+				print(var+'\t:: OK')
 			expectedConfig.remove(var)
 		if var=='nbSystemDisplayed':
 			nbSystemToDisplay = int(configJson[var])
@@ -456,6 +457,8 @@ if prefix!= "" :
 	url="server_url/"+prefix+"/export"
 else :
 	url="server_url/export"
+
+
 print("You can access the database from the following url : " + url)
 print("You will need a token for this so keep this one !!")
 print("Token ====  %s" %tok)
