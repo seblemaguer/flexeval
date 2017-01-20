@@ -66,7 +66,6 @@ def parse_arguments():
 	else:
 		lsPath = args.systems
 
-	print('')
 	return args.json, lsPath, lsName, args.main_tpl, args.index_tpl, args.completed_tpl, args.export_tpl
 
 def create_architecture(testName):
@@ -448,7 +447,6 @@ configJSON = load_json(inputJSON)
 generate_config(configJSON, lsPath)
 listDataCSV = load_csv(lsPath)
 create_db(configJSON, listDataCSV, lsName)
-# generate_template() # TODO: not used, move to verif_template
 copy_templates(inputTemplate, indexTemplate, completedTemplate, exportTemplate)
 create_platform()
 create_model()
@@ -458,12 +456,12 @@ url=''
 if prefix!='' : 
 	url='server_url/'+prefix+'/export'
 else :
-	url="server_url/export"
+	url='server_url/export'
 
 
-print("You can access the database from the following url : " + url)
-print("You will need a token for this so keep this one !!")
-print("Token ====  %s" %tok)
+print('You can access the database from the following url : ' + url)
+print('You will need a token for this, so keep this one !!')
+print('Token = '+tok)
 printWarning()
 print('='*30)
 print('    GENERATION TERMINEE !!')
