@@ -10,7 +10,7 @@
 	"nbFixedPosition":1,
 	"nbIntroductionSteps":1,
 	"nbSampleBySystem": 10,
-	"headersCSV": ["text","number","letter","path"],
-	"useMedia": ["path"]
+	"headersCSV": ["text","image","letter","path"],
+	"useMedia": ["path", "image"]
 	}
 }
