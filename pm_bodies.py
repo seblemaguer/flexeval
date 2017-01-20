@@ -144,6 +144,21 @@ def process_test_post():
 		return bottle.template('completed', data)
 		#return "<p>Test finished thank you for your cooperation</p>"
 
+
+@app.route('/export')
+def export_db():
+	book = model.get_book_variable_module_name('config')
+	data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "config": book}
+	return bottle.template('export',data)
+
+@app.post('/export')
+def export_db_ok():
+	#return bottle.send_file("data.db", root=os.path.dirname(os.path.abspath(__file__)))
+	if(post_get("token")==model.get_token()):
+		return bottle.static_file("data.db", root=os.getcwd(),download="data.db")
+	else:
+		return "<h2>Bad token!</h2>"
+
 #access to local static files
 @app.route('/static/:type/:filename#.*#')
 def send_static(type, filename):
@@ -195,6 +210,9 @@ def get_book_variable_module_name(module_name):
 
 def get_prefixe():
 	return config.prefixe
+
+def get_token():
+	return config.token
 
 def get_headers():
 	return config.headersCSV
