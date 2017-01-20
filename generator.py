@@ -24,7 +24,6 @@ def parse_arguments():
 
 	JSONFile = None
 	TemplateFile = None
-	# parser = OptionParser()
 	parser = argparse.ArgumentParser(description='Generator for subjective test web platform')
 	parser.add_argument('-j', '--json', help='input JSON file', type=argparse.FileType('r'), required=True)
 	parser.add_argument('-t', '--main-tpl', help='input main template file', type=str, required=True)

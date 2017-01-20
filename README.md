@@ -10,19 +10,19 @@ templates utilisés : `template.tpl`, `completed.tpl`, `index.tpl`
 
 ## Module python utilisés
 - argparse
+- beaker.middleware
 - bottle
 - csv
-- date
+- datetime
 - itertools
 - json
 - model
 - operator
 - os
+- paste
 - pprint
 - random
 - re
-- request
-- SessionMiddleware
 - shutil
 - sqlite3
 - sys
@@ -37,7 +37,7 @@ Il possible de lancer une génération sans utiliser le script de test en exécu
 Ce dernier accepte les arguments suivants :
 
 | court | long              | description                                                                           | requis |
-| ----- | ----------------- | ------------------------------------------------------------------------------------- | ------ |
+| ----- | ----------------- | ------------------------------------------------------------------------------------- |:------:|
 | `-j`  | `--json`          | fichier JSON                                                                          | oui    |
 | `-t`  | `--main-tpl`      | modèle principal                                                                      | oui    |
 | `-i`  | `--index-tpl`     | modèle pour la page d'index                                                           | oui    |
