@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-import json
+import argparse
 import csv
+import json
 import os
 import re
 import shutil
 import sqlite3
 import sys
-import argparse
 from pprint import pprint
 import random
 import string
@@ -66,46 +66,64 @@ def parse_arguments():
 	return args.json, lsPath, lsName, args.main_tpl, args.index_tpl, args.completed_tpl, args.export_tpl
 
 def create_architecture(testName):
-	print('|-----------------------|')
-	print('| architecture creation |')
-	print('v-----------------------v')
+	if verbose:
+		print('|-----------------------|')
+		print('| architecture creation |')
+		print('v-----------------------v')
 
 	def create_dir(path, name):
-		dir = str(path)+str(name)+'/'
-		if os.path.exists(dir):
-			sys.exit('ABORT: Folder already exist : '+dir)
+		std_dir = str(path)+str(name)
+		dir = std_dir
+		i = 0
+		print(dir)
+		while os.path.exists(dir):
+			i+=1
+			dir = std_dir+'_'+str(i)
+			print(dir)
+			# addWarning('Folder aready exist.')
+			# sys.exit('ABORT: Folder already exist : '+dir)
+		if i>0:
+			addWarning('Folder '+std_dir+' aready exist.')
+			addWarning('New folder at '+dir)
 		os.makedirs(dir)
-		print(dir+' created.')
-		return dir
+		if verbose:
+			print(dir+' created.')
+		return dir+'/'
+
+	simpleTestName = re.sub('\W','_', testName)
 
 	mainDirectory = os.path.join(os.path.dirname(__file__),'tests/')
 	if not os.path.exists(mainDirectory):
 		os.makedirs(mainDirectory)
 
-	testDirectory = create_dir(mainDirectory, testName)
+	testDirectory = create_dir(mainDirectory, simpleTestName)
 	viewsDirectory = create_dir(testDirectory, 'views')
 	staticDirectory = create_dir(testDirectory, 'static')
 	mediaDirectory = create_dir(testDirectory, 'media')
 
-	print('Done.\n')
+	if verbose:
+		print('Done.\n')
 	return mainDirectory, testDirectory, viewsDirectory, staticDirectory, mediaDirectory
 
 def load_json(JSONfile):
-	print('|--------------|')
-	print('| loading JSON |')
-	print('v--------------v')
+	if verbose:
+		print('|--------------|')
+		print('| loading JSON |')
+		print('v--------------v')
 
 	data = json.load(JSONfile)
 	if verbose:
 		pprint(data)
 
-	print('Done.\n')
+	if verbose:
+		print('Done.\n')
 	return data
 
 def load_csv(lsPath):
-	print('|-------------|')
-	print('| loading CSV |')
-	print('v-------------v')
+	if verbose:
+		print('|-------------|')
+		print('| loading CSV |')
+		print('v-------------v')
 
 	lsCSV = []
 	for csvPath in lsPath:
@@ -129,9 +147,10 @@ def load_csv(lsPath):
 	return lsCSV
 
 def create_db(config, data, lsName):
-	print('|---------------|')
-	print('| DB generation |')
-	print('v---------------v')
+	if verbose:
+		print('|---------------|')
+		print('| DB generation |')
+		print('v---------------v')
 
 	con = sqlite3.connect(testDirectory+'/data.db')
 	headersCSV = config['configuration']['headersCSV']
@@ -179,12 +198,14 @@ def create_db(config, data, lsName):
 		raise e
 	finally:
 		con.close()
-	print('Done.\n')
+	if verbose:
+		print('Done.\n')
 
 def generate_config(json, lsPath):
-	print('|-------------------|')
-	print('| config generation |')
-	print('v-------------------v')
+	if verbose:
+		print('|-------------------|')
+		print('| config generation |')
+		print('v-------------------v')
 	global nbSystemToDisplay
 	global useMedia
 	global prefix
@@ -227,7 +248,13 @@ def generate_config(json, lsPath):
 			if configJson[var] < 0 or configJson[var] > configJson['nbSteps'] :
 				configJson[var]=nbsbs
 		if var not in exception:
-			config.write(var+'=\''+str(configJson[var])+'\'\n')
+			print sys.stdout.encoding
+			if type(configJson[var]) == int:
+				config.write(var+'=\''+str(configJson[var])+'\'\n')
+			else:
+				# print(configJson[var])
+				# print(type(configJson[var]))
+				config.write(var+'=\''+configJson[var]+'\'\n')
 	tok = generate_token()
 	config.write("token=\'"+tok+"\'\n")
 	for expected in expectedConfig:
@@ -254,12 +281,14 @@ def generate_config(json, lsPath):
 		if expected == 'nbFixedPosition' :
 			config.write(expected+'=\'0\'\n')
 	config.write('nbSampleBySystem=\''+str(nbsbs)+'\'\n')
-	print('Done.\n')
+	if verbose:
+		print('Done.\n')
 
 def generate_template():
-	print('|---------------------|')
-	print('| template generation |')
-	print('v---------------------v')
+	if verbose:
+		print('|---------------------|')
+		print('| template generation |')
+		print('v---------------------v')
 
 	shutil.copy(inputTemplate, viewsDirectory)
 	print('template correctly moved to '+viewsDirectory)
@@ -285,30 +314,36 @@ def generate_template():
 		scriptArray.append(finditer.group(0))
 	print(linkArray)
 	print(scriptArray)
-	print('Done.\n')
+	if verbose:
+		print('Done.\n')
 
 def create_platform():
-	print('|-------------------|')
-	print('| platform creation |')
-	print('v-------------------v')
+	if verbose:
+		print('|-------------------|')
+		print('| platform creation |')
+		print('v-------------------v')
 	fo = open(testDirectory+'platform.py', 'wb')
 	fo.write(platform_body)
 	fo.close()
-	print('Done.\n')
+	if verbose:
+		print('Done.\n')
 
 def create_model():
-	print('|----------------|')
-	print('| model creation |')
-	print('v----------------v')
+	if verbose:
+		print('|----------------|')
+		print('| model creation |')
+		print('v----------------v')
 	fo = open(testDirectory+'model.py', 'wb')
 	fo.write(model_body)
 	fo.close()
-	print('Done.\n')
+	if verbose:
+		print('Done.\n')
 
 def copy_media(csv, mediaColumns, config):
-	print('|-----------------|')
-	print('| media file copy |')
-	print('v-----------------v')
+	if verbose:
+		print('|-----------------|')
+		print('| media file copy |')
+		print('v-----------------v')
 
 	audio = []
 	audioFolders = []
@@ -335,12 +370,14 @@ def copy_media(csv, mediaColumns, config):
 		shutil.copy(file, mediaDirectory+filedir)
 		if verbose:
 			print(file+'  to  '+mediaDirectory+filedir)
-	print('Done.\n')
+	if verbose:
+		print('Done.\n')
 
 def verif_template():
-	print('|----------------|')
-	print('| template check |')
-	print('v----------------v')
+	if verbose:
+		print('|----------------|')
+		print('| template check |')
+		print('v----------------v')
 	authorized_tags=["{{name}}","{{author}}","{{description}}","{{index}}","{{user}}"]
 	warning_tags=["samples","systems"]
 	essentials_tags=["bootstrap.min.css","jquery.js","jquery-ui.min.js","jquery-ui.min.css","addEventListener"]
@@ -375,18 +412,29 @@ def verif_template():
 		else :
 			print(m + " \t:: OK")
 		checked.append(m)
-	print('Done.\n')
+	if verbose:
+		print('Done.\n')
 
 def copy_templates(inputTemplate, indexTemplate, completedTemplate, exportTemplate):
-	print('|----------------|')
-	print('| templates copy |')
-	print('v----------------v')
+	if verbose:
+		print('|----------------|')
+		print('| templates copy |')
+		print('v----------------v')
 	shutil.copy(indexTemplate, viewsDirectory+'index.tpl')
 	shutil.copy(inputTemplate, viewsDirectory+'template.tpl')
 	shutil.copy(completedTemplate, viewsDirectory+'completed.tpl')
 	shutil.copy(exportTemplate, viewsDirectory+'export.tpl')
 	
-	print('Done.\n')
+	if verbose:
+		print('Done.\n')
+
+def addWarning(warningMessage):
+	warning.append(warningMessage)
+
+def printWarning():
+	for i in warning:
+		print('WARNING: '+i)
+
 
 def generate_token():
 	return ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(30))
@@ -404,7 +452,6 @@ create_platform()
 create_model()
 if useMedia:
 	copy_media(listDataCSV, useMedia, configJSON)
-# verif_template() # TODO: rewrite this function
 url=""
 if prefix!= "" : 
 	url="server_url/"+prefix+"/export"
@@ -413,6 +460,7 @@ else :
 print("You can access the database from the following url : " + url)
 print("You will need a token for this so keep this one !!")
 print("Token ====  %s" %tok)
+printWarning()
 print('='*30)
 print('    GENERATION TERMINEE !!')
 print('='*30)

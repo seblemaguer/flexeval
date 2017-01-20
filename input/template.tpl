@@ -54,7 +54,7 @@
 		<h4><i>Remark: Some propositions may be identical, some may differ only very slightly.</i></h4>
 		</div>
 		% if introduction :
-		<div class="alert alert-danger"><strong>Warning !</strong> This is an introduction step !</div>
+		<div class="alert alert-danger"><strong>Warning!</strong> This is an introduction step!</div>
 		% end 
 		<input type="hidden" name="ref" value="{{index}}">
 		<input type="hidden" name="system1" value="{{systems[0]}}">
