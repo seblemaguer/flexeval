@@ -45,6 +45,11 @@ def badroute():
 @app.post('/login')
 def login():
 	mail = post_get("email")
+	pattern="(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)"
+	if not re.match(pattern,mail) :
+		book = model.get_book_variable_module_name('config')
+		data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "config": book, "error" : "Invalid email address"}
+		return bottle.template('index', data)
 	app_session = bottle.request.environ.get('beaker.session')
 	app_session['logged_in'] = True
 	app_session['pseudo'] = mail
@@ -142,7 +147,6 @@ def process_test_post():
 		data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "config": book}
 		bottle.request.environ.get('beaker.session').delete()
 		return bottle.template('completed', data)
-		#return "<p>Test finished thank you for your cooperation</p>"
 
 
 @app.route('/export')
@@ -153,7 +157,6 @@ def export_db():
 
 @app.post('/export')
 def export_db_ok():
-	#return bottle.send_file("data.db", root=os.path.dirname(os.path.abspath(__file__)))
 	if(post_get("token")==model.get_token()):
 		return bottle.static_file("data.db", root=os.getcwd(),download="data.db")
 	else:
