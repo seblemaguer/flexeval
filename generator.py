@@ -143,7 +143,6 @@ def generate_config(json, lsPath):
 	# json expected and mandatory input definition
 	expectedStringConfig = {
 	'author' : '\'unknow\'',
-	'description' : '\'\'',
 	'name' : '\'TEST\'',
 	'nbFixedPosition' : '\'0\'',
 	'nbIntroductionSteps' : '\'0\''
@@ -199,11 +198,9 @@ def generate_config(json, lsPath):
 		elif var == 'prefixe':
 			prefix = configJson[var]
 		elif var == 'useMedia':
-			useMedia = configJson[var]
-			exception.append(var)
+			useMedia = [x.encode('UTF-8') for x in configJson[var]]
 		elif var == 'headersCSV':
-			verifHeadersCSV = str(configJson[var])[1:-1].split(', ')
-			exception.append(var)
+			verifHeadersCSV = [x.encode('UTF-8') for x in configJson[var]]
 		elif var == 'nbFixedPosition':
 			if configJson[var] < 0 or configJson[var] > configJson['nbSteps']:
 				configJson[var] = nbsbs
@@ -229,10 +226,10 @@ def generate_config(json, lsPath):
 		for aUseMedia in useMedia:
 			errorInUseMedia = True
 			for aHCSV in verifHeadersCSV:
-				if aHCSV[2:-1] == aUseMedia:
+				if (aHCSV == aUseMedia):
 					errorInUseMedia = False
-			# if errorInUseMedia == True:
-			# 	exit_on_error('value "'+aUseMedia+'" in useMedia is not in headersCSV (in JSON config file)')
+			if errorInUseMedia == True:
+				exit_on_error('value "'+aUseMedia+'" in useMedia is not in headersCSV (in JSON config file)')
 	if verbose:
 		print('Done.\n')
 
@@ -378,7 +375,7 @@ def copy_media(csv, mediaColumns):
 	for system in csv:
 		for sample in system:
 			for col_index, col_content in enumerate(sample):
-				if configJSON['configuration']['headersCSV'][col_index] in mediaColumns:
+				if configJSON['configuration']['headersCSV'][col_index].encode('UTF-8') in useMedia:
 					media.append(col_content)
 	for wav in media:
 		search = re.search(regex, wav)

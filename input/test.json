@@ -12,6 +12,6 @@
 	"nbSampleBySystem": 10,
 	"headersCSV": ["text","image","vidéo","path"],
 	"useMedia": ["path","image","vidéo"],
-	"toto": "toto-text-éà"
+	"toto": "text-with-àçċèňţ"
 	}
 }

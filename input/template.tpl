@@ -23,8 +23,7 @@
 			margin-top: -.8em;
 			text-align: center;
 			line-height: 1.6em;
-		}
-		
+		}		
 		.vcenter {
 			display: inline-block;
 			vertical-align: middle;
@@ -39,6 +38,7 @@
 	<nav class="navbar navbar-default" style="margin-bottom:0">
 		<div class="container-fluid">
 			<ul class="nav navbar-nav navbar-right">
+				<!-- <li><a>{{config["toto"]}}</a></li> -->
 				<li><a>{{user}}</a></li>
 				<li><a href="{{APP_PREFIX}}/logout">Logout</a></li>
 			</ul>
@@ -48,13 +48,13 @@
 	<form role="form" action="{{APP_PREFIX}}/test" method="POST">
 	
 		<div class="jumbotron text-center">
-		<h2><b>Context:</b> Imagine someone tells the text below during a spontaneous conversation.</h2>
-		<h2><b>Question:</b> How likely do you judge the spoken propositions?</h2>
-		<br>
-		<h4><i>Remark: Some propositions may be identical, some may differ only very slightly.</i></h4>
+			<h2><b>Context:</b> Imagine someone tells the text below during a spontaneous conversation.</h2>
+			<h2><b>Question:</b> How likely do you judge the spoken propositions?</h2>
+			<br>
+			<h4><i>Remark: Some propositions may be identical, some may differ only very slightly.</i></h4>
 		</div>
 		% if introduction :
-		<div class="alert alert-danger"><strong>Warning!</strong> This is an introduction step!</div>
+		<div class="alert alert-warning text-center"><strong>Warning!</strong> This is an introduction step!</div>
 		% end 
 		<input type="hidden" name="ref" value="{{index}}">
 		<input type="hidden" name="system1" value="{{systems[0]}}">
@@ -63,10 +63,10 @@
 		</div>
 		<div class="container">
 			<div class="col-md-4 col-md-offset-4">
-			<div class="progress" style="height: 2px">
-				<div class="progress-bar" role="progressbar" aria-valuenow="{{progress}}" aria-valuemin="0" aria-valuemax="100" style="width:{{progress}}%">
+				<div class="progress" style="height: 2px">
+					<div class="progress-bar" role="progressbar" aria-valuenow="{{progress}}" aria-valuemin="0" aria-valuemax="100" style="width:{{progress}}%">
+					</div>
 				</div>
-			</div>
 			</div>
 		</div>
 		<div class="container">
@@ -94,9 +94,9 @@
 			<div class="row">
 				<div class="col-xs-12 col-md-7 col-lg-7 vcenter">
 					<blockquote>
-					<samp class="text-justify">
-						{{!samples[i]['text']}}
-					</samp>
+						<samp class="text-justify">
+							{{!samples[i]['text']}}
+						</samp>
 					</blockquote>
 				</div>
 				<div class="col-xs-12 col-md-4 col-lg-4 vcenter">
@@ -111,19 +111,19 @@
 				</div>
 				<div class="col-xs-12 col-md-7 col-lg-7 vcenter">
 					<blockquote>
-					<audio id="player" controls>
-						<source src="{{samples[i]["path"]}}">
-					</audio>
+						<audio id="player" controls>
+							<source src="{{samples[i]["path"]}}">
+						</audio>
 					</blockquote>
 				</div>
 				<div class="col-xs-12 col-md-7 col-lg-7 vcenter">
 					<blockquote>
-					<img src="{{samples[i]["image"]}}" alt="Mountain View" style="width:304px;height:228px;">
+						<img src="{{samples[i]["image"]}}" alt="Mountain View" style="width:304px;height:228px;">
 					</blockquote>
 				</div>
 				<div class="col-xs-12 col-md-7 col-lg-7 vcenter">
 					<blockquote>
-					 <video width="500" height="345" src="{{samples[i]["vidéo"]}}" controls/>
+						<video width="500" height="345" src="{{samples[i]["vidéo"]}}" controls/>
 					</blockquote>
 				</div>
 			</div>
@@ -161,15 +161,14 @@
 		% end
 
 		
-		
-	<div class="container">
-		<div class="row">
-			<!-- answer part -->
-			<div class="col-md-6 col-md-offset-3">
+		<div class="container">
+			<div class="row">
+				<!-- answer part -->
+				<div class="col-md-6 col-md-offset-3">
 					<input id="next" type="submit" class="btn btn-lg btn-success btn-block pull-right" value="Next" style="margin-top: 20px;">
+				</div>
 			</div>
 		</div>
-	</div>
 	
 	</form>
 
