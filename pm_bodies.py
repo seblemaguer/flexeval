@@ -463,28 +463,33 @@ def insert_data(data) :
 	now = datetime.now()
 	conn = sqlite3.connect(os.path.join(os.path.dirname(os.path.abspath(__file__)),'data.db'))
 	c = conn.cursor()
-	sysval=""
-	systs=""
-	for i in range(int(config.nbSystemDisplayed)):
-		sysval=sysval+'"'+data['systems'][i]+'"'
-		systs=systs+"system"+str(i+1)
-		if(i<int(config.nbSystemDisplayed)-1):
-			sysval=sysval+","
-			systs=systs+","
-	#update the number of time processed for the samples
-	for sy in data['systems'] :
-		c.execute('select nb_processed from sample where id_system="'+sy+'" and sample_index='+str(data['index']))
-		n = c.fetchall()[0][0]
-		c.execute('update sample set nb_processed='+str(n+1)+' where id_system="'+sy+'" and sample_index='+str(data['index']))
-	conn.commit()
-	answers = data['answers']
-	for answer in answers :
-		if "target" in answer :
-			val = '"'+str(data['user'])+'","'+str(now)+'","'+answer['content']+'","'+str(data['index'])+'","'+str(answer['index'])+'","'+answer['target']+'",'+sysval
-			c.execute("insert into answer(user,date,content,sample_index,question_index,content_target,"+systs+") values ("+val+")")
-		else :
-			val = '"'+str(data['user'])+'","'+str(now)+'","'+answer['content']+'","'+str(data['index'])+'","'+str(answer['index'])+'",'+sysval
-			c.execute("insert into answer(user,date,content,sample_index,question_index,"+systs+") values ("+val+")")
-	conn.commit()
+
+	c.execute('select * from answer where user="'+str(data['user'])+'" and sample_index="'+str(data['index'])+'"')
+	res = c.fetchall()
+	if len(res) == 0: # check if the response is not already in the database
+	
+		sysval=''
+		systs=''
+		for i in range(int(config.nbSystemDisplayed)):
+			sysval=sysval+'"'+data['systems'][i]+'"'
+			systs=systs+'system'+str(i+1)
+			if(i<int(config.nbSystemDisplayed)-1):
+				sysval=sysval+','
+				systs=systs+','
+		#update the number of time processed for the samples
+		for sy in data['systems'] :
+			c.execute('select nb_processed from sample where id_system="'+sy+'" and sample_index='+str(data['index']))
+			n = c.fetchall()[0][0]
+			c.execute('update sample set nb_processed='+str(n+1)+' where id_system="'+sy+'" and sample_index='+str(data['index']))
+		conn.commit()
+		answers = data['answers']
+		for answer in answers :
+			if 'target' in answer :
+				val = '"'+str(data['user'])+'","'+str(now)+'","'+answer['content']+'","'+str(data['index'])+'","'+str(answer['index'])+'","'+answer['target']+'",'+sysval
+				c.execute("insert into answer(user,date,content,sample_index,question_index,content_target,"+systs+") values ("+val+")")
+			else :
+				val = '"'+str(data['user'])+'","'+str(now)+'","'+answer['content']+'","'+str(data['index'])+'","'+str(answer['index'])+'",'+sysval
+				c.execute('insert into answer(user,date,content,sample_index,question_index,'+systs+') values ('+val+')')
+		conn.commit()
 	conn.close()
 """
