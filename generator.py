@@ -404,6 +404,7 @@ def addWarning(warningMessage):
 
 
 def printWarning():
+	print('')
 	for i in warning:
 		print('WARNING: ' + i)
 
@@ -415,6 +416,7 @@ def generate_token():
 def exit_on_error(fatal_message):
 	shutil.rmtree(testDirectory)
 	sys.exit('ABORT: '+fatal_message)
+
 
 (inputJSON, lsPath, lsName, inputTemplate, indexTemplate, completedTemplate, exportTemplate) = parse_arguments()
 configJSON = load_json(inputJSON)
@@ -433,13 +435,10 @@ if prefix != '':
 else:
 	url = 'server_url/export'
 
-# print('=' * 30)
 print('    GENERATION TERMINEE !!')
 print('=' * 30)
-print('')
 printWarning()
 print('')
 print('You can access the database at the following url: ' + url)
-# print('You will need a token for that, so keep this one!!')
 print('Token = ' + tok)
 print('')

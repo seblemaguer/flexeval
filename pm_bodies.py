@@ -472,21 +472,23 @@ def insert_data(data) :
 	for answer in answers :
 		#val = (data['user'],str(now),answer['content'],data['index'],answer['index'])
 		#c.execute('insert into answer(user,date,content,sample_index,question_index) values (?,?,?,?,?)',val)
-		sysval=""
-		systs=""
+		sysval=''
+		systs=''
 		for i in range(int(config.nbSystemDisplayed)):
-			sysval=sysval+"\\""+data['systems'][i]+"\\""
-			systs=systs+"system"+str(i+1)
+			sysval=sysval+'"'+data['systems'][i]+'"'
+			systs=systs+'system'+str(i+1)
 			if(i<int(config.nbSystemDisplayed)-1):
-				sysval=sysval+","
-				systs=systs+","
+				sysval=sysval+','
+				systs=systs+','
+
+		# conn.execute('')
 		
-		if "target" in answer :
-			val = "\\""+str(data['user'])+"\\",\\""+str(now)+"\\",\\""+answer['content']+"\\",\\""+str(data['index'])+"\\",\\""+str(answer['index'])+"\\",\\""+answer["target"]+"\\","+sysval
+		if 'target' in answer :
+			val = '"'+str(data['user'])+'","'+str(now)+'","'+answer['content']+'","'+str(data['index'])+'","'+str(answer['index'])+'","'+answer['target']+'",'+sysval
 			conn.execute("insert into answer(user,date,content,sample_index,question_index,content_target,"+systs+") values ("+val+")")
 		else :
-			val = "\\""+str(data['user'])+"\\",\\""+str(now)+"\\",\\""+answer['content']+"\\",\\""+str(data['index'])+"\\",\\""+str(answer['index'])+"\\","+sysval
-			conn.execute("insert into answer(user,date,content,sample_index,question_index,"+systs+") values ("+val+")")
+			val = '"'+str(data['user'])+'","'+str(now)+'","'+answer['content']+'","'+str(data['index'])+'","'+str(answer['index'])+'",'+sysval
+			conn.execute('insert into answer(user,date,content,sample_index,question_index,'+systs+') values ('+val+')')
 		
 		#update the number of time processed for the samples
 		c.execute('select nb_processed from sample where id_system="'+answer['target']+'" and sample_index='+str(data['index']))
