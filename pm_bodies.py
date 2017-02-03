@@ -159,7 +159,7 @@ def export_db():
 @app.post('/export')
 def export_db_ok():
 	if(post_get("token")==model.get_token()):
-		return bottle.static_file("data.db", root=os.getcwd(),download="data.db")
+		return bottle.static_file("data.db", root=os.path.dirname(os.path.abspath(__file__)),download="data.db")
 	else:
 		book = model.get_book_variable_module_name('config')
 		data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "config": book, "error": "Bad Token !"}
@@ -359,8 +359,6 @@ def get_test_sample(user) :
 	systs = {}
 	for s in c.fetchall():
 		systs[s[1]] = s
-	
-	print systs
 
 	i=0
 	while i<nbToKeep :
@@ -429,8 +427,6 @@ def get_intro_sample(user) :
 	systs = {}
 	for s in c.fetchall():
 		systs[s[1]] = s
-	
-	print systs
 
 	i=0
 	while i<nbToKeep :
