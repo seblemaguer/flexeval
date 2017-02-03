@@ -11,6 +11,7 @@
 	"nbIntroductionSteps": 1,
 	"nbSampleBySystem": 10,
 	"headersCSV": ["text","image","video","path"],
-	"useMedia": ["path","image","video"]
+	"useMedia": ["path","image","video"],
+	"toto": "toto-text-éà"
 	}
 }

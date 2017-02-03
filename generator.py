@@ -59,7 +59,7 @@ def parse_arguments():
 			else:
 				lsName.append(elt)
 		if len(lsName) != len(lsPath):
-			exit_on_error('ABORT: Bad number of arguments (in systems argument)')
+			exit_on_error('bad number of arguments (in systems argument)')
 	else:
 		lsPath = args.systems
 
@@ -130,74 +130,107 @@ def generate_config(json, lsPath):
 	global useMedia
 	global prefix
 	global tok
+
 	configJson = json
 	if 'configuration' in configJson:
 		configJson = configJson['configuration']
 	else:
-		sys.exit('ABORT: Invalid JSON file')
+		exit_on_error('Invalid JSON file: no configuration object founded')
 	if verbose:
 		print('Configuration JSON:')
 		print(configJson)
 
-	expectedConfig = ['name', 'author', 'nbSteps', 'nbIntroductionSteps', 'nbSystemDisplayed', 'description', 'useMedia', 'nbQuestions', 'nbFixedPosition']
+	# json expected and mandatory input definition
+	expectedStringConfig = {
+	'author' : '\'unknow\'',
+	'description' : '\'\'',
+	'name' : '\'TEST\'',
+	'nbFixedPosition' : '\'0\'',
+	'nbIntroductionSteps' : '\'0\''
+	}
+	expectedArrayConfig = {
+	'useMedia':'[]'
+	}
+	mandatoryStringConfig = ['nbSampleBySystem', 'nbSteps', 'nbSystemDisplayed', 'nbQuestions', 'prefixe']
+	mandatoryArrayConfig = ['headersCSV']
 
+	def writeString(var):
+		if type(configJson[var]) == unicode:
+			config.write((var + '=\'' + configJson[var] + '\'\n').encode('UTF-8'))
+		else:
+			config.write(var + '=\'' + str(configJson[var]) + '\'\n')
+	def writeArray(var):
+		if type(configJson[var]) == unicode:
+			config.write((var + '=' + configJson[var] + '\n').encode('UTF-8'))
+		else:
+			config.write(var + '=' + str(configJson[var]) + '\n')
+
+	# config file writing
 	config = open(testDirectory + '/config.py', 'w')
+	config.write('# -*- coding: utf-8 -*-\n')
 	config.write('# === CONFIGURATION VARIABLES ===\n')
 	config.write('# Each configuration variable is necessarily a string\n')
 	with open(lsPath[0], 'rb') as csvfile:
 		spamreader = csv.reader(csvfile, delimiter=';', quotechar='|')
 		nbsbs = sum(1 for row in spamreader)
 	exception = []
+	verifHeadersCSV = []
 	for var in configJson:
-		if var in expectedConfig:
-			if verbose:
-				print(var + '\t:: OK')
-			expectedConfig.remove(var)
+		if var in mandatoryStringConfig:
+			writeString(var)
+			mandatoryStringConfig.remove(var)
+		elif var in mandatoryArrayConfig:
+			writeArray(var)
+			mandatoryArrayConfig.remove(var)
+		elif var in expectedStringConfig:
+			writeString(var)
+			del expectedStringConfig[var]
+		elif var in expectedArrayConfig:
+			writeArray(var)
+			del expectedArrayConfig[var]
+		else:
+			writeString(var)
+
+		# special cases
 		if var == 'nbSystemDisplayed':
 			nbSystemToDisplay = int(configJson[var])
 		elif var == 'prefixe':
 			prefix = configJson[var]
 		elif var == 'useMedia':
 			useMedia = configJson[var]
-			config.write(var + '=' + str(configJson[var]) + '\n')
 			exception.append(var)
 		elif var == 'headersCSV':
-			config.write(var + '=' + str(configJson[var]) + '\n')
+			verifHeadersCSV = str(configJson[var])[1:-1].split(', ')
 			exception.append(var)
 		elif var == 'nbFixedPosition':
 			if configJson[var] < 0 or configJson[var] > configJson['nbSteps']:
 				configJson[var] = nbsbs
-		if var not in exception:
-			if type(configJson[var]) == unicode:
-				config.write((var + '=\'' + configJson[var] + '\'\n').encode('UTF-8'))
-			else:
-				config.write(var + '=\'' + str(configJson[var]) + '\'\n')
+
+	# expected and mandatory checks
+	for mandatory in mandatoryStringConfig:
+		exit_on_error('Invalid JSON file: '+mandatory+' is mandatory')
+	for mandatory in mandatoryArrayConfig:
+		exit_on_error('Invalid JSON file: '+mandatory+' is mandatory')
+
+	for expected in expectedStringConfig:
+		config.write((expected + '=\'' + expectedStringConfig[expected] + '\'\n').encode('UTF-8'))
+	for expected in expectedArrayConfig:
+		config.write((expected + '=\'' + expectedArrayConfig[expected] + '\'\n').encode('UTF-8'))
+
+	# write extra config
 	tok = generate_token()
 	config.write('token=\'' + tok + '\'\n')
-	for expected in expectedConfig:
-		print(expected + ' not found!')
-		if expected == 'name':
-			config.write(expected + '=\'TEST\'\n')
-		if expected == 'author':
-			config.write(expected + '=\'unknow\'\n')
-		if expected == 'nbQuestions':
-			print('ERROR: ' + expected)
-			sys.exit('ABORT: Invalid JSON file')
-		if expected == 'nbSteps':
-			print('ERROR: ' + expected)
-			sys.exit('ABORT: Invalid JSON file')
-		if expected == 'nbIntroductionSteps':
-			config.write(expected + '=\'0\'\n')
-		if expected == 'nbSystemDisplayed':
-			print('ERROR: ' + expected)
-			sys.exit('ABORT: Invalid JSON file')
-		if expected == 'description':
-			config.write(expected + '=\'\'\n')
-		if expected == 'useMedia':
-			config.write(expected + '=[]\n')
-		if expected == 'nbFixedPosition':
-			config.write(expected + '=\'0\'\n')
 	config.write('nbSampleBySystem=\'' + str(nbsbs) + '\'\n')
+
+	# check if each useMedia is in headersCSV
+	if 'useMedia' in globals():
+		for aUseMedia in useMedia:
+			errorInUseMedia = True
+			for aHCSV in verifHeadersCSV:
+				if aHCSV[2:-1] == aUseMedia:
+					errorInUseMedia = False
+			if errorInUseMedia == True:
+				exit_on_error('value "'+aUseMedia+'" in useMedia is not in headersCSV (in JSON config file)')
 	if verbose:
 		print('Done.\n')
 
@@ -212,7 +245,7 @@ def load_csv(listOfPath, config):
 	lsCSV = []
 	for csvPath in listOfPath:
 		if not os.path.isfile(csvPath):
-			exit_on_error('ABORT: ' + csvPath + ' must be a file')
+			exit_on_error(csvPath + ' must be a file')
 		with open(csvPath, 'rb') as csvfile:
 			if csv_delimiter == 'tab':
 				spamreader = csv.reader(csvfile, delimiter='\t', quotechar='"')
@@ -224,7 +257,7 @@ def load_csv(listOfPath, config):
 				if verbose:
 					print(', '.join(row))
 				if len(row)!=len(headersCSV):
-					exit_on_error('ABORT: '+ csvPath +' is not valid: columns number is not correct at line '+str(i+1))
+					exit_on_error(csvPath +' is not valid: columns number is not correct at line '+str(i+1))
 				data.append(row)
 			lsCSV.append(data)
 	if verbose:
@@ -357,7 +390,10 @@ def copy_media(csv, mediaColumns):
 		search = re.search(regex, file)
 		if search:
 			filedir = search.group(0)
-		shutil.copy(file, mediaDirectory + filedir)
+		try:
+			shutil.copy(file, mediaDirectory + filedir)
+		except Exception as e:
+			exit_on_error(file + ' is not a correct path')
 		if verbose:
 			print(file + '  to  ' + mediaDirectory + filedir)
 	if verbose:
@@ -379,7 +415,7 @@ def generate_token():
 
 def exit_on_error(fatal_message):
 	shutil.rmtree(testDirectory)
-	sys.exit(fatal_message)
+	sys.exit('ABORT: '+fatal_message)
 
 (inputJSON, lsPath, lsName, inputTemplate, indexTemplate, completedTemplate, exportTemplate) = parse_arguments()
 configJSON = load_json(inputJSON)
@@ -390,7 +426,7 @@ create_db(configJSON, listDataCSV, lsName)
 copy_templates(inputTemplate, indexTemplate, completedTemplate, exportTemplate)
 create_platform()
 create_model()
-if useMedia:
+if 'useMedia' in globals():
 	copy_media(listDataCSV, useMedia)
 url = ''
 if prefix != '':
