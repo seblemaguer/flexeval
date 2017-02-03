@@ -13,7 +13,14 @@ from pprint import pprint
 from pm_bodies import platform_body, model_body
 
 execfile(os.path.join(os.path.dirname(__file__), 'pm_bodies.py'))
-global warning
+
+# global variables
+csv_delimiter = ';'
+nbSystemToDisplay = 1
+prefix = ''
+tok = ''
+useMedia = []
+verbose = False
 warning = []
 
 
@@ -41,7 +48,6 @@ def parse_arguments():
 		print('verbose mode enabled')
 
 	global csv_delimiter
-	csv_delimiter = ';'
 	if len(args.csv_delimiter) == 1 or args.csv_delimiter == 'tab':
 		csv_delimiter = args.csv_delimiter
 	elif len(args.csv_delimiter) == 3 and args.csv_delimiter[0] == '\'' and args.csv_delimiter[2] == '\'':
@@ -148,22 +154,22 @@ def generate_config(json, lsPath):
 	'nbFixedPosition' : '\'0\'',
 	'nbIntroductionSteps' : '\'0\''
 	}
-	expectedArrayConfig = {
+	expectedListConfig = {
 	'useMedia':'[]'
 	}
 	mandatoryStringConfig = ['nbSampleBySystem', 'nbSteps', 'nbSystemDisplayed', 'nbQuestions', 'prefix']
-	mandatoryArrayConfig = ['headersCSV']
+	mandatoryListConfig = ['headersCSV']
 
-	def writeString(var):
-		if type(configJson[var]) == unicode:
-			config.write((var + '=\'' + configJson[var] + '\'\n').encode('UTF-8'))
+	def writeString(var1):
+		if type(configJson[var1]) == unicode:
+			config.write((var1 + '=\'' + configJson[var1] + '\'\n').encode('UTF-8'))
 		else:
-			config.write(var + '=\'' + str(configJson[var]) + '\'\n')
-	def writeArray(var):
-		config.write(var + '=[')
-		for i,x in enumerate(configJson[var]):
-			config.write('\''+x.encode('UTF-8')+'\'')
-			if i < len(configJson[var])-1:
+			config.write(var1 + '=\'' + str(configJson[var1]) + '\'\n')
+	def writeList(var2):
+		config.write(var2 + '=[')
+		for i,elt in enumerate(configJson[var2]):
+			config.write('\''+elt.encode('UTF-8')+'\'')
+			if i < len(configJson[var2])-1:
 				config.write(',')
 		config.write(']\n')
 
@@ -180,15 +186,15 @@ def generate_config(json, lsPath):
 		if var in mandatoryStringConfig:
 			writeString(var)
 			mandatoryStringConfig.remove(var)
-		elif var in mandatoryArrayConfig:
-			writeArray(var)
-			mandatoryArrayConfig.remove(var)
+		elif var in mandatoryListConfig:
+			writeList(var)
+			mandatoryListConfig.remove(var)
 		elif var in expectedStringConfig:
 			writeString(var)
 			del expectedStringConfig[var]
-		elif var in expectedArrayConfig:
-			writeArray(var)
-			del expectedArrayConfig[var]
+		elif var in expectedListConfig:
+			writeList(var)
+			del expectedListConfig[var]
 		else:
 			writeString(var)
 
@@ -208,13 +214,13 @@ def generate_config(json, lsPath):
 	# expected and mandatory checks
 	for mandatory in mandatoryStringConfig:
 		exit_on_error('Invalid JSON file: '+mandatory+' is mandatory')
-	for mandatory in mandatoryArrayConfig:
+	for mandatory in mandatoryListConfig:
 		exit_on_error('Invalid JSON file: '+mandatory+' is mandatory')
 
 	for expected in expectedStringConfig:
 		config.write((expected + '=\'' + expectedStringConfig[expected] + '\'\n').encode('UTF-8'))
-	for expected in expectedArrayConfig:
-		config.write((expected + '=\'' + expectedArrayConfig[expected] + '\'\n').encode('UTF-8'))
+	for expected in expectedListConfig:
+		config.write((expected + '=\'' + expectedListConfig[expected] + '\'\n').encode('UTF-8'))
 
 	# write extra config
 	tok = generate_token()
@@ -323,15 +329,16 @@ def create_db(config, data, listOfName):
 		print('Done.\n')
 
 
-def copy_templates(inputTemplate, indexTemplate, completedTemplate, exportTemplate):
+def copy_templates(inputTemplatePath, indexTemplatePath, completedTemplatePath, exportTemplatePath):
 	if verbose:
 		print('|----------------|')
 		print('| templates copy |')
 		print('v----------------v')
-	shutil.copy(indexTemplate, viewsDirectory + 'index.tpl')
-	shutil.copy(inputTemplate, viewsDirectory + 'template.tpl')
-	shutil.copy(completedTemplate, viewsDirectory + 'completed.tpl')
-	shutil.copy(exportTemplate, viewsDirectory + 'export.tpl')
+
+	shutil.copy(inputTemplatePath, viewsDirectory + 'template.tpl')
+	shutil.copy(indexTemplatePath, viewsDirectory + 'index.tpl')
+	shutil.copy(completedTemplatePath, viewsDirectory + 'completed.tpl')
+	shutil.copy(exportTemplatePath, viewsDirectory + 'export.tpl')
 
 	if verbose:
 		print('Done.\n')
