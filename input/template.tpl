@@ -123,7 +123,7 @@
 				</div>
 				<div class="col-xs-12 col-md-7 col-lg-7 vcenter">
 					<blockquote>
-					 <video width="500" height="345" src="{{samples[i]["video"]}}" controls/>
+					 <video width="500" height="345" src="{{samples[i]["vidéo"]}}" controls/>
 					</blockquote>
 				</div>
 			</div>
