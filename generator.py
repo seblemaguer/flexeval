@@ -12,7 +12,6 @@ import sys
 from pprint import pprint
 from pm_bodies import platform_body, model_body
 
-execfile(os.path.join(os.path.dirname(__file__), 'pm_bodies.py'))
 
 # global variables
 csv_delimiter = ';'

@@ -1,15 +1,15 @@
 platform_body = """
-import sys
-import os
-import re
-import model
 import bottle
-from bottle import request
-import sqlite3
 import json
+import os
 import random
-import config
+import re
+import sqlite3
+import sys
+from bottle import request
 from beaker.middleware import SessionMiddleware
+import config
+import model
 
 bottle.debug(True)
 
@@ -32,17 +32,17 @@ app_session = bottle.request.environ.get('beaker.session')
 @app.route('/')
 def badroute():
 	book = model.get_book_variable_module_name('config')
-	data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "config": book}
+	data={'APP_PREFIX':request.app.config['myapp.APP_PREFIX'], 'config': book}
 	return bottle.template('index', data)
 
 @app.route('/login')
 @app.post('/login')
 def login():
-	mail = post_get("email")
-	pattern="(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)"
+	mail = post_get('email')
+	pattern='(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)'
 	if not re.match(pattern,mail) :
 		book = model.get_book_variable_module_name('config')
-		data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "config": book, "error" : "Invalid email address"}
+		data={'APP_PREFIX':request.app.config['myapp.APP_PREFIX'], 'config': book, 'error' : 'Invalid email address'}
 		return bottle.template('index', data)
 	app_session = bottle.request.environ.get('beaker.session')
 	app_session['logged_in'] = True
@@ -59,12 +59,12 @@ def logout():
 def toto():
 	app_session = bottle.request.environ.get('beaker.session')
 	if('pseudo' in app_session) :
-		return "<p>You are already logged, please logout <a href='"+request.app.config['myapp.APP_PREFIX']+"/logout'>here</a></p>"
+		return '<p>You are already logged, please logout <a href="'+request.app.config['myapp.APP_PREFIX']+'/logout">here</a></p>'
 	book = model.get_book_variable_module_name('config')
-	data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "config": book}
+	data={'APP_PREFIX':request.app.config['myapp.APP_PREFIX'], 'config': book}
 	return bottle.template('index', data)
 
-#bottle post methods
+# Bottle post methods
 def postd():
 	return bottle.request.forms
 
@@ -81,64 +81,64 @@ def testLogin():
 @app.route('/test')
 def process_test():
 	app_session = bottle.request.environ.get('beaker.session')
-	#the following lines are to be uncommented later
+	# The following lines are to be uncommented later
 	if not testLogin() :
 		bottle.redirect(request.app.config['myapp.APP_PREFIX']+'/login')
 	user = app_session['pseudo']
-	#proceed to the test
-	#check if the test isn't finished yet
+	# Proceed to the test
+	# Check if the test isn't finished yet
 	if model.get_nb_step_user(user) < model.get_nb_step() :
-		#proceed to a new step
+		# Proceed to a new step
 		if int(config.nbIntroductionSteps) > 0 and model.get_nb_step_user(user) == 0 and not 'intro_done' in app_session:
 			if not 'nb_intro_passed' in app_session:
 				app_session['nb_intro_passed'] = 0
 			(samples, systems, index) = model.get_intro_sample(user)
 			book = model.get_book_variable_module_name('config')
-			data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "samples":samples, "systems":systems, "nfixed": model.get_nb_position_fixed(), "index":index, "user":user, "introduction": True, "step": 0, "totalstep" : model.get_nb_step(), "progress" : model.get_progress(user), "config": book}
+			data={'APP_PREFIX':request.app.config['myapp.APP_PREFIX'], 'samples':samples, 'systems':systems, 'nfixed': model.get_nb_position_fixed(), 'index':index, 'user':user, 'introduction': True, 'step': 0, 'totalstep' : model.get_nb_step(), 'progress' : model.get_progress(user), 'config': book}
 		else:
 			(samples, systems, index) = model.get_test_sample(user)
 			book = model.get_book_variable_module_name('config')
-			data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "samples":samples, "systems":systems, "nfixed": model.get_nb_position_fixed(), "index":index, "user":user, "introduction": False, "step": model.get_nb_step_user(user)+1, "totalstep" : model.get_nb_step(), "progress" : model.get_progress(user), "config": book}
+			data={'APP_PREFIX':request.app.config['myapp.APP_PREFIX'], 'samples':samples, 'systems':systems, 'nfixed': model.get_nb_position_fixed(), 'index':index, 'user':user, 'introduction': False, 'step': model.get_nb_step_user(user)+1, 'totalstep' : model.get_nb_step(), 'progress' : model.get_progress(user), 'config': book}
 		return bottle.template('template', data)
 	else :
 		bottle.request.environ.get('beaker.session').delete()
-		return "<p>You have already done this test</p>"
+		return '<p>You have already done this test</p>'
 
 @app.post('/test')
 def process_test_post():
 	app_session = bottle.request.environ.get('beaker.session')
-	#the following lines are to be uncommented later
+	# The following lines are to be uncommented later
 	if not testLogin() :
 		bottle.redirect(request.app.config['myapp.APP_PREFIX']+'/login')
 	user = app_session['pseudo']
-	#get the post data and insert into db
+	# Get the post data and insert into db
 	if ('intro_done' in app_session and app_session['intro_done'] == True) or model.get_nb_step_user(user) > 0:
 		systems=[]
 		i=1
-		while post_get("system"+str(i))!="" :
-			systems.append(post_get("system"+str(i)))
+		while post_get('system'+str(i))!='' :
+			systems.append(post_get('system'+str(i)))
 			i=i+1
 		answers=[]
 		i=1
-		while post_get("question"+str(i))!="" :
-			ct = post_get("question"+str(i)).split(";;")
+		while post_get('question'+str(i))!='' :
+			ct = post_get('question'+str(i)).split(';;')
 			if len(ct)==1:
-				answers.append({"index": i, "content": ct[0]})
+				answers.append({'index': i, 'content': ct[0]})
 			else :
-				answers.append({"index": i, "content": ct[0], "target": ct[1]})
+				answers.append({'index': i, 'content': ct[0], 'target': ct[1]})
 			i=i+1
-		post_data = {"author":model.get_author(),"user":user,"answers": answers,"systems": systems,"index": post_get("ref")}
+		post_data = {'author':model.get_author(),'user':user,'answers': answers,'systems': systems,'index': post_get('ref')}
 		model.insert_data(post_data)
 	else:
 		app_session['nb_intro_passed'] += 1
 		if (app_session['nb_intro_passed'] >= int(config.nbIntroductionSteps)):
 			app_session['intro_done'] = True
-	#check if the test isn't finished yet
+	# Check if the test isn't finished yet
 	if model.get_nb_step_user(user) < model.get_nb_step() :
 		bottle.redirect(request.app.config['myapp.APP_PREFIX']+'/test')
 	else :
 		book = model.get_book_variable_module_name('config')
-		data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "config": book}
+		data={'APP_PREFIX':request.app.config['myapp.APP_PREFIX'], 'config': book}
 		bottle.request.environ.get('beaker.session').delete()
 		return bottle.template('completed', data)
 
@@ -146,28 +146,28 @@ def process_test_post():
 @app.route('/export')
 def export_db():
 	book = model.get_book_variable_module_name('config')
-	data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "config": book}
+	data={'APP_PREFIX':request.app.config['myapp.APP_PREFIX'], 'config': book}
 	return bottle.template('export',data)
 
 @app.post('/export')
 def export_db_ok():
-	if(post_get("token")==model.get_token()):
-		return bottle.static_file("data.db", root=os.path.dirname(os.path.abspath(__file__)),download="data.db")
+	if(post_get('token')==model.get_token()):
+		return bottle.static_file('data.db', root=os.path.dirname(os.path.abspath(__file__)),download='data.db')
 	else:
 		book = model.get_book_variable_module_name('config')
-		data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "config": book, "error": "Bad Token !"}
+		data={'APP_PREFIX':request.app.config['myapp.APP_PREFIX'], 'config': book, 'error': 'Bad Token !'}
 		return bottle.template('export',data)
 
-#access to local static files
+# Access to local static files
 @app.route('/static/:type/:filename#.*#')
 def send_static(type, filename):
-	return bottle.static_file(filename, root=os.path.join(os.path.dirname(os.path.abspath(__file__)),"static/%s/") % type)
+	return bottle.static_file(filename, root=os.path.join(os.path.dirname(os.path.abspath(__file__)),'static/%s/') % type)
 
-#access to local static sound files
+# Access to local static sound files
 @app.route('/media/:media/:syst/:filename#.*#')
 @app.route('/media/:media/./:syst/:filename#.*#')
 def send_static(media, syst, filename):
-	return bottle.static_file(filename, root=os.path.join(os.path.dirname(os.path.abspath(__file__)),"media/%s/") % media+"/"+syst)
+	return bottle.static_file(filename, root=os.path.join(os.path.dirname(os.path.abspath(__file__)),'media/%s/') % media+'/'+syst)
 
 @app.route('/:badroute')
 def badroute(badroute):
@@ -175,7 +175,7 @@ def badroute(badroute):
 
 def main():
 	bottle.run(app_middlware, host='localhost', port=8080, server='paste', reloader=True)
-if __name__ == "__main__":
+if __name__ == '__main__':
 	main()
 else:
 	application = app_middlware
@@ -191,10 +191,10 @@ import itertools
 import operator
 
 def get_nb_system() :
-	#return the number of sample for a test!
+	# Return the number of sample for a test!
 	conn = sqlite3.connect(os.path.join(os.path.dirname(os.path.abspath(__file__)),'data.db'))
 	c = conn.cursor()
-	c.execute("select count(*) from system")
+	c.execute('select count(*) from system')
 	res = c.fetchall()
 	conn.close()
 	return int(res[0][0])
@@ -228,33 +228,33 @@ def get_nb_questions() :
 	return int(config.nbQuestions)
 
 def get_author():
-	#get it from config.py
+	# Get it from config.py
 	return config.author
 	
 def get_questions_type():
-	#get the text of questions as an array
+	# Get the text of questions as an array
 	return config.questionsType
 
 def get_description():
-	#get it from config.py
+	# Get it from config.py
 	return config.description
 
 def get_name():
-	#get it from config.py
+	# Get it from config.py
 	return config.name
 
 def get_nb_sample_by_system() :
-	#return the number of samples of each system
-	#get it from config.py
+	# Return the number of samples of each system
+	# Get it from config.py
 	return int(config.nbSampleBySystem)
 
 def get_nb_step() :
-	#return the number of step required on a test
-	#get it from config.py
+	# Return the number of step required on a test
+	# Get it from config.py
 	return int(config.nbSteps)
 
 def get_nb_step_user(user) :
-	#return the number of step made by a user on the test
+	# Return the number of step made by a user on the test
 	conn = sqlite3.connect(os.path.join(os.path.dirname(os.path.abspath(__file__)),'data.db'))
 	c = conn.cursor()
 	c.execute('select count(*) from answer where user="'+user+'"')
@@ -264,14 +264,14 @@ def get_nb_step_user(user) :
 	return int(nbans/get_nb_questions())
 
 def get_progress(user):
-	# return the ratio of steps achieved by the user over the total number of steps
+	# Return the ratio of steps achieved by the user over the total number of steps
 	return 100*get_nb_step_user(user)/get_nb_step()
 
 def get_metadata() :
-	#get it from config.py
+	# Get it from config.py
 	metadata=dict()
 	for i in dir(config):
-		#i,"  ",getattr(config,i)
+		# i,'  ',getattr(config,i)
 		b = re.search(r'__.+__',str(i))
 		if not b:
 			metadata[str(i)]=getattr(config,i)
@@ -297,7 +297,7 @@ def get_shuffled_list_of_system_ids(nbFixed, connection) :
 	delta = 1
 	low_votes_ids = list(filter(lambda line: line[1] <= m+delta, ids))
 	random.shuffle(low_votes_ids)
-	# and append others
+	# And append others
 	higher_votes_ids = list(filter(lambda line: line[1] > m+delta, ids))
 	# Shuffle all systems with similar number of answers
 	def gather_similar_systems(l):
@@ -317,12 +317,12 @@ def get_test_sample(user) :
 	dir = os.path.dirname(os.path.abspath(__file__))
 	conn = sqlite3.connect(os.path.join(dir,'data.db'))
 	c = conn.cursor()
-	c.execute("select sample_index, sum(nb_processed) from sample where type='test' group by sample_index")
+	c.execute('select sample_index, sum(nb_processed) from sample where type="test" group by sample_index')
 	res= c.fetchall()
 	validlist=[]
 	min=0
 	for r in res :
-		#check if user have already done it
+		# Check if user have already done it
 		c.execute('select count(*) from answer where user="'+user+'" and sample_index='+str(r[0]))
 		nb = c.fetchall()
 		if nb[0][0] ==0:
@@ -342,11 +342,11 @@ def get_test_sample(user) :
 	shuffled_ids = get_shuffled_list_of_system_ids(n, c)
 	
 	headers = get_headers()
-	queryh = ""
+	queryh = ''
 	for i in range(len(headers)) :
 		queryh = queryh+headers[i]
 		if i<len(headers)-1 : 
-			queryh=queryh+", "
+			queryh=queryh+', '
 	c.execute('select nb_processed, id_system, '+ queryh +' from sample where sample_index='+str(index)+' order by nb_processed asc')
 	systs = {}
 	for s in c.fetchall():
@@ -370,7 +370,7 @@ def get_test_sample(user) :
 		r = random.random()
 		random.shuffle(samples, lambda: r)
 		random.shuffle(systems, lambda: r)
-	elif n>=get_nb_system_display(): #'False' to false ?
+	elif n>=get_nb_system_display():
 		pass
 	else :
 		sa1 = samples[0:n]
@@ -394,7 +394,7 @@ def get_intro_sample(user) :
 	dir = os.path.dirname(os.path.abspath(__file__))
 	conn = sqlite3.connect(os.path.join(dir,'data.db'))
 	c = conn.cursor()
-	c.execute("select sample_index from sample where type='intro' group by sample_index")
+	c.execute('select sample_index from sample where type="intro" group by sample_index')
 	res= c.fetchall()
 	index= res[0][0]
 	for r in res :
@@ -410,11 +410,11 @@ def get_intro_sample(user) :
 	shuffled_ids = get_shuffled_list_of_system_ids(n, c)
 	
 	headers = get_headers()
-	queryh = ""
+	queryh = ''
 	for i in range(len(headers)) :
 		queryh = queryh+headers[i]
 		if i<len(headers)-1 : 
-			queryh=queryh+", "
+			queryh=queryh+', '
 	c.execute('select nb_processed, id_system, '+ queryh +' from sample where sample_index='+str(index)+' order by nb_processed asc')
 	systs = {}
 	for s in c.fetchall():
@@ -438,7 +438,7 @@ def get_intro_sample(user) :
 		r = random.random()
 		random.shuffle(samples, lambda: r)
 		random.shuffle(systems, lambda: r)
-	elif n>=get_nb_system_display(): #'False' to false ?
+	elif n>=get_nb_system_display():
 		pass
 	else :
 		sa1 = samples[0:n]
@@ -462,7 +462,7 @@ def insert_data(data) :
 
 	c.execute('select * from answer where user="'+str(data['user'])+'" and sample_index="'+str(data['index'])+'"')
 	res = c.fetchall()
-	if len(res) == 0: # check if the response is not already in the database
+	if len(res) == 0: # Check if the response is not already in the database
 	
 		sysval=''
 		systs=''
@@ -472,7 +472,7 @@ def insert_data(data) :
 			if(i<int(config.nbSystemDisplayed)-1):
 				sysval=sysval+','
 				systs=systs+','
-		#update the number of time processed for the samples
+		# Update the number of time processed for the samples
 		for sy in data['systems'] :
 			c.execute('select nb_processed from sample where id_system="'+sy+'" and sample_index='+str(data['index']))
 			n = c.fetchall()[0][0]
