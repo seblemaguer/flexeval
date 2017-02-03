@@ -116,7 +116,7 @@ def process_test_post():
 		bottle.redirect(request.app.config['myapp.APP_PREFIX']+'/login')
 	user = app_session['pseudo']
 	#get the post data and insert into db
-	if ('intro_done' in app_session and app_session['intro_done'] == True) or int(config.nbIntroductionSteps) <= 0:
+	if ('intro_done' in app_session and app_session['intro_done'] == True) or model.get_nb_step_user(user) > 0:
 		systems=[]
 		i=1
 		while post_get("system"+str(i))!="" :
