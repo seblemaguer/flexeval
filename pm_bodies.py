@@ -157,7 +157,9 @@ def export_db_ok():
 	if(post_get("token")==model.get_token()):
 		return bottle.static_file("data.db", root=os.getcwd(),download="data.db")
 	else:
-		return "<h2>Bad token!</h2>"
+		book = model.get_book_variable_module_name('config')
+		data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "config": book, "error": "Bad Token !"}
+		return bottle.template('export',data)
 
 #access to local static files
 @app.route('/static/:type/:filename#.*#')
