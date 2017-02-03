@@ -398,10 +398,13 @@ if prefix != '':
 else:
 	url = 'server_url/export'
 
-print('You can access the database at the following url: ' + url)
-print('You will need a token for that, so keep this one!!')
-print('Token = ' + tok)
-printWarning()
-print('=' * 30)
+# print('=' * 30)
 print('    GENERATION TERMINEE !!')
 print('=' * 30)
+print('')
+printWarning()
+print('')
+print('You can access the database at the following url: ' + url)
+# print('You will need a token for that, so keep this one!!')
+print('Token = ' + tok)
+print('')
