@@ -4,6 +4,7 @@ import os
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
+import re
 import model
 import bottle
 from bottle import request
