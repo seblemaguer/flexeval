@@ -36,7 +36,7 @@
 						<form role="form" action="{{APP_PREFIX}}/login" method="POST">
 							<fieldset>
 								<div class="form-group">
-									<input type="email" class="form-control" placeholder="E-mail" name="email" autofocus required>
+									<input type="text" class="form-control" placeholder="E-mail" name="email" autofocus required>
 								</div>
 								<!-- Change this to a button or input when using this as a form -->
 								<input type="submit" class="btn btn-lg btn-success btn-block" value="Start/Continue">
