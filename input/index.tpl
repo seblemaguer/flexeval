@@ -43,6 +43,11 @@
 							</fieldset>
 						</form>
 						<br>
+						%if defined('error') and error != "" :
+						<div class="alert alert-danger">
+							<p><strong>Error !</strong>  {{error}}</p>
+						</div>
+						%end
 					</div>
 				</div>
 			</div>
