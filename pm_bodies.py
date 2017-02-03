@@ -15,12 +15,8 @@ bottle.debug(True)
 
 views_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'views/')
 bottle.TEMPLATE_PATH.insert(0, views_path)
-#bottle.TEMPLATE_PATH.insert(0,os.path.dirname(os.path.abspath(__file__)))
 app = bottle.Bottle()
 
-# TO MODIFY DEPENDING ON DEPLOYMENT CONFIGURATION
-# example: '/mytest'
-# DO NOT FORGET TO PUT HEADING /
 app.config['myapp.APP_PREFIX'] = model.get_prefix()
 
 session_opts = {
@@ -173,7 +169,7 @@ def send_static(type, filename):
 def send_static(media, syst, filename):
 	return bottle.static_file(filename, root=os.path.join(os.path.dirname(os.path.abspath(__file__)),"media/%s/") % media+"/"+syst)
 
-@app.route(':badroute')
+@app.route('/:badroute')
 def badroute(badroute):
 	bottle.redirect(request.app.config['myapp.APP_PREFIX']+'/test')
 
