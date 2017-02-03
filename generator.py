@@ -10,6 +10,7 @@ import sqlite3
 import string
 import sys
 from pprint import pprint
+from pm_bodies import platform_body, model_body
 
 execfile(os.path.join(os.path.dirname(__file__), 'pm_bodies.py'))
 global warning
@@ -97,7 +98,7 @@ def create_architecture(testName):
 			i += 1
 			dir = std_dir + '_' + str(i)
 		if i > 0:
-			addWarning('Folder ' + std_dir + ' aready exist.')
+			addWarning('Folder ' + std_dir + ' already exist.')
 			addWarning('New folder at ' + dir)
 		os.makedirs(dir)
 		if verbose:
@@ -142,7 +143,7 @@ def generate_config(json, lsPath):
 
 	# json expected and mandatory input definition
 	expectedStringConfig = {
-	'author' : '\'unknow\'',
+	'author' : '\'unknown\'',
 	'name' : '\'TEST\'',
 	'nbFixedPosition' : '\'0\'',
 	'nbIntroductionSteps' : '\'0\''
@@ -150,7 +151,7 @@ def generate_config(json, lsPath):
 	expectedArrayConfig = {
 	'useMedia':'[]'
 	}
-	mandatoryStringConfig = ['nbSampleBySystem', 'nbSteps', 'nbSystemDisplayed', 'nbQuestions', 'prefixe']
+	mandatoryStringConfig = ['nbSampleBySystem', 'nbSteps', 'nbSystemDisplayed', 'nbQuestions', 'prefix']
 	mandatoryArrayConfig = ['headersCSV']
 
 	def writeString(var):
@@ -174,8 +175,7 @@ def generate_config(json, lsPath):
 	with open(lsPath[0], 'rb') as csvfile:
 		spamreader = csv.reader(csvfile, delimiter=';', quotechar='|')
 		nbsbs = sum(1 for row in spamreader)
-	exception = []
-	verifHeadersCSV = []
+	checkHeadersCSV = []
 	for var in configJson:
 		if var in mandatoryStringConfig:
 			writeString(var)
@@ -195,12 +195,12 @@ def generate_config(json, lsPath):
 		# special cases
 		if var == 'nbSystemDisplayed':
 			nbSystemToDisplay = int(configJson[var])
-		elif var == 'prefixe':
+		elif var == 'prefix':
 			prefix = configJson[var]
 		elif var == 'useMedia':
 			useMedia = [x.encode('UTF-8') for x in configJson[var]]
 		elif var == 'headersCSV':
-			verifHeadersCSV = [x.encode('UTF-8') for x in configJson[var]]
+			checkHeadersCSV = [x.encode('UTF-8') for x in configJson[var]]
 		elif var == 'nbFixedPosition':
 			if configJson[var] < 0 or configJson[var] > configJson['nbSteps']:
 				configJson[var] = nbsbs
@@ -225,10 +225,10 @@ def generate_config(json, lsPath):
 	if 'useMedia' in globals():
 		for aUseMedia in useMedia:
 			errorInUseMedia = True
-			for aHCSV in verifHeadersCSV:
-				if (aHCSV == aUseMedia):
+			for aHCSV in checkHeadersCSV:
+				if aHCSV == aUseMedia:
 					errorInUseMedia = False
-			if errorInUseMedia == True:
+			if errorInUseMedia:
 				exit_on_error('value "'+aUseMedia+'" in useMedia is not in headersCSV (in JSON config file)')
 	if verbose:
 		print('Done.\n')
@@ -363,7 +363,7 @@ def create_model():
 		print('Done.\n')
 
 
-def copy_media(csv, mediaColumns):
+def copy_media(csv):
 	if verbose:
 		print('|-----------------|')
 		print('| media file copy |')
@@ -391,7 +391,7 @@ def copy_media(csv, mediaColumns):
 			filedir = search.group(0)
 		try:
 			shutil.copy(file, mediaDirectory + filedir)
-		except Exception as e:
+		except Exception:
 			exit_on_error(file + ' is not a correct path')
 		if verbose:
 			print(file + '  to  ' + mediaDirectory + filedir)
@@ -428,7 +428,7 @@ copy_templates(inputTemplate, indexTemplate, completedTemplate, exportTemplate)
 create_platform()
 create_model()
 if 'useMedia' in globals():
-	copy_media(listDataCSV, useMedia)
+	copy_media(listDataCSV)
 url = ''
 if prefix != '':
 	url = 'server_url/' + prefix + '/export'

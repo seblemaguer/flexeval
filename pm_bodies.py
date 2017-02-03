@@ -21,7 +21,7 @@ app = bottle.Bottle()
 # TO MODIFY DEPENDING ON DEPLOYMENT CONFIGURATION
 # example: '/mytest'
 # DO NOT FORGET TO PUT HEADING /
-app.config['myapp.APP_PREFIX'] = model.get_prefixe()
+app.config['myapp.APP_PREFIX'] = model.get_prefix()
 
 session_opts = {
 	'session.type': 'file',
@@ -210,8 +210,8 @@ def get_book_variable_module_name(module_name):
 		book = {key: value for key, value in module.__dict__.iteritems() if not (key.startswith('__') or key.startswith('_'))}
 	return book
 
-def get_prefixe():
-	return config.prefixe
+def get_prefix():
+	return config.prefix
 
 def get_token():
 	return config.token
@@ -363,7 +363,7 @@ def get_test_sample(user) :
 		headerIndex=0
 		for j in range(2,len(systs[shuffled_ids[i]])):
 			if headers[headerIndex] in get_media() :
-				t[headers[headerIndex]] = get_prefixe()+'/media/'+systs[shuffled_ids[i][0]][j]
+				t[headers[headerIndex]] = get_prefix()+'/media/'+systs[shuffled_ids[i][0]][j]
 			else :
 				t[headers[headerIndex]] = systs[shuffled_ids[i][0]][j]
 			headerIndex+=1
@@ -431,7 +431,7 @@ def get_intro_sample(user) :
 		headerIndex=0
 		for j in range(2,len(systs[shuffled_ids[i]])):
 			if headers[headerIndex] in get_media() :
-				t[headers[headerIndex]] = get_prefixe()+'/media/'+systs[shuffled_ids[i][0]][j]
+				t[headers[headerIndex]] = get_prefix()+'/media/'+systs[shuffled_ids[i][0]][j]
 			else :
 				t[headers[headerIndex]] = systs[shuffled_ids[i][0]][j]
 			headerIndex+=1
