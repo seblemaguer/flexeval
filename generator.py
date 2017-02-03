@@ -160,16 +160,18 @@ def generate_config(json, lsPath):
 		else:
 			config.write(var + '=\'' + str(configJson[var]) + '\'\n')
 	def writeArray(var):
-		if type(configJson[var]) == unicode:
-			config.write((var + '=' + configJson[var] + '\n').encode('UTF-8'))
-		else:
-			config.write(var + '=' + str(configJson[var]) + '\n')
+		config.write(var + '=[')
+		for i,x in enumerate(configJson[var]):
+			config.write('\''+x.encode('UTF-8')+'\'')
+			if i < len(configJson[var])-1:
+				config.write(',')
+		config.write(']\n')
 
 	# config file writing
 	config = open(testDirectory + '/config.py', 'w')
 	config.write('# -*- coding: utf-8 -*-\n')
 	config.write('# === CONFIGURATION VARIABLES ===\n')
-	config.write('# Each configuration variable is necessarily a string\n')
+	config.write('# Each configuration variable is necessarily a string or a list of string\n')
 	with open(lsPath[0], 'rb') as csvfile:
 		spamreader = csv.reader(csvfile, delimiter=';', quotechar='|')
 		nbsbs = sum(1 for row in spamreader)
@@ -229,8 +231,8 @@ def generate_config(json, lsPath):
 			for aHCSV in verifHeadersCSV:
 				if aHCSV[2:-1] == aUseMedia:
 					errorInUseMedia = False
-			if errorInUseMedia == True:
-				exit_on_error('value "'+aUseMedia+'" in useMedia is not in headersCSV (in JSON config file)')
+			# if errorInUseMedia == True:
+			# 	exit_on_error('value "'+aUseMedia+'" in useMedia is not in headersCSV (in JSON config file)')
 	if verbose:
 		print('Done.\n')
 

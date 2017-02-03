@@ -10,8 +10,8 @@
 	"nbFixedPosition": 1,
 	"nbIntroductionSteps": 1,
 	"nbSampleBySystem": 10,
-	"headersCSV": ["text","image","video","path"],
-	"useMedia": ["path","image","video"],
+	"headersCSV": ["text","image","vidéo","path"],
+	"useMedia": ["path","image","vidéo"],
 	"toto": "toto-text-éà"
 	}
 }
