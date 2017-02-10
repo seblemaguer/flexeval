@@ -22,24 +22,22 @@
 	<div class="container">
 		<div class="row">
 			<div class="col-md-4 col-md-offset-4 text-center">
-			<h1>{{config["name"]}}</h1><span>
+			<h1>{{config["name"]}}</h1>
 			<p class="lead">{{config["description"]}}</p>
 			</div>
 		</div>
-	</div>
 	</div>
 
 	<div class="jumbotron">
 		<div class="container">
 			<div class="row">
 				<div class="col-md-6 col-md-offset-3">
-						<h2 class="text-center">Test completed!</h3>
-						<h2 class="text-center">Thank you for your time.</h3>
-						<br>
-						<br>
-						<h4 class="text-center">You have been logged out. You can close the page.</h4>
-						<br>
-					</div>
+					<h2 class="text-center">Test completed!</h2>
+					<h2 class="text-center">Thank you for your time.</h2>
+					<br>
+					<br>
+					<h4 class="text-center">You have been logged out. You can close the page.</h4>
+					<br>
 				</div>
 			</div>
 		</div>

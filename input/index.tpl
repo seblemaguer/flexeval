@@ -21,34 +21,32 @@
 	<div class="container">
 		<div class="row">
 			<div class="col-md-4 col-md-offset-4 text-center">
-			<h1>{{config["name"]}}</h1><span>
+			<h1>{{config["name"]}}</h1>
 			<p class="lead">{{config["description"]}}</p>
 			</div>
 		</div>
-	</div>
 	</div>
 
 	<div class="jumbotron">
 		<div class="container">
 			<div class="row">
 				<div class="col-md-4 col-md-offset-4">
-						<h3>Please provide an e-mail address to identify yourself:</h3>
-						<form role="form" action="{{APP_PREFIX}}/login" method="POST">
-							<fieldset>
-								<div class="form-group">
-									<input type="text" class="form-control" placeholder="E-mail" name="email" autofocus required>
-								</div>
-								<!-- Change this to a button or input when using this as a form -->
-								<input type="submit" class="btn btn-lg btn-success btn-block" value="Start/Continue">
-							</fieldset>
-						</form>
-						<br>
-						%if defined('error') and error != "" :
-						<div class="alert alert-danger">
-							<p><strong>Error !</strong>  {{error}}</p>
-						</div>
-						%end
+					<h3>Please provide an e-mail address to identify yourself:</h3>
+					<form role="form" action="{{APP_PREFIX}}/login" method="POST">
+						<fieldset>
+							<div class="form-group">
+								<input type="text" class="form-control" placeholder="E-mail" name="email" autofocus required>
+							</div>
+							<!-- Change this to a button or input when using this as a form -->
+							<input type="submit" class="btn btn-lg btn-success btn-block" value="Start/Continue">
+						</fieldset>
+					</form>
+					<br>
+					%if defined('error') and error != "" :
+					<div class="alert alert-danger">
+						<p><strong>Error !</strong>  {{error}}</p>
 					</div>
+					%end
 				</div>
 			</div>
 		</div>
