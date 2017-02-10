@@ -45,7 +45,7 @@
 		</div>
 	</nav>
 	
-	<form role="form" action="{{APP_PREFIX}}/test" method="POST">
+	<form role="form" action="{{APP_PREFIX}}/test2" method="POST">
 	
 		<div class="jumbotron text-center">
 			<h2><b>Context:</b> Imagine someone tells the text below during a spontaneous conversation.</h2>
@@ -55,9 +55,9 @@
 		</div>
 		% if introduction :
 		<div class="alert alert-warning text-center"><strong>Warning!</strong> This is an introduction step!</div>
-		% end 
-		<input type="hidden" name="ref" value="{{index}}">
-		<input type="hidden" name="system1" value="{{systems[0]}}">
+		% end
+		{{!hidden_fields}}
+		
 		<div class="container">
 			<h1 class="text-center">Text {{step}}/{{totalstep}}</h1>
 		</div>
@@ -74,9 +74,9 @@
 				<samp class="lead text-center">
 					{{!samples[0]['text']}}
 				</samp>
-				<audio id="player" controls>
+				<!--<audio id="player" controls>
 					<source src="{{samples[0]["path"]}}">
-				</audio>
+				</audio>-->
 			</center>
 		</div>
 
@@ -85,8 +85,6 @@
 		
 		% for i in range(nfixed,len(systems)):
 		
-		<input type="hidden" name="system{{i+1}}" value="{{systems[i]}}">
-
 		<div class="container">
 		
 			<h2>Proposition {{i}}</h2>
@@ -107,24 +105,8 @@
 						<label style="color: red; margin-top:5px; margin-bottom:5px;">0: impossible</label>
 						<label style="color: green; margin-top:5px; margin-bottom:5px; float: right;">10: perfectly possible</label>
 					</div>
-					<input type="hidden" id="question{{i}}" name="question{{i}}" value="5;;{{systems[i]}}">
-				</div>
-				<div class="col-xs-12 col-md-7 col-lg-7 vcenter">
-					<blockquote>
-						<audio id="player" controls>
-							<source src="{{samples[i]["path"]}}">
-						</audio>
-					</blockquote>
-				</div>
-				<div class="col-xs-12 col-md-7 col-lg-7 vcenter">
-					<blockquote>
-						<img src="{{samples[i]["image"]}}" alt="Mountain View" style="width:304px;height:228px;">
-					</blockquote>
-				</div>
-				<div class="col-xs-12 col-md-7 col-lg-7 vcenter">
-					<blockquote>
-						<video width="500" height="345" src="{{samples[i]["vidéo"]}}" controls/>
-					</blockquote>
+					<input type="hidden" id="question{{i}}" name="question{{i}}" value="5">
+					<input type="hidden" id="target_question{{i}}" name="target_question{{i}}" value="{{systems[i]}}">
 				</div>
 			</div>
 				
@@ -152,7 +134,7 @@
 					step: 1,
 					slide: function(event, ui) {
 						$("#rate{{i}}").html(ui.value);
-						$("#question{{i}}").attr("value",ui.value+";;{{systems[i]}}");
+						$("#question{{i}}").attr("value",ui.value);
 					}
 				});
 			});

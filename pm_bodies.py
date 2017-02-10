@@ -78,31 +78,55 @@ def testLogin():
 	else:
 		return False
 
+def encode_system(syst) :
+	#proceede to the encoding of your system name here so it won't apear clearly in source code
+	return str(syst)
+
+def decode_system(syst) :
+	#reverse operation of previous one
+	return str(syst)
+
 @app.route('/test')
 def process_test():
 	app_session = bottle.request.environ.get('beaker.session')
-	# The following lines are to be uncommented later
+	#the following lines are to be uncommented later
 	if not testLogin() :
 		bottle.redirect(request.app.config['myapp.APP_PREFIX']+'/login')
 	user = app_session['pseudo']
-	# Proceed to the test
-	# Check if the test isn't finished yet
+	#proceed to the test
+	#check if the test isn't finished yet
 	if model.get_nb_step_user(user) < model.get_nb_step() :
-		# Proceed to a new step
+		#proceed to a new step
+		book = model.get_book_variable_module_name('config')
 		if int(config.nbIntroductionSteps) > 0 and model.get_nb_step_user(user) == 0 and not 'intro_done' in app_session:
 			if not 'nb_intro_passed' in app_session:
 				app_session['nb_intro_passed'] = 0
 			(samples, systems, index) = model.get_intro_sample(user)
-			book = model.get_book_variable_module_name('config')
-			data={'APP_PREFIX':request.app.config['myapp.APP_PREFIX'], 'samples':samples, 'systems':systems, 'nfixed': model.get_nb_position_fixed(), 'index':index, 'user':user, 'introduction': True, 'step': 0, 'totalstep' : model.get_nb_step(), 'progress' : model.get_progress(user), 'config': book}
+			enc_systems = []
+			for s in systems :
+				enc_systems.append(encode_system(s))
+			hidden = '<input type="hidden" name="ref" value="'+str(index)+'">'
+			j=0
+			for s in enc_systems :
+				hidden = hidden + '<input type="hidden" name="system'+str(j)+'" value="'+s+'">'
+				j=j+1
+			data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "samples":samples, "systems":enc_systems, "nfixed": model.get_nb_position_fixed(), "index":index, "user":user, "introduction": True, "step": 0, "totalstep" : model.get_nb_step(), "progress" : model.get_progress(user), "config": book, "hidden_fields": hidden}
 		else:
 			(samples, systems, index) = model.get_test_sample(user)
+			enc_systems = []
+			for s in systems :
+				enc_systems.append(encode_system(s))
+			hidden = '<input type="hidden" name="ref" value="'+str(index)+'">'
+			j=1
+			for s in enc_systems :
+				hidden = hidden + '<input type="hidden" name="system'+str(j)+'" value="'+s+'">'
+				j=j+1
 			book = model.get_book_variable_module_name('config')
-			data={'APP_PREFIX':request.app.config['myapp.APP_PREFIX'], 'samples':samples, 'systems':systems, 'nfixed': model.get_nb_position_fixed(), 'index':index, 'user':user, 'introduction': False, 'step': model.get_nb_step_user(user)+1, 'totalstep' : model.get_nb_step(), 'progress' : model.get_progress(user), 'config': book}
+			data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "samples":samples, "systems":enc_systems, "nfixed": model.get_nb_position_fixed(), "index":index, "user":user, "introduction": False, "step": model.get_nb_step_user(user)+1, "totalstep" : model.get_nb_step(), "progress" : model.get_progress(user), "config": book, "hidden_fields": hidden}
 		return bottle.template('template', data)
 	else :
 		bottle.request.environ.get('beaker.session').delete()
-		return '<p>You have already done this test</p>'
+		return "<p>You have already done this test</p>"
 
 @app.post('/test')
 def process_test_post():
@@ -139,6 +163,45 @@ def process_test_post():
 	else :
 		book = model.get_book_variable_module_name('config')
 		data={'APP_PREFIX':request.app.config['myapp.APP_PREFIX'], 'config': book}
+		bottle.request.environ.get('beaker.session').delete()
+		return bottle.template('completed', data)
+
+@app.post('/test2')
+def process_test_post2():
+	app_session = bottle.request.environ.get('beaker.session')
+	#the following lines are to be uncommented later
+	if not testLogin() :
+		bottle.redirect(request.app.config['myapp.APP_PREFIX']+'/login')
+	user = app_session['pseudo']
+	#get the post data and insert into db
+	if ('intro_done' in app_session and app_session['intro_done'] == True) or model.get_nb_step_user(user) > 0:
+		systems=[]
+		i=1
+		while post_get("system"+str(i))!="" :
+			systems.append(post_get("system"+str(i)))
+			i=i+1
+		answers=[]
+		i=1
+		while post_get("question"+str(i))!="" :
+			content = post_get("question"+str(i))
+			if "target_question"+str(i) not in bottle.request.POST:
+				answers.append({"index": i, "content": content})
+			else :
+				target = post_get("target_question"+str(i))
+				answers.append({"index": i, "content": content, "target": target})
+			i=i+1
+		post_data = {"author":model.get_author(),"user":user,"answers": answers,"systems": systems,"index": post_get("ref")}
+		model.insert_data(post_data)
+	else:
+		app_session['nb_intro_passed'] += 1
+		if (app_session['nb_intro_passed'] >= int(config.nbIntroductionSteps)):
+			app_session['intro_done'] = True
+	#check if the test isn't finished yet
+	if model.get_nb_step_user(user) < model.get_nb_step() :
+		bottle.redirect(request.app.config['myapp.APP_PREFIX']+'/test')
+	else :
+		book = model.get_book_variable_module_name('config')
+		data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "config": book}
 		bottle.request.environ.get('beaker.session').delete()
 		return bottle.template('completed', data)
 
