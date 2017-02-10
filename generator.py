@@ -15,6 +15,7 @@ from pm_bodies import platform_body, model_body
 
 # global variables
 csv_delimiter = ';'
+dictMediaPaths = dict()
 nbSystemToDisplay = 1
 prefix = ''
 tok = ''
@@ -126,16 +127,17 @@ def create_architecture(testName):
 	return mainDirectory, testDirectory, viewsDirectory, staticDirectory, mediaDirectory
 
 
-def generate_config(json, lsPath):
+def generate_config(json, listDataCSV, lsPath):
 	if verbose:
 		print('|-------------------|')
 		print('| config generation |')
 		print('v-------------------v')
 
+	global dictMediaPaths
 	global nbSystemToDisplay
-	global useMedia
 	global prefix
 	global tok
+	global useMedia
 
 	configJson = json
 	if 'configuration' in configJson:
@@ -226,15 +228,38 @@ def generate_config(json, lsPath):
 	config.write('token=\'' + tok + '\'\n')
 	config.write('nbSampleBySystem=\'' + str(nbsbs) + '\'\n')
 
-	# check if each useMedia is in headersCSV
+	# check if each useMedia is in headersCSV AND create hashmap to hode filenames
 	if 'useMedia' in globals():
+		# config.write('hiddenPaths={')
 		for aUseMedia in useMedia:
+			# check if each useMedia is in headersCSV
 			errorInUseMedia = True
 			for aHCSV in checkHeadersCSV:
 				if aHCSV == aUseMedia:
 					errorInUseMedia = False
 			if errorInUseMedia:
 				exit_on_error('value "'+aUseMedia+'" in useMedia is not in headersCSV (in JSON config file)')
+
+		media = [] # liste des colonnes qui représentent des médias
+		for system in listDataCSV:
+			for sample in system:
+				for col_index, col_content in enumerate(sample):
+					if configJson['headersCSV'][col_index].encode('UTF-8') in useMedia:
+						media.append(col_content)
+		charSet = 'azertyuiopqsdfghjklmwxcvbn0123456789_'
+		# dictMediaPaths = dict()
+		config.write('hiddenPaths={')
+		for file in media:
+			filename, fileExtension = os.path.splitext(file)
+			while True:
+				filedir = ''.join(random.choice(charSet) for i in range(20))+fileExtension
+				if filedir not in dictMediaPaths:
+					break
+			config.write('\''+filedir+'\':\''+file+'\',')
+			dictMediaPaths[file]=filedir
+		config.write('\'\':\'\'}') # c'est moche... penser à faire mieux
+	
+	
 	if verbose:
 		print('Done.\n')
 
@@ -276,6 +301,8 @@ def create_db(config, data, listOfName):
 		print('| DB generation |')
 		print('v---------------v')
 
+	global dictMediaPaths
+
 	con = sqlite3.connect(testDirectory + '/data.db')
 	headersCSV = config['configuration']['headersCSV']
 	if not listOfName:
@@ -308,7 +335,10 @@ def create_db(config, data, listOfName):
 						sampleType = 'test'
 					sampleTuple = ()
 					for j in sample:
-						sampleTuple += (j,)
+						if j in dictMediaPaths:
+							sampleTuple += ('./'+dictMediaPaths[j],)
+						else:
+							sampleTuple += (j,)
 					sampleTuple += (sampleType, index + 1, i,)
 					con.execute('INSERT INTO sample('+', '.join(headersCSV)+', type, id_system, sample_index) VALUES ('+'?,'*len(headersCSV)+'?,?,?)', sampleTuple)
 			con.commit()
@@ -318,10 +348,12 @@ def create_db(config, data, listOfName):
 			print('Exception in filling')
 			con.rollback()
 			raise e
+			# exit_on_error('Exception in filling')
 	except Exception as e:
 		print('Exception in creation')
 		con.rollback()
 		raise e
+		# exit_on_error('Exception in creation')
 	finally:
 		con.close()
 	if verbose:
@@ -375,32 +407,46 @@ def copy_media(csv):
 		print('| media file copy |')
 		print('v-----------------v')
 
-	media = []
-	audioFolders = []
+	global dictMediaPaths
+	media = [] # liste des colonnes qui représentent des médias
+	mediaFolders = [] # liste des dossiers qui contiennent des médias
 	regex = '^.*\/'
 	for system in csv:
 		for sample in system:
 			for col_index, col_content in enumerate(sample):
 				if configJSON['configuration']['headersCSV'][col_index].encode('UTF-8') in useMedia:
 					media.append(col_content)
-	for wav in media:
-		search = re.search(regex, wav)
+	for aMedia in media:
+		search = re.search(regex, aMedia)
 		if search:
-			if search.group(0) not in audioFolders:
-				audioFolders.append(search.group(0))
-	for folder in audioFolders:
-		os.makedirs(mediaDirectory + folder)
-	for file in media:
-		filedir = ''
-		search = re.search(regex, file)
-		if search:
-			filedir = search.group(0)
+			if search.group(0) not in mediaFolders:
+				mediaFolders.append(search.group(0))
+	# for folder in mediaFolders:
+	# 	os.makedirs(mediaDirectory + folder)
+	
+	# charSet = 'azertyuiopqsdfghjklmwxcvbn0123456789_'
+	# config.write('hiddenPaths={')
+	for key, value in dictMediaPaths.iteritems():
 		try:
-			shutil.copy(file, mediaDirectory + filedir)
+			shutil.copy(key, mediaDirectory + value)
 		except Exception:
-			exit_on_error(file + ' is not a correct path')
+			exit_on_error(key + ' is not a correct path')
 		if verbose:
-			print(file + '  to  ' + mediaDirectory + filedir)
+			print(key + '  to  ' + mediaDirectory + value)
+	# for file in media:
+	# 	filedir = ''
+	# 	search = re.search(regex, file)
+	# 	if search:
+	# 		filedir = search.group(0)
+	# 		filedir = ''.join(random.choice(charSet) for i in range(20))
+	# 		# config.write('\''+file+'\':\''+filedir+'\'')
+	# 	try:
+	# 		shutil.copy(file, mediaDirectory + filedir)
+	# 	except Exception:
+	# 		exit_on_error(file + ' is not a correct path')
+	# 	if verbose:
+	# 		print(file + '  to  ' + mediaDirectory + filedir)
+	# config.write('}')
 	if verbose:
 		print('Done.\n')
 
@@ -427,8 +473,8 @@ def exit_on_error(fatal_message):
 (inputJSON, lsPath, lsName, inputTemplate, indexTemplate, completedTemplate, exportTemplate) = parse_arguments()
 configJSON = load_json(inputJSON)
 (mainDirectory, testDirectory, viewsDirectory, staticDirectory, mediaDirectory) = create_architecture(configJSON['configuration']['name'])
-generate_config(configJSON, lsPath)
 listDataCSV = load_csv(lsPath, configJSON)
+generate_config(configJSON, listDataCSV, lsPath)
 create_db(configJSON, listDataCSV, lsName)
 copy_templates(inputTemplate, indexTemplate, completedTemplate, exportTemplate)
 create_platform()

@@ -226,11 +226,16 @@ def export_db_ok():
 def send_static(type, filename):
 	return bottle.static_file(filename, root=os.path.join(os.path.dirname(os.path.abspath(__file__)),'static/%s/') % type)
 
-# Access to local static sound files
-@app.route('/media/:media/:syst/:filename#.*#')
-@app.route('/media/:media/./:syst/:filename#.*#')
-def send_static(media, syst, filename):
-	return bottle.static_file(filename, root=os.path.join(os.path.dirname(os.path.abspath(__file__)),'media/%s/') % media+'/'+syst)
+# Access to local static media files
+@app.route('/media/:filename#.*#')
+def send_static(filename):
+	return bottle.static_file(filename, root=os.path.join(os.path.dirname(os.path.abspath(__file__)),'media/'))
+
+# # Access to local static sound files
+# @app.route('/media/:media/:syst/:filename#.*#')
+# @app.route('/media/:media/./:syst/:filename#.*#')
+# def send_static(media, syst, filename):
+# 	return bottle.static_file(filename, root=os.path.join(os.path.dirname(os.path.abspath(__file__)),'media/%s/') % media+'/'+syst)
 
 @app.route('/:badroute')
 def badroute(badroute):
