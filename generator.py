@@ -113,7 +113,7 @@ def create_architecture(testName):
 
 	simpleTestName = re.sub('\W', '_', testName)
 
-	mainDirectory = os.path.join(os.path.dirname(__file__), 'tests/')
+	mainDirectory = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tests/')
 	if not os.path.exists(mainDirectory):
 		os.makedirs(mainDirectory)
 
@@ -127,7 +127,7 @@ def create_architecture(testName):
 	return mainDirectory, testDirectory, viewsDirectory, staticDirectory, mediaDirectory
 
 
-def generate_config(json, listDataCSV, lsPath):
+def generate_config(json, listDataCSV, listPathCSV):
 	if verbose:
 		print('|-------------------|')
 		print('| config generation |')
@@ -179,7 +179,7 @@ def generate_config(json, listDataCSV, lsPath):
 	config.write('# -*- coding: utf-8 -*-\n')
 	config.write('# === CONFIGURATION VARIABLES ===\n')
 	config.write('# Each configuration variable is necessarily a string or a list of string\n')
-	with open(lsPath[0], 'rb') as csvfile:
+	with open(listPathCSV[0], 'rb') as csvfile:
 		spamreader = csv.reader(csvfile, delimiter=';', quotechar='|')
 		nbsbs = sum(1 for row in spamreader)
 	checkHeadersCSV = []
@@ -240,11 +240,11 @@ def generate_config(json, listDataCSV, lsPath):
 				exit_on_error('value "'+aUseMedia+'" in useMedia is not in headersCSV (in JSON config file)')
 
 		media = [] # liste des colonnes qui représentent des médias
-		for system in listDataCSV:
+		for sysIndex, system in enumerate(listDataCSV):
 			for sample in system:
 				for col_index, col_content in enumerate(sample):
 					if configJson['headersCSV'][col_index].encode('UTF-8') in useMedia:
-						media.append(col_content)
+						media.append(os.path.join(os.path.dirname(listPathCSV[sysIndex]),col_content))
 		charSet = 'azertyuiopqsdfghjklmwxcvbn0123456789_'
 		config.write('hiddenPaths={')
 		for file in media:
@@ -419,32 +419,13 @@ def copy_media(csv):
 		if search:
 			if search.group(0) not in mediaFolders:
 				mediaFolders.append(search.group(0))
-	# for folder in mediaFolders:
-	# 	os.makedirs(mediaDirectory + folder)
-	
-	# charSet = 'azertyuiopqsdfghjklmwxcvbn0123456789_'
-	# config.write('hiddenPaths={')
 	for key, value in dictMediaPaths.iteritems():
 		try:
 			shutil.copy(key, mediaDirectory + value)
 		except shutil.Error:
-			exit_on_error(key + ' is not a correct path')
+			exit_on_error('path "'+key + '" in csv is not a correct path')
 		if verbose:
 			print(key + '  to  ' + mediaDirectory + value)
-	# for file in media:
-	# 	filedir = ''
-	# 	search = re.search(regex, file)
-	# 	if search:
-	# 		filedir = search.group(0)
-	# 		filedir = ''.join(random.choice(charSet) for i in range(20))
-	# 		# config.write('\''+file+'\':\''+filedir+'\'')
-	# 	try:
-	# 		shutil.copy(file, mediaDirectory + filedir)
-	# 	except Exception:
-	# 		exit_on_error(file + ' is not a correct path')
-	# 	if verbose:
-	# 		print(file + '  to  ' + mediaDirectory + filedir)
-	# config.write('}')
 	if verbose:
 		print('Done.\n')
 
