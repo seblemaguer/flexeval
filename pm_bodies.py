@@ -221,6 +221,22 @@ def export_db_ok():
 		data={'APP_PREFIX':request.app.config['myapp.APP_PREFIX'], 'config': book, 'error': 'Bad Token !'}
 		return bottle.template('export',data)
 
+@app.route('/exportcsv')
+def export_db():
+	book = model.get_book_variable_module_name('config')
+	data={'APP_PREFIX':request.app.config['myapp.APP_PREFIX'], 'config': book}
+	return bottle.template('export',data)
+
+@app.post('/exportcsv')
+def export_db_ok():
+	#TODO some modifications here
+	if(post_get('token')==model.get_token()):
+		return bottle.static_file('data.db', root=os.path.dirname(os.path.abspath(__file__)),download='data.db')
+	else:
+		book = model.get_book_variable_module_name('config')
+		data={'APP_PREFIX':request.app.config['myapp.APP_PREFIX'], 'config': book, 'error': 'Bad Token !'}
+		return bottle.template('export',data)
+
 # Access to local static files
 @app.route('/static/:type/:filename#.*#')
 def send_static(type, filename):
