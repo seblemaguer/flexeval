@@ -1,5 +1,4 @@
 {
-"configuration": {
 	"name": "Perceptual Test A",
 	"author": "IRISA/Expression",
 	"nbSteps": 8,
@@ -13,5 +12,4 @@
 	"headersCSV": ["text","image","vidéo","path"],
 	"useMedia": ["path","image","vidéo"],
 	"toto": "text-with-àçċèňţ"
-	}
 }

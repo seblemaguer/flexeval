@@ -70,6 +70,9 @@ def parse_arguments():
 	else:
 		lsPath = args.systems
 
+	if verbose:
+		print('')
+
 	return args.json, lsPath, lsName, args.main_tpl, args.index_tpl, args.completed_tpl, args.export_tpl
 
 
@@ -140,10 +143,6 @@ def generate_config(json, listDataCSV, listPathCSV):
 	global useMedia
 
 	configJson = json
-	if 'configuration' in configJson:
-		configJson = configJson['configuration']
-	else:
-		exit_on_error('Invalid JSON file: no configuration object founded')
 	if verbose:
 		print('Configuration JSON:')
 		print(configJson)
@@ -268,7 +267,7 @@ def load_csv(listOfPath, config):
 		print('| loading CSV |')
 		print('v-------------v')
 
-	headersCSV = config['configuration']['headersCSV']
+	headersCSV = config['headersCSV']
 	lsCSV = []
 	for csvPath in listOfPath:
 		if not os.path.isfile(csvPath):
@@ -290,6 +289,7 @@ def load_csv(listOfPath, config):
 	if verbose:
 		print('list of CSV:')
 		print(lsCSV)
+		print('Done.\n')
 	return lsCSV
 
 
@@ -302,7 +302,7 @@ def create_db(config, data, listOfName):
 	global dictMediaPaths
 
 	con = sqlite3.connect(testDirectory + '/data.db')
-	headersCSV = config['configuration']['headersCSV']
+	headersCSV = config['headersCSV']
 	if not listOfName:
 		if verbose:
 			print('No system names defined. Default system names will be created:')
@@ -327,7 +327,7 @@ def create_db(config, data, listOfName):
 			for index, system in enumerate(data):
 				con.execute('INSERT INTO system(name) VALUES (?)', (listOfName[index],))
 				for i, sample in enumerate(system):
-					if i < config['configuration']['nbIntroductionSteps']:
+					if i < config['nbIntroductionSteps']:
 						sampleType = 'intro'
 					else:
 						sampleType = 'test'
@@ -412,7 +412,7 @@ def copy_media(csv):
 	for system in csv:
 		for sample in system:
 			for col_index, col_content in enumerate(sample):
-				if configJSON['configuration']['headersCSV'][col_index].encode('UTF-8') in useMedia:
+				if configJSON['headersCSV'][col_index].encode('UTF-8') in useMedia:
 					media.append(col_content)
 	for aMedia in media:
 		search = re.search(regex, aMedia)
@@ -451,7 +451,7 @@ def exit_on_error(fatal_message):
 
 (inputJSON, lsPath, lsName, inputTemplate, indexTemplate, completedTemplate, exportTemplate) = parse_arguments()
 configJSON = load_json(inputJSON)
-(mainDirectory, testDirectory, viewsDirectory, staticDirectory, mediaDirectory) = create_architecture(configJSON['configuration']['name'])
+(mainDirectory, testDirectory, viewsDirectory, staticDirectory, mediaDirectory) = create_architecture(configJSON['name'])
 listDataCSV = load_csv(lsPath, configJSON)
 generate_config(configJSON, listDataCSV, lsPath)
 create_db(configJSON, listDataCSV, lsName)
