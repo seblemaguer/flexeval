@@ -230,7 +230,6 @@ def generate_config(json, listDataCSV, lsPath):
 
 	# check if each useMedia is in headersCSV AND create hashmap to hode filenames
 	if 'useMedia' in globals():
-		# config.write('hiddenPaths={')
 		for aUseMedia in useMedia:
 			# check if each useMedia is in headersCSV
 			errorInUseMedia = True
@@ -247,7 +246,6 @@ def generate_config(json, listDataCSV, lsPath):
 					if configJson['headersCSV'][col_index].encode('UTF-8') in useMedia:
 						media.append(col_content)
 		charSet = 'azertyuiopqsdfghjklmwxcvbn0123456789_'
-		# dictMediaPaths = dict()
 		config.write('hiddenPaths={')
 		for file in media:
 			filename, fileExtension = os.path.splitext(file)
@@ -429,7 +427,7 @@ def copy_media(csv):
 	for key, value in dictMediaPaths.iteritems():
 		try:
 			shutil.copy(key, mediaDirectory + value)
-		except Exception:
+		except shutil.Error:
 			exit_on_error(key + ' is not a correct path')
 		if verbose:
 			print(key + '  to  ' + mediaDirectory + value)
