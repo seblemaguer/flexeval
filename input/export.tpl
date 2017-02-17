@@ -38,7 +38,8 @@
 								<input type="text" class="form-control" placeholder="Token" name="token" autofocus required>
 							</div>
 							<!-- Change this to a button or input when using this as a form -->
-							<input type="submit" class="btn btn-lg btn-success btn-block" value="Submit">
+							<input type="submit" value="DB" name="type" class="btn btn-lg btn-success btn-block" value="Export DB">
+							<input type="submit" value="CSV" name="type" class="btn btn-lg btn-success btn-block" value="Export CSV">
 						</fieldset>
 					</form>
 					<br>

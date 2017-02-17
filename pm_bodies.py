@@ -1,4 +1,5 @@
 platform_body = """
+import csv
 import bottle
 import json
 import os
@@ -215,23 +216,32 @@ def export_db():
 @app.post('/export')
 def export_db_ok():
 	if(post_get('token')==model.get_token()):
-		return bottle.static_file('data.db', root=os.path.dirname(os.path.abspath(__file__)),download='data.db')
-	else:
-		book = model.get_book_variable_module_name('config')
-		data={'APP_PREFIX':request.app.config['myapp.APP_PREFIX'], 'config': book, 'error': 'Bad Token !'}
-		return bottle.template('export',data)
-
-@app.route('/exportcsv')
-def export_db():
-	book = model.get_book_variable_module_name('config')
-	data={'APP_PREFIX':request.app.config['myapp.APP_PREFIX'], 'config': book}
-	return bottle.template('export',data)
-
-@app.post('/exportcsv')
-def export_db_ok():
-	#TODO some modifications here
-	if(post_get('token')==model.get_token()):
-		return bottle.static_file('data.db', root=os.path.dirname(os.path.abspath(__file__)),download='data.db')
+		if post_get('type') == "DB" :
+			return bottle.static_file('data.db', root=os.path.dirname(os.path.abspath(__file__)),download='data.db')
+		elif post_get('type') == "CSV" :
+			#get the list of systems
+			systems= []
+			for i in range(1,model.get_nb_system_display()+1):
+				systems.append('System num '+str(i))
+			with open('db.csv', 'w') as csvfile:
+				fieldnames = ['user', 'date', 'content', 'content-target', 'sample-index', 'question-index']
+				fieldnames = fieldnames + systems
+				writer = csv.DictWriter(csvfile, delimiter=";", fieldnames=fieldnames)
+				writer.writeheader()
+				#query the answers on the db from the model
+				answers = model.get_answers()
+				sys = model.get_systems()
+				for a in answers :
+					row = {'user': a[1], 'date': a[2], 'content': a[3], 'content-target': sys[int(a[4])], 'sample-index': a[5], 'question-index': a[6]}
+					#'system1': sys[int(a[7])], 'system2': sys[int(a[8])], 'system3': sys[int(a[9])], 'system4': sys[int(a[10])], 'system5': sys[int(a[11])]
+					i=0
+					for s in systems :
+						row[s] = sys[int(a[7+i])]
+						i+=1
+					writer.writerow(row)
+			return bottle.static_file('db.csv', root=os.path.dirname(os.path.abspath(__file__)),download='db.csv')
+		else :
+			return "wrong !"
 	else:
 		book = model.get_book_variable_module_name('config')
 		data={'APP_PREFIX':request.app.config['myapp.APP_PREFIX'], 'config': book, 'error': 'Bad Token !'}
@@ -360,6 +370,25 @@ def get_metadata() :
 		if not b:
 			metadata[str(i)]=getattr(config,i)
 	return metadata
+
+def get_answers() :
+	conn = sqlite3.connect(os.path.join(os.path.dirname(os.path.abspath(__file__)),'data.db'))
+	c = conn.cursor()
+	c.execute('select * from answer')
+	answers = c.fetchall()
+	conn.close()
+	return answers
+
+def get_systems() :
+	conn = sqlite3.connect(os.path.join(os.path.dirname(os.path.abspath(__file__)),'data.db'))
+	c = conn.cursor()
+	c.execute('select * from system')
+	systems = c.fetchall()
+	conn.close()
+	sys={}
+	for s in systems :
+		sys[s[0]] = s[1]
+	return sys
 
 def get_shuffled_list_of_system_ids(nbFixed, connection) :
 	# Build the list of system IDs such that fixed position systems are returned in priority,
