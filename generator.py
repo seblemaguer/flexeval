@@ -222,10 +222,9 @@ def generate_config(json, listDataCSV, listPathCSV):
 	for expected in expectedListConfig:
 		config.write((expected + '=\'' + expectedListConfig[expected] + '\'\n').encode('UTF-8'))
 
-	# write extra config
+	# write token config
 	tok = generate_token()
 	config.write('token=\'' + tok + '\'\n')
-	config.write('nbSampleBySystem=\'' + str(nbsbs) + '\'\n')
 
 	# check if each useMedia is in headersCSV AND create hashmap to hode filenames
 	if 'useMedia' in globals():
