@@ -132,6 +132,8 @@ def process_test():
 @app.post('/test')
 def process_test_post():
 	app_session = bottle.request.environ.get('beaker.session')
+	if not 'nb_intro_passed' in app_session:
+		app_session['nb_intro_passed'] = 0	
 	# The following lines are to be uncommented later
 	if not testLogin() :
 		bottle.redirect(request.app.config['myapp.APP_PREFIX']+'/login')
@@ -324,7 +326,7 @@ def get_nb_questions() :
 def get_author():
 	# Get it from config.py
 	return config.author
-	
+
 def get_questions_type():
 	# Get the text of questions as an array
 	return config.questionsType
@@ -393,7 +395,7 @@ def get_systems() :
 def get_shuffled_list_of_system_ids(nbFixed, connection) :
 	# Build the list of system IDs such that fixed position systems are returned in priority,
 	# then systems with lowest number of answers in priority.
-	
+
 	# Get system IDs
 	connection.execute('select id_system, sum(nb_processed) as nb_answers from sample group by id_system order by id asc')
 	ids = connection.fetchall()
@@ -421,7 +423,7 @@ def get_shuffled_list_of_system_ids(nbFixed, connection) :
 	for group in gather_similar_systems(higher_votes_ids):
 		random.shuffle(group)
 		shuffled_higher_votes_ids += group
-	
+
 	return [line[0] for line in fixed_ids+low_votes_ids+shuffled_higher_votes_ids];
 
 def get_test_sample(user) :
@@ -449,16 +451,16 @@ def get_test_sample(user) :
 	index = validlist[random.randint(0,len(validlist)-1)][0]
 	samples=[]
 	systems=[]
-	
+
 	n = get_nb_position_fixed()
-	
+
 	shuffled_ids = get_shuffled_list_of_system_ids(n, c)
-	
+
 	headers = get_headers()
 	queryh = ''
 	for i in range(len(headers)) :
 		queryh = queryh+headers[i]
-		if i<len(headers)-1 : 
+		if i<len(headers)-1 :
 			queryh=queryh+', '
 	c.execute('select nb_processed, id_system, '+ queryh +' from sample where sample_index='+str(index)+' order by nb_processed asc')
 	systs = {}
@@ -478,7 +480,7 @@ def get_test_sample(user) :
 			headerIndex+=1
 		samples.append(t)
 		i=i+1
-	
+
 	if n<=0:
 		r = random.random()
 		random.shuffle(samples, lambda: r)
@@ -497,7 +499,7 @@ def get_test_sample(user) :
 		samples=sa1
 		sy1.extend(sy2)
 		systems=sy1
-	
+
 	conn.close()
 	return (samples, systems, index)
 
@@ -517,16 +519,16 @@ def get_intro_sample(user) :
 			index = r[0]
 	samples=[]
 	systems=[]
-	
+
 	n = get_nb_position_fixed()
-	
+
 	shuffled_ids = get_shuffled_list_of_system_ids(n, c)
-	
+
 	headers = get_headers()
 	queryh = ''
 	for i in range(len(headers)) :
 		queryh = queryh+headers[i]
-		if i<len(headers)-1 : 
+		if i<len(headers)-1 :
 			queryh=queryh+', '
 	c.execute('select nb_processed, id_system, '+ queryh +' from sample where sample_index='+str(index)+' order by nb_processed asc')
 	systs = {}
@@ -576,7 +578,7 @@ def insert_data(data) :
 	c.execute('select * from answer where user="'+str(data['user'])+'" and sample_index="'+str(data['index'])+'"')
 	res = c.fetchall()
 	if len(res) == 0: # Check if the response is not already in the database
-	
+
 		sysval=''
 		systs=''
 		for i in range(int(config.nbSystemDisplayed)):

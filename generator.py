@@ -237,25 +237,29 @@ def generate_config(json, listDataCSV, listPathCSV):
 			if errorInUseMedia:
 				exit_on_error('value "'+aUseMedia+'" in useMedia is not in headersCSV (in JSON config file)')
 
+
+		charSet = 'azertyuiopqsdfghjklmwxcvbn0123456789_'
+		config.write('hiddenPaths={')
+
 		media = [] # liste des colonnes qui représentent des médias
 		for sysIndex, system in enumerate(listDataCSV):
 			for sample in system:
 				for col_index, col_content in enumerate(sample):
 					if configJson['headersCSV'][col_index].encode('UTF-8') in useMedia:
-						media.append(os.path.join(os.path.dirname(listPathCSV[sysIndex]),col_content))
-		charSet = 'azertyuiopqsdfghjklmwxcvbn0123456789_'
-		config.write('hiddenPaths={')
-		for file in media:
-			filename, fileExtension = os.path.splitext(file)
-			while True:
-				filedir = ''.join(random.choice(charSet) for i in range(20))+fileExtension
-				if filedir not in dictMediaPaths:
-					break
-			config.write('\''+filedir+'\':\''+file+'\',')
-			dictMediaPaths[file]=filedir
+						fname = os.path.join(os.path.dirname(listPathCSV[sysIndex]),col_content)
+						media.append(fname)
+
+						filename, fileExtension = os.path.splitext(fname)
+						while True:
+							filedir = ''.join(random.choice(charSet) for i in range(20))+fileExtension
+							if filedir not in dictMediaPaths:
+								break
+						config.write('\''+filedir+'\':\''+col_content+'\',')
+						dictMediaPaths[col_content]=(fname,filedir)
+
 		config.write('\'\':\'\'}') # c'est moche... penser à faire mieux
-	
-	
+
+
 	if verbose:
 		print('Done.\n')
 
@@ -281,6 +285,8 @@ def load_csv(listOfPath, config):
 			for i, row in enumerate(spamreader):
 				if verbose:
 					print(', '.join(row))
+				for x in range(len(row)):
+					row[x] = row[x].decode("UTF-8")#unicode(row[x].__str__(), errors="replace")
 				if len(row)!=len(headersCSV):
 					exit_on_error(csvPath +' is not valid: columns number is not correct at line '+str(i+1))
 				data.append(row)
@@ -332,8 +338,9 @@ def create_db(config, data, listOfName):
 						sampleType = 'test'
 					sampleTuple = ()
 					for j in sample:
+						print(j)
 						if j in dictMediaPaths:
-							sampleTuple += ('./'+dictMediaPaths[j],)
+							sampleTuple += ('./'+dictMediaPaths[j][1],)
 						else:
 							sampleTuple += (j,)
 					sampleTuple += (sampleType, index + 1, i,)
@@ -420,11 +427,11 @@ def copy_media(csv):
 				mediaFolders.append(search.group(0))
 	for key, value in dictMediaPaths.iteritems():
 		try:
-			shutil.copy(key, mediaDirectory + value)
+			shutil.copy(value[0], os.path.join(mediaDirectory, value[1]))
 		except shutil.Error:
-			exit_on_error('path "'+key + '" in csv is not a correct path')
+			exit_on_error('path "'+ value[0] + '" in csv is not a correct path')
 		if verbose:
-			print(key + '  to  ' + mediaDirectory + value)
+			print(value[0] + '  to  ' + os.path.join(mediaDirectory, value[1]))
 	if verbose:
 		print('Done.\n')
 
