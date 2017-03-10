@@ -9,6 +9,8 @@ import sqlite3
 import sys
 from bottle import request
 from beaker.middleware import SessionMiddleware
+
+sys.path.insert(0,os.path.dirname(os.path.abspath(__file__)))
 import config
 import model
 
@@ -133,7 +135,7 @@ def process_test():
 def process_test_post():
 	app_session = bottle.request.environ.get('beaker.session')
 	if not 'nb_intro_passed' in app_session:
-		app_session['nb_intro_passed'] = 0	
+		app_session['nb_intro_passed'] = 0
 	# The following lines are to be uncommented later
 	if not testLogin() :
 		bottle.redirect(request.app.config['myapp.APP_PREFIX']+'/login')
@@ -282,6 +284,8 @@ model_body="""import os
 import sqlite3
 from datetime import date, datetime
 import random
+
+sys.path.insert(0,os.path.dirname(os.path.abspath(__file__)))
 import config
 import itertools
 import operator
