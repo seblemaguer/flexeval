@@ -227,7 +227,7 @@ def export_db_ok():
 			systems= []
 			for i in range(1,model.get_nb_system_display()+1):
 				systems.append('System num '+str(i))
-			with open('db.csv', 'w') as csvfile:
+			with open(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'db.csv'), 'w') as csvfile:
 				fieldnames = ['user', 'date', 'content', 'content target', 'sample index', 'question index']
 				fieldnames = fieldnames + systems
 				writer = csv.DictWriter(csvfile, delimiter=";", fieldnames=fieldnames)
@@ -236,7 +236,11 @@ def export_db_ok():
 				answers = model.get_answers()
 				sys = model.get_systems()
 				for a in answers :
-					row = {'user': a[1], 'date': a[2], 'content': a[3], 'content target': sys[int(a[4])], 'sample index': a[5], 'question index': a[6]}
+                                        ct_value = ""
+                                        if not a[4] is None:
+                                                ct_value = sys[int(a[4])]
+
+                                        row = {'user': a[1], 'date': a[2], 'content': a[3], 'content target': ct_value, 'sample index': a[5], 'question index': a[6]}
 					#'system1': sys[int(a[7])], 'system2': sys[int(a[8])], 'system3': sys[int(a[9])], 'system4': sys[int(a[10])], 'system5': sys[int(a[11])]
 					i=0
 					for s in systems :
