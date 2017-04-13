@@ -38,6 +38,7 @@ def parse_arguments():
 	parser.add_argument('-e', '--export-tpl', help='export page template file', type=str, required=True)
 	parser.add_argument('-s', '--systems', nargs='+', help='list of systems', type=str, required=True)
 	parser.add_argument('-n', '--name', help='allow names after each systems (default: no names)', action='store_true')
+	parser.add_argument('-o', '--output-dir', help='output directory where the generated test will be stored (default: generated tests are in ./tests/)')
 	parser.add_argument('-v', '--verbose', help='verbose mode', action='store_true')
 	parser.add_argument('--csv-delimiter', help='define csv delimiter (default: ;)', default=';')
 	args = parser.parse_args()
@@ -69,11 +70,18 @@ def parse_arguments():
 			exit_on_error('bad number of arguments (in systems argument)')
 	else:
 		lsPath = args.systems
+		
+	testDirectory = ''
+	if args.output_dir:
+		testDirectory = os.path.normpath(args.output_dir)
+	else:
+		simpleTestName = re.sub('\W', '_', configJSON['name'])
+		testDirectory = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tests/', simpleTestName)
 
 	if verbose:
 		print('')
 
-	return args.json, lsPath, lsName, args.main_tpl, args.index_tpl, args.completed_tpl, args.export_tpl
+	return args.json, testDirectory, lsPath, lsName, args.main_tpl, args.index_tpl, args.completed_tpl, args.export_tpl
 
 
 def load_json(JSONfile):
@@ -91,7 +99,7 @@ def load_json(JSONfile):
 	return data
 
 
-def create_architecture(testName):
+def create_architecture(testDirectory):
 	if verbose:
 		print('|-----------------------|')
 		print('| architecture creation |')
@@ -103,23 +111,23 @@ def create_architecture(testName):
 		i = 0
 		while os.path.exists(dir):
 			if verbose:
-				print('Folder ' + dir + ' already exist.')
+				print('Folder ' + dir + ' already exists.')
 			i += 1
 			dir = std_dir + '_' + str(i)
 		if i > 0:
-			addWarning('Folder ' + std_dir + ' already exist.')
+			addWarning('Folder ' + std_dir + ' already exists.')
 			addWarning('New folder at ' + dir)
 		os.makedirs(dir)
 		if verbose:
 			print(dir + ' created.')
 		return dir + '/'
+	
+	simpleTestName = os.path.basename(testDirectory)
+	mainDirectory = os.path.dirname(testDirectory) + os.sep
 
-	simpleTestName = re.sub('\W', '_', testName)
-
-	mainDirectory = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tests/')
 	if not os.path.exists(mainDirectory):
 		os.makedirs(mainDirectory)
-
+	
 	testDirectory = create_dir(mainDirectory, simpleTestName)
 	viewsDirectory = create_dir(testDirectory, 'views')
 	staticDirectory = create_dir(testDirectory, 'static')
@@ -455,9 +463,9 @@ def exit_on_error(fatal_message):
 	sys.exit('ABORT: '+fatal_message)
 
 
-(inputJSON, lsPath, lsName, inputTemplate, indexTemplate, completedTemplate, exportTemplate) = parse_arguments()
+(inputJSON, testDirectory, lsPath, lsName, inputTemplate, indexTemplate, completedTemplate, exportTemplate) = parse_arguments()
 configJSON = load_json(inputJSON)
-(mainDirectory, testDirectory, viewsDirectory, staticDirectory, mediaDirectory) = create_architecture(configJSON['name'])
+(mainDirectory, testDirectory, viewsDirectory, staticDirectory, mediaDirectory) = create_architecture(testDirectory)
 listDataCSV = load_csv(lsPath, configJSON)
 generate_config(configJSON, listDataCSV, lsPath)
 create_db(configJSON, listDataCSV, lsName)
