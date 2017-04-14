@@ -9,10 +9,11 @@
 
 	<!-- Bootstrap Core CSS -->
 	<link href="{{APP_PREFIX}}/static/css/bootstrap.min.css" rel="stylesheet">
-	<link href="{{APP_PREFIX}}/static/css/tests.css" rel="stylesheet">
+	<link href="{{APP_PREFIX}}/static/css/perceval.css" rel="stylesheet">
 	<link href="{{APP_PREFIX}}/static/css/jquery-ui.min.css" rel="stylesheet">
 	<script src="{{APP_PREFIX}}/static/js/jquery.js"></script>
 	<script src="{{APP_PREFIX}}/static/js/jquery-ui.min.js"></script>
+	<script src="{{APP_PREFIX}}/static/js/perceval.js"></script>
 
 	<style>
 		.rate {
@@ -38,14 +39,13 @@
 	<nav class="navbar navbar-default" style="margin-bottom:0">
 		<div class="container-fluid">
 			<ul class="nav navbar-nav navbar-right">
-				<!-- <li><a>{{config["toto"]}}</a></li> -->
 				<li><a>{{user}}</a></li>
 				<li><a href="{{APP_PREFIX}}/logout">Logout</a></li>
 			</ul>
 		</div>
 	</nav>
 	
-	<form role="form" action="{{APP_PREFIX}}/test2" method="POST">
+	<form role="form" action="{{APP_PREFIX}}/answer" method="POST">
 	
 		<div class="jumbotron text-center">
 			<h2><b>Context:</b> Imagine someone tells the text below during a spontaneous conversation.</h2>
@@ -157,5 +157,19 @@
 	<br><br><br>
 
 </body>
+
+<footer class="footer">
+	<div class="container" style="padding: 0px;">
+		<div class="row">
+			<div class="col-md-offset-3 col-md-3">
+				<img src="{{APP_PREFIX}}/static/img/logo_irisa.png" class="img-responsive center-block" alt="IRISA lab" width="50%" height="50%">
+			</div>
+			<div class="col-md-3">
+				<img src="{{APP_PREFIX}}/static/img/logo_expression.png" class="img-responsive center-block" alt="Expression team" width="67%" height="67%">
+			</div>
+		</div>
+				<p class="text-muted" style="letter-spacing: 2px;">Powered by PercEval.</p>
+	</div>
+</footer>
 
 </html>

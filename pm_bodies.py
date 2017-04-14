@@ -113,7 +113,7 @@ def process_test():
 			for s in enc_systems :
 				hidden = hidden + '<input type="hidden" name="system'+str(j)+'" value="'+s+'">'
 				j=j+1
-			data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "samples":samples, "systems":enc_systems, "nfixed": model.get_nb_position_fixed(), "index":index, "user":user, "introduction": True, "step": 0, "totalstep" : model.get_nb_step(), "progress" : model.get_progress(user), "config": book, "hidden_fields": hidden}
+			data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "samples":samples, "systems":enc_systems, "nfixed": model.get_nb_position_fixed(), "index":index, "user":user, "introduction": True, "step": app_session['nb_intro_passed']+1, "totalstep" : config.nbIntroductionSteps, "progress" : model.get_progress(user), "config": book, "hidden_fields": hidden}
 		else:
 			(samples, systems, index) = model.get_test_sample(user)
 			enc_systems = []
@@ -171,8 +171,8 @@ def process_test_post():
 		bottle.request.environ.get('beaker.session').delete()
 		return bottle.template('completed', data)
 
-@app.post('/test2')
-def process_test_post2():
+@app.post('/answer')
+def process_answers():
 	app_session = bottle.request.environ.get('beaker.session')
 	#the following lines are to be uncommented later
 	if not testLogin() :
@@ -368,7 +368,7 @@ def get_nb_step_user(user) :
 
 def get_progress(user):
 	# Return the ratio of steps achieved by the user over the total number of steps
-	return 100*get_nb_step_user(user)/get_nb_step()
+	return 100*(get_nb_step_user(user)+1)/get_nb_step()
 
 def get_metadata() :
 	# Get it from config.py

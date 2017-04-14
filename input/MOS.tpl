@@ -29,6 +29,7 @@
 	<nav class="navbar navbar-warning">
 		<div class="container-fluid bg-warning">
 			<div class="row">
+			
 				<div class="col-md-offset-2 col-md-8 vcenter text-center">
 					<h3><span class="alert-warning vcenter text-center" style="vertical-align: super;">This is an introduction step.</span></h3>
 	% else:
@@ -51,7 +52,7 @@
 		{{!hidden_fields}}
 		
 		<div class="container">
-			<h1 class="text-center">Étape {{step}}/{{totalstep}}</h1>
+			<h1 class="text-center">Step {{step}}/{{totalstep}}</h1>
 		</div>
 		<div class="container">
 			<div class="col-md-4 col-md-offset-4">
@@ -64,69 +65,88 @@
 		
 		<br>
 
+		% q = 1
+		
 		<div class="jumbotron text-center">
 			<h2></h2>
-			<h2><b>Question :</b> Between A and B, which sample do you prefer in terms of <strong>quality</strong>?</h2>
+			<h2><b>Question :</b> Between 1 and 5, how do you judge the <strong>quality</strong> of the following sample?</h2>
 			<br>
 		</div>
 		
 		<br>
 		
+		% for i in range(nfixed,len(systems)):
 		<div class="answer container">
-			<div id="radio">
-			<table class="table table-compact table-hover">
-<!-- 			Table header -->
-				<thead>
-					<tr>
-					<th></td>
-					<th></td>
-					<th class="text-center"><h4><strong>Preference</strong></h4></td>
-					</tr>
-				</thead>
-			
-				% for i in range(nfixed,len(systems)):
+		<center>
+			<table>
+			<tr>
+			<td align="right" class="vcenter">
+				<h3><strong>Sample</strong></h3>
+			</td>
+			<td align="center">
+				<h3><audio id="player" controls>
+					<source src="{{!samples[i]["speech"]}}">
+				</audio></h3>
+			</td>
+			</tr>
+			<tr>
+			<td align="right">
+				<h3><strong>Rate</strong></h3>
+			</td>
+			<td>
+				<div class="vcenter text-center" style="margin-top: 20px; padding: 50px;">
+					<h4>
+						<div style="width: 350px;">
+							<div id="slider{{q}}">
+								<div id="rate{{q}}" class="ui-slider-handle">3</div>
+							</div>
+							<label style="color: red; margin-top:5px; margin-bottom:5px; float: left;">1: Bad</label>
+							<label style="color: green; margin-top:5px; margin-bottom:5px; float: right;">5: Excellent</label>
+							<input type="hidden" id="question{{q}}" name="question{{q}}" value="3">
+							<input type="hidden" id="target_question{{q}}" name="target_question{{q}}" value="{{systems[i]}}">
+							<input type="hidden" name="system{{i+1}}" value="{{systems[i]}}">
+						</div>
+					</h4>
+				</div>
+			</td>
+			</tr>
 				
-<!-- 			Sample i -->
-				<tr class="question1" id="choice{{i+1}}">
-					<td class="text-right">
-						<h3>Échantillon {{str(unichr(65+i))}}</h3>
-					</td>
-					<td class="text-center">
-						<h3><audio id="player" controls>
-							<source src="{{!samples[i]["speech"]}}">
-						</audio></h3>
-					</td>
-					<td class="text-center">
-						<h3><input type=radio name="question1" value="{{i+1}}"><label for="{{i+1}}"></label></h3>
-					</td>
-				</tr>
 				
 				
-				<input type="hidden" name="system{{i+1}}" value="{{systems[i]}}">
-				
+			<style>
+				#rate{{q}} {
+					width: 3em;
+					height: 1.6em;
+					top: 50%;
+					font-weight: bold;
+					margin-top: -.8em;
+					text-align: center;
+					line-height: 1.6em;
+				}
+			</style>
+
+			<script>
+				$(function() {
+					$("#slider{{q}}").slider({
+						range: "min",
+						value:3,
+						min: 1,
+						max: 5,
+						step: 1,
+						slide: function(event, ui) {
+							$("#rate{{q}}").html(ui.value);
+							$("#question{{q}}").attr("value",ui.value);
+						}
+					});
+				});
+			</script>
+
 				%end
-				
-<!-- 				No preference -->
-				<tr class="question1" id="choiceNone">
-					<td class="text-right">
-					<h3>No preference</h3>
-					</td>
-					<td class="text-center">
-					</td>
-					<td class="text-center">
-						<h3><input type=radio name="question1" value="None"><label for="None"></label></h3>
-					</td>
-				</tr>
 
 			</table>
+			</center>
 			</div>
 		</div>
-		
-		<script type="text/javascript">
-		$(document).ready(function(){
-			$('input[type="radio"]').click(highlight_selected_choice);
-		});
-		</script>
 		
 		<br>
 		

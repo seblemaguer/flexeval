@@ -51,7 +51,7 @@
 		{{!hidden_fields}}
 		
 		<div class="container">
-			<h1 class="text-center">Étape {{step}}/{{totalstep}}</h1>
+			<h1 class="text-center">Step {{step}}/{{totalstep}}</h1>
 		</div>
 		<div class="container">
 			<div class="col-md-4 col-md-offset-4">
@@ -64,59 +64,83 @@
 		
 		<br>
 
+		% q = 1
+		
 		<div class="jumbotron text-center">
 			<h2></h2>
-			<h2><b>Question :</b> Between A and B, which sample do you prefer in terms of <strong>quality</strong>?</h2>
+			<h2><b>Question :</b> Between 1 and 5, how do you judge the <strong>quality</strong> of the following samples?</h2>
 			<br>
 		</div>
 		
 		<br>
 		
 		<div class="answer container">
-			<div id="radio">
+			<div>
 			<table class="table table-compact table-hover">
 <!-- 			Table header -->
 				<thead>
 					<tr>
-					<th></td>
-					<th></td>
-					<th class="text-center"><h4><strong>Preference</strong></h4></td>
+					<th class="text-center"><h4><strong>Sample</strong></h4></td>
+					<th class="text-center"><h4><strong>Rate</strong></h4></td>
 					</tr>
 				</thead>
 			
 				% for i in range(nfixed,len(systems)):
 				
 <!-- 			Sample i -->
-				<tr class="question1" id="choice{{i+1}}">
-					<td class="text-right">
-						<h3>Échantillon {{str(unichr(65+i))}}</h3>
-					</td>
+				<tr>
 					<td class="text-center">
 						<h3><audio id="player" controls>
 							<source src="{{!samples[i]["speech"]}}">
 						</audio></h3>
 					</td>
 					<td class="text-center">
-						<h3><input type=radio name="question1" value="{{i+1}}"><label for="{{i+1}}"></label></h3>
+						<h4>
+							<div class="answer">
+								<div id="slider{{q}}">
+									<div id="rate{{q}}" class="ui-slider-handle">3</div>
+								</div>
+								<label style="color: red; margin-top:5px; margin-bottom:5px; float: left;">1: Bad</label>
+								<label style="color: green; margin-top:5px; margin-bottom:5px; float: right;">5: Excellent</label>
+							</div>
+							<input type="hidden" id="question{{q}}" name="question{{q}}" value="3">
+							<input type="hidden" id="target_question{{q}}" name="target_question{{q}}" value="{{systems[i]}}">
+							<input type="hidden" name="system{{i+1}}" value="{{systems[i]}}">
+						</h4>
 					</td>
 				</tr>
 				
 				
-				<input type="hidden" name="system{{i+1}}" value="{{systems[i]}}">
 				
+				<style>
+					#rate{{q}} {
+						width: 3em;
+						height: 1.6em;
+						top: 50%;
+						font-weight: bold;
+						margin-top: -.8em;
+						text-align: center;
+						line-height: 1.6em;
+					}
+				</style>
+
+				<script>
+					$(function() {
+						$("#slider{{q}}").slider({
+							range: "min",
+							value:3,
+							min: 1,
+							max: 5,
+							step: 1,
+							slide: function(event, ui) {
+								$("#rate{{q}}").html(ui.value);
+								$("#question{{q}}").attr("value",ui.value);
+							}
+						});
+					});
+				</script>
+
 				%end
-				
-<!-- 				No preference -->
-				<tr class="question1" id="choiceNone">
-					<td class="text-right">
-					<h3>No preference</h3>
-					</td>
-					<td class="text-center">
-					</td>
-					<td class="text-center">
-						<h3><input type=radio name="question1" value="None"><label for="None"></label></h3>
-					</td>
-				</tr>
 
 			</table>
 			</div>
