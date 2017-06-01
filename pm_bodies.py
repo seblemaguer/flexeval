@@ -113,7 +113,7 @@ def process_test():
 			for s in enc_systems :
 				hidden = hidden + '<input type="hidden" name="system'+str(j)+'" value="'+s+'">'
 				j=j+1
-			data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "samples":samples, "systems":enc_systems, "nfixed": model.get_nb_position_fixed(), "index":index, "user":user, "introduction": True, "step": app_session['nb_intro_passed']+1, "totalstep" : config.nbIntroductionSteps, "progress" : model.get_progress(user), "config": book, "hidden_fields": hidden}
+			data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "samples":samples, "systems":enc_systems, "nfixed": model.get_nb_position_fixed(), "index":index, "user":user, "introduction": True, "step": app_session['nb_intro_passed']+1, "totalstep" : int(config.nbIntroductionSteps), "progress" : (100*(app_session['nb_intro_passed']+1))/int(config.nbIntroductionSteps), "config": book, "hidden_fields": hidden}
 		else:
 			(samples, systems, index) = model.get_test_sample(user)
 			enc_systems = []
@@ -346,11 +346,6 @@ def get_name():
 	# Get it from config.py
 	return config.name
 
-def get_nb_sample_by_system() :
-	# Return the number of samples of each system
-	# Get it from config.py
-	return int(config.nbSampleBySystem)
-
 def get_nb_step() :
 	# Return the number of step required on a test
 	# Get it from config.py
@@ -404,7 +399,7 @@ def get_shuffled_list_of_system_ids(nbFixed, connection) :
 	# then systems with lowest number of answers in priority.
 
 	# Get system IDs
-	connection.execute('select id_system, sum(nb_processed) as nb_answers from sample group by id_system order by id asc')
+	connection.execute('select id_system, sum(nb_processed) as nb_answers from sample group by id_system order by __id__ asc')
 	ids = connection.fetchall()
 	# Keep fixed systems aside
 	fixed_ids = []

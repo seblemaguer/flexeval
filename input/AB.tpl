@@ -66,7 +66,7 @@
 
 		<div class="jumbotron text-center">
 			<h2></h2>
-			<h2><b>Question :</b> Between A and B, which sample do you prefer in terms of <strong>quality</strong>?</h2>
+			<h2><b>Question:</b> Between A and B, which sample do you prefer in terms of <strong>quality</strong>?</h2>
 			<br>
 		</div>
 		
@@ -138,13 +138,13 @@
 			<div class="row">
 				<div class="col-md-6 col-md-offset-3">
 <!-- 					Submit button -->
-					<input id="next" type="submit" class="btn btn-lg btn-success btn-block pull-right disabled" value="Next" style="margin-top: 20px;">
+					<input id="next" type="submit" class="btn btn-lg btn-success btn-block pull-right" value="Next" style="margin-top: 20px;" disabled>
 					
 <!-- 					Auto-enabling -->
 					<script>
 					jQuery('body').on('pause', 'audio', function(e) {
 						if (all_played('audio')) {
-							$('input[type="submit"]').removeClass("disabled");
+							$('input[type="submit"]').prop("disabled", false);
 						}
 					});
 					</script>
@@ -211,17 +211,21 @@
 
 </body>
 
-<footer class="footer">
+<footer>
 	<div class="container" style="padding: 0px;">
 		<div class="row">
 			<div class="col-md-offset-3 col-md-3">
-				<img src="{{APP_PREFIX}}/static/img/logo_irisa.png" class="img-responsive center-block" alt="IRISA lab" width="50%" height="50%">
+				<a href="http://www.irisa.fr" target="_blank">
+					<img src="{{APP_PREFIX}}/static/img/logo_irisa.png" class="img-responsive center-block" alt="IRISA lab" width="50%" height="50%">
+				</a>
 			</div>
 			<div class="col-md-3">
-				<img src="{{APP_PREFIX}}/static/img/logo_expression.png" class="img-responsive center-block" alt="Expression team" width="67%" height="67%">
+				<a href="http://www-expression.irisa.fr" target="_blank">
+					<img src="{{APP_PREFIX}}/static/img/logo_expression.png" class="img-responsive center-block" alt="Expression team" width="67%" height="67%">
+				</a>
 			</div>
 		</div>
-				<p class="text-muted" style="letter-spacing: 2px;">Powered by PercEval.</p>
+		<p class="text-muted text-center" style="letter-spacing: 2px; line-height: 40px;">Powered by PercEval.</p>
 	</div>
 </footer>
 

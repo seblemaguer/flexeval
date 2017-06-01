@@ -8,7 +8,6 @@
 	"nbQuestions": 1,
 	"nbFixedPosition": 0,
 	"nbIntroductionSteps": 2,
-	"nbSampleBySystem": 10,
 	"headersCSV": ["text", "image", "video", "speech"],
 	"useMedia": ["speech"]
 }

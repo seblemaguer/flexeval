@@ -19,7 +19,7 @@
 	width: 100%;
 	text-align: center;
 	/* Set the fixed height of the footer here */
-	line-height: 50px; /* Vertically center the text there */
+	line-height: 40px; /* Vertically center the text there */
 }
 
 #introductionModal {

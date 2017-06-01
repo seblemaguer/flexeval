@@ -165,7 +165,7 @@ def generate_config(json, listDataCSV, listPathCSV):
 	expectedListConfig = {
 	'useMedia':'[]'
 	}
-	mandatoryStringConfig = ['nbSampleBySystem', 'nbSteps', 'nbSystemDisplayed', 'nbQuestions', 'prefix']
+	mandatoryStringConfig = ['nbSteps', 'nbSystemDisplayed', 'nbQuestions', 'prefix']
 	mandatoryListConfig = ['headersCSV']
 
 	def writeString(var1):
@@ -330,9 +330,9 @@ def create_db(config, data, listOfName):
 		columns = ''
 		for header in headersCSV:
 			columns += '`'+header+'` TEXT NOT NULL,'
-		con.execute('CREATE TABLE system (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `name` TEXT NOT NULL)')
-		con.execute('CREATE TABLE sample (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, '+columns+' `type` TEXT NOT NULL, `id_system` TEXT NOT NULL , `sample_index` INTEGER NOT NULL, `nb_processed` INTEGER NOT NULL DEFAULT 0, FOREIGN KEY(id_system) REFERENCES system(id))')
-		con.execute('CREATE TABLE answer (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `user` TEXT NOT NULL, `date` TEXT NOT NULL, `content` TEXT NOT NULL, `content_target` TEXT, `sample_index` INTEGER NOT NULL, `question_index` INTEGER NOT NULL,'+systs+' )')
+		con.execute('CREATE TABLE system (`__id__` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `name` TEXT NOT NULL)')
+		con.execute('CREATE TABLE sample (`__id__` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, '+columns+' `type` TEXT NOT NULL, `id_system` TEXT NOT NULL , `sample_index` INTEGER NOT NULL, `nb_processed` INTEGER NOT NULL DEFAULT 0, FOREIGN KEY(id_system) REFERENCES system(__id__))')
+		con.execute('CREATE TABLE answer (`__id__` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `user` TEXT NOT NULL, `date` TEXT NOT NULL, `content` TEXT NOT NULL, `content_target` TEXT, `sample_index` INTEGER NOT NULL, `question_index` INTEGER NOT NULL,'+systs+' )')
 		con.commit()
 		if verbose:
 			print('Database successfully created.')
@@ -435,7 +435,8 @@ def copy_media(csv):
 				mediaFolders.append(search.group(0))
 	for key, value in dictMediaPaths.iteritems():
 		try:
-			shutil.copy(value[0], os.path.join(mediaDirectory, value[1]))
+			if value[0]:
+				shutil.copy(value[0], os.path.join(mediaDirectory, value[1]))
 		except shutil.Error:
 			exit_on_error('path "'+ value[0] + '" in csv is not a correct path')
 		if verbose:
