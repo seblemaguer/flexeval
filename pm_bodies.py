@@ -101,7 +101,7 @@ def process_test():
 	if model.get_nb_step_user(user) < model.get_nb_step() :
 		#proceed to a new step
 		book = model.get_book_variable_module_name('config')
-		if int(config.nbIntroductionSteps) > 0 and model.get_nb_step_user(user) == 0 and not 'intro_done' in app_session:
+		if model.get_nb_intro_steps() > 0 and model.get_nb_step_user(user) == 0 and not 'intro_done' in app_session:
 			if not 'nb_intro_passed' in app_session:
 				app_session['nb_intro_passed'] = 0
 			(samples, systems, index) = model.get_intro_sample(user)
@@ -111,9 +111,9 @@ def process_test():
 			hidden = '<input type="hidden" name="ref" value="'+str(index)+'">'
 			j=0
 			for s in enc_systems :
-				hidden = hidden + '<input type="hidden" name="system'+str(j)+'" value="'+s+'">'
+				hidden = hidden + '<input type="hidden" name="real_system_'+str(j)+'" value="'+s+'">'
 				j=j+1
-			data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "samples":samples, "systems":enc_systems, "nfixed": model.get_nb_position_fixed(), "index":index, "user":user, "introduction": True, "step": app_session['nb_intro_passed']+1, "totalstep" : int(config.nbIntroductionSteps), "progress" : (100*(app_session['nb_intro_passed']+1))/int(config.nbIntroductionSteps), "config": book, "hidden_fields": hidden}
+			data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "samples":samples, "systems":enc_systems, "nfixed": model.get_nb_position_fixed(), "index":index, "user":user, "introduction": True, "step": app_session['nb_intro_passed']+1, "totalstep" : model.get_nb_intro_steps(), "progress" : (100*(app_session['nb_intro_passed']+1))/model.get_nb_intro_steps(), "config": book, "hidden_fields": hidden}
 		else:
 			(samples, systems, index) = model.get_test_sample(user)
 			enc_systems = []
@@ -122,7 +122,7 @@ def process_test():
 			hidden = '<input type="hidden" name="ref" value="'+str(index)+'">'
 			j=1
 			for s in enc_systems :
-				hidden = hidden + '<input type="hidden" name="system'+str(j)+'" value="'+s+'">'
+				hidden = hidden + '<input type="hidden" name="real_system_'+str(j)+'" value="'+s+'">'
 				j=j+1
 			book = model.get_book_variable_module_name('config')
 			data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "samples":samples, "systems":enc_systems, "nfixed": model.get_nb_position_fixed(), "index":index, "user":user, "introduction": False, "step": model.get_nb_step_user(user)+1, "totalstep" : model.get_nb_step(), "progress" : model.get_progress(user), "config": book, "hidden_fields": hidden}
@@ -133,47 +133,15 @@ def process_test():
 
 @app.post('/test')
 def process_test_post():
-	app_session = bottle.request.environ.get('beaker.session')
-	if not 'nb_intro_passed' in app_session:
-		app_session['nb_intro_passed'] = 0
-	# The following lines are to be uncommented later
-	if not testLogin() :
-		bottle.redirect(request.app.config['myapp.APP_PREFIX']+'/login')
-	user = app_session['pseudo']
-	# Get the post data and insert into db
-	if ('intro_done' in app_session and app_session['intro_done'] == True) or model.get_nb_step_user(user) > 0:
-		systems=[]
-		i=1
-		while post_get('system'+str(i))!='' :
-			systems.append(post_get('system'+str(i)))
-			i=i+1
-		answers=[]
-		i=1
-		while post_get('question'+str(i))!='' :
-			ct = post_get('question'+str(i)).split(';;')
-			if len(ct)==1:
-				answers.append({'index': i, 'content': ct[0]})
-			else :
-				answers.append({'index': i, 'content': ct[0], 'target': ct[1]})
-			i=i+1
-		post_data = {'author':model.get_author(),'user':user,'answers': answers,'systems': systems,'index': post_get('ref')}
-		model.insert_data(post_data)
-	else:
-		app_session['nb_intro_passed'] += 1
-		if (app_session['nb_intro_passed'] >= int(config.nbIntroductionSteps)):
-			app_session['intro_done'] = True
-	# Check if the test isn't finished yet
-	if model.get_nb_step_user(user) < model.get_nb_step() :
-		bottle.redirect(request.app.config['myapp.APP_PREFIX']+'/test')
-	else :
-		book = model.get_book_variable_module_name('config')
-		data={'APP_PREFIX':request.app.config['myapp.APP_PREFIX'], 'config': book}
-		bottle.request.environ.get('beaker.session').delete()
-		return bottle.template('completed', data)
+	process_answers()
 
 @app.post('/answer')
 def process_answers():
 	app_session = bottle.request.environ.get('beaker.session')
+	if not 'nb_intro_passed' in app_session:
+		app_session['nb_intro_passed'] = 0
+	if model.get_nb_intro_steps() == 0 and app_session['nb_intro_passed'] == 0:
+		app_session['intro_done'] = True
 	#the following lines are to be uncommented later
 	if not testLogin() :
 		bottle.redirect(request.app.config['myapp.APP_PREFIX']+'/login')
@@ -181,25 +149,29 @@ def process_answers():
 	#get the post data and insert into db
 	if ('intro_done' in app_session and app_session['intro_done'] == True) or model.get_nb_step_user(user) > 0:
 		systems=[]
-		i=1
-		while post_get("system"+str(i))!="" :
-			systems.append(post_get("system"+str(i)))
-			i=i+1
+
+		s=1
+		while post_get("real_system_"+str(s))!="" :
+			systems.append(post_get("real_system_"+str(s)))
+			s=s+1
 		answers=[]
+
 		i=1
-		while post_get("question"+str(i))!="" :
-			content = post_get("question"+str(i))
-			if "target_question"+str(i) not in bottle.request.POST:
-				answers.append({"index": i, "content": content})
-			else :
-				target = post_get("target_question"+str(i))
-				answers.append({"index": i, "content": content, "target": target})
+		while post_get("answer_"+str(i))!="" :
+			system_index = 1
+			question_index = 1
+			content = post_get("answer_"+str(i))
+			if "system_index_"+str(i) in bottle.request.POST:
+				system_index = post_get("system_index_"+str(i))
+			if "question_index_"+str(i) in bottle.request.POST:
+				question_index = post_get("question_index_"+str(i))
+			answers.append({"system_index": system_index, "question_index": question_index, "content": content})
 			i=i+1
-		post_data = {"author":model.get_author(),"user":user,"answers": answers,"systems": systems,"index": post_get("ref")}
+		post_data = {"author":model.get_author(),"user":user,"answers": answers,"systems": systems,"sample_index": post_get("ref")}
 		model.insert_data(post_data)
 	else:
 		app_session['nb_intro_passed'] += 1
-		if (app_session['nb_intro_passed'] >= int(config.nbIntroductionSteps)):
+		if (app_session['nb_intro_passed'] >= model.get_nb_intro_steps()):
 			app_session['intro_done'] = True
 	#check if the test isn't finished yet
 	if model.get_nb_step_user(user) < model.get_nb_step() :
@@ -209,7 +181,6 @@ def process_answers():
 		data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "config": book}
 		bottle.request.environ.get('beaker.session').delete()
 		return bottle.template('completed', data)
-
 
 @app.route('/export')
 def export_db():
@@ -228,7 +199,7 @@ def export_db_ok():
 			for i in range(1,model.get_nb_system_display()+1):
 				systems.append('System num '+str(i))
 			with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'db.csv'), 'w') as csvfile:
-				fieldnames = ['user', 'date', 'content', 'content target', 'sample index', 'question index']
+				fieldnames = ['user', 'date', 'content', 'system index', 'sample index', 'question index']
 				fieldnames = fieldnames + systems
 				writer = csv.DictWriter(csvfile, delimiter=";", fieldnames=fieldnames)
 				writer.writeheader()
@@ -239,7 +210,7 @@ def export_db_ok():
 					ct_value = ""
 					if not a[4] is None:
 							ct_value = sys[int(a[4])]
-					row = {'user': a[1], 'date': a[2], 'content': a[3], 'content target': ct_value, 'sample index': a[5], 'question index': a[6]}
+					row = {'user': a[1], 'date': a[2], 'content': a[3], 'system index': ct_value, 'sample index': a[5], 'question index': a[6]}
 					#'system1': sys[int(a[7])], 'system2': sys[int(a[8])], 'system3': sys[int(a[9])], 'system4': sys[int(a[10])], 'system5': sys[int(a[11])]
 					i=0
 					for s in systems :
@@ -321,6 +292,9 @@ def get_headers():
 def get_media():
 	return config.useMedia
 
+def get_nb_intro_steps():
+	return int(config.nbIntroductionSteps)
+
 def get_nb_position_fixed():
 	return int(config.nbFixedPosition)
 
@@ -359,7 +333,7 @@ def get_nb_step_user(user) :
 	res = c.fetchall()
 	conn.close()
 	nbans = res[0][0]
-	return int(nbans/get_nb_questions())
+	return int(nbans/(get_nb_questions()*get_nb_system_display()))
 
 def get_progress(user):
 	# Return the ratio of steps achieved by the user over the total number of steps
@@ -577,7 +551,7 @@ def insert_data(data) :
 	conn = sqlite3.connect(os.path.join(os.path.dirname(os.path.abspath(__file__)),'data.db'))
 	c = conn.cursor()
 
-	c.execute('select * from answer where user="'+str(data['user'])+'" and sample_index="'+str(data['index'])+'"')
+	c.execute('select * from answer where user="'+str(data['user'])+'" and sample_index="'+str(data['sample_index'])+'"')
 	res = c.fetchall()
 	if len(res) == 0: # Check if the response is not already in the database
 
@@ -591,18 +565,14 @@ def insert_data(data) :
 				systs=systs+','
 		# Update the number of time processed for the samples
 		for sy in data['systems'] :
-			c.execute('select nb_processed from sample where id_system="'+sy+'" and sample_index='+str(data['index']))
+			c.execute('select nb_processed from sample where id_system="'+sy+'" and sample_index='+str(data['sample_index']))
 			n = c.fetchall()[0][0]
-			c.execute('update sample set nb_processed='+str(n+1)+' where id_system="'+sy+'" and sample_index='+str(data['index']))
+			c.execute('update sample set nb_processed='+str(n+1)+' where id_system="'+sy+'" and sample_index='+str(data['sample_index']))
 		conn.commit()
 		answers = data['answers']
 		for answer in answers :
-			if 'target' in answer :
-				val = '"'+str(data['user'])+'","'+str(now)+'","'+answer['content']+'","'+str(data['index'])+'","'+str(answer['index'])+'","'+answer['target']+'",'+sysval
-				c.execute("insert into answer(user,date,content,sample_index,question_index,content_target,"+systs+") values ("+val+")")
-			else :
-				val = '"'+str(data['user'])+'","'+str(now)+'","'+answer['content']+'","'+str(data['index'])+'","'+str(answer['index'])+'",'+sysval
-				c.execute('insert into answer(user,date,content,sample_index,question_index,'+systs+') values ('+val+')')
+			val = '"'+str(data['user'])+'","'+str(now)+'","'+answer['content']+'","'+str(data['sample_index'])+'","'+str(answer['question_index'])+'","'+answer['system_index']+'",'+sysval
+			c.execute("insert into answer(user,date,content,sample_index,question_index,system_index,"+systs+") values ("+val+")")
 		conn.commit()
 	conn.close()
 """

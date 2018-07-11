@@ -332,7 +332,7 @@ def create_db(config, data, listOfName):
 			columns += '`'+header+'` TEXT NOT NULL,'
 		con.execute('CREATE TABLE system (`__id__` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `name` TEXT NOT NULL)')
 		con.execute('CREATE TABLE sample (`__id__` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, '+columns+' `type` TEXT NOT NULL, `id_system` TEXT NOT NULL , `sample_index` INTEGER NOT NULL, `nb_processed` INTEGER NOT NULL DEFAULT 0, FOREIGN KEY(id_system) REFERENCES system(__id__))')
-		con.execute('CREATE TABLE answer (`__id__` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `user` TEXT NOT NULL, `date` TEXT NOT NULL, `content` TEXT NOT NULL, `content_target` TEXT, `sample_index` INTEGER NOT NULL, `question_index` INTEGER NOT NULL,'+systs+' )')
+		con.execute('CREATE TABLE answer (`__id__` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `user` TEXT NOT NULL, `date` TEXT NOT NULL, `content` TEXT NOT NULL, `system_index` TEXT, `sample_index` INTEGER NOT NULL, `question_index` INTEGER NOT NULL,'+systs+' )')
 		con.commit()
 		if verbose:
 			print('Database successfully created.')
