@@ -102,9 +102,9 @@
 							</div>
 							<label style="color: red; margin-top:5px; margin-bottom:5px; float: left;">1: Bad</label>
 							<label style="color: green; margin-top:5px; margin-bottom:5px; float: right;">5: Excellent</label>
-							<input type="hidden" id="question{{q}}" name="question{{q}}" value="3">
-							<input type="hidden" id="target_question{{q}}" name="target_question{{q}}" value="{{systems[i]}}">
-							<input type="hidden" name="system{{i+1}}" value="{{systems[i]}}">
+							<input type="hidden" id="answer_{{q}}" name="answer_{{q}}" value="3">
+							<input type="hidden" id="question_index_{{q}}" name="question_index_{{q}}" value="{{systems[i]}}">
+							<input type="hidden" name="system_index_{{i+1}}" value="{{systems[i]}}">
 						</div>
 					</h4>
 				</div>
@@ -135,7 +135,7 @@
 						step: 1,
 						slide: function(event, ui) {
 							$("#rate{{q}}").html(ui.value);
-							$("#question{{q}}").attr("value",ui.value);
+							$("#answer_{{q}}").attr("value",ui.value);
 						}
 					});
 				});

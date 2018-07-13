@@ -87,7 +87,7 @@
 				% for i in range(nfixed,len(systems)):
 				
 <!-- 			Sample i -->
-				<tr class="question1" id="choice{{i+1}}">
+				<tr class="answer_1" id="choice{{i+1}}">
 					<td class="text-right">
 						<h3>Échantillon {{str(unichr(65+i))}}</h3>
 					</td>
@@ -97,24 +97,24 @@
 						</audio></h3>
 					</td>
 					<td class="text-center">
-						<h3><input type=radio name="question1" value="{{i+1}}"><label for="{{i+1}}"></label></h3>
+						<h3><input type=radio name="answer_1" value="{{i+1}}"><label for="{{i+1}}"></label></h3>
 					</td>
 				</tr>
 				
 				
-				<input type="hidden" name="system{{i+1}}" value="{{systems[i]}}">
+				<input type="hidden" name="system_index_{{i+1}}" value="{{systems[i]}}">
 				
 				%end
 				
 <!-- 				No preference -->
-				<tr class="question1" id="choiceNone">
+				<tr class="answer_1" id="choiceNone">
 					<td class="text-right">
 					<h3>No preference</h3>
 					</td>
 					<td class="text-center">
 					</td>
 					<td class="text-center">
-						<h3><input type=radio name="question1" value="None"><label for="None"></label></h3>
+						<h3><input type=radio name="answer_1" value="None"><label for="None"></label></h3>
 					</td>
 				</tr>
 

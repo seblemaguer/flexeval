@@ -304,6 +304,11 @@ def get_nb_system_display() :
 def get_nb_questions() :
 	return int(config.nbQuestions)
 
+def get_nb_questions_per_step() :
+	# Get the total number of questions required on a step
+	return int(config.nbQuestionsPerStep)
+
+
 def get_author():
 	# Get it from config.py
 	return config.author
@@ -333,7 +338,8 @@ def get_nb_step_user(user) :
 	res = c.fetchall()
 	conn.close()
 	nbans = res[0][0]
-	return int(nbans/(get_nb_questions()*get_nb_system_display()))
+	#return int(nbans/(get_nb_questions()*get_nb_system_display()))
+	return int(nbans/(get_nb_questions_per_step()))
 
 def get_progress(user):
 	# Return the ratio of steps achieved by the user over the total number of steps

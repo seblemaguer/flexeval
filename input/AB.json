@@ -6,6 +6,7 @@
 	"description": "Example of preference test",
 	"prefix": "",
 	"nbQuestions": 1,
+	"nbQuestionsPerStep": 1,
 	"nbFixedPosition": 0,
 	"nbIntroductionSteps": 1,
 	"headersCSV": ["text", "image", "video", "speech"],
