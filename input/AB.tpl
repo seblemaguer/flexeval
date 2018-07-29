@@ -18,9 +18,9 @@
 
 	<style>
 
-		
+
 	</style>
-	
+
 </head>
 
 <body>
@@ -29,39 +29,39 @@
 	<nav class="navbar navbar-warning">
 		<div class="container-fluid bg-warning">
 			<div class="row">
-				<div class="col-md-offset-2 col-md-8 vcenter text-center">
+				<div class="col-sm-offset-1 col-sm-8 col-md-offset-2 col-md-8 vcenter text-center">
 					<h3><span class="alert-warning vcenter text-center" style="vertical-align: super;">This is an introduction step.</span></h3>
 	% else:
 	<nav class="navbar navbar-default">
 		<div class="container-fluid">
 			<div class="row">
-				<div class="col-md-offset-2 col-md-8 vcenter text-center">
+				<div class="col-sm-offset-1 col-sm-8 col-md-offset-2 col-md-8 vcenter text-center">
 					<h3><span class="text-center">&nbsp;</span></h3>
 	% end
 				</div>
-				<div class="col-md-1 vcenter">
+				<div class="col-sm-2 col-md-1 vcenter">
 					<a class="label label-danger" href="{{APP_PREFIX}}/logout">&#10060; Logout ({{user}})</a>
 				</div>
 			</div>
 		</div>
 	</nav>
-	
+
 	<form role="form" action="{{APP_PREFIX}}/answer" method="POST">
-	
+
 		{{!hidden_fields}}
-		
+
 		<div class="container">
 			<h1 class="text-center">Étape {{step}}/{{totalstep}}</h1>
 		</div>
 		<div class="container">
-			<div class="col-md-4 col-md-offset-4">
+			<div class="col-sm-4 col-sm-offset-4 col-md-4 col-md-offset-4">
 				<div class="progress" style="height: 2px">
 					<div class="progress-bar" role="progressbar" aria-valuenow="{{progress}}" aria-valuemin="0" aria-valuemax="100" style="width:{{progress}}%">
 					</div>
 				</div>
 			</div>
 		</div>
-		
+
 		<br>
 
 		<div class="jumbotron text-center">
@@ -69,9 +69,9 @@
 			<h2><b>Question:</b> Between A and B, which sample do you prefer in terms of <strong>quality</strong>?</h2>
 			<br>
 		</div>
-		
+
 		<br>
-		
+
 		<div class="answer container">
 			<div id="radio">
 			<table class="table table-compact table-hover">
@@ -83,9 +83,9 @@
 					<th class="text-center"><h4><strong>Preference</strong></h4></td>
 					</tr>
 				</thead>
-			
+
 				% for i in range(nfixed,len(systems)):
-				
+
 <!-- 			Sample i -->
 				<tr class="answer_1" id="choice{{i+1}}">
 					<td class="text-right">
@@ -100,12 +100,12 @@
 						<h3><input type=radio name="answer_1" value="{{i+1}}"><label for="{{i+1}}"></label></h3>
 					</td>
 				</tr>
-				
-				
+
+
 				<input type="hidden" name="system_index_{{i+1}}" value="{{systems[i]}}">
-				
+
 				%end
-				
+
 <!-- 				No preference -->
 				<tr class="answer_1" id="choiceNone">
 					<td class="text-right">
@@ -121,25 +121,25 @@
 			</table>
 			</div>
 		</div>
-		
+
 		<script type="text/javascript">
 		$(document).ready(function(){
 			$('input[type="radio"]').click(highlight_selected_choice);
 		});
 		</script>
-		
+
 		<br>
-		
+
 		<input type="hidden" name="ref" value="{{index}}">
 
-		
+
 		<br>
 		<div class="container">
 			<div class="row">
-				<div class="col-md-6 col-md-offset-3">
+				<div class="col-sm-6 col-sm-offset-3 col-md-6 col-md-offset-3">
 <!-- 					Submit button -->
 					<input id="next" type="submit" class="btn btn-lg btn-success btn-block pull-right" value="Next" style="margin-top: 20px;" disabled>
-					
+
 <!-- 					Auto-enabling -->
 					<script>
 					jQuery('body').on('pause', 'audio', function(e) {
@@ -151,13 +151,13 @@
 				</div>
 			</div>
 		</div>
-	
+
 	</form>
 
 	<br><br><br>
 
-	
-	
+
+
 <!-- ============= Modals ============= -->
 
 
@@ -214,12 +214,12 @@
 <footer>
 	<div class="container" style="padding: 0px;">
 		<div class="row">
-			<div class="col-md-offset-3 col-md-3">
+			<div class="col-sm-offset-2 col-sm-4 col-md-offset-3 col-md-3">
 				<a href="http://www.irisa.fr" target="_blank">
 					<img src="{{APP_PREFIX}}/static/img/logo_irisa.png" class="img-responsive center-block" alt="IRISA lab" width="50%" height="50%">
 				</a>
 			</div>
-			<div class="col-md-3">
+			<div class="col-sm-4 col-md-3">
 				<a href="http://www-expression.irisa.fr" target="_blank">
 					<img src="{{APP_PREFIX}}/static/img/logo_expression.png" class="img-responsive center-block" alt="Expression team" width="67%" height="67%">
 				</a>

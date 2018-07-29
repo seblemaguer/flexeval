@@ -18,9 +18,9 @@
 
 	<style>
 
-		
+
 	</style>
-	
+
 </head>
 
 <body>
@@ -29,28 +29,27 @@
 	<nav class="navbar navbar-warning">
 		<div class="container-fluid bg-warning">
 			<div class="row">
-			
-				<div class="col-md-offset-2 col-md-8 vcenter text-center">
+				<div class="col-sm-offset-1 col-sm-8 col-md-offset-2 col-md-8 vcenter text-center">
 					<h3><span class="alert-warning vcenter text-center" style="vertical-align: super;">This is an introduction step.</span></h3>
 	% else:
 	<nav class="navbar navbar-default">
 		<div class="container-fluid">
 			<div class="row">
-				<div class="col-md-offset-2 col-md-8 vcenter text-center">
+				<div class="col-sm-offset-1 col-sm-8 col-md-offset-2 col-md-8 vcenter text-center">
 					<h3><span class="text-center">&nbsp;</span></h3>
 	% end
 				</div>
-				<div class="col-md-1 vcenter">
+				<div class="col-sm-2 col-md-1 vcenter">
 					<a class="label label-danger" href="{{APP_PREFIX}}/logout">&#10060; Logout ({{user}})</a>
 				</div>
 			</div>
 		</div>
 	</nav>
-	
+
 	<form role="form" action="{{APP_PREFIX}}/answer" method="POST">
-	
+
 		{{!hidden_fields}}
-		
+
 		<div class="container">
 			<h1 class="text-center">Step {{step}}/{{totalstep}}</h1>
 		</div>
@@ -62,19 +61,19 @@
 				</div>
 			</div>
 		</div>
-		
+
 		<br>
 
 		% q = 1
-		
+
 		<div class="jumbotron text-center">
 			<h2></h2>
 			<h2><b>Question:</b> Between 1 and 5, how do you judge the <strong>quality</strong> of the following sample?</h2>
 			<br>
 		</div>
-		
+
 		<br>
-		
+
 		% for i in range(nfixed,len(systems)):
 		<div class="answer container">
 		<center>
@@ -110,9 +109,9 @@
 				</div>
 			</td>
 			</tr>
-				
-				
-				
+
+
+
 			<style>
 				#rate{{q}} {
 					width: 3em;
@@ -147,19 +146,19 @@
 			</center>
 			</div>
 		</div>
-		
+
 		<br>
-		
+
 		<input type="hidden" name="ref" value="{{index}}">
 
-		
+
 		<br>
 		<div class="container">
 			<div class="row">
-				<div class="col-md-6 col-md-offset-3">
+				<div class="col-sm-6 col-sm-offset-3 col-md-6 col-md-offset-3">
 <!-- 					Submit button -->
 					<input id="next" type="submit" class="btn btn-lg btn-success btn-block pull-right" value="Next" style="margin-top: 20px;" disabled>
-					
+
 <!-- 					Auto-enabling -->
 					<script>
 					jQuery('body').on('pause', 'audio', function(e) {
@@ -171,13 +170,13 @@
 				</div>
 			</div>
 		</div>
-	
+
 	</form>
 
 	<br><br><br>
 
-	
-	
+
+
 <!-- ============= Modals ============= -->
 
 
@@ -234,18 +233,18 @@
 <footer>
 	<div class="container" style="padding: 0px;">
 		<div class="row">
-			<div class="col-md-offset-3 col-md-3">
+			<div class="col-sm-offset-2 col-sm-4 col-md-offset-3 col-md-3">
 				<a href="http://www.irisa.fr" target="_blank">
 					<img src="{{APP_PREFIX}}/static/img/logo_irisa.png" class="img-responsive center-block" alt="IRISA lab" width="50%" height="50%">
 				</a>
 			</div>
-			<div class="col-md-3">
+			<div class="col-sm-4 col-md-3">
 				<a href="http://www-expression.irisa.fr" target="_blank">
 					<img src="{{APP_PREFIX}}/static/img/logo_expression.png" class="img-responsive center-block" alt="Expression team" width="67%" height="67%">
 				</a>
 			</div>
 		</div>
-		<p class="text-muted text-center" style="letter-spacing: 2px; line-height: 40px;">Powered by PercEval.</p>
+		<p class="text-muted text-center" style="letter-spacing: 2px; line-height: 40px;"><a href="https://gitlab.inria.fr/dlolive/PercepEval" target="_blank">Powered by PercEval.</a></p>
 	</div>
 </footer>
 

@@ -1,14 +1,15 @@
 {
-	"name": "Perceptual Test: MUSHRA Disfluencies",
-	"author": "IRISA/Expression",
 	"nbSteps": 2,
 	"nbSystemDisplayed": 3,
-	"description": "Prototype of MUSHRA Disfluencies",
 	"prefix": "",
-	"nbQuestions": 2,
-	"nbQuestionsPerStep": 6,
+	"headersCSV": ["text", "image", "video","speech"],
+
+"__OPTIONAL__": "Optional parmeters are below",
+	"name": "Perceptual Test: MUSHRA Test with Multiple Question",
+	"author": "IRISA/Expression",
+	"description": "Prototype of MUSHRA test with multiple questions",
 	"nbFixedPosition": 0,
 	"nbIntroductionSteps":2,
-	"headersCSV": ["text", "image", "video","speech"],
+	"nbQuestionsPerStep": 2,
 	"useMedia": ["speech"]
 }

@@ -1,13 +1,14 @@
 {
-	"name": "Perceptual Test: AB Test Example",
-	"author": "IRISA/Expression",
 	"nbSteps": 4,
 	"nbSystemDisplayed": 2,
-	"description": "Example of preference test",
 	"prefix": "",
-	"nbQuestions": 1,
+	"headersCSV": ["text", "image", "video", "speech"],
+
+"//OPTIONAL": "__Optional parmeters are below__",
+	"name": "Perceptual Test: MUSHRA Test Example",
+	"author": "IRISA/Expression",
+	"description": "Example of MUSHRA-like test",
 	"nbFixedPosition": 0,
 	"nbIntroductionSteps": 2,
-	"headersCSV": ["text", "image", "video", "speech"],
 	"useMedia": ["speech"]
 }

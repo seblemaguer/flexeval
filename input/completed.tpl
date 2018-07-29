@@ -44,21 +44,21 @@
 			</div>
 		</div>
 	</div>
-	
-	<div class="container">
+
+	<div class="container" style="padding: 0px;">
 		<div class="row">
-			<div class="col-md-offset-3 col-md-3">
+			<div class="col-sm-offset-2 col-sm-4 col-md-offset-3 col-md-3">
 				<a href="http://www.irisa.fr" target="_blank">
 					<img src="{{APP_PREFIX}}/static/img/logo_irisa.png" class="img-responsive center-block" alt="IRISA lab">
 				</a>
 			</div>
-			<div class="col-md-3">
+			<div class="col-sm-4 col-md-3">
 				<a href="http://www-expression.irisa.fr" target="_blank">
 					<img src="{{APP_PREFIX}}/static/img/logo_expression.png" class="img-responsive center-block" alt="Expression team">
 				</a>
 			</div>
 		</div>
-		<p class="text-muted text-center" style="letter-spacing: 2px; line-height: 50px;">Powered by PercEval.</p>
+		<p class="text-muted text-center" style="letter-spacing: 2px; line-height: 40px;"><a href="https://gitlab.inria.fr/dlolive/PercepEval" target="_blank">Powered by PercEval.</a></p>
 	</div>
 
 	</body>

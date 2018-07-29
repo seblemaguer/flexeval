@@ -70,7 +70,7 @@ def parse_arguments():
 			exit_on_error('bad number of arguments (in systems argument)')
 	else:
 		lsPath = args.systems
-		
+
 	testDirectory = ''
 	if args.output_dir:
 		testDirectory = os.path.normpath(args.output_dir)
@@ -121,13 +121,13 @@ def create_architecture(testDirectory):
 		if verbose:
 			print(dir + ' created.')
 		return dir + '/'
-	
+
 	simpleTestName = os.path.basename(testDirectory)
 	mainDirectory = os.path.dirname(testDirectory) + os.sep
 
 	if not os.path.exists(mainDirectory):
 		os.makedirs(mainDirectory)
-	
+
 	testDirectory = create_dir(mainDirectory, simpleTestName)
 	viewsDirectory = create_dir(testDirectory, 'views')
 	staticDirectory = create_dir(testDirectory, 'static')
@@ -165,7 +165,7 @@ def generate_config(json, listDataCSV, listPathCSV):
 	expectedListConfig = {
 	'useMedia':'[]'
 	}
-	mandatoryStringConfig = ['nbSteps', 'nbSystemDisplayed', 'nbQuestions', 'prefix']
+	mandatoryStringConfig = ['nbSteps', 'nbSystemDisplayed', 'prefix']
 	mandatoryListConfig = ['headersCSV']
 
 	def writeString(var1):

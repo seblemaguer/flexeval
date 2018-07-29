@@ -301,14 +301,6 @@ def get_nb_position_fixed():
 def get_nb_system_display() :
 	return int(config.nbSystemDisplayed)
 
-def get_nb_questions() :
-	return int(config.nbQuestions)
-
-def get_nb_questions_per_step() :
-	# Get the total number of questions required on a step
-	return int(config.nbQuestionsPerStep)
-
-
 def get_author():
 	# Get it from config.py
 	return config.author
@@ -334,12 +326,11 @@ def get_nb_step_user(user) :
 	# Return the number of step made by a user on the test
 	conn = sqlite3.connect(os.path.join(os.path.dirname(os.path.abspath(__file__)),'data.db'))
 	c = conn.cursor()
-	c.execute('select count(*) from answer where user="'+user+'"')
+	# c.execute('select count(*) from answer where user="'+user+'"')
+	c.execute('select count(distinct(sample_index)) from answer where user="'+user+'"')
 	res = c.fetchall()
 	conn.close()
-	nbans = res[0][0]
-	#return int(nbans/(get_nb_questions()*get_nb_system_display()))
-	return int(nbans/(get_nb_questions_per_step()))
+	return int(res[0][0])
 
 def get_progress(user):
 	# Return the ratio of steps achieved by the user over the total number of steps
