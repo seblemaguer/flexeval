@@ -168,18 +168,23 @@ def generate_config(json, listDataCSV, listPathCSV):
 	mandatoryStringConfig = ['nbSteps', 'nbSystemDisplayed', 'prefix']
 	mandatoryListConfig = ['headersCSV']
 
-	def writeString(var1):
-		if type(configJson[var1]) == unicode:
-			config.write((var1 + '=\'' + configJson[var1] + '\'\n').encode('UTF-8'))
+	def writeString(keyValue):
+		if type(configJson[keyValue]) == unicode:
+			config.write((keyValue + ' = \'' + configJson[keyValue] + '\'\n').encode('UTF-8'))
 		else:
-			config.write(var1 + '=\'' + str(configJson[var1]) + '\'\n')
-	def writeList(var2):
-		config.write(var2 + '=[')
-		for i,elt in enumerate(configJson[var2]):
+			config.write(keyValue + ' = \'' + str(configJson[keyValue]) + '\'\n')
+	def writeList(keyValue):
+		config.write(keyValue + ' = [')
+		for i,elt in enumerate(configJson[keyValue]):
 			config.write('\''+elt.encode('UTF-8')+'\'')
-			if i < len(configJson[var2])-1:
+			if i < len(configJson[keyValue])-1:
 				config.write(',')
 		config.write(']\n')
+	def writeVerbatim(keyValue):
+		if type(configJson[keyValue]) == unicode:
+			config.write((keyValue + ' = ' + configJson[keyValue] + '\n').encode('UTF-8'))
+		else:
+			config.write(keyValue + ' = ' + str(configJson[keyValue]) + '\n')
 
 	# config file writing
 	config = open(testDirectory + '/config.py', 'w')
@@ -204,7 +209,10 @@ def generate_config(json, listDataCSV, listPathCSV):
 			writeList(var)
 			del expectedListConfig[var]
 		else:
-			writeString(var)
+			if type(configJson[var]) == str or type(configJson[var]) == unicode:
+				writeString(var)
+			else:
+				writeVerbatim(var)
 
 		# special cases
 		if var == 'nbSystemDisplayed':

@@ -1,0 +1,37 @@
+
+{
+	"nbSteps": 3,
+	"nbSystemDisplayed": 2,
+	"prefix": "",
+	"headersCSV": ["id_v","text","video"],
+
+"__OPTIONAL__": "Optional parmeters are below",
+	"name": "TEST VIDEO LSF",
+	"author": "IRISA/Expression",
+	"description": "Prototype of TEST N°1 VIDEO LSF",
+	"nbFixedPosition": 0,
+	"nbIntroductionSteps":1,
+	"nbQuestionsPerStep": 2,
+	"questionTitle": ["Question 1", 
+						"Question 2",
+							"Question 3",
+								"Question 4",
+									"Question 5"],
+	"questionDetail": ["Details Question 1",
+							"Details Question 2",
+								"Details Question 3",
+									"Details Question 4", 
+										"Details Question 5"],
+	"questionBgColor": ["#FBEDE9", "#E9FBEE", "#FBF8E9", "#F7E9FB", "#E9F5FB"],
+	"explanationTextColor": ["#D64400", "#4CB800", "#978602", "#AA31ED", "#14B4E6"],
+	"instructionsDetail": [" Explications pour la Question 1 ", 
+						" Explications pour la Question 2 ",
+							" Explications pour la Question 3 ",
+								" Explications pour la Question 4 ",
+									" Explications pour la Question 5 "],
+	"sliderMinValue": "1",
+	"sliderMaxValue": "5",
+	"sliderMinMaxValue": 3,	
+	"useMedia": ["video"]
+
+}
