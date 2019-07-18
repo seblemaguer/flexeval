@@ -1,4 +1,5 @@
 platform_body = """
+
 import csv
 import bottle
 import json
@@ -38,11 +39,19 @@ def badroute():
 	data={'APP_PREFIX':request.app.config['myapp.APP_PREFIX'], 'config': book}
 	return bottle.template('index', data)
 
+@app.route('/alreadyregister/<key>/<val>')
+def async_rec_user_register_verification(key,val):
+	res= model.already_in_user_table(key,val)
+	return str(res)
+
+@app.route('/login')
+
 @app.route('/login')
 @app.post('/login')
 def login():
 	mail = post_get('email')
 	pattern='(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)'
+	print(mail)
 	if not re.match(pattern,mail) :
 		book = model.get_book_variable_module_name('config')
 		data={'APP_PREFIX':request.app.config['myapp.APP_PREFIX'], 'config': book, 'error' : 'Invalid email address'}
@@ -50,7 +59,13 @@ def login():
 	app_session = bottle.request.environ.get('beaker.session')
 	app_session['logged_in'] = True
 	app_session['pseudo'] = mail
+
+
+	model.generate_user_table(request.forms.dict)
+	model.populate_user_table(request.forms.dict,"email")
+
 	bottle.redirect(request.app.config['myapp.APP_PREFIX']+'/test')
+
 
 @app.route('/logout')
 @app.post('/logout')
@@ -263,6 +278,80 @@ sys.path.insert(0,os.path.dirname(os.path.abspath(__file__)))
 import config
 import itertools
 import operator
+
+################
+def already_in_user_table(key,val):
+
+	#exec la requete (si la table existe, on aura une exception)
+	try:
+		print('SELECT COUNT(\\''+key+'\\') FROM user WHERE \\''+key+'\\' = \\''+val+'\\' ')
+		con = sqlite3.connect(os.path.join(os.path.dirname(os.path.abspath(__file__)),'data.db'))
+		c = con.execute('SELECT COUNT('+key+') FROM user WHERE '+key+' = \\''+val+'\\' ')
+		res = c.fetchall()
+		con.commit()
+		con.close()
+		return res[0][0]
+	except Exception as e:
+		return 0
+
+
+def generate_user_table(post_data):
+
+	# forge la requete
+	req=''
+	for key_col in post_data.keys():
+		req='`'+key_col+'` TEXT NOT NULL,'+req
+
+	req=req[:len(req)-1] # On enleve la virgule
+
+	#exec la requete (si la table existe, on aura une exception)
+	try:
+		con = sqlite3.connect(os.path.join(os.path.dirname(os.path.abspath(__file__)),'data.db'))
+		con.execute('CREATE TABLE user (`__id__` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, '+req+')')
+		con.commit()
+		con.close()
+	except Exception as e:
+		pass
+	
+
+
+def req_val(post_data,key_col):
+
+	if(len(post_data[key_col])) == 1:
+		return str(post_data[key_col][0])
+	else:
+		return str(post_data[key_col])
+
+def populate_user_table(post_data,unique_key):
+	
+	print(already_in_user_table(unique_key,post_data[unique_key][0]))
+
+	if already_in_user_table(unique_key,post_data[unique_key][0]) == 0:
+
+		col_key = post_data.keys()
+		#forge la requete
+		req='insert into user('
+		for key_col in col_key:
+			req=req+'`'+key_col+'`,'
+
+		req=req[:len(req)-1] # On enleve la virgule
+		req=req+') values ('
+
+		for key_col in col_key:
+			req=req+'"'+req_val(post_data,key_col)+'",'
+
+		req=req[:len(req)-1] # On enleve la virgule
+		req=req+')'
+
+		try:
+			con = sqlite3.connect(os.path.join(os.path.dirname(os.path.abspath(__file__)),'data.db'))
+			con.execute(req)
+			con.commit()
+			con.close()
+		except Exception as e:
+			pass
+	else:
+		pass
 
 def get_nb_system() :
 	# Return the number of sample for a test!

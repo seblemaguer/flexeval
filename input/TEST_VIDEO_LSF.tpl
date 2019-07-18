@@ -68,7 +68,8 @@
 			
 			<a onclick="instructionsToggle()" class="btn btn-primary" id="instructionsToggleBtn">Instructions</a>
 
-		</div>
+<!-- le /div d'apres est en trop sans doute !!!  -->
+<!--		</div> -->
 		
 		<script>
 			var idBtn = document.getElementById("instructionsToggleBtn");
@@ -91,11 +92,40 @@
 	
 		</script>
 
-
-
 		<br>
 
+		<div id="CarouselTest" class="carousel slide" data-interval="false" data-ride="carousel">
+ 
+
+		<div class="carousel-inner">
+
+		 	<div class="carousel-item active">
+			<p>
+<h2> Nom d'Animaux en Signes </2>
+				<h4>Dans cette première partie, vous allez voir 18 vidéos avec des personnages virtuels signant des noms d'animaux. <br>
+
+				Il vous sera demandé de répondre à trois questions sur chaque vidéo. 
+<br>
+				Ces personnages peuvent prendre trois apparences différentes. 
+<br>
+				Et maintenant un petit entraînement pour que vous visualisiez le type de vidéo qui vous sera présentées. Les réponses correspondant à cet entraînement ne compteront pas. 
+<br>
+				</h4>
+			</p>
+  			<a   href="#CarouselTest"  class="btn btn-lg btn-success   col-3"  >Suiv  </a>
+
+			</div>
+
+
+		 	
+
+		</div>
+		</div>
 		<div class="answer container">
+
+
+
+
 			<div>
 			<table class="table table-compact table-hover">
 <!-- 			Table header -->
@@ -104,12 +134,9 @@
 					<th class="text-center"><h4><strong>   			 </strong></h4></th>
 					% for i in range(nfixed,len(systems)):
 					
-<!--					<th class="text-center"><h4><strong>  sample {{i + 1}}    </strong></h4></th>   -->
+
 					<th class="text-center"><h4><strong>  Apparence N° {{ step }}    </strong></h4></th>
-					
-			
 					% end
-					
 					</tr>
 					
 					<tr>
@@ -119,7 +146,7 @@
 					% for i in range(nfixed,len(systems)):
 					<td class="text-center">
 
-							<video width="320" height="240" controls >
+							<video width="480" height="360" controls >
 							  <source src="{{!samples[i]["video"]}}" type="video/mp4">
 
 							Your browser does not support the video tag.
@@ -143,6 +170,7 @@
 				<tr bgcolor={{config['questionBgColor'][q]}}>
 					
 				<td class="text-center">
+
 					<h4>
 						<strong>
 							<a class="test"  id="tooltip_q" data-toggle="tooltip" data-placement="right" title="{{config['instructionsDetail'][q]}}">
@@ -150,40 +178,54 @@
 							</a>
 						</strong>
 					</h4>
-					<h5><br>{{config['questionDetail'][q]}} </h5>
+
+					<h4><br>{{config['questionDetail'][q]}} </h4>
 <!-- question vidéo -->
-					<video width="320" height="240" controls >
+<!--					<video width="320" height="240" controls >
 					<source src="{{config['questionVideo'][q]}}" type="video/mp4">
 
 					Your browser does not support the video tag.
-					</video> 
+					</video>
+--> 
 <!-- question vidéo -->					
 				</td>
 				
 
 				
 				% for i in range(nfixed,len(systems)):
-				<!-- Question q -->
+				<!-- Question 1 -->
 					<td class="text-center">
 						<h5>
 							<div class="answer" style="padding-left:20px; padding-right:20px;">
+								<!-- 
 								<div id="slider{{iQ}}">
-<!--								<div id="rate{{iQ}}" class="ui-slider-handle">0</div>  -->
+								<div id="rate{{iQ}}" class="ui-slider-handle">0</div>  
 								<div id="rate{{iQ}}" class="ui-slider-handle">3</div>  
-
 								</div>
-
-							<label style=" color: {{config['explanationTextColor'][q]}};margin-top:5px; margin-bottom:5px; float: left;">{{config['sliderMinValue']}}</label>
-							<label style=" color: {{config['explanationTextColor'][q]}};margin-top:5px; margin-bottom:5px; float: right;">{{config['sliderMaxValue']}}</label>
-
-<!--						
-							<label style=" margin-top:5px; margin-bottom:5px; float: left;">very prepared</label>
-							<label style=" margin-top:5px; margin-bottom:5px; float: right;">very spontaneous</label>
--->
+								-->
+								<select id="selectTruc" name="answer_{{iQ}}" class="custom-select">
+								    <option selected>Choisir le nom de l'animal correspondant dans la liste</option>
+								    <option value="chat">chat</option>
+								    <option value="chien">chien</option>
+								    <option value="lapin">lapin</option>
+								  </select>
 
 							</div>
+  	
 
-							<input type="hidden" id ="answer_{{iQ}}" name="answer_{{iQ}}" value="3">
+							<script>
+
+								 $("#selectTruc").on('change', () =>
+								{
+									$("#selectTruc").attr("disabled","");
+									$("#tq2").css("visibility","visible");
+									$("#tq3").css("visibility","visible");
+								});	
+
+							</script>
+
+
+<!--<input type="hidden" id ="answer_{{iQ}}" name="answer_{{iQ}}" value="3">-->
 							<input type="hidden" id="question_index_{{iQ}}" name="question_index_{{iQ}}" value="{{q + 1}}">
 							<input type="hidden" name="system_index_{{iQ}}" value="{{systems[i]}}">
 						</h5>
@@ -247,224 +289,274 @@
 				% end
 				</tr>
 <!--				%end   -->
-				% q = q + 1
-				<!-- Question 2 -->
-				
-				<tr bgcolor={{config['questionBgColor'][q]}}>
+					% q = q + 1
+					<!-- Question 2 -->
+
+					<tr id="tq2" style="visibility:hidden" bgcolor={{config['questionBgColor'][q]}}>
 					
-				<td class="text-center">
-					<h4>
-						<strong>
-							<a class="test"  id="tooltip_q" data-toggle="tooltip" data-placement="right" title="{{config['instructionsDetail'][q]}}">
-								<font color={{config['explanationTextColor'][q]}}>{{config['questionTitle'][q]}}</font> 
-							</a>
-						</strong>
-					</h4>
-					<h5><br>{{config['questionDetail'][q]}} "{{!samples[i]["text"]}}"</h5>
-<!-- question vidéo -->
-					<video width="320" height="240" controls >
-					<source src="{{config['questionVideo'][q]}}" type="video/mp4">
+					<td class="text-center" >
+						<h4>
+							<strong>
+								<a class="test"  id="tooltip_q" data-toggle="tooltip" data-placement="right" title="{{config['instructionsDetail'][q]}}">
+									<font color={{config['explanationTextColor'][q]}}>{{config['questionTitle'][q]}}</font> 
+								</a>
+							</strong>
+						</h4>
+						<h4><br>{{config['questionDetail'][q][0]}} "{{!samples[i]["text"]}}" <br> {{config['questionDetail'][q][1]}}</h4>
 
-					Your browser does not support the video tag.
-					</video> 
-<!-- question vidéo -->					
-				</td>
+						
+
+	<!-- question vidéo -->
+	<!--					<video width="320" height="240" controls >
+						<source src="{{config['questionVideo'][q]}}" type="video/mp4">
+
+						Your browser does not support the video tag.
+						</video> 
+	-->
+	<!-- question vidéo -->					
+					</td>
 				
 
 				
-				% for i in range(nfixed,len(systems)):
-				<!-- Question q -->
-					<td class="text-center">
-						<h5>
-							<div class="answer" style="padding-left:20px; padding-right:20px;">
-								<div id="slider{{iQ}}">
-<!--								<div id="rate{{iQ}}" class="ui-slider-handle">0</div>  -->
-								<div id="rate{{iQ}}" class="ui-slider-handle">3</div>  
+					% for i in range(nfixed,len(systems)):
+					<!-- Question q -->
+						<td class="text-center">
+							<h5>
+								<div class="answer" style="padding-left:20px; padding-right:20px;">
+									<!-- 
+									<div id="slider{{iQ}}">
+	 								<div id="rate{{iQ}}" class="ui-slider-handle">0</div>
+									<div id="rate{{iQ}}" class="ui-slider-handle">3</div>  
+									</div>
+									-->
+
+									<div>
+									  <input type="radio" id="1" name="answer_{{iQ}}" value="1">
+									  <label for="1">1</label>
+									</div>
+
+									<div>
+									  <input type="radio" id="2" name="answer_{{iQ}}" value="2">
+									  <label for="2">2</label>
+									</div>
+
+									<div>
+									  <input type="radio" id="3" name="answer_{{iQ}}" value="3">
+									  <label for="3">3</label>
+									</div>
+
+									<div>
+									  <input type="radio" id="4" name="answer_{{iQ}}" value="4">
+									  <label for="4">4</label>
+									</div>
+
+									<div>
+									  <input type="radio" id="5" name="answer_{{iQ}}" value="5">
+									  <label for="5">5</label>
+									</div>
+
 
 								</div>
 
-							<label style=" color: {{config['explanationTextColor'][q]}};margin-top:5px; margin-bottom:5px; float: left;">{{config['sliderMinValue']}}</label>
-							<label style=" color: {{config['explanationTextColor'][q]}};margin-top:5px; margin-bottom:5px; float: right;">{{config['sliderMaxValue']}}</label>
-
-<!--						
-							<label style=" margin-top:5px; margin-bottom:5px; float: left;">very prepared</label>
-							<label style=" margin-top:5px; margin-bottom:5px; float: right;">very spontaneous</label>
--->
-
-							</div>
-
-							<input type="hidden" id ="answer_{{iQ}}" name="answer_{{iQ}}" value="3">
-							<input type="hidden" id="question_index_{{iQ}}" name="question_index_{{iQ}}" value="{{q + 1}}">
-							<input type="hidden" name="system_index_{{iQ}}" value="{{systems[i]}}">
-						</h5>
-					</td>
+								<!--<input type="hidden" id ="answer_{{iQ}}" name="answer_{{iQ}}" value="3">-->
+								<input type="hidden" id="question_index_{{iQ}}" name="question_index_{{iQ}}" value="{{q + 1}}">
+								<input type="hidden" name="system_index_{{iQ}}" value="{{systems[i]}}">
+							</h5>
+						</td>
 					
-				<style>
-					#rate{{iQ}} {
-						width: 3em;
-						height: 1.6em;
-						top: 50%;
-						font-weight: bold;
-						margin-top: -.8em;
-						text-align: center;
-						line-height: 1.6em;
-						border-color: {{config['explanationTextColor'][q]}};
-						color: {{config['explanationTextColor'][q]}};
+					<style>
+						#rate{{iQ}} {
+							width: 3em;
+							height: 1.6em;
+							top: 50%;
+							font-weight: bold;
+							margin-top: -.8em;
+							text-align: center;
+							line-height: 1.6em;
+							border-color: {{config['explanationTextColor'][q]}};
+							color: {{config['explanationTextColor'][q]}};
+						}
+					</style>
+				
+					<style>
+					/* Tooltip */
+					.test + .tooltip > .tooltip-inner {
+						background-color: {{config['explanationTextColor'][q]}}; 
+						color: #FFFFFF; 
+						border: 1px solid green; 
+						padding: 15px;
+						font-size: 20px;
 					}
-				</style>
+
+					/* Tooltip on right */
+					.test + .tooltip.right > .tooltip-arrow {
+					border-right: 5px solid black;
+					}
+					</style>
 				
-				<style>
-				/* Tooltip */
-				.test + .tooltip > .tooltip-inner {
-					background-color: {{config['explanationTextColor'][q]}}; 
-					color: #FFFFFF; 
-					border: 1px solid green; 
-					padding: 15px;
-					font-size: 20px;
-				}
-
-				/* Tooltip on right */
-				.test + .tooltip.right > .tooltip-arrow {
-				border-right: 5px solid black;
-				}
-				</style>
-				
-				<script>
-					$(document).ready(function(){
-						$('[data-toggle="tooltip"]').tooltip();   
-					});
-				</script>
-
-				<script>
-					$(function() {
-						$("#slider{{iQ}}").slider({
-							range: "min",
-							value:3,
-							
-							min: 1, 
-							max: 5, 
-
-							step: 1,
-							slide: function(event, ui) {
-								$("#rate{{iQ}}").html(ui.value);
-								$("#answer_{{iQ}}").attr("value",ui.value);
-								
-							}
+					<script>
+						$(document).ready(function(){
+							$('[data-toggle="tooltip"]').tooltip();   
 						});
-					});
-				</script>
-				% iQ = iQ + 1
-				% end
-				</tr>
+					</script>
 
-				% q = q + 1
-				<!-- Question 3 -->
+					<script>
+						$(function() {
+							$("#slider{{iQ}}").slider({
+								range: "min",
+								value:3,
+							
+								min: 1, 
+								max: 5, 
+
+								step: 1,
+								slide: function(event, ui) {
+									$("#rate{{iQ}}").html(ui.value);
+									$("#answer_{{iQ}}").attr("value",ui.value);
+								
+								}
+							});
+						});
+					</script>
+					% iQ = iQ + 1
+					% end
+					</tr>
+
+					% q = q + 1
+					<!-- Question 3 -->
 				
-				<tr bgcolor={{config['questionBgColor'][q]}}>
+					<tr id="tq3" style="visibility:hidden" bgcolor={{config['questionBgColor'][q]}}>
 					
-				<td class="text-center">
-					<h4>
-						<strong>
-							<a class="test"  id="tooltip_q" data-toggle="tooltip" data-placement="right" title="{{config['instructionsDetail'][q]}}">
-								<font color={{config['explanationTextColor'][q]}}>{{config['questionTitle'][q]}}</font> 
-							</a>
-						</strong>
-					</h4>
-					<h5><br>{{config['questionDetail'][q]}} </h5>
-<!-- question vidéo -->
-					<video width="320" height="240" controls >
-					<source src="{{config['questionVideo'][q]}}" type="video/mp4">
-
-					Your browser does not support the video tag.
-					</video> 
-<!-- question vidéo -->					
-				</td>
-				
-
-				
-				% for i in range(nfixed,len(systems)):
-				<!-- Question q -->
 					<td class="text-center">
-						<h5>
-							<div class="answer" style="padding-left:20px; padding-right:20px;">
-								<div id="slider{{iQ}}">
-<!--								<div id="rate{{iQ}}" class="ui-slider-handle">0</div>  -->
-								<div id="rate{{iQ}}" class="ui-slider-handle">3</div>  
+						<h4>
+							<strong>
+								<a class="test"  id="tooltip_q" data-toggle="tooltip" data-placement="right" title="{{config['instructionsDetail'][q]}}">
+									<font color={{config['explanationTextColor'][q]}}>{{config['questionTitle'][q]}}</font> 
+								</a>
+							</strong>
+						</h4>
+						<h4><br>{{config['questionDetail'][q]}} </h4>
+	<!-- question vidéo -->
+	<!--					<video width="320" height="240" controls >
+						<source src="{{config['questionVideo'][q]}}" type="video/mp4">
+
+						Your browser does not support the video tag.
+						</video> 
+	-->
+	<!-- question vidéo -->					
+					</td>
+				
+
+				
+					% for i in range(nfixed,len(systems)):
+					<!-- Question q -->
+						<td class="text-center">
+							<h5>
+								<div class="answer" style="padding-left:20px; padding-right:20px;">
+									<!--  
+									<div id="slider{{iQ}}">
+	 								<div id="rate{{iQ}}" class="ui-slider-handle">0</div>  
+									<div id="rate{{iQ}}" class="ui-slider-handle">3</div>  
+									</div>
+									-->
+
+									<div>
+									  <input type="radio" id="1" name="answer_{{iQ}}" value="1">
+									  <label for="1">1</label>
+									</div>
+
+									<div>
+									  <input type="radio" id="2" name="answer_{{iQ}}" value="2">
+									  <label for="2">2</label>
+									</div>
+
+									<div>
+									  <input type="radio" id="3" name="answer_{{iQ}}" value="3">
+									  <label for="3">3</label>
+									</div>
+
+									<div>
+									  <input type="radio" id="4" name="answer_{{iQ}}" value="4">
+									  <label for="4">4</label>
+									</div>
+
+									<div>
+									  <input type="radio" id="5" name="answer_{{iQ}}" value="5">
+									  <label for="5">5</label>
+									</div>
+
+
+
+	<!--						
+								<label style=" margin-top:5px; margin-bottom:5px; float: left;">very prepared</label>
+								<label style=" margin-top:5px; margin-bottom:5px; float: right;">very spontaneous</label>
+	-->
 
 								</div>
 
-							<label style=" color: {{config['explanationTextColor'][q]}};margin-top:5px; margin-bottom:5px; float: left;">{{config['sliderMinValue']}}</label>
-							<label style=" color: {{config['explanationTextColor'][q]}};margin-top:5px; margin-bottom:5px; float: right;">{{config['sliderMaxValue']}}</label>
-
-<!--						
-							<label style=" margin-top:5px; margin-bottom:5px; float: left;">very prepared</label>
-							<label style=" margin-top:5px; margin-bottom:5px; float: right;">very spontaneous</label>
--->
-
-							</div>
-
-							<input type="hidden" id ="answer_{{iQ}}" name="answer_{{iQ}}" value="3">
-							<input type="hidden" id="question_index_{{iQ}}" name="question_index_{{iQ}}" value="{{q + 1}}">
-							<input type="hidden" name="system_index_{{iQ}}" value="{{systems[i]}}">
-						</h5>
-					</td>
+								<!--<input type="hidden" id ="answer_{{iQ}}" name="answer_{{iQ}}" value="3"> -->
+								<input type="hidden" id="question_index_{{iQ}}" name="question_index_{{iQ}}" value="{{q + 1}}">
+								<input type="hidden" name="system_index_{{iQ}}" value="{{systems[i]}}">
+							</h5>
+						</td>
 					
-				<style>
-					#rate{{iQ}} {
-						width: 3em;
-						height: 1.6em;
-						top: 50%;
-						font-weight: bold;
-						margin-top: -.8em;
-						text-align: center;
-						line-height: 1.6em;
-						border-color: {{config['explanationTextColor'][q]}};
-						color: {{config['explanationTextColor'][q]}};
+					<style>
+						#rate{{iQ}} {
+							width: 3em;
+							height: 1.6em;
+							top: 50%;
+							font-weight: bold;
+							margin-top: -.8em;
+							text-align: center;
+							line-height: 1.6em;
+							border-color: {{config['explanationTextColor'][q]}};
+							color: {{config['explanationTextColor'][q]}};
+						}
+					</style>
+				
+					<style>
+					/* Tooltip */
+					.test + .tooltip > .tooltip-inner {
+						background-color: {{config['explanationTextColor'][q]}}; 
+						color: #FFFFFF; 
+						border: 1px solid green; 
+						padding: 15px;
+						font-size: 20px;
 					}
-				</style>
+
+					/* Tooltip on right */
+					.test + .tooltip.right > .tooltip-arrow {
+					border-right: 5px solid black;
+					}
+					</style>
 				
-				<style>
-				/* Tooltip */
-				.test + .tooltip > .tooltip-inner {
-					background-color: {{config['explanationTextColor'][q]}}; 
-					color: #FFFFFF; 
-					border: 1px solid green; 
-					padding: 15px;
-					font-size: 20px;
-				}
-
-				/* Tooltip on right */
-				.test + .tooltip.right > .tooltip-arrow {
-				border-right: 5px solid black;
-				}
-				</style>
-				
-				<script>
-					$(document).ready(function(){
-						$('[data-toggle="tooltip"]').tooltip();   
-					});
-				</script>
-
-				<script>
-					$(function() {
-						$("#slider{{iQ}}").slider({
-							range: "min",
-							value:3,
-							
-							min: 1, 
-							max: 5, 
-
-							step: 1,
-							slide: function(event, ui) {
-								$("#rate{{iQ}}").html(ui.value);
-								$("#answer_{{iQ}}").attr("value",ui.value);
-								
-							}
+					<script>
+						$(document).ready(function(){
+							$('[data-toggle="tooltip"]').tooltip();   
 						});
-					});
-				</script>
-				% iQ = iQ + 1
-				% end
+					</script>
+
+					<script>
+						$(function() {
+							$("#slider{{iQ}}").slider({
+								range: "min",
+								value:3,
+							
+								min: 1, 
+								max: 5, 
+
+								step: 1,
+								slide: function(event, ui) {
+									$("#rate{{iQ}}").html(ui.value);
+									$("#answer_{{iQ}}").attr("value",ui.value);
+								
+								}
+							});
+						});
+					</script>
+					% iQ = iQ + 1
+					% end
+
 				</tr>
 
 			</table>
@@ -491,8 +583,20 @@
 
 <!-- 					Auto-enabling -->
 					<script>
+
+					$("#next").on("click", () => {	
+						$("#selectTruc").removeAttr("disabled"); 
+					});
+
+
 					jQuery('body').on('pause', 'video', function(e) {
-						if (all_played('video')) {
+						if ((all_played('video'))
+						&&
+						   ($('input[type=radio][name=answer_2]:checked').length == 1 )
+						&&
+						   ($('input[type=radio][name=answer_3]:checked').length == 1 )
+						)
+						{						 
 							$('input[type="submit"]').prop("disabled", false);
 						}
 					});

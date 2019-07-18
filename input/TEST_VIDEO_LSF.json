@@ -20,7 +20,7 @@
 									
 	"questionVideo": ["/static/video/q1.mp4","/static/video/q2.mp4","/static/video/q1.mp4","/static/video/q1.mp4","/static/video/q1.mp4"],
 	"questionDetail": ["Quel signe a été réalisé ?",
-							"Il s'agissait du signe ",
+							["Il s'agissait du signe ","Trouvez-vous que le signe a été réalisé correctement ?"],
 								"Trouvez-vous que le mouvement est naturel/réaliste/spontané (i.e. vous pensez voir les mouvements d'une vraie personne) ?",
 									"Details Question 4", 
 										"Details Question 5"],
