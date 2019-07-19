@@ -93,13 +93,6 @@
 		</script>
 
 		<br>
-
-		<div id="CarouselTest" class="carousel slide" data-interval="false" data-ride="carousel">
- 
-
-		<div class="carousel-inner">
-
-		 	<div class="carousel-item active">
 			<p>
 <h2> Nom d'Animaux en Signes </2>
 				<h4>Dans cette première partie, vous allez voir 18 vidéos avec des personnages virtuels signant des noms d'animaux. <br>
@@ -111,21 +104,15 @@
 				Et maintenant un petit entraînement pour que vous visualisiez le type de vidéo qui vous sera présentées. Les réponses correspondant à cet entraînement ne compteront pas. 
 <br>
 				</h4>
+
+				<video width="320" height="240" controls >
+				<source src="{{config['questionTestVideo'][0]}}" type="video/mp4">
+				Your browser does not support the video tag.
+				</video>
+
+ 
 			</p>
-  			<a   href="#CarouselTest"  class="btn btn-lg btn-success   col-3"  >Suiv  </a>
-
-			</div>
-
-
-		 	
-
-		</div>
-		</div>
 		<div class="answer container">
-
-
-
-
 			<div>
 			<table class="table table-compact table-hover">
 <!-- 			Table header -->
@@ -180,14 +167,13 @@
 					</h4>
 
 					<h4><br>{{config['questionDetail'][q]}} </h4>
-<!-- question vidéo -->
-<!--					<video width="320" height="240" controls >
-					<source src="{{config['questionVideo'][q]}}" type="video/mp4">
 
-					Your browser does not support the video tag.
-					</video>
---> 
-<!-- question vidéo -->					
+				<video width="320" height="240" controls >
+				<source src="{{config['questionTestVideo'][0]}}" type="video/mp4">
+				Your browser does not support the video tag.
+				</video>
+
+				
 				</td>
 				
 
@@ -203,21 +189,37 @@
 								<div id="rate{{iQ}}" class="ui-slider-handle">3</div>  
 								</div>
 								-->
-								<select id="selectTruc" name="answer_{{iQ}}" class="custom-select">
+								<p>
+								<br> 
+								<br>  
+								<br> 	
+								<br> 
+								<br>  
+								<br> 	
+
+								<select id="selectAnimal" name="answer_{{iQ}}" class="custom-select">
 								    <option selected>Choisir le nom de l'animal correspondant dans la liste</option>
 								    <option value="chat">chat</option>
 								    <option value="chien">chien</option>
 								    <option value="lapin">lapin</option>
 								  </select>
 
+								<br> 
+								<br>  
+								<br> 	
+								<br> 
+								<br>  
+								<br> 	
+								</p>
+
 							</div>
   	
 
 							<script>
 
-								 $("#selectTruc").on('change', () =>
+								 $("#selectAnimal").on('change', () =>
 								{
-									$("#selectTruc").attr("disabled","");
+									$("#selectAnimal").attr("disabled","");
 									$("#tq2").css("visibility","visible");
 									$("#tq3").css("visibility","visible");
 								});	
@@ -304,16 +306,12 @@
 						</h4>
 						<h4><br>{{config['questionDetail'][q][0]}} "{{!samples[i]["text"]}}" <br> {{config['questionDetail'][q][1]}}</h4>
 
-						
 
-	<!-- question vidéo -->
-	<!--					<video width="320" height="240" controls >
-						<source src="{{config['questionVideo'][q]}}" type="video/mp4">
-
-						Your browser does not support the video tag.
-						</video> 
-	-->
-	<!-- question vidéo -->					
+				<video width="320" height="240" controls >
+				<source src="{{config['questionTestVideo'][0]}}" type="video/mp4">
+				Your browser does not support the video tag.
+				</video>
+				
 					</td>
 				
 
@@ -323,13 +321,34 @@
 						<td class="text-center">
 							<h5>
 								<div class="answer" style="padding-left:20px; padding-right:20px;">
-									<!-- 
+								<p>
+								<br> 
+								<br>  
+								<br> 	
+								<br> 
+								<br>  
+								<br> 	
+								 
+								<br> 
+								<br>  
+								<br> 	
+								<br>
+								<br> 
+								<br>		
+								</p>								
 									<div id="slider{{iQ}}">
-	 								<div id="rate{{iQ}}" class="ui-slider-handle">0</div>
-									<div id="rate{{iQ}}" class="ui-slider-handle">3</div>  
+										<div id="rate{{iQ}}" class="ui-slider-handle">3</div>  
 									</div>
-									-->
+									
 
+<!--							<label style=" color: {{config['explanationTextColor'][q]}};margin-top:5px; margin-bottom:5px; float: left;">{{config['sliderMinValue']}}</label>
+-->
+							<label style=" color: {{config['explanationTextColor'][q]}};margin-top:5px; margin-bottom:5px; float: left;">non, pas du tout</label>
+<!--							<label style=" color: {{config['explanationTextColor'][q]}};margin-top:5px; margin-bottom:5px; float: right;">{{config['sliderMaxValue']}}</label>
+-->
+							<label style=" color: {{config['explanationTextColor'][q]}};margin-top:5px; margin-bottom:5px; float: right;">Oui, tout à fait</label>
+
+<!--
 									<div>
 									  <input type="radio" id="1" name="answer_{{iQ}}" value="1">
 									  <label for="1">1</label>
@@ -341,7 +360,7 @@
 									</div>
 
 									<div>
-									  <input type="radio" id="3" name="answer_{{iQ}}" value="3">
+									  <input type="radio" id="3" name="answer_{{iQ}}" value="3" checked>
 									  <label for="3">3</label>
 									</div>
 
@@ -354,11 +373,11 @@
 									  <input type="radio" id="5" name="answer_{{iQ}}" value="5">
 									  <label for="5">5</label>
 									</div>
-
+-->
 
 								</div>
 
-								<!--<input type="hidden" id ="answer_{{iQ}}" name="answer_{{iQ}}" value="3">-->
+								<input type="hidden" id ="answer_{{iQ}}" name="answer_{{iQ}}" value="3">
 								<input type="hidden" id="question_index_{{iQ}}" name="question_index_{{iQ}}" value="{{q + 1}}">
 								<input type="hidden" name="system_index_{{iQ}}" value="{{systems[i]}}">
 							</h5>
@@ -436,14 +455,12 @@
 							</strong>
 						</h4>
 						<h4><br>{{config['questionDetail'][q]}} </h4>
-	<!-- question vidéo -->
-	<!--					<video width="320" height="240" controls >
-						<source src="{{config['questionVideo'][q]}}" type="video/mp4">
 
-						Your browser does not support the video tag.
-						</video> 
-	-->
-	<!-- question vidéo -->					
+				<video width="320" height="240" controls >
+				<source src="{{config['questionTestVideo'][0]}}" type="video/mp4">
+				Your browser does not support the video tag.
+				</video>
+					
 					</td>
 				
 
@@ -453,13 +470,27 @@
 						<td class="text-center">
 							<h5>
 								<div class="answer" style="padding-left:20px; padding-right:20px;">
-									<!--  
+								<p>
+								<br> 
+								<br>  
+								<br> 	
+								<br> 
+								<br>  
+								<br> 	
+								 
+								<br> 
+								<br>  
+								<br> 	
+								<br>
+								<br> 
+								<br>		
+								</p>									  
 									<div id="slider{{iQ}}">
-	 								<div id="rate{{iQ}}" class="ui-slider-handle">0</div>  
+<!--	 								<div id="rate{{iQ}}" class="ui-slider-handle">1</div>  -->
 									<div id="rate{{iQ}}" class="ui-slider-handle">3</div>  
 									</div>
-									-->
-
+									
+<!--
 									<div>
 									  <input type="radio" id="1" name="answer_{{iQ}}" value="1">
 									  <label for="1">1</label>
@@ -471,7 +502,7 @@
 									</div>
 
 									<div>
-									  <input type="radio" id="3" name="answer_{{iQ}}" value="3">
+									  <input type="radio" id="3" name="answer_{{iQ}}" value="3" checked>
 									  <label for="3">3</label>
 									</div>
 
@@ -485,16 +516,15 @@
 									  <label for="5">5</label>
 									</div>
 
+-->
+							<label style=" color: {{config['explanationTextColor'][q]}};margin-top:5px; margin-bottom:5px; float: left;">non, pas du tout</label>
+							<label style=" color: {{config['explanationTextColor'][q]}};margin-top:5px; margin-bottom:5px; float: right;">Oui, tout à fait</label>
 
-
-	<!--						
-								<label style=" margin-top:5px; margin-bottom:5px; float: left;">very prepared</label>
-								<label style=" margin-top:5px; margin-bottom:5px; float: right;">very spontaneous</label>
-	-->
+	
 
 								</div>
 
-								<!--<input type="hidden" id ="answer_{{iQ}}" name="answer_{{iQ}}" value="3"> -->
+								<input type="hidden" id ="answer_{{iQ}}" name="answer_{{iQ}}" value="3"> 
 								<input type="hidden" id="question_index_{{iQ}}" name="question_index_{{iQ}}" value="{{q + 1}}">
 								<input type="hidden" name="system_index_{{iQ}}" value="{{systems[i]}}">
 							</h5>
@@ -585,16 +615,12 @@
 					<script>
 
 					$("#next").on("click", () => {	
-						$("#selectTruc").removeAttr("disabled"); 
+						$("#selectAnimal").removeAttr("disabled"); 
 					});
 
 
 					jQuery('body').on('pause', 'video', function(e) {
-						if ((all_played('video'))
-						&&
-						   ($('input[type=radio][name=answer_2]:checked').length == 1 )
-						&&
-						   ($('input[type=radio][name=answer_3]:checked').length == 1 )
+						if (all_played('video')  
 						)
 						{						 
 							$('input[type="submit"]').prop("disabled", false);

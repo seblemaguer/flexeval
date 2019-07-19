@@ -12,6 +12,8 @@
 	"nbFixedPosition": 0,
 	"nbIntroductionSteps":1,
 	"nbQuestionsPerStep": 3,
+	"questionIdentificationVideo": ["/static/video/genre.mp4"],
+	"questionTestVideo": ["/static/video/genre.mp4"],
 	"questionTitle": ["Question 1", 
 						"Question 2",
 							"Question 3",
