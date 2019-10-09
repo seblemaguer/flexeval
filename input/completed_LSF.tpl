@@ -58,21 +58,23 @@
 
 					<div id="feedback">
 						<h2 class="text-center">Un commentaire ?</h2>
-						<p> La complétion du formulaire suivant est optionnel. </p>
+						<p> Vous pouvez fournir une adresse de courriel de contact si vous le souhaitez.</p>
+						<p> Vous pouvez laisser des commentaires à propos de ce test sous forme de texte ou d'une vidéo.</p>
+						<p> La complétion du formulaire suivant est optionnel.</p>
 
 						<form  action="">
 							<div class="form-group">
-							    <label for="courriel">Courriel</label>
+							    <label for="courriel">Adresse de Courriel</label>
 							    <input type="email" class="form-control" id="courriel" aria-describedby="emailHelp" placeholder="Courriel" />
 	 						</div>
 
 							<div class="form-group">
-							    <label for="comment">Commentaire</label>
+							    <label for="comment">Commentaires</label>
 							    <textarea class="form-control" id="commentaire" rows="3"></textarea>
 	 						</div>
 
 							<div class="form-group">
-							    <label for="video">Faire un commentaire vidéo</label>
+							    <label for="video">Enregistrer un commentaire vidéo</label>
 
 								<div id="container">
 
@@ -90,8 +92,8 @@
 
 
 
-								<a href="#webplayer" class="btn btn-primary" style="display:none" id="stop">Stop</a>
-								<a href="#webplayer" class="btn btn-primary" id="start">Start</a>
+								<a href="#webplayer" class="btn btn-primary" style="display:none" id="stop">Arrêter Enregistrement Vidéo</a>
+								<a href="#webplayer" class="btn btn-primary" id="start">Démarrer Enregistrement Vidéo</a>
 
 
 	 						</div>
@@ -190,12 +192,12 @@ function gotStream(stream) {
   mediaRecorder = new MediaRecorder(window.stream);
 
 	mediaRecorder.onstop = function(e) {
-	  console.log("recorder stopped");
+//	  console.log("recorder stopped");
 
 	  var blob = new Blob(chunks, { 'type' : 'video/webm;codecs=h264' });
 	  chunks = [];
 	  var videoURL = window.URL.createObjectURL(blob);
-	  console.log(videoURL);
+//	  console.log(videoURL);
 	  
           BlobRec=blob;
 
@@ -224,17 +226,18 @@ Doc:https://developer.mozilla.org/en-US/docs/Web/API/MediaStream_Recording_API/U
 DIVstartRecord.onclick = function (e)
 {
   mediaRecorder.start();
-  console.log(mediaRecorder.state);
-  console.log("recorder started");
+//  console.log(mediaRecorder.state);
+//  console.log("recorder started");
   $("#start").css("display","none");
-  $("#stop").css("display","block");
+//  $("#stop").css("display","block");
+  $("#stop").css("display","inline");
 };
 
 DIVstopRecord.onclick = function(e){
 
   mediaRecorder.stop();
-  console.log(mediaRecorder.state);
-  console.log("recorder stopped");
+//  console.log(mediaRecorder.state);
+//  console.log("recorder stopped");
   $("#start").css("display","inline");
   $("#stop").css("display","none");
 
