@@ -18,6 +18,33 @@
 	<script src="{{APP_PREFIX}}/static/js/perceval.js"></script>
 
 
+
+<style>
+
+.dropdown {
+/*  position: relative;*/
+  display: inline-block;
+}
+
+.dropbtn {
+  cursor: pointer;
+  padding: 16px;
+  font-size: 16px;
+
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f1f1f1;
+/*  min-width: 160px; */
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+  
+}
+
+</style>
+
 </head>
 
 <body>
@@ -30,7 +57,7 @@
 		<div class="container-fluid bg-warning">
 			<div class="row">
 				<div class="col-sm-offset-1 col-sm-8 col-md-offset-2 col-md-8 vcenter text-center">
-					<h3><span class="alert-warning vcenter text-center" style="vertical-align: super;">This is an introduction step.</span></h3>
+					<h3><span class="alert-warning vcenter text-center" style="vertical-align: super;">Ceci est une étape d'introduction.</span></h3>
 	% else:
 	<nav class="navbar navbar-default">
 		<div class="container-fluid">
@@ -51,7 +78,7 @@
 		{{!hidden_fields}}
 
 		<div class="container">
-			<h1 class="text-center">Step {{step}}/{{totalstep}}</h1>
+			<h1 class="text-center">Etape n°{{step}}/{{totalstep}}</h1>
 		</div>
 		<div class="container">
 			<div class="col-md-4 col-md-offset-4">
@@ -65,19 +92,19 @@
 		<br>
 
 
-			
+<!-- suppression du bouton id="instructionsToggleBtn"	 		
 			<a onclick="instructionsToggle()" class="btn btn-primary" id="instructionsToggleBtn">Instructions</a>
+-->
 
-<!-- le /div d'apres est en trop sans doute !!!  -->
-<!--		</div> -->
-		
+
+<!-- suppression du script du bouton  id="instructionsToggleBtn"	 				
 		<script>
 			var idBtn = document.getElementById("instructionsToggleBtn");
 			var idJumbo = document.getElementById("instructions");
 
 			function show() {}
 			function hide() {}
-<!--			function toggle() {}  -->
+			function toggle() {} 
 			function instructionsToggle() {
 				var idBtn = document.getElementById("instructionsToggleBtn");
 				var idJumbo = document.getElementById("instructions");
@@ -91,19 +118,15 @@
 			}
 	
 		</script>
+-->
+
+
+<!-- le /div d'apres est en trop sans doute !!!  -->
+<!--		</div> -->
 
 		<br>
+<!--	video explications partie 1
 			<p>
-<h2> Nom d'Animaux en Signes </2>
-				<h4>Dans cette première partie, vous allez voir 18 vidéos avec des personnages virtuels signant des noms d'animaux. <br>
-
-				Il vous sera demandé de répondre à trois questions sur chaque vidéo. 
-<br>
-				Ces personnages peuvent prendre trois apparences différentes. 
-<br>
-				Et maintenant un petit entraînement pour que vous visualisiez le type de vidéo qui vous sera présentées. Les réponses correspondant à cet entraînement ne compteront pas. 
-<br>
-				</h4>
 
 				<video width="320" height="240" controls >
 				<source src="{{config['questionTestVideo'][0]}}" type="video/mp4">
@@ -112,6 +135,7 @@
 
  
 			</p>
+-->
 		<div class="answer container">
 			<div>
 			<table class="table table-compact table-hover">
@@ -132,8 +156,8 @@
 
 					% for i in range(nfixed,len(systems)):
 					<td class="text-center">
-
-							<video width="480" height="360" controls >
+							<!-- video de l'échantillon à qualifier à l'étape 'step' -->
+							<video id="video_sample" width="480" height="360" controls >
 							  <source src="{{!samples[i]["video"]}}" type="video/mp4">
 
 							Your browser does not support the video tag.
@@ -153,25 +177,29 @@
 <!--				% for q in range(0,int(config["nbQuestionsPerStep"]) ):  -->
 				% q = 0
 				<!-- Question 1 -->
+
 				
 				<tr bgcolor={{config['questionBgColor'][q]}}>
 					
 				<td class="text-center">
-
-					<h4>
-						<strong>
-							<a class="test"  id="tooltip_q" data-toggle="tooltip" data-placement="right" title="{{config['instructionsDetail'][q]}}">
-								<font color={{config['explanationTextColor'][q]}}>{{config['questionTitle'][q]}}</font> 
-							</a>
-						</strong>
-					</h4>
-
-					<h4><br>{{config['questionDetail'][q]}} </h4>
-
 				<video width="320" height="240" controls >
 				<source src="{{config['questionTestVideo'][0]}}" type="video/mp4">
 				Your browser does not support the video tag.
 				</video>
+
+					<h4>
+						<strong>
+<!--							<a class="test"  id="tooltip_q" data-toggle="tooltip" data-placement="right" title="{{config['instructionsDetail'][q]}}">
+								<font color={{config['explanationTextColor'][q]}}>{{config['questionTitle'][q]}}</font> 
+							</a>
+-->
+						<br><font color={{config['explanationTextColor'][q]}}>{{config['questionTitle'][q]}}</font>
+						</strong>
+					</h4>
+
+<!--					<h4><br>{{config['questionDetail'][q]}} </h4>   -->
+					<h4><br><font color={{config['explanationTextColor'][q]}}>{{config['questionDetail'][q]}}</font> 
+</h4>
 
 				
 				</td>
@@ -180,7 +208,7 @@
 				
 				% for i in range(nfixed,len(systems)):
 				<!-- Question 1 -->
-					<td class="text-center">
+					<td id="ancreq1" class="text-center">
 						<h5>
 							<div class="answer" style="padding-left:20px; padding-right:20px;">
 								<!-- 
@@ -196,38 +224,113 @@
 								<br> 
 								<br>  
 								<br> 	
-
+<!-- liste avec de noms d'animaux uniquement 
 								<select id="selectAnimal" name="answer_{{iQ}}" class="custom-select">
 								    <option selected>Choisir le nom de l'animal correspondant dans la liste</option>
-								    <option value="chat">chat</option>
-								    <option value="chien">chien</option>
-								    <option value="lapin">lapin</option>
-								  </select>
+								% for j in range(0,len(config["listeAnimaux"])):
 
+								    <option value={{j}}>{{config['listeAnimaux'][j][0]}}</option>
+
+								% end
+								  </select>   
+-->
+							<div class="container">
+							<div class="dropdown">
+								<!--    <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Dropdown Example  
+    								<button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" >Dropdown Example<span class="caret"></span></button>-->
+    							<button id="selectAnimal" class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" > 								<div id="valliste"></div><span class="caret"></span></button>
+
+							<span id='Animal'></span>
+
+    							<ul class="dropdown-menu" id="myDropdown" >
+
+								% for j in range(0,len(config["listeAnimaux"])) :
+
+								    <!-- <option value={{j}}>{{config['listeAnimaux'][j][0]}}</option>   -->
+      								    <!--<li class="clickable" data="{{config['listeAnimaux'][j][0]}}"><img style="width: 18rem;" src="{{config['listeAnimaux'][j][1]}}" alt=" " title="{{config['listeAnimaux'][j][0]}}"/>  {{config['listeAnimaux'][j][0]}}</li>  -->
+      									<li><a class="clickable" data="{{config['listeAnimaux'][j][0]}}" href="#" ><img style="width: 18rem;" src="{{config['listeAnimaux'][j][1]}}"  title="{{config['listeAnimaux'][j][0]}}" alt=" " />  {{config['listeAnimaux'][j][0]}}</a> </li>
+								% end
+
+<!--
+      							<li class="clickable" data="Lion"><img style="width: 18rem;" src="/static/img/guepard.jpeg" alt=" " title="Lion"/>  Lion</a></li>
+      							<li class="clickable" data="Chat" ><img style="width: 18rem;" src="/static/img/chat.jpeg" alt=" " title="Chat"/>  Chat</a></li>
+      							<li class="clickable" data="Lapin" ><img style="width: 18rem;" src="/static/img/lapin.jpeg" alt=" " title="Lapin"/>  Lapin</a></li>
+      							<li class="clickable" data="Renard" ><img style="width: 18rem;" src="/static/img/renard.jpeg" alt=" " title="Renard"/>  Renard</a></li>
+      							<li class="clickable" data="Souris" ><img style="width: 18rem;" src="/static/img/souris.jpeg" alt=" " title="Souris"/>  Souris</a></li>
+-->            
+    							</ul>
+  							</div>
 								<br> 
 								<br>  
 								<br> 	
 								<br> 
-								<br>  
-								<br> 	
+  								<input id="validAnimal" type="button" class="btn btn-success"  style="visibility:visible" value="Valider" disabled ></input>
+								<br> 
+							</div>	
 								</p>
 
 							</div>
-  	
+  
+<script type='text/javascript'>
+$("#valliste").html("Choisir un animal dans la liste");
+var ObjListe = document.getElementById('myDropdown');
+var ObjAffiche = document.getElementById('Animal');
+/*
+$(".clickable").click((e)=>{$("#Animal").html(e.currentTarget.attributes.data.nodeValue);
+$("#validAnimal").removeAttr("disabled");
+$("#valliste").html("<img style='width: 18rem;' src='"+e.currentTarget.childNodes[0].src+"' />");
+$("#answer_{{iQ}}").val(e.currentTarget.attributes.data.nodeValue);
+//alert($("#answer_{{iQ}}").val());
+});
+*/
 
-							<script>
+$(".clickable").click((e)=>{
+	$("#Animal").html(e.currentTarget.attributes.data.nodeValue);
+	$("#validAnimal").removeAttr("disabled");
+	$("#valliste").html("<img style='width: 18rem;' alt='"+e.currentTarget.childNodes[0].title+"' src='"+e.currentTarget.childNodes[0].src+"' />");
+	$("#answer_{{iQ}}").val(e.currentTarget.attributes.data.nodeValue);
+	//alert($("#answer_{{iQ}}").val());
+});
+
+
+/* When the user clicks on the button, 
+toggle between hiding and showing the dropdown content */
+/*function myFunction(e) {
+	ObjAffiche.innerHTML = "       " +  e.currentTarget.attributes.data.nodeValue ;
+} */
+</script>
+
+<!--							<script>
 
 								 $("#selectAnimal").on('change', () =>
 								{
-									$("#selectAnimal").attr("disabled","");
-									$("#tq2").css("visibility","visible");
-									$("#tq3").css("visibility","visible");
+									/*$("#selectAnimal").attr("disabled","");*/
+									/*$("#tq2").css("visibility","visible");*/
+									/*$("#tq3").css("visibility","visible");*/
+
+									$("#validAnimal").removeAttr("disabled");
+								});	
+
+							</script>
+-->
+							<script>
+								 $("#validAnimal").on("click", () =>
+								{
+									$("#selectAnimal").attr("disabled",""); 
+									$("#tq2").css("visibility","visible");  
+									$("#tq3").css("visibility","visible");    										$("#validAnimal").attr("disabled","");
+
 								});	
 
 							</script>
 
 
-<!--<input type="hidden" id ="answer_{{iQ}}" name="answer_{{iQ}}" value="3">-->
+
+							<!--<input type="hidden" id ="answer_{{iQ}}" name="answer_{{iQ}}" value="3">-->
+							<!-- on remplit le champ réponse de nom "value" de la question IQ avec le nom de l'animal choisi  -->
+
+							<input type="hidden" id ="answer_{{iQ}}" name="answer_{{iQ}}" value="-1">
+
 							<input type="hidden" id="question_index_{{iQ}}" name="question_index_{{iQ}}" value="{{q + 1}}">
 							<input type="hidden" name="system_index_{{iQ}}" value="{{systems[i]}}">
 						</h5>
@@ -297,21 +400,29 @@
 					<tr id="tq2" style="visibility:hidden" bgcolor={{config['questionBgColor'][q]}}>
 					
 					<td class="text-center" >
-						<h4>
-							<strong>
-								<a class="test"  id="tooltip_q" data-toggle="tooltip" data-placement="right" title="{{config['instructionsDetail'][q]}}">
-									<font color={{config['explanationTextColor'][q]}}>{{config['questionTitle'][q]}}</font> 
-								</a>
-							</strong>
-						</h4>
-						<h4><br>{{config['questionDetail'][q][0]}} "{{!samples[i]["text"]}}" <br> {{config['questionDetail'][q][1]}}</h4>
-
 
 				<video width="320" height="240" controls >
-				<source src="{{config['questionTestVideo'][0]}}" type="video/mp4">
+				<source src="{{config['questionTestVideo'][1]}}" type="video/mp4">
 				Your browser does not support the video tag.
 				</video>
 				
+
+						<h4>
+							<strong>
+<!--								<a class="test"  id="tooltip_q" data-toggle="tooltip" data-placement="right" title="{{config['instructionsDetail'][q]}}">
+									<font color={{config['explanationTextColor'][q]}}>{{config['questionTitle'][q]}}</font> 
+								</a>
+-->
+						<br><font color={{config['explanationTextColor'][q]}}>{{config['questionTitle'][q]}}</font>
+
+							</strong>
+						</h4>
+<!--						<h4><br>{{config['questionDetail'][q][0]}} "{{!samples[i]["text"]}}" <br> {{config['questionDetail'][q][1]}}</h4>   -->
+					<h4><br><font color={{config['explanationTextColor'][q]}}>{{config['questionDetail'][q][0]}} "{{!samples[i]["text"]}}"</font> 
+</h4>
+					<h4><font color={{config['explanationTextColor'][q]}}>{{config['questionDetail'][q][1]}} </font> 
+</h4>
+
 					</td>
 				
 
@@ -447,19 +558,27 @@
 					<tr id="tq3" style="visibility:hidden" bgcolor={{config['questionBgColor'][q]}}>
 					
 					<td class="text-center">
+
+				<video width="320" height="240" controls >
+				<source src="{{config['questionTestVideo'][2]}}" type="video/mp4">
+				Your browser does not support the video tag.
+				</video>
+					
+
 						<h4>
 							<strong>
+<!--
 								<a class="test"  id="tooltip_q" data-toggle="tooltip" data-placement="right" title="{{config['instructionsDetail'][q]}}">
 									<font color={{config['explanationTextColor'][q]}}>{{config['questionTitle'][q]}}</font> 
 								</a>
+-->
+						<br><font color={{config['explanationTextColor'][q]}}>{{config['questionTitle'][q]}}</font>
+
 							</strong>
 						</h4>
-						<h4><br>{{config['questionDetail'][q]}} </h4>
-
-				<video width="320" height="240" controls >
-				<source src="{{config['questionTestVideo'][0]}}" type="video/mp4">
-				Your browser does not support the video tag.
-				</video>
+						<!-- <h4><br>{{config['questionDetail'][q]}} </h4>  -->
+						<h4><br><font color={{config['explanationTextColor'][q]}}>{{config['questionDetail'][q]}}</font> 
+</h4>
 					
 					</td>
 				
@@ -609,7 +728,7 @@
 			<div class="row">
 				<div class="col-sm-6 col-sm-offset-3 col-md-6 col-md-offset-3">
 <!-- 					Submit button -->
-					<input id="next" type="submit" class="btn btn-lg btn-success btn-block pull-right" value="Next" style="margin-top: 20px;" disabled>
+					<input id="next" type="submit" class="btn btn-lg btn-success btn-block pull-right" value="Suivant" style="margin-top: 20px;" disabled>
 
 <!-- 					Auto-enabling -->
 					<script>
@@ -620,8 +739,13 @@
 
 
 					jQuery('body').on('pause', 'video', function(e) {
-						if (all_played('video')  
-						)
+//on  supprime le test de vérification suivant
+//						if (all_played('video')  
+//						) 
+//on le remplace par le test de vérification de l'échantillon video 
+						if (all_played('#video_sample')  
+						) 
+
 						{						 
 							$('input[type="submit"]').prop("disabled", false);
 						}
@@ -655,10 +779,15 @@
 	<div class="modal fade" id="introductionModal" tabindex="-1" role="dialog" aria-labelledby="introductionModalLabel">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content" style="background-color: #fcf8e3;">
+				<div class="modal-header">
+        			<h3 class="modal-title text-center" id="partie1IntroModalLabel">Test LSF - Partie 1 <br> Nom d'Animaux en Signes</h3>
+        			<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          			<span aria-hidden="true">&times;</span>
+        			</button>
+      				</div>
 				<div class="modal-body text-center">
-					<h3><span class="alert-warning">This is the <strong>introduction</strong>.</span></h3>
-					<h3><span class="alert-warning">Your answers will <strong>not</strong> be recorded for now.</span></h3>
-					<br>
+					<h4><span class="alert-warning">Ceci est l'étape d'introduction.</span></h4> 
+					<h4><span class="alert-warning">Les réponses correspondant à cet entraînement <strong>ne</strong> compteront <strong>pas</strong>.</span></h4><br>
 					<button type="button" class="btn btn-lg btn-warning" data-dismiss="modal">OK</button>
 				</div>
 			</div>
@@ -677,10 +806,17 @@
 	<div class="modal fade" id="realStartModal" tabindex="-1" role="dialog" aria-labelledby="realStartModalLabel">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content" style="background-color: #d9edf7;">
+				<div class="modal-header">
+        			<h3 class="modal-title text-center" id="partie1ReelModalLabel">Test LSF - Partie 1 <br> Nom d'Animaux en Signes</h3>
+        			<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          			<span aria-hidden="true">&times;</span>
+        			</button>
+      				</div>
+
 				<div class="modal-body text-center">
-					<h3><span class="alert-info text-center">This is now the <strong>real</strong> test, not an introduction step.</span></h3>
+					<h4><span class="alert-info text-center">C'est maintenant le test <strong>réel</strong>, vos réponses vont être enregistrées.</span></h4>
 					<br>
-					<button type="button" class="btn btn-lg btn-primary" data-dismiss="modal">Let's go!</button>
+					<button type="button" class="btn btn-lg btn-primary" data-dismiss="modal">Allons y !</button>
 				</div>
 			</div>
 		</div>

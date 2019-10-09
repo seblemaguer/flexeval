@@ -11,6 +11,7 @@ import sys
 from bottle import request
 from beaker.middleware import SessionMiddleware
 
+
 sys.path.insert(0,os.path.dirname(os.path.abspath(__file__)))
 import config
 import model
@@ -38,6 +39,21 @@ def badroute():
 	book = model.get_book_variable_module_name('config')
 	data={'APP_PREFIX':request.app.config['myapp.APP_PREFIX'], 'config': book}
 	return bottle.template('index', data)
+
+@app.post('/perso/lsf/commentaires')
+def persolsfcommentaires():
+
+	video = bottle.request.POST.get("video")
+	model.generate_comment_table()
+	model.add_comment_table(bottle.request.POST.get("courriel"),bottle.request.POST.get("commentaire"),video)
+
+
+@app.get('/devtestfeedback')
+def alaid():
+	book = model.get_book_variable_module_name('config')
+	data={'APP_PREFIX':request.app.config['myapp.APP_PREFIX'], 'config': book}
+	return bottle.template('completed', data)
+
 
 @app.route('/alreadyregister/<key>/<val>')
 def async_rec_user_register_verification(key,val):
@@ -266,10 +282,12 @@ if __name__ == '__main__':
 	main()
 else:
 	application = app_middlware
+
 """
 
 
-model_body="""import os
+model_body="""
+import os
 import sqlite3
 from datetime import date, datetime
 import random
@@ -284,9 +302,9 @@ def already_in_user_table(key,val):
 
 	#exec la requete (si la table existe, on aura une exception)
 	try:
-		print('SELECT COUNT(\\''+key+'\\') FROM user WHERE \\''+key+'\\' = \\''+val+'\\' ')
+		print('SELECT COUNT(\''+key+'\') FROM user WHERE \''+key+'\' = \''+val+'\' ')
 		con = sqlite3.connect(os.path.join(os.path.dirname(os.path.abspath(__file__)),'data.db'))
-		c = con.execute('SELECT COUNT('+key+') FROM user WHERE '+key+' = \\''+val+'\\' ')
+		c = con.execute('SELECT COUNT('+key+') FROM user WHERE '+key+' = \''+val+'\' ')
 		res = c.fetchall()
 		con.commit()
 		con.close()
@@ -308,6 +326,39 @@ def generate_user_table(post_data):
 	try:
 		con = sqlite3.connect(os.path.join(os.path.dirname(os.path.abspath(__file__)),'data.db'))
 		con.execute('CREATE TABLE user (`__id__` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, '+req+')')
+		con.commit()
+		con.close()
+	except Exception as e:
+		pass
+	
+
+def add_comment_table(courriel,commentaire,video):
+
+	video_stream = None
+
+	try:
+		with video.file as f_vid:
+		    video_stream = f_vid.read()
+	except Exception as e:
+		pass
+
+	con = sqlite3.connect(os.path.join(os.path.dirname(os.path.abspath(__file__)),'data.db'))
+	con.text_factory = str
+	cursor = con.cursor()
+	sqlite_insert_blob_query = \"\"\" INSERT INTO 'commentaires' ('Commentaire', 'Courriel', 'Video') VALUES (?, ?, ?)\"\"\"
+        data_tuple = (commentaire, courriel, video_stream )
+        cursor.execute(sqlite_insert_blob_query, data_tuple)
+
+	con.commit()
+	cursor.close()
+	con.close()
+
+def generate_comment_table():
+
+	#exec la requete (si la table existe, on aura une exception)
+	try:
+		con = sqlite3.connect(os.path.join(os.path.dirname(os.path.abspath(__file__)),'data.db'))
+		con.execute('CREATE TABLE `commentaires` (`Commentaire`	TEXT,`Video` BLOB, `Courriel` TEXT,`ID` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE );')
 		con.commit()
 		con.close()
 	except Exception as e:
