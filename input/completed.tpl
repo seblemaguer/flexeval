@@ -34,7 +34,14 @@
 		<div class="container">
 			<div class="row">
 				<div class="col-md-6 col-md-offset-3">
-					<h2 class="text-center">Test completed!</h2>
+					%if already_completed:
+						<div class="alert alert-success" role="alert">
+							<h2 class="text-center">You have already participated.</h2>
+						</div>
+						<br>
+					%else:
+						<h2 class="text-center">Test completed!</h2>
+					%end
 					<h2 class="text-center">Thank you for your time.</h2>
 					<br>
 					<br>

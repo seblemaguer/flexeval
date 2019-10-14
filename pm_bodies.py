@@ -74,6 +74,21 @@ def postd():
 def post_get(name, default=''):
 	return bottle.request.POST.get(name, default).strip()
 
+def get_question_answer_keys():
+	keys = list()
+	for k in bottle.request.POST:
+		# If prefix is "answer" and the corresponding question exists
+		prefix = re.compile('^answer(.*)')
+		is_answer = prefix.match(k)
+		if is_answer:
+			suffix = is_answer.group(1)
+			question = "question_index" + suffix
+			# Add in the set of working keys
+			if question in bottle.request.POST.keys():
+				print(suffix)
+				keys.append(suffix)
+	return keys
+
 def testLogin():
 	app_session = bottle.request.environ.get('beaker.session')
 	if 'pseudo' in app_session:
@@ -128,8 +143,10 @@ def process_test():
 			data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "samples":samples, "systems":enc_systems, "nfixed": model.get_nb_position_fixed(), "index":index, "user":user, "introduction": False, "step": model.get_nb_step_user(user)+1, "totalstep" : model.get_nb_step(), "progress" : model.get_progress(user), "config": book, "hidden_fields": hidden}
 		return bottle.template('template', data)
 	else :
+    	book = model.get_book_variable_module_name('config')
+		data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "config": book, "already_completed": True}
 		bottle.request.environ.get('beaker.session').delete()
-		return "<p>You have already done this test</p>"
+		return bottle.template('completed', data)
 
 @app.post('/test')
 def process_test_post():
@@ -149,24 +166,23 @@ def process_answers():
 	#get the post data and insert into db
 	if ('intro_done' in app_session and app_session['intro_done'] == True) or model.get_nb_step_user(user) > 0:
 		systems=[]
-
+		keys = get_question_answer_keys()
 		s=1
 		while post_get("real_system_"+str(s))!="" :
 			systems.append(post_get("real_system_"+str(s)))
 			s=s+1
 		answers=[]
 
-		i=1
-		while post_get("answer_"+str(i))!="" :
+		for k in keys:
 			system_index = 1
 			question_index = 1
-			content = post_get("answer_"+str(i))
-			if "system_index_"+str(i) in bottle.request.POST:
-				system_index = post_get("system_index_"+str(i))
-			if "question_index_"+str(i) in bottle.request.POST:
-				question_index = post_get("question_index_"+str(i))
+			content = post_get("answer"+k)
+			if "system_index"+k in bottle.request.POST:
+				system_index = post_get("system_index"+k)
+			if "question_index"+k in bottle.request.POST:
+				question_index = post_get("question_index"+k)
+			print({"system_index": system_index, "question_index": question_index, "content": content})
 			answers.append({"system_index": system_index, "question_index": question_index, "content": content})
-			i=i+1
 		post_data = {"author":model.get_author(),"user":user,"answers": answers,"systems": systems,"sample_index": post_get("ref")}
 		model.insert_data(post_data)
 	else:
@@ -178,7 +194,7 @@ def process_answers():
 		bottle.redirect(request.app.config['myapp.APP_PREFIX']+'/test')
 	else :
 		book = model.get_book_variable_module_name('config')
-		data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "config": book}
+		data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "config": book, "already_completed": False}
 		bottle.request.environ.get('beaker.session').delete()
 		return bottle.template('completed', data)
 
@@ -568,7 +584,7 @@ def insert_data(data) :
 		conn.commit()
 		answers = data['answers']
 		for answer in answers :
-			val = '"'+str(data['user'])+'","'+str(now)+'","'+answer['content']+'","'+str(data['sample_index'])+'","'+str(answer['question_index'])+'","'+answer['system_index']+'",'+sysval
+			val = '"'+str(data['user'])+'","'+str(now)+'","'+answer['content']+'","'+str(data['sample_index'])+'","'+str(answer['question_index'])+'","'+str(answer['system_index'])+'",'+sysval
 			c.execute("insert into answer(user,date,content,sample_index,question_index,system_index,"+systs+") values ("+val+")")
 		conn.commit()
 	conn.close()

@@ -49,7 +49,7 @@ def parse_arguments():
 		print('verbose mode enabled')
 
 	global csv_delimiter
-	if len(args.csv_delimiter) == 1 or args.csv_delimiter == 'tab':
+	if len(args.csv_delimiter) == 1 or args.csv_delimiter == 'tab' or args.csv_delimiter == "\\t":
 		csv_delimiter = args.csv_delimiter
 	elif len(args.csv_delimiter) == 3 and args.csv_delimiter[0] == '\'' and args.csv_delimiter[2] == '\'':
 		csv_delimiter = args.csv_delimiter[1]
@@ -123,7 +123,11 @@ def create_architecture(testDirectory):
 		return dir + '/'
 
 	simpleTestName = os.path.basename(testDirectory)
-	mainDirectory = os.path.dirname(testDirectory) + os.sep
+	mainDirectory = os.path.dirname(testDirectory)
+	if mainDirectory != '':
+		mainDirectory += os.sep
+	else:
+		mainDirectory = '.' + os.sep
 
 	if not os.path.exists(mainDirectory):
 		os.makedirs(mainDirectory)
@@ -292,7 +296,7 @@ def load_csv(listOfPath, config):
 		if not os.path.isfile(csvPath):
 			exit_on_error(csvPath + ' must be a file')
 		with open(csvPath, 'rb') as csvfile:
-			if csv_delimiter == 'tab':
+			if csv_delimiter == 'tab' or csv_delimiter == "\\t":
 				spamreader = csv.reader(csvfile, delimiter='\t', quotechar='"')
 			else:
 				spamreader = csv.reader(csvfile, delimiter=csv_delimiter, quotechar='"')
