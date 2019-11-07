@@ -174,7 +174,7 @@ def process_test():
 			data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "samples":samples, "systems":enc_systems, "nfixed": model.get_nb_position_fixed(), "index":index, "user":user, "introduction": False, "step": model.get_nb_step_user(user)+1, "totalstep" : model.get_nb_step(), "progress" : model.get_progress(user), "config": book, "hidden_fields": hidden}
 		return bottle.template('template', data)
 	else :
-    	book = model.get_book_variable_module_name('config')
+                book = model.get_book_variable_module_name('config')
 		data={"APP_PREFIX":request.app.config['myapp.APP_PREFIX'], "config": book, "already_completed": True}
 		bottle.request.environ.get('beaker.session').delete()
 		return bottle.template('completed', data)
@@ -257,7 +257,7 @@ def export_db_ok():
 					ct_value = ""
 					if not a[4] is None:
 							ct_value = sys[int(a[4])]
-					row = {'user': a[1], 'date': a[2], 'content': a[3], 'system index': ct_value, 'sample index': a[5], 'question index': a[6]}
+					row = {'user': a[1], 'date': a[2], 'content': a[3].encode('utf-8'), 'system index': ct_value, 'sample index': a[5], 'question index': a[6]}
 					#'system1': sys[int(a[7])], 'system2': sys[int(a[8])], 'system3': sys[int(a[9])], 'system4': sys[int(a[10])], 'system5': sys[int(a[11])]
 					i=0
 					for s in systems :
