@@ -708,24 +708,28 @@ def insert_data(data) :
 	res = c.fetchall()
 	if len(res) == 0: # Check if the response is not already in the database
 
-		sysval=''
-		systs=''
+		sysval = ''
+		systs = ''
 		for i in range(int(config.nbSystemDisplayed)):
-			sysval=sysval+'"'+data['systems'][i]+'"'
-			systs=systs+'system'+str(i+1)
-			if(i<int(config.nbSystemDisplayed)-1):
-				sysval=sysval+','
-				systs=systs+','
+			sysval = sysval+data['systems'][i]
+			systs = systs+'system'+str(i+1)
+			if(i < int(config.nbSystemDisplayed)-1):
+				sysval = sysval+','
+				systs = systs+','
+		
 		# Update the number of time processed for the samples
 		for sy in data['systems'] :
 			c.execute('select nb_processed from sample where id_system="'+sy+'" and sample_index='+str(data['sample_index']))
 			n = c.fetchall()[0][0]
 			c.execute('update sample set nb_processed='+str(n+1)+' where id_system="'+sy+'" and sample_index='+str(data['sample_index']))
+		
 		conn.commit()
+		
 		answers = data['answers']
 		for answer in answers :
-			val = '"'+str(data['user'])+'","'+str(now)+'","'+answer['content']+'","'+str(data['sample_index'])+'","'+str(answer['question_index'])+'","'+str(answer['system_index'])+'",'+sysval
-			c.execute("insert into answer(user,date,content,sample_index,question_index,system_index,"+systs+") values ("+val+")")
+			c.execute("insert into answer(user,date,content,sample_index,question_index,system_index,"+systs+") values (?,?,?,?,?,?,?)", (str(data['user']), now, buffer(answer['content']), data['sample_index'], answer['question_index'], answer['system_index'], sysval))
+		
 		conn.commit()
+	
 	conn.close()
 """
