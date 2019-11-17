@@ -257,7 +257,7 @@ def export_db_ok():
 					ct_value = ""
 					if not a[4] is None:
 							ct_value = sys[int(a[4])]
-					row = {'user': a[1], 'date': a[2], 'content': a[3].encode('utf-8'), 'system index': ct_value, 'sample index': a[5], 'question index': a[6]}
+					row = {'user': a[1], 'date': a[2], 'content': a[3], 'system index': ct_value, 'sample index': a[5], 'question index': a[6]}
 					#'system1': sys[int(a[7])], 'system2': sys[int(a[8])], 'system3': sys[int(a[9])], 'system4': sys[int(a[10])], 'system5': sys[int(a[11])]
 					i=0
 					for s in systems :
