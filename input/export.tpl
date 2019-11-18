@@ -40,8 +40,8 @@
 								<input type="text" class="form-control" placeholder="Token" name="token" autofocus required>
 							</div>
 							<!-- Change this to a button or input when using this as a form -->
-							<input type="submit" value="DB" name="type" class="btn btn-lg btn-success btn-block" value="Export DB">
-							<input type="submit" value="CSV" name="type" class="btn btn-lg btn-success btn-block" value="Export CSV">
+							<button type="submit" value="DB" name="type" class="btn btn-lg btn-success btn-block">Export as SQLite database</button>
+							<button type="submit" value="CSV" name="type" class="btn btn-lg btn-success btn-block">Export as CSV file</button>
 						</fieldset>
 					</form>
 					<br>

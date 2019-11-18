@@ -10,7 +10,6 @@ import sqlite3
 import string
 import sys
 from pprint import pprint
-from pm_bodies import platform_body, model_body
 
 
 # global variables
@@ -22,7 +21,9 @@ tok = ''
 useMedia = []
 verbose = False
 warning = []
-
+perceval_dir = os.path.dirname(sys.argv[0])
+platform_file = "platform.py"
+model_file = "model.py"
 
 def parse_arguments():
 	print('	╔════════════════╗')
@@ -404,10 +405,11 @@ def create_platform():
 		print('|-------------------|')
 		print('| platform creation |')
 		print('v-------------------v')
-
-	fo = open(testDirectory + 'platform.py', 'wb')
-	fo.write(platform_body)
-	fo.close()
+	
+	shutil.copy(os.path.join(perceval_dir, platform_file), testDirectory)
+	# fo = open(testDirectory + 'platform.py', 'wb')
+	# fo.write(platform_body)
+	# fo.close()
 	if verbose:
 		print('Done.\n')
 
@@ -418,9 +420,10 @@ def create_model():
 		print('| model creation |')
 		print('v----------------v')
 
-	fo = open(testDirectory + 'model.py', 'wb')
-	fo.write(model_body)
-	fo.close()
+	shutil.copy(os.path.join(perceval_dir, model_file), testDirectory)
+	# fo = open(testDirectory + 'model.py', 'wb')
+	# fo.write(model_body)
+	# fo.close()
 	if verbose:
 		print('Done.\n')
 
