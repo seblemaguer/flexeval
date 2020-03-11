@@ -3,3 +3,13 @@ Assets:
   jquery
 
 Footer & Header template
+
+Gestion des fichiers
+
+PROVIDER:
+  Auth :
+    "provider": create anon@ID
+  Static
+
+File :
+  regarde .files
