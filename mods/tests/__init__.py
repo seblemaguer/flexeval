@@ -1,0 +1,93 @@
+from flask import Blueprint, render_template,url_for,request,redirect,session
+from utils import db,config
+from mods.tests.model import System as mSystem
+from mods.tests.model import Sample as mSample
+import random
+
+bp = Blueprint('tests', __name__,template_folder='templates',static_folder='../../static')
+
+# Routes
+@bp.route('/<name>', methods = ['GET'])
+def get(name):
+
+    user_id = session["user"]
+    session["Test_"+str(name)] = False
+
+    try:
+        samples = mSample.Sample.query.filter_by(user_id=user_id,name_test=name).all()
+    except Exception as e:
+        samples = []
+
+    choice = []
+    for system in config["tests"][name]["systems"]:
+        system = mSystem.System.get(utils.NAME_REP_CONFIG+'/'+system)
+
+        nb_answer = 0
+        select_question = None
+        try:
+            choice_per_system = []
+            min_sample_per_syssample = 9999999999999999999
+
+            for syssample in system.samples():
+                cpt_sample_per_syssample = 0
+
+                for sample in syssample.samples:
+                    if(sample.name_test == name):
+                        if(sample.user_id == user_id):
+                            if select_question is None:
+                                select_question = sample.question
+
+                            if sample.question == select_question:
+                                nb_answer = nb_answer + 1
+                                assert nb_answer < config["tests"][name]["#answer"]
+                                if(nb_answer == config["tests"][name]["#answer"]):
+                                    session["Test_"+str(name)] = True
+                        else:
+                            cpt_sample_per_syssample = cpt_sample_per_syssample + 1
+
+                if(cpt_sample_per_syssample <= min_sample_per_syssample):
+                    print("Woup")
+                    if cpt_sample_per_syssample < min_sample_per_syssample:
+                        choice_per_system = [syssample]
+                        min_sample_per_syssample = cpt_sample_per_syssample
+                    else:
+                        choice_per_system.append(syssample)
+
+            choice.append(random.choice(choice_per_system))
+
+        except Exception as e:
+            print(e)
+            return redirect(config["tests"][name]["next"])
+
+        if len(choice) == 0:
+            print("OKK")
+            return redirect(config["tests"][name]["next"])
+
+    random.shuffle(choice)
+    return render_template(config["tests"][name]["template"],name=name,systems=choice)
+
+@bp.route('/<name>/send', methods = ['POST'])
+def save(name):
+    user_id = session["user"]
+
+    if("Test_"+str(name) in session):
+
+        for key in request.form.keys():
+            rtn = mSystem.SysSample.get_save_field(key)
+            if not(rtn is None):
+                question = rtn[0]
+                answer = request.form[key]
+                syssample_id = rtn[1]
+
+                sample = mSample.Sample(question,answer,name,user_id)
+                syssample = mSystem.SysSample.query.filter_by(id=syssample_id).first()
+                db.session.add(sample)
+                syssample.samples.append(sample)
+        db.session.commit()
+
+        return redirect("../"+str(name))
+        print(session["Test_"+str(name)])
+        if session["Test_"+str(name)] == True:
+            return redirect(config["tests"][name]["next"])
+    else:
+        return redirect(config["tests"][name]["next"])

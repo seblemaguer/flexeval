@@ -1,0 +1,42 @@
+{
+  "SQLALCHEMY_DATABASE_URI":"sqlite:///MachinTruc.db",
+  "HOST":"127.0.0.1",
+  "PORT":8080,
+
+  "use":["login","pages","questionnaire","tests"],
+  "entrypoint": "/login",
+
+  "login":
+  {
+    "next":"/pages/tuto"
+  },
+
+  "pages":
+  {
+    "tuto":
+    {
+      "next":"/questionnaire/qrA"
+    }
+  },
+
+  "questionnaire":
+  {
+    "qrA":
+    {
+      "template":"questionnaireA.tpl",
+      "next":"/tests/tmos"
+    }
+  },
+
+  "tests":
+  {
+    "tmos":
+    {
+      "template":"txtmos.tpl",
+      "systems":["system1.csv"],
+      "#answer":3,
+      "next":"/pages/end"
+    }
+  }
+
+}
