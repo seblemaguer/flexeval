@@ -30,10 +30,11 @@ def get(name):
 
             for syssample in system.samples():
                 cpt_sample_per_syssample = 0
-
+                already_present_to_the_user = False
                 for sample in syssample.samples:
                     if(sample.name_test == name):
                         if(sample.user_id == user_id):
+                            already_present_to_the_user = True
                             if select_question is None:
                                 select_question = sample.question
 
@@ -45,22 +46,20 @@ def get(name):
                         else:
                             cpt_sample_per_syssample = cpt_sample_per_syssample + 1
 
-                if(cpt_sample_per_syssample <= min_sample_per_syssample):
-                    print("Woup")
-                    if cpt_sample_per_syssample < min_sample_per_syssample:
-                        choice_per_system = [syssample]
-                        min_sample_per_syssample = cpt_sample_per_syssample
-                    else:
-                        choice_per_system.append(syssample)
+                if not(already_present_to_the_user):
+                    if(cpt_sample_per_syssample <= min_sample_per_syssample):
+                        if cpt_sample_per_syssample < min_sample_per_syssample:
+                            choice_per_system = [syssample]
+                            min_sample_per_syssample = cpt_sample_per_syssample
+                        else:
+                            choice_per_system.append(syssample)
 
             choice.append(random.choice(choice_per_system))
 
         except Exception as e:
-            print(e)
             return redirect(config["tests"][name]["next"])
 
         if len(choice) == 0:
-            print("OKK")
             return redirect(config["tests"][name]["next"])
 
     random.shuffle(choice)
@@ -85,9 +84,7 @@ def save(name):
                 syssample.samples.append(sample)
         db.session.commit()
 
-        return redirect("../"+str(name))
-        print(session["Test_"+str(name)])
-        if session["Test_"+str(name)] == True:
-            return redirect(config["tests"][name]["next"])
-    else:
+    if session["Test_"+str(name)] == True:
         return redirect(config["tests"][name]["next"])
+    else:
+        return redirect("../"+str(name))

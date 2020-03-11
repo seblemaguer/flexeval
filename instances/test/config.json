@@ -34,7 +34,7 @@
     {
       "template":"txtmos.tpl",
       "systems":["system1.csv"],
-      "#answer":3,
+      "#answer":10,
       "next":"/pages/end"
     }
   }
