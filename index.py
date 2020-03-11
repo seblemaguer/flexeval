@@ -15,13 +15,13 @@ if __name__ == '__main__':
     parser.add_argument("config",metavar='CONFIG_REP', type=str, help='configuration')
     args = parser.parse_args()
 
-    utils.NAME_REP_CONFIG = os.path.dirname(os.path.abspath(__file__))+"./configs/"+args.config
+    utils.NAME_REP_CONFIG = os.path.dirname(os.path.abspath(__file__))+"./instances/"+args.config
 
     utils.app = Flask(__name__, instance_relative_config=False)
     with open(utils.NAME_REP_CONFIG+'/config.json') as config:
         utils.config = json.load(config)
 
-    utils.app.config['SQLALCHEMY_DATABASE_URI'] = utils.config["SQLALCHEMY_DATABASE_URI"]
+    utils.app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///"+utils.NAME_REP_CONFIG+"/"+utils.config["SQLALCHEMY_DATABASE_URI"]
     utils.app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     utils.app.secret_key = b'_5#y2zcer88L"Fczerzce4Q8sdqsdcezqtz\n\xec]/'
     utils.db = SQLAlchemy(utils.app)

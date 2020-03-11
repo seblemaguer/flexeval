@@ -1,10 +1,10 @@
 from flask import Blueprint, render_template,url_for,request,redirect,session
-from utils import db,config
+from utils import db,config,NAME_REP_CONFIG
 from mods.tests.model import System as mSystem
 from mods.tests.model import Sample as mSample
 import random
 
-bp = Blueprint('tests', __name__,template_folder='templates',static_folder='../../static')
+bp = Blueprint('tests', __name__,template_folder=NAME_REP_CONFIG+'/templates',static_folder='../../static')
 
 # Routes
 @bp.route('/<name>', methods = ['GET'])
@@ -20,7 +20,7 @@ def get(name):
 
     choice = []
     for system in config["tests"][name]["systems"]:
-        system = mSystem.System.get(utils.NAME_REP_CONFIG+'/'+system)
+        system = mSystem.System.get(NAME_REP_CONFIG+'/systems/'+system)
 
         nb_answer = 0
         select_question = None
