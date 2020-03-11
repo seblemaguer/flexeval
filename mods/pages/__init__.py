@@ -1,21 +1,11 @@
 from flask import Blueprint, render_template,url_for,request,redirect,session
-from mods.login.model.User import User as mUser
-from utils import db,config
+from utils import db,config,NAME_REP_CONFIG
 
-bp = Blueprint('pages', __name__,template_folder='templates',static_folder='../../static')
+bp = Blueprint('pages', __name__,template_folder=NAME_REP_CONFIG+'/templates',static_folder='../../assets')
 
 # Routes
-@bp.route('/end')
-def end():
 
-    try:
-        del session["user"]
-    except Exception as e:
-        pass
+@bp.route('/<name>', methods = ['GET'])
+def get(name):
 
-    return render_template('end.tpl')
-
-@bp.route('/tuto')
-def tuto():
-
-    return render_template('tuto.tpl',next=config["pages"]["tuto"]["next"])
+    return render_template(config["pages"][name]["template"],next=config["pages"][name]["next"])

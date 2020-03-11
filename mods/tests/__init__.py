@@ -4,7 +4,7 @@ from mods.tests.model import System as mSystem
 from mods.tests.model import Sample as mSample
 import random
 
-bp = Blueprint('tests', __name__,template_folder=NAME_REP_CONFIG+'/templates',static_folder='../../static')
+bp = Blueprint('tests', __name__,template_folder=NAME_REP_CONFIG+'/templates',static_folder='../../assets')
 
 # Routes
 @bp.route('/<name>', methods = ['GET'])

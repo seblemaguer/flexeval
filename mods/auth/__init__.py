@@ -1,14 +1,14 @@
 from flask import Blueprint, render_template,url_for,request,redirect,session
-from mods.login.model.User import User as mUser
+from mods.auth.model.User import User as mUser
 from utils import db,config
 
-bp = Blueprint('login', __name__,template_folder='templates',static_folder='../../static')
+bp = Blueprint('auth', __name__,template_folder='templates',static_folder='../../assets')
 
 # Routes
-@bp.route('/')
+@bp.route('/login')
 def login():
     if "user" in session:
-        return redirect(config["login"]["next"])
+        return redirect(config["auth"]["login"]["next"])
     else:
         return render_template('login.tpl')
 
@@ -26,4 +26,13 @@ def log_register():
 
     session["user"] = user.id
 
-    return redirect(config["login"]["next"])
+    return redirect(config["auth"]["login"]["next"])
+
+@bp.route('/deco/<name>')
+def deco(name):
+    try:
+        del session["user"]
+    except Exception as e:
+        pass
+
+    return redirect(config["auth"]["deco"][name]["next"])

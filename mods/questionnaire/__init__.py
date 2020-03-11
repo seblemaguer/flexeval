@@ -3,7 +3,7 @@ from utils import db,config,NAME_REP_CONFIG
 from mods.questionnaire.model.QRResp import QRResp as mQRResp
 
 
-bp = Blueprint('questionnaire', __name__,template_folder=NAME_REP_CONFIG+'/templates',static_folder='../../static')
+bp = Blueprint('questionnaire', __name__,template_folder=NAME_REP_CONFIG+'/templates',static_folder='../../assets')
 
 # Routes
 @bp.route('/<name>', methods = ['GET'])

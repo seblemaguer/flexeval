@@ -26,10 +26,10 @@ if __name__ == '__main__':
     utils.app.secret_key = b'_5#y2zcer88L"Fczerzce4Q8sdqsdcezqtz\n\xec]/'
     utils.db = SQLAlchemy(utils.app)
 
-    if "login" in utils.config["use"]:
-        import mods.login as ml
-        from mods.login.model import *
-        utils.app.register_blueprint(ml.bp,url_prefix='/login') # Register Blueprint
+    if "auth" in utils.config["use"]:
+        import mods.auth as ml
+        from mods.auth.model import *
+        utils.app.register_blueprint(ml.bp,url_prefix='/auth') # Register Blueprint
 
     if "pages" in utils.config["use"]:
         import mods.pages as mp

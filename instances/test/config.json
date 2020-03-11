@@ -3,18 +3,40 @@
   "HOST":"127.0.0.1",
   "PORT":8080,
 
-  "use":["login","pages","questionnaire","tests"],
-  "entrypoint": "/login",
+  "use":["auth","pages","questionnaire","tests"],
+  "entrypoint": "/auth/login",
 
-  "login":
+  "auth":
   {
-    "next":"/pages/tuto"
+    "login":
+    {
+      "next":"/pages/tuto"
+    },
+
+    "deco":
+    {
+      "stop":
+      {
+        "next":"/auth/login"
+      },
+      "end":
+      {
+        "next":"/pages/end"
+      }
+    }
   },
 
   "pages":
   {
+    "end":
+    {
+      "template":"end.tpl",
+      "next":""
+    },
+
     "tuto":
     {
+      "template":"tuto.tpl",
       "next":"/questionnaire/qrA"
     }
   },
@@ -23,7 +45,7 @@
   {
     "qrA":
     {
-      "template":"questionnaireA.tpl",
+      "template":"questionnaire.tpl",
       "next":"/tests/tmos"
     }
   },
@@ -35,7 +57,7 @@
       "template":"txtmos.tpl",
       "systems":["system1.csv"],
       "#answer":10,
-      "next":"/pages/end"
+      "next":"/auth/deco/end"
     }
   }
 
