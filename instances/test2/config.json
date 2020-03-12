@@ -1,0 +1,45 @@
+{
+
+  "entrypoint": "/auth_login/login",
+
+  "auth_login":
+  {
+    "login":
+    {
+      "next":"/tests/tdeux"
+    },
+
+    "deco":
+    {
+      "stop":
+      {
+        "next":"/auth_login/login"
+      },
+      "end":
+      {
+        "next":"/pages/end"
+      }
+    }
+  },
+
+  "pages":
+  {
+    "end":
+    {
+      "template":"end.tpl",
+      "next":""
+    }
+  },
+
+  "tests":
+  {
+    "tdeux":
+    {
+      "template":"tdeux.tpl",
+      "systems":["system1.csv","system2.csv"],
+      "#answer":10,
+      "next":"/auth_login/deco/end"
+    }
+  }
+
+}
