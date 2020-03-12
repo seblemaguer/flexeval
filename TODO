@@ -4,12 +4,11 @@ Assets:
 
 Footer & Header template
 
-Gestion des fichiers
-
 PROVIDER:
-  Auth :
-    "provider": create anon@ID
   Static
 
+Gestion des fichiers: reponse multiple type
 File :
   regarde .files
+
+SysSample

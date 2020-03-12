@@ -7,7 +7,7 @@ class Sample(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
 
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, nullable=False)
     syssample_id = db.Column(db.Integer, db.ForeignKey('syssample.id'))
     name_test = db.Column(db.String, nullable=False)
 

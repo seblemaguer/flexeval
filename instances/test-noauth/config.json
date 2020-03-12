@@ -1,26 +1,7 @@
 {
 
-  "entrypoint": "/auth_login/login",
+  "entrypoint": "/pages/tuto",
 
-  "auth_login":
-  {
-    "login":
-    {
-      "next":"/pages/tuto"
-    },
-
-    "deco":
-    {
-      "stop":
-      {
-        "next":"/auth_login/login"
-      },
-      "end":
-      {
-        "next":"/pages/end"
-      }
-    }
-  },
 
   "pages":
   {
@@ -53,7 +34,7 @@
       "template":"txtmos.tpl",
       "systems":["system1.csv"],
       "#answer":10,
-      "next":"/auth_login/deco/end"
+      "next":"/pages/end"
     }
   }
 

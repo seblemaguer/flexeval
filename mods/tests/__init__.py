@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template,url_for,request,redirect,session
-from utils import db,config,NAME_REP_CONFIG
+from utils import db,config,NAME_REP_CONFIG,get_provider
 from mods.tests.model import System as mSystem
 from mods.tests.model import Sample as mSample
 import random
@@ -10,7 +10,7 @@ bp = Blueprint('tests', __name__,template_folder=NAME_REP_CONFIG+'/templates',st
 @bp.route('/<name>', methods = ['GET'])
 def get(name):
 
-    user_id = session["user"]
+    user_id = get_provider("auth").get()
     session["Test_"+str(name)] = False
 
     try:
@@ -67,7 +67,7 @@ def get(name):
 
 @bp.route('/<name>/send', methods = ['POST'])
 def save(name):
-    user_id = session["user"]
+    user_id = get_provider("auth").get()
 
     if("Test_"+str(name) in session):
 
