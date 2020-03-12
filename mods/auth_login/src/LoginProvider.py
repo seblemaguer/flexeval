@@ -1,4 +1,4 @@
-from flask import session
+from flask import session, redirect
 from src.providers.AuthProvider import AuthProvider
 
 class LoginAuthProvider(AuthProvider):

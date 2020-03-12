@@ -20,18 +20,18 @@ def get(name):
 
     choice = []
     for system in config["tests"][name]["systems"]:
-        system = mSystem.System.get(NAME_REP_CONFIG+'/systems/'+system)
-
+        system = mSystem.System.get(system)
         nb_answer = 0
         select_question = None
         try:
             choice_per_system = []
             min_sample_per_syssample = 9999999999999999999
+            for syssample in system.samples:
 
-            for syssample in system.samples():
                 cpt_sample_per_syssample = 0
                 already_present_to_the_user = False
-                for sample in syssample.samples:
+                for sample in syssample.samples():
+
                     if(sample.name_test == name):
                         if(sample.user_id == user_id):
                             already_present_to_the_user = True
@@ -57,6 +57,7 @@ def get(name):
             choice.append(random.choice(choice_per_system))
 
         except Exception as e:
+
             return redirect(config["tests"][name]["next"])
 
         if len(choice) == 0:
@@ -78,11 +79,8 @@ def save(name):
                 answer = request.form[key]
                 syssample_id = rtn[1]
 
-                sample = mSample.Sample(question,answer,name,user_id)
-                syssample = mSystem.SysSample.query.filter_by(id=syssample_id).first()
-                db.session.add(sample)
-                syssample.samples.append(sample)
-        db.session.commit()
+                mSystem.System.get_syssample(syssample_id).add_sample(question,answer,name,user_id)
+
 
     if session["Test_"+str(name)] == True:
         return redirect(config["tests"][name]["next"])
