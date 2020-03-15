@@ -2,14 +2,14 @@
 
   <head>
 
-    	<meta charset="utf-8">
+      <meta charset="utf-8">
 
-      <title> {% block title %}{% endblock %} </title>
+      <title> {% block title %}PercEval{% endblock %} </title>
 
       <!-- JQuery -->
       <script src="/static/js/jquery-3.4.1.min.js"></script>
 
-    	<!-- Bootstrap Core CSS -->
+      <!-- Bootstrap Core CSS -->
     	<link href="/static/css/bootstrap-4.4.1/bootstrap.min.css" rel="stylesheet">
     	<script src="/static/js/bootstrap-4.4.1/bootstrap.min.js"></script>
 
@@ -18,15 +18,21 @@
   <body>
 
     <header>
-      {% block header %}Coucou{% endblock %}
+      {% block header %}
+
+      {% endblock %}
     </header>
 
     <section class="content">
-      {% block content %}{% endblock %}
+      {% block content %}
+
+      {% endblock %}
     </section>
 
     <footer>
-      {% block footer %}Coucou{% endblock %}
+      {% block footer %}
+
+      {% endblock %}
     </footer>
 
   </body>
