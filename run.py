@@ -5,7 +5,7 @@ import json
 import utils
 import argparse
 import os
-
+import static as sstatic
 
 #  Main
 if __name__ == '__main__':
@@ -17,8 +17,8 @@ if __name__ == '__main__':
     parser.add_argument("port",metavar='PORT', type=int, help='8080')
     args = parser.parse_args()
 
-
-    utils.NAME_REP_CONFIG = os.path.dirname(os.path.abspath(__file__))+"./instances/"+args.instance
+    utils.ROOT =  os.path.dirname(os.path.abspath(__file__))
+    utils.NAME_REP_CONFIG = os.path.dirname(os.path.abspath(__file__))+"/instances/"+args.instance
 
     utils.app = Flask(__name__, instance_relative_config=False)
     with open(utils.NAME_REP_CONFIG+'/config.json') as config:
@@ -28,6 +28,9 @@ if __name__ == '__main__':
     utils.app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     utils.app.secret_key = b'_5#y2zcer88L"Fczerzce4Q8sdqsdcezqtz\n\xec]/'
     utils.db = SQLAlchemy(utils.app)
+
+    utils.app.url_map.converters['list'] = utils.ListConverter
+    utils.app.register_blueprint(sstatic.bp,url_prefix='/static') # Register Blueprint
 
     if "auth_login" in utils.config:
         import mods.auth_login as ml
@@ -52,6 +55,7 @@ if __name__ == '__main__':
     @utils.app.route('/')
     def main_route():
         return redirect(utils.config["entrypoint"])
+
 
     # Run app
     utils.app.run(host=args.host,port=args.port)

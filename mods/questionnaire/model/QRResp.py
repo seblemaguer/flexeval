@@ -13,5 +13,5 @@ class QRResp(db.Model):
     def __init__(self,name,question,response,userid):
         self.name = name
         self.question = question
-        self.response = response
+        self.response = str(response)
         self.user_id = userid
