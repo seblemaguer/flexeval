@@ -1,22 +1,33 @@
 from sqlalchemy import orm
-from utils import db, config
+from utils import db, config, get_provider
 import csv
 
 class Sample(db.Model):
     __tablename__ = 'sample'
 
     id = db.Column(db.Integer, primary_key=True)
-
     user_id = db.Column(db.Integer, nullable=False)
-    syssample_id = db.Column(db.Integer)
+
+    system_sample_id = db.Column(db.Integer)
+
     name_test = db.Column(db.String, nullable=False)
+    name_system = db.Column(db.String, nullable=False)
+    step = db.Column(db.Integer, nullable=False)
 
     question = db.Column(db.String,nullable=False)
-    answer = db.Column(db.String,nullable=False)
+    answerSTRING = db.Column(db.String,nullable=True)
+    answerBLOB = db.Column(db.BLOB)
 
-    def __init__(self,question,answer,name_test,user_id):
+    def __init__(self,system_sample_id,name_test,name_system,step,question,answerSTRING=None,answerBLOB=None):
+
+        self.user_id = get_provider("auth").get()
+
+        self.system_sample_id = system_sample_id
         self.name_test = name_test
-        self.user_id = user_id
+        self.name_system = name_system
+
+        self.step = step
 
         self.question = question
-        self.answer = answer
+        self.answerSTRING = answerSTRING
+        self.answerBLOB = answerBLOB

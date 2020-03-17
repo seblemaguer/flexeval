@@ -3,7 +3,7 @@ from utils import db,config,NAME_REP_CONFIG,get_provider
 from mods.questionnaire.model.QRResp import QRResp as mQRResp
 
 
-bp = Blueprint('questionnaire', __name__,template_folder=NAME_REP_CONFIG+'/templates',static_folder='../../assets')
+bp = Blueprint('questionnaire', __name__,template_folder=NAME_REP_CONFIG+'/templates')
 
 # Routes
 @bp.route('/<name>', methods = ['GET'])
@@ -11,9 +11,9 @@ def get(name):
 
     oneAnswer = mQRResp.query.filter_by(name=name,user_id=get_provider("auth").get()).first()
     if oneAnswer is None:
-        return render_template(config["questionnaire"][name]["template"],qrname=name)
+        return render_template(config["stages"][name]["template"],qrname=name)
     else:
-        return redirect(config["questionnaire"][name]["next"])
+        return redirect(config["stages"][name]["next"])
 
 @bp.route('/<name>/send', methods = ['POST'])
 def save(name):
@@ -23,4 +23,4 @@ def save(name):
     db.session.commit()
 
 
-    return redirect(config["questionnaire"][name]["next"])
+    return redirect(config["stages"][name]["next"])

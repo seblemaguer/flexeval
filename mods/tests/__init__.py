@@ -1,88 +1,70 @@
 from flask import Blueprint, render_template,url_for,request,redirect,session
-from utils import db,config,NAME_REP_CONFIG,get_provider
-from mods.tests.model import System as mSystem
-from mods.tests.model import Sample as mSample
+from utils import db,config,NAME_REP_CONFIG,get_provider,instance_data
+from mods.tests.src.Test import Test
+from mods.tests.src.System import SystemTemplate
+from mods.tests.model.Sample import Sample
 import random
 
-bp = Blueprint('tests', __name__,template_folder=NAME_REP_CONFIG+'/templates',static_folder='../../assets')
+bp = Blueprint('tests', __name__,template_folder=NAME_REP_CONFIG+'/templates')
 
 # Routes
 @bp.route('/<name>', methods = ['GET'])
 def get(name):
 
-    user_id = get_provider("auth").get()
-    session["Test_"+str(name)] = False
+    test = Test(name)
 
-    try:
-        samples = mSample.Sample.query.filter_by(user_id=user_id,name_test=name).all()
-    except Exception as e:
-        samples = []
+    unique_system_answer = test.unique_system_answer()
 
-    choice = []
-    for system in config["tests"][name]["systems"]:
-        system = mSystem.System.get(system)
-        nb_answer = 0
-        select_question = None
-        try:
-            choice_per_system = []
-            min_sample_per_syssample = 9999999999999999999
-            for syssample in system.samples:
+    if(unique_system_answer >= test.nb_answers_max):
+        return redirect(config["stages"][name]["next"])
+    else:
+        session["tests"] = {name:{}}
+        system_sample = test.get_system_sample()
 
-                cpt_sample_per_syssample = 0
-                already_present_to_the_user = False
-                for sample in syssample.samples():
+        for name_system in system_sample.keys():
+            session["tests"][name][system_sample[name_system].id] = {"name_system":name_system}
 
-                    if(sample.name_test == name):
-                        if(sample.user_id == user_id):
-                            already_present_to_the_user = True
-                            if select_question is None:
-                                select_question = sample.question
+        def systems(*args):
+            systems = []
 
-                            if sample.question == select_question:
-                                nb_answer = nb_answer + 1
-                                assert nb_answer < config["tests"][name]["#answer"]
-                                if(nb_answer == config["tests"][name]["#answer"]):
-                                    session["Test_"+str(name)] = True
-                        else:
-                            cpt_sample_per_syssample = cpt_sample_per_syssample + 1
+            if(len(args) == 0):
+                for name_system in system_sample.keys():
+                    systems.append(SystemTemplate(name_system,system_sample[name_system]))
+            else:
+                for name_system in args:
+                    systems.append(SystemTemplate(name_system,system_sample[name_system]))
 
-                if not(already_present_to_the_user):
-                    if(cpt_sample_per_syssample <= min_sample_per_syssample):
-                        if cpt_sample_per_syssample < min_sample_per_syssample:
-                            choice_per_system = [syssample]
-                            min_sample_per_syssample = cpt_sample_per_syssample
-                        else:
-                            choice_per_system.append(syssample)
+            random.shuffle(systems)
+            return systems
 
-            choice.append(random.choice(choice_per_system))
-
-        except Exception as e:
-
-            return redirect(config["tests"][name]["next"])
-
-        if len(choice) == 0:
-            return redirect(config["tests"][name]["next"])
-
-    random.shuffle(choice)
-    return render_template(config["tests"][name]["template"],name=name,systems=choice)
+        return render_template(config["stages"][name]["template"],name=name,systems=systems)
 
 @bp.route('/<name>/send', methods = ['POST'])
 def save(name):
-    user_id = get_provider("auth").get()
 
-    if("Test_"+str(name) in session):
+    test = Test(name)
+
+    unique_system_answer = test.unique_system_answer()
+    
+    if(unique_system_answer >= test.nb_answers_max):
+        return redirect(config["stages"][name]["next"])
+    else:
 
         for key in request.form.keys():
-            rtn = mSystem.SysSample.get_save_field(key)
+
+            rtn = SystemTemplate.get_save_field(key)
+
             if not(rtn is None):
                 question = rtn[0]
                 answer = request.form[key]
-                syssample_id = rtn[1]
+                system_sample_id = rtn[1]
+                name_system = session["tests"][name][system_sample_id]["name_system"]
+                step = unique_system_answer
 
-                mSystem.System.get_syssample(syssample_id).add_sample(question,answer,name,user_id)
+                sample = Sample(system_sample_id,name,name_system,step,question,answerSTRING=answer)
+                db.session.add(sample)
 
+        db.session.commit()
+        del session["tests"]
 
-    if session["Test_"+str(name)] == True:
-        return redirect(config["tests"][name]["next"])
-    else:
-        return redirect("../"+str(name))
+        return redirect("../"+name)

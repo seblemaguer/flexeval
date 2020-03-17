@@ -1,0 +1,26 @@
+{
+  "tests":
+  {
+    "premier_ab":
+    {
+      "linked_line":true,
+      "systems":
+      [
+          {"name": "s1", "data": "test1/system1.csv"},
+          {"name": "s2", "data": "test1/system2.csv"},
+          {"name": "s3", "data": "test1/system3.csv"}
+      ]
+    },
+
+    "deuxieme_ab":
+    {
+      "linked_line":false,
+      "systems":
+      [
+          {"name": "premier_systeme", "data": "test2/system1.csv"},
+          {"name": "deuxieme_systeme", "data": "test2/system2.csv"}
+      ]
+    }
+  }
+
+}

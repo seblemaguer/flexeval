@@ -3,19 +3,19 @@ from mods.auth_login.model.User import User as mUser
 from mods.auth_login.src.LoginProvider import LoginAuthProvider
 from utils import db,config,get_provider,set_provider
 
-bp = Blueprint('auth_login', __name__,template_folder='templates',static_folder='../../assets')
+bp = Blueprint('auth_login', __name__,template_folder='templates')
 set_provider("auth",LoginAuthProvider())
 
 # Routes
-@bp.route('/login')
-def login():
+@bp.route('/<name>')
+def login(name):
     if "user" in session:
-        return redirect(config["auth_login"]["login"]["next"])
+        return redirect(config["stages"][name]["next"])
     else:
-        return render_template('login.tpl')
+        return render_template('login.tpl',name=name)
 
-@bp.route('/log-register', methods = ['POST'])
-def log_register():
+@bp.route('/<name>/log-register', methods = ['POST'])
+def log_register(name):
     email =  request.form["email"]
 
     try:
@@ -28,13 +28,4 @@ def log_register():
 
     get_provider("auth").set(user.id)
 
-    return redirect(config["auth_login"]["login"]["next"])
-
-@bp.route('/deco/<name>')
-def deco(name):
-    try:
-        get_provider("auth").destroy()
-    except Exception as e:
-        pass
-
-    return redirect(config["auth_login"]["deco"][name]["next"])
+    return redirect(config["stages"][name]["next"])

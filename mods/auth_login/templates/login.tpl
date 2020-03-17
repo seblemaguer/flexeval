@@ -3,7 +3,7 @@
 {% block title %}Login{% endblock %}
 
 {% block content %}
-  <form action="./log-register" method="post" class="form-example">
+  <form action="./{{ name }}/log-register" method="post" class="form-example">
     <div class="form-example">
       <label for="email">Enter your email: </label>
       <input type="email" name="email" id="email" required>
@@ -15,5 +15,4 @@
 {% endblock %}
 
 {% block footer %}
-Youpla la
 {% endblock %}

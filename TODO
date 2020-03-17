@@ -1,3 +1,18 @@
 Gestion des fichiers: reponse multiple type
 File :
   regarde .files
+
+EXPORT:
+mod export
+
+TEMPLATE:
+Possibilité de créer une base
+{% extends 'base.tpl' %}
+{% block title %}Login{% endblock %}
+Template par default:
+attr template facultatif
+ab_audio
+ab_text
+
+
+random name pour assets video image
