@@ -17,8 +17,18 @@ def get(name):
 
 @bp.route('/<name>/send', methods = ['POST'])
 def save(name):
-    for question in request.form.keys():
-        db.session.add(mQRResp(name,question,request.form[question],get_provider("auth").get()))
+
+    for (type, keys) in [("form",request.form.keys()),("file",request.files.keys())]:
+        for key in keys:
+            responseFORM = None
+            responseFILE = None
+
+            if type == "form":
+                responseFORM = request.form[key]
+            else:
+                responseFILE = request.files[key]
+
+            db.session.add(mQRResp(name,key,get_provider("auth").get(),responseFORM=responseFORM,responseFILE=responseFILE))
 
     db.session.commit()
 

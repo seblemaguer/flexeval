@@ -29,5 +29,17 @@ class Sample(db.Model):
         self.step = step
 
         self.question = question
-        self.answerSTRING = answerSTRING
-        self.answerBLOB = answerBLOB
+        self.set_answer_STRING(answerSTRING)
+        self.set_answer_BLOB(answerBLOB)
+
+    def set_answer_STRING(self,val):
+        if not(val is None):
+            self.answerSTRING = str(val)
+
+    def set_answer_BLOB(self,val):
+        if not(val is None):
+            try:
+                with val.stream as f:
+                    self.answerBLOB = f.read()
+            except Exception as e:
+                self.answerBLOB = None

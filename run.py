@@ -1,7 +1,6 @@
 # Import Libraries
 from flask import Flask,redirect,session, render_template
 from flask_sqlalchemy import SQLAlchemy
-from werkzeug.exceptions import HTTPException
 import json
 import utils
 import argparse
@@ -87,8 +86,6 @@ if __name__ == '__main__':
     @utils.app.errorhandler(Exception)
     def not_found(e):
 
-        print(e)
-
         try:
             code = e.code
         except Exception as e:
@@ -100,6 +97,7 @@ if __name__ == '__main__':
             pass
 
         return render_template('error.tpl',code=code,entrypoint=utils.config["entrypoint"])
+
 
     # Run app
     utils.app.run(host=args.host,port=args.port)

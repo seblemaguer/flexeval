@@ -45,24 +45,33 @@ def save(name):
     test = Test(name)
 
     unique_system_answer = test.unique_system_answer()
-    
+
     if(unique_system_answer >= test.nb_answers_max):
         return redirect(config["stages"][name]["next"])
     else:
 
-        for key in request.form.keys():
+        for (type, keys) in [("form",request.form.keys()),("file",request.files.keys())]:
+            for key in keys:
 
-            rtn = SystemTemplate.get_save_field(key)
+                rtn = SystemTemplate.get_save_field(key)
 
-            if not(rtn is None):
-                question = rtn[0]
-                answer = request.form[key]
-                system_sample_id = rtn[1]
-                name_system = session["tests"][name][system_sample_id]["name_system"]
-                step = unique_system_answer
+                if not(rtn is None):
+                    question = rtn[0]
 
-                sample = Sample(system_sample_id,name,name_system,step,question,answerSTRING=answer)
-                db.session.add(sample)
+                    answerFORM = None
+                    answerFILE = None
+
+                    if type == "form":
+                        answerFORM = request.form[key]
+                    else:
+                        answerFILE = request.files[key]
+
+                    system_sample_id = rtn[1]
+                    name_system = session["tests"][name][system_sample_id]["name_system"]
+                    step = unique_system_answer
+
+                    sample = Sample(system_sample_id,name,name_system,step,question,answerSTRING=answerFORM,answerBLOB=answerFILE)
+                    db.session.add(sample)
 
         db.session.commit()
         del session["tests"]
