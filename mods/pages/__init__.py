@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template,url_for,request,redirect,session
 from utils import db,config,NAME_REP_CONFIG,get_provider
 
-bp = Blueprint('pages', __name__,template_folder=NAME_REP_CONFIG+'/templates')
+bp = Blueprint('pages', __name__)
 
 # Routes
 

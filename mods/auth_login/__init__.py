@@ -1,9 +1,9 @@
-from flask import Blueprint, render_template,url_for,request,redirect,session
+from flask import Blueprint,url_for,request,redirect,session, render_template
 from mods.auth_login.model.User import User as mUser
 from mods.auth_login.src.LoginProvider import LoginAuthProvider
 from utils import db,config,get_provider,set_provider
 
-bp = Blueprint('auth_login', __name__,template_folder='templates')
+bp = Blueprint('auth_login', __name__)
 set_provider("auth",LoginAuthProvider())
 
 # Routes
@@ -12,7 +12,7 @@ def login(name):
     if "user" in session:
         return redirect(config["stages"][name]["next"])
     else:
-        return render_template('login.tpl',name=name)
+        return render_template('auth_login/login.tpl',name=name)
 
 @bp.route('/<name>/log-register', methods = ['POST'])
 def log_register(name):
