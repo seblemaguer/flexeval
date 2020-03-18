@@ -1,5 +1,5 @@
 from sqlalchemy import orm
-from utils import db
+from utils import db, get_provider
 
 class QRResp(db.Model):
     __tablename__ = 'questionnaire'
@@ -9,12 +9,12 @@ class QRResp(db.Model):
     question = db.Column(db.String,nullable=False)
     responseSTRING = db.Column(db.String,nullable=True)
     responseBLOB = db.Column(db.BLOB,nullable=True)
-    user_id = db.Column(db.Integer, nullable=False)
+    user = db.Column(db.String, nullable=False)
 
-    def __init__(self,name,question,userid,responseFORM=None,responseFILE=None):
+    def __init__(self,name,question,responseFORM=None,responseFILE=None):
         self.name = name
         self.question = question
-        self.user_id = userid
+        self.user = get_provider("auth").get()
 
         self.set_response_STRING(responseFORM)
         self.set_response_BLOB(responseFILE)

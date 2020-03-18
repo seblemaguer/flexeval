@@ -5,7 +5,7 @@
     {
       "systems":
       [
-          {"name": "system_img", "data": "system6.csv"}
+          {"name": "system_img", "data": "bidule/system6.csv"}
       ]
     },
 

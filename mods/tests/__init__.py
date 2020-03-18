@@ -4,6 +4,7 @@ from mods.tests.src.Test import Test
 from mods.tests.src.System import SystemTemplate
 from mods.tests.model.Sample import Sample
 import random
+import utils
 
 bp = Blueprint('tests', __name__)
 
@@ -14,7 +15,7 @@ def get(name):
     test = Test(name)
 
     unique_system_answer = test.unique_system_answer()
-
+    print("UNIQUE"+str(unique_system_answer))
     if(unique_system_answer >= test.nb_answers_max):
         return redirect(config["stages"][name]["next"])
     else:
@@ -37,7 +38,7 @@ def get(name):
             random.shuffle(systems)
             return systems
 
-        return render_template(config["stages"][name]["template"],name=name,systems=systems)
+        return render_template(config["stages"][name]["template"],name=name,systems=systems,obfuscate_assets=utils.assets.obfuscate)
 
 @bp.route('/<name>/send', methods = ['POST'])
 def save(name):
@@ -45,6 +46,7 @@ def save(name):
     test = Test(name)
 
     unique_system_answer = test.unique_system_answer()
+    print("UNIQUE"+str(unique_system_answer))
 
     if(unique_system_answer >= test.nb_answers_max):
         return redirect(config["stages"][name]["next"])

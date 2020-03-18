@@ -5,7 +5,7 @@ import json
 import utils
 import argparse
 import os
-import assets as assets
+from src.Assets import Assets
 import shutil
 
 #  Main
@@ -71,7 +71,7 @@ if __name__ == '__main__':
     utils.app.secret_key = b'_5#y2zcer88L"Fczerzce4Q8sdqsdcezqtz\n\xec]/'
     utils.db = SQLAlchemy(utils.app)
 
-    utils.app.register_blueprint(assets.bp,url_prefix='/assets') # Register Blueprint
+    utils.assets = Assets("/assets")
 
     if "auth_login" in active_mods:
         import mods.auth_login as ml
@@ -111,7 +111,7 @@ if __name__ == '__main__':
 
     @utils.app.errorhandler(Exception)
     def not_found(e):
-        print(e)
+
         try:
             code = e.code
         except Exception as e:
@@ -123,7 +123,6 @@ if __name__ == '__main__':
             pass
 
         return render_template('error.tpl',code=code,entrypoint=utils.config["entrypoint"])
-
 
     # Run app
     utils.app.run(host=args.host,port=args.port)

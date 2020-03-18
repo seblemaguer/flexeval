@@ -11,7 +11,7 @@
   <div class="form-example">
 
     <p> Blabla: {{system.data["sentence"]}} </p>
-    <img src="{{system.data['image']}}" />
+    <img src="{{ obfuscate_assets(system.data['image']) }}" />
     <select name="{{ system.save_field('score') }}">
      <option value="1">Médiocre</option>
      <option value="2">Moyen</option>

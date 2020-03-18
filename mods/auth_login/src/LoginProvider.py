@@ -10,8 +10,8 @@ class LoginAuthProvider(AuthProvider):
         else:
             abort(401)
 
-    def set(self,userid):
-        session["user"] = userid
+    def set(self,user):
+        session["user"] = user
 
     def destroy(self):
         del session["user"]

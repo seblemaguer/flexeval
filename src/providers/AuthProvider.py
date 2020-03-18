@@ -23,7 +23,7 @@ class AnonAuthProvider(AuthProvider):
             return session["anon"]
 
     def set(self):
-        session["anon"] = int(random.randint(1,999999999999999))
+        session["anon"] = "anon@"+str(random.randint(1,999999999999999))
 
     def destroy(self):
         del session["anon"]

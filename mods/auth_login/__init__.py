@@ -26,6 +26,6 @@ def log_register(name):
         db.session.add(user)
         db.session.commit()
 
-    get_provider("auth").set(user.id)
+    get_provider("auth").set(user.email)
 
     return redirect(config["stages"][name]["next"])

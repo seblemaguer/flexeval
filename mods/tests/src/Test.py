@@ -24,11 +24,11 @@ class Test():
         self.nb_answers_max = config["stages"][name]["nb_answers"]
 
     def unique_system_answer(self):
-        completed = Sample.query.filter_by(name_test=self.name,user_id=get_provider("auth").get()).all()
+        completed = Sample.query.filter_by(name_test=self.name,user=get_provider("auth").get()).all()
 
         unique_system_answer = 0
         for w in completed:
-            if w.name_system == completed[0].name_system:
+            if w.name_system == completed[0].name_system and w.question == completed[0].question:
                 unique_system_answer = unique_system_answer + 1
 
         return unique_system_answer
@@ -53,7 +53,7 @@ class Test():
 
                 for systemsample in system.systemsamples:
 
-                    if(Sample.query.filter_by(  user_id = get_provider("auth").get(),
+                    if(Sample.query.filter_by(  user = get_provider("auth").get(),
                                                 system_sample_id = systemsample.id,
                                                 name_test = self.name,
                                                 name_system = name_system).first() is None):

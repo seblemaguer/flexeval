@@ -9,6 +9,7 @@ db = None
 instance_data = None
 
 providers = {"auth":AuthProvider.AnonAuthProvider()}
+assets = None
 
 def set_provider(key,prov):
     providers[key] = prov

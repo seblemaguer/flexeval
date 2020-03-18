@@ -6,7 +6,7 @@ class Sample(db.Model):
     __tablename__ = 'sample'
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, nullable=False)
+    user = db.Column(db.String, nullable=False)
 
     system_sample_id = db.Column(db.Integer)
 
@@ -20,7 +20,7 @@ class Sample(db.Model):
 
     def __init__(self,system_sample_id,name_test,name_system,step,question,answerSTRING=None,answerBLOB=None):
 
-        self.user_id = get_provider("auth").get()
+        self.user = get_provider("auth").get()
 
         self.system_sample_id = system_sample_id
         self.name_test = name_test

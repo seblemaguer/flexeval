@@ -9,7 +9,7 @@ bp = Blueprint('questionnaire', __name__)
 @bp.route('/<name>', methods = ['GET'])
 def get(name):
 
-    oneAnswer = mQRResp.query.filter_by(name=name,user_id=get_provider("auth").get()).first()
+    oneAnswer = mQRResp.query.filter_by(name=name,user=get_provider("auth").get()).first()
     if oneAnswer is None:
         return render_template(config["stages"][name]["template"],qrname=name)
     else:
@@ -28,7 +28,7 @@ def save(name):
             else:
                 responseFILE = request.files[key]
 
-            db.session.add(mQRResp(name,key,get_provider("auth").get(),responseFORM=responseFORM,responseFILE=responseFILE))
+            db.session.add(mQRResp(name,key,responseFORM=responseFORM,responseFILE=responseFILE))
 
     db.session.commit()
 
