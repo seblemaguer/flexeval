@@ -5,7 +5,7 @@ import json
 import utils
 import argparse
 import os
-import static as sstatic
+import assets as assets
 import shutil
 
 #  Main
@@ -21,7 +21,7 @@ if __name__ == '__main__':
     utils.ROOT =  os.path.dirname(os.path.abspath(__file__))
     utils.NAME_REP_CONFIG = os.path.dirname(os.path.abspath(__file__))+"/instances/"+args.instance
 
-    utils.app = Flask(__name__,template_folder = utils.NAME_REP_CONFIG+"/.tmp/templates")
+    utils.app = Flask(__name__,template_folder = utils.NAME_REP_CONFIG+"/.tmp/templates",static_url_path=None)
 
     # Template
     def safe_copy_rep(SRC,DST):
@@ -71,8 +71,7 @@ if __name__ == '__main__':
     utils.app.secret_key = b'_5#y2zcer88L"Fczerzce4Q8sdqsdcezqtz\n\xec]/'
     utils.db = SQLAlchemy(utils.app)
 
-    utils.app.url_map.converters['list'] = utils.ListConverter
-    utils.app.register_blueprint(sstatic.bp,url_prefix='/static') # Register Blueprint
+    utils.app.register_blueprint(assets.bp,url_prefix='/assets') # Register Blueprint
 
     if "auth_login" in active_mods:
         import mods.auth_login as ml
@@ -110,10 +109,9 @@ if __name__ == '__main__':
 
         return redirect(utils.config["entrypoint"])
 
-
     @utils.app.errorhandler(Exception)
     def not_found(e):
-
+        print(e)
         try:
             code = e.code
         except Exception as e:
@@ -125,6 +123,7 @@ if __name__ == '__main__':
             pass
 
         return render_template('error.tpl',code=code,entrypoint=utils.config["entrypoint"])
+
 
     # Run app
     utils.app.run(host=args.host,port=args.port)

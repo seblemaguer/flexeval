@@ -8,7 +8,7 @@ class QRResp(db.Model):
     name = db.Column(db.String,nullable=False)
     question = db.Column(db.String,nullable=False)
     responseSTRING = db.Column(db.String,nullable=True)
-    responseBLOB = db.Column(db.BLOB)
+    responseBLOB = db.Column(db.BLOB,nullable=True)
     user_id = db.Column(db.Integer, nullable=False)
 
     def __init__(self,name,question,userid,responseFORM=None,responseFILE=None):

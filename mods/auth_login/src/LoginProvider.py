@@ -1,4 +1,4 @@
-from flask import session, redirect
+from flask import session, abort
 from src.providers.AuthProvider import AuthProvider
 
 class LoginAuthProvider(AuthProvider):
@@ -8,7 +8,7 @@ class LoginAuthProvider(AuthProvider):
         if "user" in session:
             return session["user"]
         else:
-            return redirect("/auth_login/login")
+            abort(401)
 
     def set(self,userid):
         session["user"] = userid
