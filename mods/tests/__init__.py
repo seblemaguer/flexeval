@@ -15,7 +15,7 @@ def get(name):
     test = Test(name)
 
     unique_system_answer = test.unique_system_answer()
-    print("UNIQUE"+str(unique_system_answer))
+
     if(unique_system_answer >= test.nb_answers_max):
         return redirect(config["stages"][name]["next"])
     else:
@@ -23,7 +23,7 @@ def get(name):
         system_sample = test.get_system_sample()
 
         for name_system in system_sample.keys():
-            session["tests"][name][system_sample[name_system].id] = {"name_system":name_system}
+            session["tests"][name][str(system_sample[name_system].id)] = {"name_system":name_system}
 
         def systems(*args):
             systems = []
@@ -38,42 +38,42 @@ def get(name):
             random.shuffle(systems)
             return systems
 
-        return render_template(config["stages"][name]["template"],name=name,systems=systems,obfuscate_assets=utils.assets.obfuscate)
+        return render_template(config["stages"][name]["template"],name=name,systems=systems,save_field=SystemTemplate.save_field,obfuscate_assets=utils.assets.obfuscate)
 
 @bp.route('/<name>/send', methods = ['POST'])
 def save(name):
 
+    print(request.form)
     test = Test(name)
 
     unique_system_answer = test.unique_system_answer()
-    print("UNIQUE"+str(unique_system_answer))
 
     if(unique_system_answer >= test.nb_answers_max):
         return redirect(config["stages"][name]["next"])
     else:
-
+        step = unique_system_answer
         for (type, keys) in [("form",request.form.keys()),("file",request.files.keys())]:
             for key in keys:
 
                 rtn = SystemTemplate.get_save_field(key)
 
                 if not(rtn is None):
-                    question = rtn[0]
+                    (question,systems) = rtn
 
                     answerFORM = None
                     answerFILE = None
 
                     if type == "form":
                         answerFORM = request.form[key]
+                        rtn = SystemTemplate.get_name(answerFORM)
+                        if not(rtn is None):
+                            answerFORM = rtn
                     else:
                         answerFILE = request.files[key]
 
-                    system_sample_id = rtn[1]
-                    name_system = session["tests"][name][system_sample_id]["name_system"]
-                    step = unique_system_answer
-
-                    sample = Sample(system_sample_id,name,name_system,step,question,answerSTRING=answerFORM,answerBLOB=answerFILE)
-                    db.session.add(sample)
+                    for system in systems:
+                        sample = Sample(system["systemsample_id"],name,system["name_system"],step,question,answerSTRING=answerFORM,answerBLOB=answerFILE)
+                        db.session.add(sample)
 
         db.session.commit()
         del session["tests"]

@@ -7,6 +7,7 @@ import argparse
 import os
 from src.Assets import Assets
 import shutil
+import traceback
 
 #  Main
 if __name__ == '__main__':
@@ -109,9 +110,20 @@ if __name__ == '__main__':
 
         return redirect(utils.config["entrypoint"])
 
+    
     @utils.app.errorhandler(Exception)
     def not_found(e):
+        print("*******************************")
+        print("A CRITICAL ERROR HAS OCCURED")
+        print("")
+        print("--> MSG")
+        print(str(e))
+        print("")
+        print("--> TRACEBACK")
+        for eline in traceback.format_exc().splitlines():
+            print(eline)
 
+        print("*******************************")
         try:
             code = e.code
         except Exception as e:

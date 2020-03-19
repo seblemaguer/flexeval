@@ -1,6 +1,8 @@
 from mods.tests.model.SystemSample import SystemSample
 from utils import NAME_REP_CONFIG,db
 import csv
+import random
+import string
 
 class System():
 
@@ -20,7 +22,8 @@ class System():
                 db.session.add(systemsample)
                 systemsamples.append(systemsample)
 
-        db.session.commit()
+            db.session.commit()
+
         self.systemsamples = systemsamples
 
     def get_line(self,id):
@@ -28,6 +31,8 @@ class System():
 
 
 class SystemTemplate():
+
+    REMINDER = {}
 
     def __init__(self, name_system, systemsample):
         self.name_system = name_system
@@ -41,16 +46,57 @@ class SystemTemplate():
             self.column_name.append(k)
 
     @classmethod
-    def get_save_field(cls,field):
-        split = field.split("_SystemSample_")
+    def set_reminder(cls,json_data):
+        key = ''.join((random.choice(string.ascii_lowercase) for i in range(256)))
+        cls.REMINDER[key] = json_data
+
+        return key
+
+    @classmethod
+    def get_reminder(cls,key):
+        json_data = SystemTemplate.REMINDER[key]
+        del cls.REMINDER[key]
+
+        return json_data
+
+    def name(self):
+        key = SystemTemplate.set_reminder({"name_system": self.name_system})
+        return "@SystemTemplate:"+str(key)
+
+    @classmethod
+    def get_name(cls,val):
+        base = "@SystemTemplate:"
+        split = val.split("@SystemTemplate:")
 
         if(len(split) == 2):
-            return split
+            return SystemTemplate.get_reminder(split[1])["name_system"]
         else:
             return None
 
-    def save_field(self,name_field):
-        return name_field+"_SystemSample_"+str(self.systemsample_id)
+    @classmethod
+    def get_save_field(cls,field):
+        base = "@SystemTemplate:"
+        split = field.split("@SystemTemplate:")
+
+        if(len(split) == 2):
+            return (split[0],SystemTemplate.get_reminder(split[1]))
+        else:
+            return None
+
+    @classmethod
+    def save_field(cls,name_field,systems):
+
+        if not(isinstance(systems,list)):
+            systems=[systems]
+
+        systems_reminder = []
+
+        for system in systems:
+            systems_reminder.append({"systemsample_id":system.systemsample_id,"name_system":system.name_system})
+
+        key = SystemTemplate.set_reminder(systems_reminder)
+
+        return name_field+"@SystemTemplate:"+str(key)
 
     def get_column_name(self,i):
         return self.column_name[i]

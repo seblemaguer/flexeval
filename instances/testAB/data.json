@@ -3,15 +3,16 @@
   {
     "testA":
     {
+      "system_aligned":false,
       "systems":
       [
-          {"name": "system_img", "data": "bidule/system6.csv"}
+        {"name": "system_img", "data": "bidule/system6.csv"}
       ]
     },
 
     "deuxieme_ab":
     {
-      "linked_line":false,
+      "system_aligned":false,
       "systems":
       [
           {"name": "premier_systeme", "data": "system4.csv"},

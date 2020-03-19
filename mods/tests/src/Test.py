@@ -16,10 +16,21 @@ class Test():
     def __init__(self,name):
         self.name = name
 
-        if "linked_line" in instance_data["tests"][name]:
-            self.linked_line = instance_data["tests"][name]["linked_line"]
+        if "system_aligned" in instance_data["tests"][name]:
+            self.system_aligned = instance_data["tests"][name]["system_aligned"]
         else:
-            self.linked_line = True
+            self.system_aligned = True
+
+        size_test = None
+        for system in instance_data["tests"][self.name]["systems"]:
+            system = System(system["data"])
+
+            if self.system_aligned:
+                if size_test is None:
+                    size_test = len(system.systemsamples)
+                else:
+                    if not(size_test == len(system.systemsamples)):
+                        raise Exception("TEST "+str(self.name)+": data.json say that the systems are aligned, but they don't have the same number of sample (line). \n After fixing the csv of these systems or/and the data.json, don't forget to delete the current db that have been corrupted, before runing again the server.")
 
         self.nb_answers_max = config["stages"][name]["nb_answers"]
 
@@ -41,7 +52,7 @@ class Test():
             name_system = system["name"]
             system = System(system["data"])
 
-            if self.linked_line and len(list(selected_systemsample_per_system.keys())) >= 1:
+            if self.system_aligned and len(list(selected_systemsample_per_system.keys())) >= 1:
                 selected_systemsample = selected_systemsample_per_system[list(selected_systemsample_per_system.keys())[0]]
                 selected_systemsample_per_system[name_system] = system.get_line(selected_systemsample.line_id)
 
