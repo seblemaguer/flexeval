@@ -1,6 +1,5 @@
 {
-  "tests":
-  {
+
     "testA":
     {
       "system_aligned":false,
@@ -19,6 +18,5 @@
           {"name": "deuxieme_systeme", "data": "system5.csv"}
       ]
     }
-  }
 
 }

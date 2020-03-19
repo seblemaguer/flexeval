@@ -6,6 +6,7 @@ import utils
 import argparse
 import os
 from src.Assets import Assets
+from src.Export import Export
 import shutil
 import traceback
 
@@ -43,12 +44,15 @@ if __name__ == '__main__':
         shutil.rmtree(utils.NAME_REP_CONFIG+"/.tmp")
 
     os.makedirs(utils.NAME_REP_CONFIG+"/.tmp")
+    os.makedirs(utils.NAME_REP_CONFIG+"/.tmp/export_bdd")
+
     shutil.copytree(utils.NAME_REP_CONFIG+"/templates",utils.NAME_REP_CONFIG+"/.tmp/templates")
     safe_copy_rep(utils.ROOT+"/templates",utils.NAME_REP_CONFIG+"/.tmp/templates")
 
     active_mods = []
     with open(utils.NAME_REP_CONFIG+'/structure.json') as config:
         config = json.load(config)
+
         name = config["entrypoint"]
         intel = config["stages"][name]
         config["entrypoint"] = "/"+intel["type"]+"/"+ name
@@ -61,18 +65,13 @@ if __name__ == '__main__':
                 config["stages"][stage]["next"] ="/"+intel["type"]+"/"+ name
 
     utils.config = config
-
-    with open(utils.NAME_REP_CONFIG+'/data.json') as instance_data:
-        instance_data = json.load(instance_data)
-
-    utils.instance_data = instance_data
-
     utils.app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///"+utils.NAME_REP_CONFIG+"/bdd_sqlite.db"
     utils.app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     utils.app.secret_key = b'_5#y2zcer88L"Fczerzce4Q8sdqsdcezqtz\n\xec]/'
     utils.db = SQLAlchemy(utils.app)
 
     utils.assets = Assets("/assets")
+    Export("/export")
 
     if "auth_login" in active_mods:
         import mods.auth_login as ml
@@ -110,7 +109,7 @@ if __name__ == '__main__':
 
         return redirect(utils.config["entrypoint"])
 
-    
+
     @utils.app.errorhandler(Exception)
     def not_found(e):
         print("*******************************")

@@ -6,7 +6,6 @@ ROOT = None
 
 app = None
 db = None
-instance_data = None
 
 providers = {"auth":AuthProvider.AnonAuthProvider()}
 assets = None

@@ -15,7 +15,6 @@ class AuthProvider():
 class AnonAuthProvider(AuthProvider):
 
     def get(self):
-
         if "anon" in session:
             return session["anon"]
         else:

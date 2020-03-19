@@ -1,7 +1,8 @@
-from utils import instance_data, get_provider, config, db
+from utils import get_provider, config, db
 from mods.tests.model.Sample import Sample
 from mods.tests.src.System import System
 import random
+import mods.tests as m_test
 
 class Test():
 
@@ -16,13 +17,13 @@ class Test():
     def __init__(self,name):
         self.name = name
 
-        if "system_aligned" in instance_data["tests"][name]:
-            self.system_aligned = instance_data["tests"][name]["system_aligned"]
+        if "system_aligned" in m_test.tests_data[name]:
+            self.system_aligned = m_test.tests_data[name]["system_aligned"]
         else:
             self.system_aligned = True
 
         size_test = None
-        for system in instance_data["tests"][self.name]["systems"]:
+        for system in m_test.tests_data[self.name]["systems"]:
             system = System(system["data"])
 
             if self.system_aligned:
@@ -48,7 +49,7 @@ class Test():
 
         selected_systemsample_per_system = {}
 
-        for system in instance_data["tests"][self.name]["systems"]:
+        for system in m_test.tests_data[self.name]["systems"]:
             name_system = system["name"]
             system = System(system["data"])
 

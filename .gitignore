@@ -1,4 +1,5 @@
 
+*.ign
 
 # Compiled python
 *.pyc
@@ -12,3 +13,5 @@ python3.lnk
 
 # IDE directories
 \.vscode/
+
+*.tmp

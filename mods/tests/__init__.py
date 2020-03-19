@@ -1,12 +1,17 @@
 from flask import Blueprint, render_template,url_for,request,redirect,session
-from utils import db,config,NAME_REP_CONFIG,get_provider,instance_data
+from utils import db,config,NAME_REP_CONFIG,get_provider
 from mods.tests.src.Test import Test
 from mods.tests.src.System import SystemTemplate
 from mods.tests.model.Sample import Sample
 import random
 import utils
+import json
 
 bp = Blueprint('tests', __name__)
+tests_data = None
+
+with open(utils.NAME_REP_CONFIG+'/tests.json') as tests_data_json:
+    tests_data = json.load(tests_data_json)
 
 # Routes
 @bp.route('/<name>', methods = ['GET'])
