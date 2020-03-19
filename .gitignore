@@ -1,3 +1,14 @@
+
+
+# Compiled python
 *.pyc
 python3.lnk
+
+# BDD
 *.db
+
+# Ignore logs
+*.log
+
+# IDE directories
+\.vscode/
