@@ -63,7 +63,7 @@ if __name__ == '__main__':
         next_stage = config["stages"][next_stage_name]
 
         # REWRITE
-        config["entrypoint"] = "/"+next["type"]+"/"+ next_stage_name
+        config["entrypoint"] = "/"+next_stage["type"]+"/"+ next_stage_name
         activated_stage.append("entrypoint")
 
         while not(next_stage is None):
@@ -98,7 +98,6 @@ if __name__ == '__main__':
 
 
     for mod in activated_mod:
-        print("ACTIVATE :"+mod)
         lib_imported = importlib.import_module("mods."+mod)
         utils.app.register_blueprint(lib_imported.bp,url_prefix='/'+str(mod)) # Register Blueprint
         safe_copy_rep(utils.ROOT+"/mods/"+mod+"/templates",utils.NAME_REP_CONFIG+"/.tmp/templates/"+mod)
