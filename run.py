@@ -9,6 +9,7 @@ from src.Assets import Assets
 from src.Export import Export
 import shutil
 import traceback
+import importlib
 
 #  Main
 if __name__ == '__main__':
@@ -49,20 +50,42 @@ if __name__ == '__main__':
     shutil.copytree(utils.NAME_REP_CONFIG+"/templates",utils.NAME_REP_CONFIG+"/.tmp/templates")
     safe_copy_rep(utils.ROOT+"/templates",utils.NAME_REP_CONFIG+"/.tmp/templates")
 
-    active_mods = []
+    # VARs
+    activated_stage = []
+    activated_mod = []
+
     with open(utils.NAME_REP_CONFIG+'/structure.json') as config:
         config = json.load(config)
 
-        name = config["entrypoint"]
-        intel = config["stages"][name]
-        config["entrypoint"] = "/"+intel["type"]+"/"+ name
 
-        for stage in config["stages"]:
-            active_mods.append(config["stages"][stage]["type"])
-            if "next" in config["stages"][stage]:
-                name = config["stages"][stage]["next"]
-                intel = config["stages"][name]
-                config["stages"][stage]["next"] ="/"+intel["type"]+"/"+ name
+         #lOAD
+        next_stage_name = config["entrypoint"]
+        next = config["stages"][next_stage_name]
+
+        # REWRITE
+        config["entrypoint"] = "/"+next["type"]+"/"+ next_stage_name
+        activated_stage.append("entrypoint")
+
+        while not(next is None):
+
+            current = next
+
+            # Activate mods (attr type)
+            if not(current["type"] in activated_mod):
+                mod = current["type"]
+                activated_mod.append(mod)
+
+            # Next stage ? (attr next)
+            if "next" in current:
+                if current["next"] in config["stages"]:
+                    next = config["stages"][current["next"]]
+
+                    # REWRITE
+                    current["next"] =  "/"+next["type"]+"/"+ current["next"]
+                else:
+                    next = None
+            else:
+                next = None
 
     utils.config = config
     utils.app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///"+utils.NAME_REP_CONFIG+"/bdd_sqlite.db"
@@ -73,26 +96,12 @@ if __name__ == '__main__':
     utils.assets = Assets("/assets")
     Export("/export")
 
-    if "auth_login" in active_mods:
-        import mods.auth_login as ml
-        from mods.auth_login.model import *
-        utils.app.register_blueprint(ml.bp,url_prefix='/auth_login') # Register Blueprint
-        safe_copy_rep(utils.ROOT+"/mods/auth_login/templates",utils.NAME_REP_CONFIG+"/.tmp/templates/auth_login")
 
-    if "pages" in active_mods:
-        import mods.pages as mp
-        utils.app.register_blueprint(mp.bp,url_prefix='/pages') # Register Blueprint
-        safe_copy_rep(utils.ROOT+"/mods/pages/templates",utils.NAME_REP_CONFIG+"/.tmp/templates/pages")
-
-    if "questionnaire" in active_mods:
-        import mods.questionnaire as mq
-        utils.app.register_blueprint(mq.bp,url_prefix='/questionnaire') # Register Blueprint
-        safe_copy_rep(utils.ROOT+"/mods/questionnaire/templates",utils.NAME_REP_CONFIG+"/.tmp/templates/questionnaire")
-
-    if "tests" in active_mods:
-        import mods.tests as mt
-        utils.app.register_blueprint(mt.bp,url_prefix='/tests') # Register Blueprint
-        safe_copy_rep(utils.ROOT+"/mods/tests/templates",utils.NAME_REP_CONFIG+"/.tmp/templates/tests")
+    for mod in activated_mod:
+        print("ACTIVATE :"+mod)
+        lib_imported = importlib.import_module("mods."+mod)
+        utils.app.register_blueprint(lib_imported.bp,url_prefix='/'+str(mod)) # Register Blueprint
+        safe_copy_rep(utils.ROOT+"/mods/"+mod+"/templates",utils.NAME_REP_CONFIG+"/.tmp/templates/"+mod)
 
     utils.db.create_all()
 
