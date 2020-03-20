@@ -81,7 +81,7 @@ if __name__ == '__main__':
                     next_stage = config["stages"][current["next"]]
 
                     # REWRITE
-                    current["next"] =  "/"+next["type"]+"/"+ current["next"]
+                    current["next"] =  "/"+next_stage["type"]+"/"+ current["next"]
                 else:
                     next_stage = None
             else:
