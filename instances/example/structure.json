@@ -1,5 +1,5 @@
 {
-  "entrypoint": "info_utilisateur",
+  "entrypoint": "page_de_login",
   "stages": {
     "page_de_login":    {"type": "auth_login", "next":"info_utilisateur"},
     "info_utilisateur": {"type": "questionnaire", "template":"questionnaire.tpl", "next": "testA"},

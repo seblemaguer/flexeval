@@ -45,7 +45,7 @@ def get(name):
             random.shuffle(systems)
             return systems
 
-        return render_template(config["stages"][name]["template"],name=name,systems=systems,save_field=SystemTemplate.save_field,obfuscate_assets=assets.obfuscate)
+        return render_template(config["stages"][name]["template"],name=name,step=unique_system_answer,systems=systems,save_field=SystemTemplate.save_field,obfuscate_assets=assets.obfuscate)
 
 @bp.route('/<name>/send', methods = ['POST'])
 def save(name):

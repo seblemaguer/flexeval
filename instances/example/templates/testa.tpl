@@ -4,6 +4,7 @@
 
 {% block content %}
 
+STEP: {{step}}
 <form action="./{{name}}/send" method="post" class="form-example" enctype="multipart/form-data">
 
 

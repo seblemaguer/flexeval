@@ -36,7 +36,7 @@ if __name__ == '__main__':
     os.makedirs(utils.NAME_REP_CONFIG+"/.tmp/export_bdd")
 
     shutil.copytree(utils.NAME_REP_CONFIG+"/templates",utils.NAME_REP_CONFIG+"/.tmp/templates")
-    utils.safe_copy_rep(utils.ROOT+"core/templates",utils.NAME_REP_CONFIG+"/.tmp/templates")
+    utils.safe_copy_rep(utils.ROOT+"/core/templates",utils.NAME_REP_CONFIG+"/.tmp/templates")
 
     # VARs
     activated_stage = []
@@ -88,7 +88,7 @@ if __name__ == '__main__':
     for mod in activated_mod:
         lib_imported = importlib.import_module("core.mods."+mod)
         utils.app.register_blueprint(lib_imported.bp,url_prefix='/'+str(mod)) # Register Blueprint
-        utils.safe_copy_rep(utils.ROOT+"core/mods/"+mod+"/templates",utils.NAME_REP_CONFIG+"/.tmp/templates/"+mod)
+        utils.safe_copy_rep(utils.ROOT+"/core/mods/"+mod+"/templates",utils.NAME_REP_CONFIG+"/.tmp/templates/"+mod)
 
     utils.db.create_all()
 
