@@ -60,15 +60,15 @@ if __name__ == '__main__':
 
          #lOAD
         next_stage_name = config["entrypoint"]
-        next = config["stages"][next_stage_name]
+        next_stage = config["stages"][next_stage_name]
 
         # REWRITE
         config["entrypoint"] = "/"+next["type"]+"/"+ next_stage_name
         activated_stage.append("entrypoint")
 
-        while not(next is None):
+        while not(next_stage is None):
 
-            current = next
+            current = next_stage
 
             # Activate mods (attr type)
             if not(current["type"] in activated_mod):
@@ -78,14 +78,14 @@ if __name__ == '__main__':
             # Next stage ? (attr next)
             if "next" in current:
                 if current["next"] in config["stages"]:
-                    next = config["stages"][current["next"]]
+                    next_stage = config["stages"][current["next"]]
 
                     # REWRITE
                     current["next"] =  "/"+next["type"]+"/"+ current["next"]
                 else:
-                    next = None
+                    next_stage = None
             else:
-                next = None
+                next_stage = None
 
     utils.config = config
     utils.app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///"+utils.NAME_REP_CONFIG+"/bdd_sqlite.db"
