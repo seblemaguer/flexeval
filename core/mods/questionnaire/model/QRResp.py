@@ -1,5 +1,5 @@
-from sqlalchemy import orm
-from utils import db, get_provider
+# Import Libraries
+from core.utils import db, get_provider
 
 class QRResp(db.Model):
     __tablename__ = 'questionnaire'

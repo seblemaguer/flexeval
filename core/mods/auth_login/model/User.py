@@ -1,5 +1,5 @@
-from sqlalchemy import orm
-from utils import db
+# Import Libraries
+from core.utils import db
 
 class User(db.Model):
     __tablename__ = 'user'

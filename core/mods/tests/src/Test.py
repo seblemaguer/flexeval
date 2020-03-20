@@ -1,8 +1,10 @@
-from utils import get_provider, config, db
-from mods.tests.model.Sample import Sample
-from mods.tests.src.System import System
+# Import Libraries
 import random
-import mods.tests as m_test
+
+from core.utils import get_provider, config, db
+from core.mods.tests.model.Sample import Sample
+from core.mods.tests.src.System import System
+import core.mods.tests as m_test
 
 class Test():
 

@@ -1,8 +1,11 @@
-from mods.tests.model.SystemSample import SystemSample
-from utils import NAME_REP_CONFIG,db
+# Import Libraries
 import csv
 import random
 import string
+
+from core.mods.tests.model.SystemSample import SystemSample
+from core.utils import NAME_REP_CONFIG,db
+
 
 class System():
 

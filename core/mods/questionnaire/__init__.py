@@ -1,7 +1,8 @@
-from flask import Blueprint, render_template,url_for,request,redirect,session
-from utils import db,config,NAME_REP_CONFIG,get_provider
-from mods.questionnaire.model.QRResp import QRResp as mQRResp
+# Import Libraries
+from flask import Blueprint, render_template,request,redirect,session
 
+from core.utils import db,config,get_provider
+from core.mods.questionnaire.model.QRResp import QRResp as mQRResp
 
 bp = Blueprint('questionnaire', __name__)
 

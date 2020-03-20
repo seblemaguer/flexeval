@@ -1,5 +1,7 @@
-from flask import Blueprint, render_template,url_for,request,redirect,session
-from utils import db,config,NAME_REP_CONFIG,get_provider
+# Import Libraries
+from flask import Blueprint, render_template
+
+from core.utils import config,get_provider
 
 bp = Blueprint('pages', __name__)
 

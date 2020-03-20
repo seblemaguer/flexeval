@@ -1,15 +1,17 @@
 # Import Libraries
-from flask import Flask,redirect,session, render_template
-from flask_sqlalchemy import SQLAlchemy
 import json
-import utils
 import argparse
 import os
-from src.Assets import Assets
-from src.Export import Export
 import shutil
 import traceback
 import importlib
+
+from flask import Flask,redirect, render_template
+from flask_sqlalchemy import SQLAlchemy
+
+from core.src.Assets import Assets
+from core.src.Export import Export
+import core.utils as utils
 
 #  Main
 if __name__ == '__main__':
@@ -27,20 +29,6 @@ if __name__ == '__main__':
     utils.app = Flask(__name__,template_folder = utils.NAME_REP_CONFIG+"/.tmp/templates",static_url_path=None)
 
     # Template
-    def safe_copy_rep(SRC,DST):
-
-        if not os.path.exists(DST):
-            os.makedirs(DST)
-
-        if os.path.exists(SRC):
-
-            DST_files = os.listdir(DST)
-            SRC_files = os.listdir(SRC)
-
-            for file in SRC_files:
-                if not(file in DST_files):
-                    shutil.copyfile(SRC+"/"+file,DST+"/"+file)
-
     if os.path.exists(utils.NAME_REP_CONFIG+"/.tmp"):
         shutil.rmtree(utils.NAME_REP_CONFIG+"/.tmp")
 
@@ -48,7 +36,7 @@ if __name__ == '__main__':
     os.makedirs(utils.NAME_REP_CONFIG+"/.tmp/export_bdd")
 
     shutil.copytree(utils.NAME_REP_CONFIG+"/templates",utils.NAME_REP_CONFIG+"/.tmp/templates")
-    safe_copy_rep(utils.ROOT+"/templates",utils.NAME_REP_CONFIG+"/.tmp/templates")
+    utils.safe_copy_rep(utils.ROOT+"core/templates",utils.NAME_REP_CONFIG+"/.tmp/templates")
 
     # VARs
     activated_stage = []
@@ -98,9 +86,9 @@ if __name__ == '__main__':
 
 
     for mod in activated_mod:
-        lib_imported = importlib.import_module("mods."+mod)
+        lib_imported = importlib.import_module("core.mods."+mod)
         utils.app.register_blueprint(lib_imported.bp,url_prefix='/'+str(mod)) # Register Blueprint
-        safe_copy_rep(utils.ROOT+"/mods/"+mod+"/templates",utils.NAME_REP_CONFIG+"/.tmp/templates/"+mod)
+        utils.safe_copy_rep(utils.ROOT+"core/mods/"+mod+"/templates",utils.NAME_REP_CONFIG+"/.tmp/templates/"+mod)
 
     utils.db.create_all()
 

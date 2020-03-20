@@ -1,7 +1,9 @@
-from flask import Blueprint,url_for,request,redirect,session, render_template
-from mods.auth_login.model.User import User as mUser
-from mods.auth_login.src.LoginProvider import LoginAuthProvider
-from utils import db,config,get_provider,set_provider
+# Import Libraries
+from flask import Blueprint,request,redirect,session, render_template
+
+from core.mods.auth_login.model.User import User as mUser
+from core.mods.auth_login.src.LoginProvider import LoginAuthProvider
+from core.utils import db,config,get_provider,set_provider
 
 bp = Blueprint('auth_login', __name__)
 set_provider("auth",LoginAuthProvider())

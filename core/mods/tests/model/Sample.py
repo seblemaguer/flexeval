@@ -1,6 +1,7 @@
-from sqlalchemy import orm
-from utils import db, config, get_provider
+# Import Libraries
 import csv
+
+from core.utils import db, get_provider
 
 class Sample(db.Model):
     __tablename__ = 'sample'

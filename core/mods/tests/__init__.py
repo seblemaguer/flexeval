@@ -1,16 +1,18 @@
-from flask import Blueprint, render_template,url_for,request,redirect,session
-from utils import db,config,NAME_REP_CONFIG,get_provider
-from mods.tests.src.Test import Test
-from mods.tests.src.System import SystemTemplate
-from mods.tests.model.Sample import Sample
+# Import Libraries
 import random
-import utils
 import json
+
+from flask import Blueprint, render_template,request,redirect,session
+
+from core.utils import db,config,NAME_REP_CONFIG,assets
+from core.mods.tests.src.Test import Test
+from core.mods.tests.src.System import SystemTemplate
+from core.mods.tests.model.Sample import Sample
 
 bp = Blueprint('tests', __name__)
 tests_data = None
 
-with open(utils.NAME_REP_CONFIG+'/tests.json') as tests_data_json:
+with open(NAME_REP_CONFIG+'/tests.json') as tests_data_json:
     tests_data = json.load(tests_data_json)
 
 # Routes
@@ -43,12 +45,11 @@ def get(name):
             random.shuffle(systems)
             return systems
 
-        return render_template(config["stages"][name]["template"],name=name,systems=systems,save_field=SystemTemplate.save_field,obfuscate_assets=utils.assets.obfuscate)
+        return render_template(config["stages"][name]["template"],name=name,systems=systems,save_field=SystemTemplate.save_field,obfuscate_assets=assets.obfuscate)
 
 @bp.route('/<name>/send', methods = ['POST'])
 def save(name):
 
-    print(request.form)
     test = Test(name)
 
     unique_system_answer = test.unique_system_answer()

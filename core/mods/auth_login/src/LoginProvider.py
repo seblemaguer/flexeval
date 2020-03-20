@@ -1,5 +1,7 @@
+# Import Libraries
 from flask import session, abort
-from src.providers.AuthProvider import AuthProvider
+
+from core.src.providers.AuthProvider import AuthProvider
 
 class LoginAuthProvider(AuthProvider):
 

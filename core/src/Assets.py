@@ -1,7 +1,10 @@
-from flask import Blueprint, send_from_directory, abort
-import utils
+# Import Libraries
 import random
 import string
+
+from flask import Blueprint, send_from_directory, abort
+
+import core.utils as utils
 
 class Assets():
 
@@ -43,6 +46,6 @@ class Assets():
             try:
                 return send_from_directory(utils.NAME_REP_CONFIG+"/assets"+path,file)
             except Exception as e:
-                return send_from_directory(utils.ROOT+"/assets"+path, file)
+                return send_from_directory(utils.ROOT+"/core/assets"+path, file)
         except Exception as e:
             abort(404)
