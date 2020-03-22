@@ -10,6 +10,8 @@ $(document).ready(function(){
       });
 
       $(this).on("ended", function(e) {
+          locked = locked - 1;
+          
           if(locked == 0)
           {
             $("*[type=submit]").map(function(){$(this).attr("disabled",false)});
