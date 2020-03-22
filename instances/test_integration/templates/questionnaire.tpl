@@ -1,8 +1,10 @@
-{% extends 'base.tpl' %}
+{% extends 'core/base.tpl' %}
 
 {% block title %}Qui êtes vous ?{% endblock %}
 
 {% block content %}
+<h2 class="bd-content-title"> <img src="/assets/static/img/svg_icon/chevron-right.svg" alt=">" /> Qui êtes vous ?</h2>
+
 <form action="./{{qrname}}/send" method="post" class="form-example" enctype="multipart/form-data">
 
   <div class="form-example">
@@ -37,9 +39,8 @@
 
 
 
-  <div class="form-example">
-    <input type="submit" value="Send">
-  </div>
+  <button  class="btn btn-outline-primary">Send</button>
+
 </form>
 {% endblock %}
 

@@ -1,4 +1,4 @@
-{% extends 'base.tpl' %}
+{% extends 'core/base.tpl' %}
 
 {% block title %}Fin{% endblock %}
 

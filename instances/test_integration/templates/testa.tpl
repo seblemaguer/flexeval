@@ -1,10 +1,11 @@
-{% extends 'base.tpl' %}
+{% extends 'core/base.tpl' %}
 
 {% block title %}Test MOS{% endblock %}
 
 {% block content %}
 
-STEP: {{step}}
+<h2 class="bd-content-title"> <img src="/assets/static/img/svg_icon/chevron-right.svg" alt=">" /> Test {{ name }} - step {{step}} over {{nb_step}}</h2>
+
 <form action="./{{name}}/send" method="post" class="form-example" enctype="multipart/form-data">
 
 
@@ -31,7 +32,7 @@ STEP: {{step}}
   </div>
   {% endfor %}
 
-  <button>Send</button>
+  <button  class="btn btn-outline-primary">Send</button>
 
 </form>
 

@@ -14,10 +14,14 @@ class AuthProvider():
     def destroy(self):
         raise NotImplementedError()
 
+    @property
+    def connected(self):
+        raise NotImplementedError()
+
 class AnonAuthProvider(AuthProvider):
 
     def get(self):
-        if "anon" in session:
+        if self.connected:
             return session["anon"]
         else:
             self.set()
@@ -28,3 +32,7 @@ class AnonAuthProvider(AuthProvider):
 
     def destroy(self):
         del session["anon"]
+
+    @property
+    def connected(self):
+        return "anon" in session

@@ -14,7 +14,7 @@ def login(name):
     if "user" in session:
         return redirect(config["stages"][name]["next"])
     else:
-        return render_template('auth_login/login.tpl',name=name)
+        return render_template('auth_login/login.tpl',userprov=get_provider("auth"),name=name)
 
 @bp.route('/<name>/log-register', methods = ['POST'])
 def log_register(name):

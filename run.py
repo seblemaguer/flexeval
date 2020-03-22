@@ -36,7 +36,7 @@ if __name__ == '__main__':
     os.makedirs(utils.NAME_REP_CONFIG+"/.tmp/export_bdd")
 
     shutil.copytree(utils.NAME_REP_CONFIG+"/templates",utils.NAME_REP_CONFIG+"/.tmp/templates")
-    utils.safe_copy_rep(utils.ROOT+"/core/templates",utils.NAME_REP_CONFIG+"/.tmp/templates")
+    utils.safe_copy_rep(utils.ROOT+"/core/templates",utils.NAME_REP_CONFIG+"/.tmp/templates/core")
 
     # VARs
     activated_stage = []

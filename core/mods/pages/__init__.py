@@ -20,5 +20,8 @@ def get(name):
     if "next" in config["stages"][name]:
         next=config["stages"][name]["next"]
 
+    _parameters = None
+    if "parameters" in config["stages"][name]:
+        _parameters=config["stages"][name]["parameters"]
 
-    return render_template(config["stages"][name]["template"],next=next)
+    return render_template(config["stages"][name]["template"],userprov=get_provider("auth"),next=next,parameters=_parameters)

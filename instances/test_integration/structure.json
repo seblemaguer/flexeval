@@ -5,7 +5,7 @@
     "info_utilisateur": {"type": "questionnaire", "template":"questionnaire.tpl", "next": "testA"},
     "testA":            {"type": "tests", "nb_answers": 10, "template": "testa.tpl", "next": "deuxieme_ab"},
     "deuxieme_ab":      {"type": "tests", "nb_answers": 10, "template": "testab.tpl", "next": "troisieme_ab"},
-    "troisieme_ab":      {"type": "tests", "nb_answers": 10, "template": "testabl.tpl", "next": "fin_du_test"},
+    "troisieme_ab":     {"type": "tests", "nb_answers": 10, "template": "testabl.tpl", "next": "fin_du_test", "parameters": {"test":"coucou"}},
     "fin_du_test":      {"type": "pages", "deconnect_user":true, "template":"end.tpl"}
   }
 }

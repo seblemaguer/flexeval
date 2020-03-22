@@ -7,7 +7,7 @@ class LoginAuthProvider(AuthProvider):
 
     def get(self):
 
-        if "user" in session:
+        if self.connected:
             return session["user"]
         else:
             abort(401)
@@ -17,3 +17,7 @@ class LoginAuthProvider(AuthProvider):
 
     def destroy(self):
         del session["user"]
+
+    @property
+    def connected(self):
+        return "user" in session

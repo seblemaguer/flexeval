@@ -12,7 +12,12 @@ def get(name):
 
     oneAnswer = mQRResp.query.filter_by(name=name,user=get_provider("auth").get()).first()
     if oneAnswer is None:
-        return render_template(config["stages"][name]["template"],qrname=name)
+
+        _parameters = None
+        if "parameters" in config["stages"][name]:
+            _parameters=config["stages"][name]["parameters"]
+
+        return render_template(config["stages"][name]["template"],userprov=get_provider("auth"),qrname=name,parameters=_parameters)
     else:
         return redirect(config["stages"][name]["next"])
 

@@ -1,10 +1,10 @@
-{% extends 'base.tpl' %}
+{% extends 'core/base.tpl' %}
 
 {% block title %}ERREUR {{code}}{% endblock %}
 
 {% block content %}
 
-  <h1> Erreur {{code}} </h1>
+  <h2> Erreur {{code}} </h2>
 
   <p> Une erreur s'est produite </p>
 
