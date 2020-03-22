@@ -1,0 +1,11 @@
+{
+  "entrypoint": "page_de_login",
+  "stages": {
+    "page_de_login":    {"type": "auth_login", "next":"mos_text"},
+    "mos_text":         {"type": "tests", "nb_answers": 5, "template": "tests/mos_text.tpl", "next": "mos_image"},
+    "mos_image":        {"type": "tests", "nb_answers": 5, "template": "tests/mos_image.tpl", "next": "mos_audio"},
+    "mos_audio":        {"type": "tests", "nb_answers": 5, "template": "tests/mos_audio.tpl", "next": "mos_video"},
+    "mos_video":        {"type": "tests", "nb_answers": 5, "template": "tests/mos_video.tpl", "next": "fin_du_test"},
+    "fin_du_test":      {"type": "pages", "deconnect_user":true, "template":"pages/end.tpl"}
+  }
+}

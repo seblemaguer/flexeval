@@ -35,7 +35,8 @@ if __name__ == '__main__':
     os.makedirs(utils.NAME_REP_CONFIG+"/.tmp")
     os.makedirs(utils.NAME_REP_CONFIG+"/.tmp/export_bdd")
 
-    shutil.copytree(utils.NAME_REP_CONFIG+"/templates",utils.NAME_REP_CONFIG+"/.tmp/templates")
+    utils.safe_copy_rep(utils.NAME_REP_CONFIG+"/templates",utils.NAME_REP_CONFIG+"/.tmp/templates")
+    utils.safe_copy_rep(utils.ROOT+"/core/templates",utils.NAME_REP_CONFIG+"/.tmp/templates")
     utils.safe_copy_rep(utils.ROOT+"/core/templates",utils.NAME_REP_CONFIG+"/.tmp/templates/core")
 
     # VARs
@@ -129,7 +130,7 @@ if __name__ == '__main__':
         except Exception as e:
             pass
 
-        return render_template('error.tpl',code=code,entrypoint=utils.config["entrypoint"])
+        return render_template('error.tpl',code=code,entrypoint=utils.config["entrypoint"],userprov=None)
 
     # Run app
     utils.app.run(host=args.host,port=args.port)

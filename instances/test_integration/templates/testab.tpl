@@ -1,6 +1,4 @@
-{% extends 'core/base.tpl' %}
-
-{% block title %}Test MOS{% endblock %}
+{% extends 'base.tpl' %}
 
 {% block content %}
 <h2 class="bd-content-title"> <img src="/assets/static/img/svg_icon/chevron-right.svg" alt=">" /> Test {{ name }} - step {{step}} over {{nb_step}}</h2>
@@ -35,7 +33,4 @@
 
 </form>
 
-{% endblock %}
-
-{% block footer %}
 {% endblock %}

@@ -1,6 +1,4 @@
-{% extends 'core/base.tpl' %}
-
-{% block title %}Test MOS{% endblock %}
+{% extends 'base.tpl' %}
 
 {% block content %}
 
@@ -10,33 +8,30 @@
 
 
   {% for system in systems() %}
-  <div class="form-example">
-
-    <p> Blabla: {{system.data["sentence"]}} </p>
+  <div class="form-group">
+    {% set name = save_field('score',system) %}
+    <label for="{{ name }}"> Blabla: {{system.data["sentence"]}} </label>
     <img src="{{ obfuscate_assets(system.data['image']) }}" />
-    <select name="{{ save_field('score',system) }}">
+    <select name="{{ name }}" class="form-control">
      <option value="1">Médiocre</option>
      <option value="2">Moyen</option>
      <option value="3">Correct</option>
      <option value="4"> Bon </option>
     </select>
 
-    <input name="{{ save_field('image',system) }}" type="file">
+  </div>
+
+  <div class="form-group">
+    {% set name = save_field('image',system) %}
+    <label for="{{ name }}"> Bidule </label>
+    <input name="{{ name }}" type="file"  class="form-control">
 
   </div>
+
   {% endfor %}
 
-  {% for system in systems() %}
-  <div class="form-example">
-    <input type="radio" name="{{ save_field('choose_one_system',systems()) }}" value="{{ system.name() }}">
-  </div>
-  {% endfor %}
-
-  <button  class="btn btn-outline-primary">Send</button>
+  <button type="submit" class="btn btn-primary">Submit</button>
 
 </form>
 
-{% endblock %}
-
-{% block footer %}
 {% endblock %}

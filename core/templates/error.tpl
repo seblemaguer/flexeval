@@ -1,16 +1,10 @@
-{% extends 'core/base.tpl' %}
+{% extends 'base.tpl' %}
 
-{% block title %}ERREUR {{code}}{% endblock %}
+{% block title %}{{code}} Error{% endblock %}
+
 
 {% block content %}
+  <h2 class="bd-content-title"> <img src="/assets/static/img/svg_icon/chevron-right.svg" alt=">" /> Something wrong happened ...</h2>
 
-  <h2> Erreur {{code}} </h2>
-
-  <p> Une erreur s'est produite </p>
-
-  <a href="{{entrypoint}}"> Retour à l'accueil </a>
-
-{% endblock %}
-
-{% block footer %}
+  <a href="{{entrypoint}}"> Back </a>
 {% endblock %}

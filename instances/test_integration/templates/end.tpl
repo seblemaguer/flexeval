@@ -1,10 +1,5 @@
-{% extends 'core/base.tpl' %}
-
-{% block title %}Fin{% endblock %}
+{% extends 'base.tpl' %}
 
 {% block content %}
 Bye
-{% endblock %}
-
-{% block footer %}
 {% endblock %}

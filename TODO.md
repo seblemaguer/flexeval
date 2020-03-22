@@ -25,3 +25,7 @@
   * [ ] ab_text
   * [ ] paraphrase syntax
   * [ ] paraphrase semantic (like ab_text)
+
+
+
+PROBLEME TEMPLATE BASE ET ERROR ET AUTH LOGIN lorsque redef

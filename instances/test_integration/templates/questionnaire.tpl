@@ -1,48 +1,43 @@
 {% extends 'core/base.tpl' %}
 
-{% block title %}Qui êtes vous ?{% endblock %}
-
 {% block content %}
 <h2 class="bd-content-title"> <img src="/assets/static/img/svg_icon/chevron-right.svg" alt=">" /> Qui êtes vous ?</h2>
 
 <form action="./{{qrname}}/send" method="post" class="form-example" enctype="multipart/form-data">
 
-  <div class="form-example">
+  <div class="form-group">
     <label for="q1">q1: </label>
-    <input type="text" name="q1" id="q1">
+    <input type="text" name="q1" class="form-control">
   </div>
 
-  <div class="form-example">
+  <div class="form-group">
     <label for="q2">q2: </label>
-    <input type="text" name="q2" id="q2">
+    <input type="text" name="q2" class="form-control">
   </div>
 
-  <div class="form-example">
+  <div class="form-group">
     <label for="q3">q3: </label>
-    <input type="text" name="q3" id="q3">
+    <input type="text" name="q3" class="form-control">
   </div>
 
-  <div class="form-example">
+  <div class="form-group">
     <label for="ez">ze: </label>
-    <input type="text" name="ez" id="ez">
+    <input type="text" name="ez" class="form-control">
   </div>
 
-  <div class="form-example">
+  <div class="form-group">
     <label for="ef">ef: </label>
-    <input type="text" name="ef" id="ef">
+    <input type="text" name="ef"class="form-control">
   </div>
 
-  <div class="form-example">
+  <div class="form-group">
     <label for="img">img: </label>
-    <input type="file" name="img" id="img">
+    <input type="file" name="img" class="form-control">
   </div>
 
 
 
-  <button  class="btn btn-outline-primary">Send</button>
+  <button type="submit" class="btn btn-primary">Submit</button>
 
 </form>
-{% endblock %}
-
-{% block footer %}
 {% endblock %}
