@@ -13,6 +13,7 @@ class Sample(db.Model):
 
     name_test = db.Column(db.String, nullable=False)
     name_system = db.Column(db.String, nullable=False)
+
     step = db.Column(db.Integer, nullable=False)
 
     question = db.Column(db.String,nullable=False)

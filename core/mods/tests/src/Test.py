@@ -9,7 +9,7 @@ import core.mods.tests as m_test
 class Test():
 
     TESTS = {}
-
+    DATA_ALREADY_MODIFIED = False
     @classmethod
     def get(cld,name):
         if not(name in cls.TESTS.keys()):
@@ -19,21 +19,40 @@ class Test():
     def __init__(self,name):
         self.name = name
 
-        if "system_aligned" in m_test.tests_data[name]:
-            self.system_aligned = m_test.tests_data[name]["system_aligned"]
-        else:
-            self.system_aligned = True
+        anchors = []
+        orphelins = []
 
         size_test = None
-        for system in m_test.tests_data[self.name]["systems"]:
-            system = System(system["data"])
+        if not("system_all_aligned" in m_test.tests_data[self.name]):
+            m_test.tests_data[self.name]["system_all_aligned"] = True
 
-            if self.system_aligned:
-                if size_test is None:
-                    size_test = len(system.systemsamples)
-                else:
-                    if not(size_test == len(system.systemsamples)):
-                        raise Exception("TEST "+str(self.name)+": data.json say that the systems are aligned, but they don't have the same number of sample (line). \n After fixing the csv of these systems or/and the data.json, don't forget to delete the current db that have been corrupted, before runing again the server.")
+        for data_system in m_test.tests_data[self.name]["systems"]:
+            system = System(data_system["data"])
+
+            if "aligned_with" in data_system:
+
+                if  m_test.tests_data[self.name]["system_all_aligned"]:
+                    if(not(Test.DATA_ALREADY_MODIFIED)):
+                        raise Exception("TEST "+str(self.name)+": test.json say that systems are all aligned but an alignement between two systems have been specified. \n After fixing the test.json, don't forget to delete the current db that have been corrupted, before runing again the server.")
+
+                anchor =  data_system["aligned_with"]
+                anchor_data_system = None
+                for _anchor_data_system in m_test.tests_data[self.name]["systems"]:
+                    if(_anchor_data_system["name"] == anchor):
+                        anchor_data_system = _anchor_data_system
+
+                anchor_sys = System(anchor_data_system["data"])
+
+                if not(anchor in anchors):
+                    anchors.append(anchor)
+
+                if not(len(anchor_sys.systemsamples) == len(system.systemsamples)):
+                        raise Exception("TEST "+str(self.name)+": test.json say that systems: "+data_system["name"]+" and  "+anchor+ " are aligned, but they don't have the same number of sample (line). \n After fixing the csv of these systems or/and the test.json, don't forget to delete the current db that have been corrupted, before runing again the server.")
+
+        if m_test.tests_data[self.name]["system_all_aligned"]:
+            for data_system in m_test.tests_data[self.name]["systems"][1:]:
+                data_system["aligned_with"] = m_test.tests_data[self.name]["systems"][0]["name"]
+            Test.DATA_ALREADY_MODIFIED = True
 
         self.nb_answers_max = config["stages"][name]["nb_answers"]
 
@@ -47,21 +66,23 @@ class Test():
 
         return unique_system_answer
 
-    def get_system_sample(self):
 
-        selected_systemsample_per_system = {}
+    def get_system_sample_per_system(self,name_system,selected_systemsample_per_system):
 
-        for system in m_test.tests_data[self.name]["systems"]:
-            name_system = system["name"]
-            system = System(system["data"])
+        data_system = None
+        for _data_system in m_test.tests_data[self.name]["systems"]:
+            if(_data_system["name"] == name_system):
+                data_system = _data_system
 
-            if self.system_aligned and len(list(selected_systemsample_per_system.keys())) >= 1:
-                selected_systemsample = selected_systemsample_per_system[list(selected_systemsample_per_system.keys())[0]]
-                selected_systemsample_per_system[name_system] = system.get_line(selected_systemsample.line_id)
+        if not(name_system in selected_systemsample_per_system.keys()):
 
-                assert not(selected_systemsample_per_system[name_system] is None)
+            if "aligned_with" in data_system:
+                name_system_anchor = data_system["aligned_with"]
+                anchor_sys_samples = self.get_system_sample_per_system(name_system_anchor,selected_systemsample_per_system)
+                selected_systemsample_per_system[name_system] = System(data_system["data"]).get_line(anchor_sys_samples.line_id)
+
             else:
-
+                system = System(data_system["data"])
                 choose_systemsample = []
                 samples_per_systemsample_min = None
 
@@ -88,5 +109,16 @@ class Test():
                             samples_per_systemsample_min = len(samples)
 
                 selected_systemsample_per_system[name_system] = random.choice(choose_systemsample)
+
+        assert not(selected_systemsample_per_system[name_system] is None)
+        return selected_systemsample_per_system[name_system]
+
+    def get_system_sample(self):
+
+        selected_systemsample_per_system = {}
+
+        for data_system in m_test.tests_data[self.name]["systems"]:
+
+            self.get_system_sample_per_system(data_system["name"],selected_systemsample_per_system)
 
         return selected_systemsample_per_system

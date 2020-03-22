@@ -1,0 +1,30 @@
+{
+
+    "testA":
+    {
+      "systems":
+      [
+        {"name": "system_img", "data": "bidule/system6.csv"}
+      ]
+    },
+
+    "deuxieme_ab":
+    {
+      "systems":
+      [
+          {"name": "premier_systeme", "data": "system2.csv"},
+          {"name": "deuxieme_systeme", "data": "system3.csv"}
+      ]
+    },
+    "troisieme_ab":
+    {
+      "system_all_aligned":false,
+      "systems":
+      [
+          {"name": "tA", "data": "system2.csv"},
+          {"name": "tB", "data": "system2.csv","aligned_with":"tA"},
+          {"name": "tC", "data": "system3.csv","aligned_with":"tB"}
+      ]
+    }
+
+}

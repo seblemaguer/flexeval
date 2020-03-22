@@ -4,7 +4,8 @@
     "page_de_login":    {"type": "auth_login", "next":"info_utilisateur"},
     "info_utilisateur": {"type": "questionnaire", "template":"questionnaire.tpl", "next": "testA"},
     "testA":            {"type": "tests", "nb_answers": 10, "template": "testa.tpl", "next": "deuxieme_ab"},
-    "deuxieme_ab":      {"type": "tests", "nb_answers": 10, "template": "testab.tpl", "next": "fin_du_test"},
+    "deuxieme_ab":      {"type": "tests", "nb_answers": 10, "template": "testab.tpl", "next": "troisieme_ab"},
+    "troisieme_ab":      {"type": "tests", "nb_answers": 10, "template": "testabl.tpl", "next": "fin_du_test"},
     "fin_du_test":      {"type": "pages", "deconnect_user":true, "template":"end.tpl"}
   }
 }
