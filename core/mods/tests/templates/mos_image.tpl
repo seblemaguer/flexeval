@@ -13,7 +13,10 @@
     {% for system in systems() %}
     <div class="form-group">
       {% set name = save_field('score',system) %}
-      <label for="{{ name }}"><img src="{{ obfuscate_assets(system.data[system.get_column_name(0)]) }}" /></label>
+      <label for="{{ name }}">
+        <img class="img-fluid" src="{{ obfuscate_assets(system.data[system.get_column_name(0)]) }}" />
+      </label>
+
       <select name="{{ name }}" class="form-control">
        <option value="5">Excellent</option>
        <option value="4">Good</option>

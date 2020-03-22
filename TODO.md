@@ -14,18 +14,14 @@
 
 ### Modes ###
 
-* [ ] Add a mode to alternate various tests
+* [ ] Add an intro to tests
   * TODO: add a description
 
 ### Templates ###
 
 * [ ] optional template attributes
 * Add as default template:
-  * [ ] ab_audio
-  * [ ] ab_text
+  * [x] ab_audio
+  * [x] ab_text
   * [ ] paraphrase syntax
   * [ ] paraphrase semantic (like ab_text)
-
-
-
-PROBLEME TEMPLATE BASE ET ERROR ET AUTH LOGIN lorsque redef

@@ -14,7 +14,7 @@
     <div class="form-group">
       {% set name = save_field('score',system) %}
       <label for="{{ name }}">
-        <video controls>
+        <video controls readall>
           <source src="{{ obfuscate_assets(system.data[system.get_column_name(0)]) }}">
             Your browser does not support the <code>video</code> element.
         </video>

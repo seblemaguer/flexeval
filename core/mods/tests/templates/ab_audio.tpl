@@ -17,7 +17,7 @@
       <div class="form-check">
         <input class="form-check-input" type="radio" name="{{ name }}" id="sys{{ system.name() }}" value="{{ system.name() }}" checked>
         <label class="form-check-label" for="sys{{ system.name() }}">
-          <audio controls>
+          <audio controls readall>
             <source src="{{ obfuscate_assets(system.data[system.get_column_name(0)]) }}">
               Your browser does not support the <code>audio</code> element.
           </audio>

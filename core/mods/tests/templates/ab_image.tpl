@@ -17,7 +17,7 @@
       <div class="form-check">
         <input class="form-check-input" type="radio" name="{{ name }}" id="sys{{ system.name() }}" value="{{ system.name() }}" checked>
         <label class="form-check-label" for="sys{{ system.name() }}">
-          <img src="{{ obfuscate_assets(system.data[system.get_column_name(0)]) }}" />
+          <img class="img-fluid" src="{{ obfuscate_assets(system.data[system.get_column_name(0)]) }}" />
         </label>
       </div>
 
