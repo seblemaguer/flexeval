@@ -2,10 +2,10 @@
   "entrypoint": "page_de_login",
   "stages": {
     "page_de_login":    {"type": "auth_login", "next":"mos_text"},
-    "mos_text":         {"type": "tests", "nb_answers": 5, "template": "tests/mos_text.tpl", "next": "mos_image"},
-    "mos_image":        {"type": "tests", "nb_answers": 5, "template": "tests/mos_image.tpl", "next": "mos_audio"},
-    "mos_audio":        {"type": "tests", "nb_answers": 5, "template": "tests/mos_audio.tpl", "next": "mos_video"},
-    "mos_video":        {"type": "tests", "nb_answers": 5, "template": "tests/mos_video.tpl", "next": "fin_du_test"},
+    "mos_text":         {"type": "tests", "nb_answers": 5, "template:parameters":{"name":"Test MOS (1/4)","media":"text"}, "template": "tests/mos.tpl", "next": "mos_image"},
+    "mos_image":        {"type": "tests", "nb_answers": 5, "template:parameters":{"name":"Test MOS (2/4)","media":"image"}, "template": "tests/mos.tpl", "next": "mos_audio"},
+    "mos_audio":        {"type": "tests", "nb_answers": 5, "template:parameters":{"name":"Test MOS (3/4)","media":"audio"}, "template": "tests/mos.tpl", "next": "mos_video"},
+    "mos_video":        {"type": "tests", "nb_answers": 5, "template:parameters":{"name":"Test MOS (4/4)","media":"video"}, "template": "tests/mos.tpl", "next": "fin_du_test"},
     "fin_du_test":      {"type": "pages", "deconnect_user":true, "template":"pages/end.tpl"}
   }
 }

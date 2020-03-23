@@ -1,0 +1,11 @@
+{
+  "entrypoint": "page_de_login",
+  "stages": {
+    "page_de_login":    {"type": "auth_login", "next":"mushra_text"},
+    "mushra_text":      {"type": "tests", "nb_answers": 5, "template:parameters":{"name":"Test mushra (1/4)","media":"text","sysref":"ref"}, "template": "tests/mushra.tpl", "next": "mushra_image"},
+    "mushra_image":     {"type": "tests", "nb_answers": 5, "template:parameters":{"name":"Test mushra (2/4)","media":"image","sysref":"ref"}, "template": "tests/mushra.tpl", "next": "mushra_audio"},
+    "mushra_audio":     {"type": "tests", "nb_answers": 5, "template:parameters":{"name":"Test mushra (3/4)","media":"audio","sysref":"ref"}, "template": "tests/mushra.tpl", "next": "mushra_video"},
+    "mushra_video":     {"type": "tests", "nb_answers": 5, "template:parameters":{"name":"Test mushra (4/4)","media":"video","sysref":"reference"}, "template": "tests/mushra.tpl", "next": "fin_du_test"},
+    "fin_du_test":      {"type": "pages", "deconnect_user":true, "template":"pages/end.tpl"}
+  }
+}

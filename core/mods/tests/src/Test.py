@@ -11,7 +11,7 @@ class Test():
     TESTS = {}
     DATA_ALREADY_MODIFIED = False
     @classmethod
-    def get(cld,name):
+    def get(cls,name):
         if not(name in cls.TESTS.keys()):
             cls.TESTS[name] = Test(name)
         return cls.TESTS[name]

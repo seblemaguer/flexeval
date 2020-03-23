@@ -21,7 +21,7 @@ with open(NAME_REP_CONFIG+'/tests.json') as tests_data_json:
 @bp.route('/<name>', methods = ['GET'])
 def get(name):
 
-    test = Test(name)
+    test = Test.get(name)
 
     unique_system_answer = test.unique_system_answer()
 
@@ -47,16 +47,16 @@ def get(name):
             random.shuffle(systems)
             return systems
 
-        _parameters = None
-        if "parameters" in config["stages"][name]:
-            _parameters=config["stages"][name]["parameters"]
+        _parameters = {}
+        if "template:parameters" in config["stages"][name]:
+            _parameters=config["stages"][name]["template:parameters"]
 
         return render_template(config["stages"][name]["template"],userprov=get_provider("auth"),name=name,step=unique_system_answer+1,nb_step=test.nb_answers_max,systems=systems,save_field=SystemTemplate.save_field,obfuscate_assets=assets.obfuscate,parameters=_parameters)
 
 @bp.route('/<name>/send', methods = ['POST'])
 def save(name):
 
-    test = Test(name)
+    test = Test.get(name)
 
     unique_system_answer = test.unique_system_answer()
 

@@ -14,8 +14,8 @@ def get(name):
     if oneAnswer is None:
 
         _parameters = None
-        if "parameters" in config["stages"][name]:
-            _parameters=config["stages"][name]["parameters"]
+        if "template:parameters" in config["stages"][name]:
+            _parameters=config["stages"][name]["template:parameters"]
 
         return render_template(config["stages"][name]["template"],userprov=get_provider("auth"),qrname=name,parameters=_parameters)
     else:
