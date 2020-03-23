@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="/assets/static/img/favicon.ico" />
 
-  <title> {% block title %}PercEval{% endblock %} </title>
+  <title> {{ variables("title",default_value="PercEval")}} </title>
 
   <!-- JQuery -->
   <script src="/assets/static/js/jquery-3.4.1.min.js"></script>
@@ -35,7 +35,11 @@
       <div class="col-10">
         <header>
           {% block header %}
-            <h1  class="display-1"> PercEval </h1>
+            <h1  class="display-1">  {{ variables("title",default_value="PercEval")}} </h1>
+            {% if variables("description") is not none %}
+            <span>{{variables("description")}}</span>
+            {% endif %}
+            <span></span>
           {% endblock %}
         </header>
 
@@ -55,20 +59,23 @@
             {% if userprov.connected %}
             <p class="text-muted" style="letter-spacing: 1px;">Logged in as {{ userprov.get()}} (<a href="/deco"> Log out </a>) .</p>
             {% endif %}
-            <p class="text-muted" style="letter-spacing: 2px;">Powered by <a href="https://gitlab.inria.fr/dlolive/PercepEval">PercEval</a>.</p>
+            <p class="text-muted" style="letter-spacing: 2px;">
+              {% if variables("authors") is not none %}
+                Made by {{variables("authors")}}.
+              {% endif %}
+              Powered by <a href="https://gitlab.inria.fr/dlolive/PercepEval">PercEval</a>.</p>
           </div>
 
-          {% block footer %}
-
           <div class="col-12 text-center">
+            {% block footer %}
         				<a href="http://www.irisa.fr" target="_blank">
         					<img src="/assets/static/img/logo/irisa.png" class="img-responsive center-block" alt="IRISA lab">
         				</a>
         				<a href="http://www-expression.irisa.fr" target="_blank">
         					<img src="/assets/static/img/logo/expression.png" class="img-responsive center-block" alt="Expression team">
         				</a>
+            {% endblock %}
           </div>
-          {% endblock %}
 
         </footer>
       </div>

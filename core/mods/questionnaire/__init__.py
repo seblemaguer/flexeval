@@ -1,7 +1,7 @@
 # Import Libraries
-from flask import Blueprint, render_template,request,redirect,session
+from flask import Blueprint,request,redirect,session
 
-from core.utils import db,config,get_provider
+from core.utils import db,config,get_provider,render_template
 from core.mods.questionnaire.model.QRResp import QRResp as mQRResp
 
 bp = Blueprint('questionnaire', __name__)
@@ -12,12 +12,7 @@ def get(name):
 
     oneAnswer = mQRResp.query.filter_by(name=name,user=get_provider("auth").get()).first()
     if oneAnswer is None:
-
-        _parameters = None
-        if "template:parameters" in config["stages"][name]:
-            _parameters=config["stages"][name]["template:parameters"]
-
-        return render_template(config["stages"][name]["template"],userprov=get_provider("auth"),qrname=name,parameters=_parameters)
+        return render_template(config["stages"][name]["template"],stage_name=name)
     else:
         return redirect(config["stages"][name]["next"])
 

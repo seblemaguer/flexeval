@@ -1,7 +1,7 @@
 # Import Libraries
-from flask import Blueprint, render_template
+from flask import Blueprint
 
-from core.utils import config,get_provider
+from core.utils import config,get_provider, render_template
 
 bp = Blueprint('pages', __name__)
 
@@ -10,18 +10,10 @@ bp = Blueprint('pages', __name__)
 @bp.route('/<name>', methods = ['GET'])
 def get(name):
 
-    if( config["stages"][name]["deconnect_user"]):
+    if( config["stages"][name]["disconnect_user"]):
         try:
             get_provider("auth").destroy()
         except Exception as e:
             pass
 
-    next=None
-    if "next" in config["stages"][name]:
-        next=config["stages"][name]["next"]
-
-    _parameters = None
-    if "template:parameters" in config["stages"][name]:
-        _parameters=config["stages"][name]["template:parameters"]
-
-    return render_template(config["stages"][name]["template"],userprov=get_provider("auth"),next=next,parameters=_parameters)
+    return render_template(config["stages"][name]["template"],stage_name=name)

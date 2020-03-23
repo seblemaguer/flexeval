@@ -6,7 +6,7 @@ import shutil
 import traceback
 import importlib
 
-from flask import Flask,redirect, render_template
+from flask import Flask,redirect
 from flask_sqlalchemy import SQLAlchemy
 
 from core.src.Assets import Assets
@@ -85,7 +85,6 @@ if __name__ == '__main__':
     utils.assets = Assets("/assets")
     Export("/export")
 
-
     for mod in activated_mod:
         lib_imported = importlib.import_module("core.mods."+mod)
         utils.app.register_blueprint(lib_imported.bp,url_prefix='/'+str(mod)) # Register Blueprint
@@ -130,7 +129,7 @@ if __name__ == '__main__':
         except Exception as e:
             pass
 
-        return render_template('error.tpl',code=code,entrypoint=utils.config["entrypoint"],userprov=None)
+        return utils.render_template('error.tpl',code=code,entrypoint=utils.config["entrypoint"])
 
     # Run app
     utils.app.run(host=args.host,port=args.port)

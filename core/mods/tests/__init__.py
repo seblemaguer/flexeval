@@ -2,9 +2,9 @@
 import random
 import json
 
-from flask import Blueprint, render_template,request,redirect,session
+from flask import Blueprint,request,redirect,session
 
-from core.utils import db,config,NAME_REP_CONFIG,assets, get_provider
+from core.utils import db,config,NAME_REP_CONFIG,assets, get_provider,render_template
 from core.mods.tests.src.Test import Test
 from core.mods.tests.src.System import SystemTemplate
 from core.mods.tests.model.Sample import Sample
@@ -47,11 +47,10 @@ def get(name):
             random.shuffle(systems)
             return systems
 
-        _parameters = {}
-        if "template:parameters" in config["stages"][name]:
-            _parameters=config["stages"][name]["template:parameters"]
+        def save_field_with_default_value(field,systems=systems()):
+            return SystemTemplate.save_field(field,systems)
 
-        return render_template(config["stages"][name]["template"],userprov=get_provider("auth"),name=name,step=unique_system_answer+1,nb_step=test.nb_answers_max,systems=systems,save_field=SystemTemplate.save_field,obfuscate_assets=assets.obfuscate,parameters=_parameters)
+        return render_template(config["stages"][name]["template"],stage_name=name,step=unique_system_answer+1,nb_step=test.nb_answers_max,systems=systems,save_field=save_field_with_default_value,obfuscate_assets=assets.obfuscate)
 
 @bp.route('/<name>/send', methods = ['POST'])
 def save(name):

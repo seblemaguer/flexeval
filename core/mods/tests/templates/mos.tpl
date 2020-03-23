@@ -1,15 +1,13 @@
 {% extends 'base.tpl' %}
 
-{% set title = "Test" + name %}
-{% set media = "text" %}
-{% if "name" in parameters %}   {% set title = parameters["name"] %}{% endif %}
-{% if "media" in parameters %}   {% set media = parameters["media"] %} {% endif %}
+{% set subtitle = variables("subtitle",default_value="Test " + stage_name) %}
+{% set media = variables("media",default_value="text") %}
 
 {% block content %}
 
-<h2 class="bd-content-title"> <img src="/assets/static/img/svg_icon/chevron-right.svg" alt=">" /> {{ title }} - step {{step}} over {{nb_step}}</h2>
+<h2 class="bd-content-title"> <img src="/assets/static/img/svg_icon/chevron-right.svg" alt=">" /> {{ subtitle }} - step {{step}} over {{nb_step}}</h2>
 
-<form action="./{{name}}/send" method="post" class="form-example" enctype="multipart/form-data">
+<form action="./{{stage_name}}/send" method="post" class="form-example" enctype="multipart/form-data">
 
   <fieldset class="form-group">
     <legend class="col-form-label"><strong>Question:</strong> How do you judge the <strong>quality</strong> of the following sample?</legend>

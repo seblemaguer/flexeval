@@ -2,20 +2,19 @@
 
 {% block content %}
 
-{% set title = "Test" + name %}
-{% set media = "text" %}
-{% if "name" in parameters %}   {% set title = parameters["name"] %}{% endif %}
-{% if "media" in parameters %}   {% set media = parameters["media"] %} {% endif %}
+{% set subtitle = variables("subtitle",default_value="Test " + stage_name) %}
+{% set media = variables("media",default_value="text") %}
 
-<h2 class="bd-content-title"> <img src="/assets/static/img/svg_icon/chevron-right.svg" alt=">" /> {{ title }} - step {{step}} over {{nb_step}}</h2>
+<h2 class="bd-content-title"> <img src="/assets/static/img/svg_icon/chevron-right.svg" alt=">" /> {{ subtitle }} - step {{step}} over {{nb_step}}</h2>
 
-<form action="./{{name}}/send" method="post"  enctype="multipart/form-data" class="form-example">
+<form action="./{{stage_name}}/send" method="post"  enctype="multipart/form-data" class="form-example">
 
   <fieldset class="form-group">
     <legend class="col-form-label"><strong>Question:</strong> Between the following samples, which sample do you prefer in terms of <strong>quality</strong>?</legend>
 
 
     <div class="form-group">
+
     {% set name_field = save_field('choosen',systems()) %}
     {% for system in systems() %}
 

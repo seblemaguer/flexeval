@@ -25,7 +25,3 @@
   * [x] ab_text
   * [ ] paraphrase syntax
   * [ ] paraphrase semantic (like ab_text)
-
-  intro
-  annotation segment
-  alternate
