@@ -17,9 +17,22 @@ class Export():
             export = json.load(export_json)
 
         self.prefix = prefix
+        utils.app.add_url_rule(self.prefix+'/','auth',self.export_auth)
+        utils.app.add_url_rule(self.prefix+'/panel','panel',self.export_panel)
         utils.app.add_url_rule(self.prefix+'/bdd.zip','csv',self.csv)
         utils.app.add_url_rule(self.prefix+'/bdd.sqlite','sqlite',self.sqlite)
         self.password = export["password"]
+
+    def export_auth(self):
+        return utils.render_template("export_auth.tpl")
+
+    def export_panel(self):
+        try:
+            assert request.args.get('password') == self.password
+        except Exception as e:
+            abort(401)
+
+        return utils.render_template("export_panel.tpl",password=self.password)
 
     def csv(self):
 

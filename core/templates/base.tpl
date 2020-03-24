@@ -53,7 +53,7 @@
             {% endblock %}
           </section>
         </div>
-        <footer class="row">
+        <footer class="row" style="margin-top:5px;">
 
           <div class="col-12 text-center">
             {% if userprov.connected %}
