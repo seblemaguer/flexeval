@@ -44,8 +44,12 @@ class Assets():
                 path = path + "/" + _path
 
             try:
-                return send_from_directory(utils.NAME_REP_CONFIG+"/assets"+path,file)
+                try:
+                    return send_from_directory(utils.NAME_REP_CONFIG+"/systems/public"+path,file)
+                except Exception as e:
+                    return send_from_directory(utils.NAME_REP_CONFIG+"/assets"+path,file)
             except Exception as e:
                 return send_from_directory(utils.ROOT+"/core/assets"+path, file)
+
         except Exception as e:
             abort(404)

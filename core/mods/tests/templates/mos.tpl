@@ -21,15 +21,15 @@
         {% if media == "text" %}
           {{system.data[system.get_column_name(0)]}}
         {% elif media == "image" %}
-          <img class="img-fluid" src="{{ obfuscate_assets(system.data[system.get_column_name(0)]) }}" />
+          <img class="img-fluid" src="{{ obfuscate_assets("/assets/"+ system.data[system.get_column_name(0)]) }}" />
         {% elif media == "audio" %}
           <audio controls readall>
-            <source src="{{ obfuscate_assets(system.data[system.get_column_name(0)]) }}">
+            <source src="{{ obfuscate_assets("/assets/"+ system.data[system.get_column_name(0)]) }}">
             Your browser does not support the <code>audio</code> element.
           </audio>
         {% elif media == "video" %}
           <video controls readall>
-            <source src="{{ obfuscate_assets(system.data[system.get_column_name(0)]) }}">
+            <source src="{{ obfuscate_assets("/assets/"+ system.data[system.get_column_name(0)]) }}">
               Your browser does not support the <code>video</code> element.
           </video>
         {% else %}
