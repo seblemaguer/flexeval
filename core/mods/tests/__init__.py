@@ -57,12 +57,11 @@ def save(name):
 
     test = Test.get(name)
 
-    unique_system_answer = test.unique_system_answer()
+    step = test.unique_system_answer()
 
-    if(unique_system_answer >= test.nb_answers_max):
+    if(step >= test.nb_answers_max):
         return redirect(config["stages"][name]["next"])
     else:
-        step = unique_system_answer
 
         systems_with_resp = {}
 
@@ -119,4 +118,10 @@ def save(name):
         db.session.commit()
         del session["tests"]
 
-        return redirect("../"+name)
+        if(test.turn_nb_step is not None):
+            if (step+1) % test.turn_nb_step == 0:
+                return redirect(test.turn_next)
+            else:
+                return redirect("../"+name)
+        else:
+            return redirect("../"+name)

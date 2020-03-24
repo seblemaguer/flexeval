@@ -54,6 +54,17 @@ class Test():
                 data_system["aligned_with"] = m_test.tests_data[self.name]["systems"][0]["name"]
             Test.DATA_ALREADY_MODIFIED = True
 
+        if("turn_nb_step" in config["stages"][name]):
+            self.turn_nb_step = config["stages"][name]["turn_nb_step"]
+        else:
+            self.turn_nb_step = None
+
+
+        if("turn_next" in config["stages"][name]):
+            self.turn_next = config["stages"][name]["turn_next"]
+        else:
+            self.turn_next = config["stages"][name]["next"]
+
         self.nb_answers_max = config["stages"][name]["nb_answers"]
 
     def unique_system_answer(self):

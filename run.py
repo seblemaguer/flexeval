@@ -43,38 +43,45 @@ if __name__ == '__main__':
     activated_stage = []
     activated_mod = []
 
-    with open(utils.NAME_REP_CONFIG+'/structure.json') as config:
-        config = json.load(config)
+    try:
+        with open(utils.NAME_REP_CONFIG+'/structure.json') as config:
+            config = json.load(config)
 
 
-         #lOAD
-        next_stage_name = config["entrypoint"]
-        next_stage = config["stages"][next_stage_name]
+             #lOAD
+            next_stage_name = config["entrypoint"]
+            next_stage = config["stages"][next_stage_name]
 
-        # REWRITE
-        config["entrypoint"] = "/"+next_stage["type"]+"/"+ next_stage_name
-        activated_stage.append("entrypoint")
+            # REWRITE
+            config["entrypoint"] = "/"+next_stage["type"]+"/"+ next_stage_name
+            activated_stage.append("entrypoint")
 
-        while not(next_stage is None):
+            while not(next_stage is None):
 
-            current = next_stage
+                current = next_stage
 
-            # Activate mods (attr type)
-            if not(current["type"] in activated_mod):
-                mod = current["type"]
-                activated_mod.append(mod)
+                # Activate mods (attr type)
+                if not(current["type"] in activated_mod):
+                    mod = current["type"]
+                    activated_mod.append(mod)
 
-            # Next stage ? (attr next)
-            if "next" in current:
-                if current["next"] in config["stages"]:
-                    next_stage = config["stages"][current["next"]]
+                if "turn_next" in current:
+                    turn_next = config["stages"][current["turn_next"]]
+                    current["turn_next"] = "/"+turn_next["type"]+"/"+ current["turn_next"]
 
-                    # REWRITE
-                    current["next"] =  "/"+next_stage["type"]+"/"+ current["next"]
+                # Next stage ? (attr next)
+                if "next" in current:
+                    if current["next"] in config["stages"]:
+                        next_stage = config["stages"][current["next"]]
+
+                        # REWRITE
+                        current["next"] =  "/"+next_stage["type"]+"/"+ current["next"]
+                    else:
+                        next_stage = None
                 else:
                     next_stage = None
-            else:
-                next_stage = None
+    except Exception as e:
+        raise Exception("Issue in structure.json")
 
     utils.config = config
     utils.app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///"+utils.NAME_REP_CONFIG+"/bdd_sqlite.db"

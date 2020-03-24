@@ -25,3 +25,11 @@
   * [x] ab_text
   * [ ] paraphrase syntax
   * [ ] paraphrase semantic (like ab_text)
+
+
+  alternate
+
+  page : EXPORT  (panel admin ? permet de visualiser les resp)
+
+
+fichier script sh pour créer une instance
