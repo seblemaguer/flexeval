@@ -1,5 +1,5 @@
 # Import Libraries
-from flask import Blueprint,request,redirect,session
+from flask import Blueprint,request,redirect,session,abort
 
 from core.mods.auth_login.model.User import User as mUser
 from core.mods.auth_login.src.LoginProvider import LoginAuthProvider
@@ -11,6 +11,10 @@ set_provider("auth",LoginAuthProvider())
 # Routes
 @bp.route('/<name>')
 def login(name):
+
+    if(name not in config["stages"]):
+        abort(404)
+
     if "user" in session:
         return redirect(config["stages"][name]["next"])
     else:
@@ -19,6 +23,9 @@ def login(name):
 @bp.route('/<name>/log-register', methods = ['POST'])
 def log_register(name):
     email =  request.form["email"]
+
+    if(name not in config["stages"]):
+        abort(404)
 
     try:
         user = mUser.query.filter_by(email=email).first()

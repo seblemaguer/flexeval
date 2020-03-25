@@ -7,6 +7,7 @@ import traceback
 import importlib
 import random
 import string
+import datetime
 
 from flask import Flask,redirect
 from flask_sqlalchemy import SQLAlchemy
@@ -86,6 +87,7 @@ if __name__ == '__main__':
     utils.app.secret_key = ''.join((random.choice(string.ascii_lowercase) for i in range(256))).encode('ascii')
     utils.app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///"+utils.NAME_REP_CONFIG+"/bdd_sqlite.db"
     utils.app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    utils.app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(days=31)
 
     utils.db = SQLAlchemy(utils.app)
     utils.assets = Assets("/assets")
@@ -96,13 +98,15 @@ if __name__ == '__main__':
 
     reserved_name=["admin","assets"]
     for mod in activated_mod:
+        try:
+            if(mod in reserved_name):
+                raise Exception("You can't name a module "+mod)
 
-        if(mod in reserved_name):
-            raise Exception("You can't name a module "+mod)
-
-        lib_imported = importlib.import_module("core.mods."+mod)
-        utils.app.register_blueprint(lib_imported.bp,url_prefix='/'+str(mod)) # Register Blueprint
-        utils.safe_copy_rep(utils.ROOT+"/core/mods/"+mod+"/templates",utils.NAME_REP_CONFIG+"/.tmp/templates/"+mod)
+            lib_imported = importlib.import_module("core.mods."+mod)
+            utils.app.register_blueprint(lib_imported.bp,url_prefix='/'+str(mod)) # Register Blueprint
+            utils.safe_copy_rep(utils.ROOT+"/core/mods/"+mod+"/templates",utils.NAME_REP_CONFIG+"/.tmp/templates/"+mod)
+        except Exception as e:
+            raise Exception("Module: "+mod+" doesn't exist or can't be initialized properly.")
 
     utils.db.create_all()
 
@@ -136,12 +140,7 @@ if __name__ == '__main__':
         try:
             code = e.code
         except Exception as e:
-            code = 500
-
-        try:
-            utils.get_provider("auth").destroy()
-        except Exception as e:
-            pass
+            code = 520
 
         return utils.render_template('error.tpl',code=code,entrypoint=utils.config["entrypoint"])
 

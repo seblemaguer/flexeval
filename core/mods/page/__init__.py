@@ -1,5 +1,5 @@
 # Import Libraries
-from flask import Blueprint
+from flask import Blueprint, abort
 
 from core.utils import config,get_provider, render_template
 
@@ -9,6 +9,9 @@ bp = Blueprint('page', __name__)
 
 @bp.route('/<name>', methods = ['GET'])
 def get(name):
+
+    if(name not in config["stages"]):
+        abort(404)
 
     if( config["stages"][name]["disconnect_user"]):
         try:

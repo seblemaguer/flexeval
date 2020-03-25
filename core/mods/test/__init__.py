@@ -2,7 +2,7 @@
 import random
 import json
 
-from flask import Blueprint,request,redirect,session
+from flask import Blueprint,request,redirect,session, abort
 
 from core.utils import db,config,NAME_REP_CONFIG,assets, get_provider,render_template
 from core.mods.test.src.Test import Test
@@ -20,6 +20,9 @@ with open(NAME_REP_CONFIG+'/tests.json') as tests_data_json:
 # Routes
 @bp.route('/<name>', methods = ['GET'])
 def get(name):
+
+    if(name not in config["stages"]):
+        abort(404)
 
     test = Test.get(name)
 
@@ -50,6 +53,9 @@ def get(name):
 
 @bp.route('/<name>/send', methods = ['POST'])
 def save(name):
+
+    if(name not in config["stages"]):
+        abort(404)
 
     test = Test.get(name)
 

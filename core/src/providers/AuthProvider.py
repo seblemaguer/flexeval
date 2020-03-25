@@ -29,9 +29,10 @@ class AnonAuthProvider(AuthProvider):
 
     def set(self):
         session["anon"] = "anon@"+str(random.randint(1,999999999999999))
-
+        session.permanent = True
+        
     def destroy(self):
-        del session["anon"]
+        pass
 
     @property
     def connected(self):

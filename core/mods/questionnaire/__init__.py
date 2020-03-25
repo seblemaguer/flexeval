@@ -1,5 +1,5 @@
 # Import Libraries
-from flask import Blueprint,request,redirect,session
+from flask import Blueprint,request,redirect,session, abort
 
 from core.utils import db,config,get_provider,render_template
 from core.mods.questionnaire.model.QRResp import QRResp as mQRResp
@@ -10,6 +10,9 @@ bp = Blueprint('questionnaire', __name__)
 @bp.route('/<name>', methods = ['GET'])
 def get(name):
 
+    if(name not in config["stages"]):
+        abort(404)
+
     oneAnswer = mQRResp.query.filter_by(name=name,user=get_provider("auth").get()).first()
     if oneAnswer is None:
         return render_template(config["stages"][name]["template"],stage_name=name)
@@ -18,6 +21,9 @@ def get(name):
 
 @bp.route('/<name>/send', methods = ['POST'])
 def save(name):
+
+    if(name not in config["stages"]):
+        abort(404)
 
     for (type, keys) in [("form",request.form.keys()),("file",request.files.keys())]:
         for key in keys:
