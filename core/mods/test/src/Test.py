@@ -2,9 +2,9 @@
 import random
 
 from core.utils import get_provider, config, db
-from core.mods.tests.model.Sample import Sample
-from core.mods.tests.src.System import System
-import core.mods.tests as m_test
+from core.mods.test.model.Sample import Sample
+from core.mods.test.src.System import System
+import core.mods.test as m_test
 
 class Test():
 

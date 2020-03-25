@@ -33,7 +33,7 @@
       <div class="col">
       </div>
       <div class="col-10">
-        <header>
+        <header class="row">
           {% block header %}
             <h1  class="display-1">  {{ variables("title",default_value="PercEval")}} </h1>
             {% if variables("description") is not none %}
@@ -41,30 +41,33 @@
             {% endif %}
             <span></span>
           {% endblock %}
+
+          <div class="col-12 text-right">
+            <p class="text-muted" style="letter-spacing: 1px;"> &nbsp; {%block userintel%} {% if userprov.connected %} Logged in as {{ userprov.get()}} (<a href="/deco"> Log out </a>) . {% endif %}{%endblock%}</p>
+          </div>
+
         </header>
 
 
         <div class="row">
-          <div class="col-1">
-          </div>
-          <section class="col-9">
-            {% block content %}
+          <div class="container">
+            <div class="row">
+              <div class="col-1"></div>
+              <section class="col-9">
+                <div class="container">
+                  {% block content %}
 
-            {% endblock %}
-          </section>
+                  {% endblock %}
+                </div>
+              </section>
+              <div class="col-2"></div>
+            </div>
+          </div>
         </div>
-        <footer class="row" style="margin-top:5px;">
 
-          <div class="col-12 text-center">
-            {% if userprov.connected %}
-            <p class="text-muted" style="letter-spacing: 1px;">Logged in as {{ userprov.get()}} (<a href="/deco"> Log out </a>) .</p>
-            {% endif %}
-            <p class="text-muted" style="letter-spacing: 2px;">
-              {% if variables("authors") is not none %}
-                Made by {{variables("authors")}}.
-              {% endif %}
-              Powered by <a href="https://gitlab.inria.fr/dlolive/PercepEval">PercEval</a>.</p>
-          </div>
+        <footer class="row" style="margin-top:20px;">
+
+
 
           <div class="col-12 text-center">
             {% block footer %}
@@ -75,8 +78,22 @@
         					<img src="/assets/static/img/logo/expression.png" class="img-responsive center-block" alt="Expression team">
         				</a>
             {% endblock %}
+
           </div>
 
+          <div class="col-12 text-center">
+            <p class="text-muted" style="letter-spacing: 2px;">
+              {% if variables("authors") is not none %}
+                Made by {{variables("authors")}}.
+              {% endif %}
+              Powered by <a href="https://gitlab.inria.fr/dlolive/PercepEval">PercEval</a>.
+              </p>
+              {%block bottomlink%}
+                <p class="text-muted" style="letter-spacing: 2px;">
+                  Access <a href="/admin"> Admin panel </a>.
+                </p>
+              {%endblock%}
+          </div>
         </footer>
       </div>
     </div>

@@ -5,12 +5,13 @@ import os
 import shutil
 import traceback
 import importlib
+import random
+import string
 
 from flask import Flask,redirect
 from flask_sqlalchemy import SQLAlchemy
 
 from core.src.Assets import Assets
-from core.src.Export import Export
 import core.utils as utils
 
 #  Main
@@ -33,7 +34,6 @@ if __name__ == '__main__':
         shutil.rmtree(utils.NAME_REP_CONFIG+"/.tmp")
 
     os.makedirs(utils.NAME_REP_CONFIG+"/.tmp")
-    os.makedirs(utils.NAME_REP_CONFIG+"/.tmp/export_bdd")
 
     utils.safe_copy_rep(utils.NAME_REP_CONFIG+"/templates",utils.NAME_REP_CONFIG+"/.tmp/templates")
     utils.safe_copy_rep(utils.ROOT+"/core/templates",utils.NAME_REP_CONFIG+"/.tmp/templates")
@@ -46,7 +46,6 @@ if __name__ == '__main__':
     try:
         with open(utils.NAME_REP_CONFIG+'/structure.json') as config:
             config = json.load(config)
-
 
              #lOAD
             next_stage_name = config["entrypoint"]
@@ -84,15 +83,23 @@ if __name__ == '__main__':
         raise Exception("Issue in structure.json")
 
     utils.config = config
+    utils.app.secret_key = ''.join((random.choice(string.ascii_lowercase) for i in range(256))).encode('ascii')
     utils.app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///"+utils.NAME_REP_CONFIG+"/bdd_sqlite.db"
     utils.app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    utils.app.secret_key = b'_5#y2zcer88L"Fczerzce4Q8sdqsdcezqtz\n\xec]/'
+
     utils.db = SQLAlchemy(utils.app)
-
     utils.assets = Assets("/assets")
-    Export("/export")
 
+    import core.admin as admin
+    utils.app.register_blueprint(admin.bp,url_prefix='/admin') # Register Blueprint
+    utils.safe_copy_rep(utils.ROOT+"/core/admin/templates",utils.NAME_REP_CONFIG+"/.tmp/templates/admin")
+
+    reserved_name=["admin","assets"]
     for mod in activated_mod:
+
+        if(mod in reserved_name):
+            raise Exception("You can't name a module "+mod)
+
         lib_imported = importlib.import_module("core.mods."+mod)
         utils.app.register_blueprint(lib_imported.bp,url_prefix='/'+str(mod)) # Register Blueprint
         utils.safe_copy_rep(utils.ROOT+"/core/mods/"+mod+"/templates",utils.NAME_REP_CONFIG+"/.tmp/templates/"+mod)

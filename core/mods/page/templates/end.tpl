@@ -9,6 +9,5 @@
   You have been logged out. You can close the page.
 </p>
 
-<a href="/"> Back </a>
 
 {% endblock %}

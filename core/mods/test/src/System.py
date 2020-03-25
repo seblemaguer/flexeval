@@ -3,7 +3,7 @@ import csv
 import random
 import string
 
-from core.mods.tests.model.SystemSample import SystemSample
+from core.mods.test.model.SystemSample import SystemSample
 from core.utils import NAME_REP_CONFIG,db
 
 

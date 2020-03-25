@@ -8,6 +8,7 @@ from flask import render_template as flask_render_template
 NAME_REP_CONFIG = None
 ROOT = None
 
+jwt = None
 app = None
 db = None
 

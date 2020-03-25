@@ -5,13 +5,13 @@ import json
 from flask import Blueprint,request,redirect,session
 
 from core.utils import db,config,NAME_REP_CONFIG,assets, get_provider,render_template
-from core.mods.tests.src.Test import Test
-from core.mods.tests.src.System import SystemTemplate
-from core.mods.tests.model.Sample import Sample
-from core.mods.tests.model.SystemSample import SystemSample
-from core.mods.tests.src.System import System as mSystem
+from core.mods.test.src.Test import Test
+from core.mods.test.src.System import SystemTemplate
+from core.mods.test.model.Sample import Sample
+from core.mods.test.model.SystemSample import SystemSample
+from core.mods.test.src.System import System as mSystem
 
-bp = Blueprint('tests', __name__)
+bp = Blueprint('test', __name__)
 tests_data = None
 
 with open(NAME_REP_CONFIG+'/tests.json') as tests_data_json:
@@ -28,11 +28,7 @@ def get(name):
     if(unique_system_answer >= test.nb_answers_max):
         return redirect(config["stages"][name]["next"])
     else:
-        session["tests"] = {name:{}}
         system_sample = test.get_system_sample()
-
-        for name_system in system_sample.keys():
-            session["tests"][name][str(system_sample[name_system].id)] = {"name_system":name_system}
 
         def systems(*args):
             systems = []
@@ -116,7 +112,6 @@ def save(name):
 
 
         db.session.commit()
-        del session["tests"]
 
         if(test.turn_nb_step is not None):
             if (step+1) % test.turn_nb_step == 0:

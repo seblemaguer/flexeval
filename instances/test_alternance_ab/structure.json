@@ -6,10 +6,14 @@
     "authors":"Cedric Fayet"
   },
 
+  "admin":{
+    "password":"bflzefinlh67ss"
+  },
+
   "stages": {
     "page_de_login":   {"type": "auth_login", "next":"ab_text"},
-    "ab_text":         {"type": "tests", "nb_answers": 9, "turn_nb_step":3,"template": "tests/ab.tpl", "variables":{"subtitle":"Test AB (text)","media":"text"}, "next": "ab_image"},
-    "ab_image":        {"type": "tests", "nb_answers": 9, "turn_nb_step":3,"turn_next":"ab_text","template": "tests/ab.tpl", "variables":{"subtitle":"Test AB (image)","media":"image"}, "next": "fin_du_test"},
-    "fin_du_test":     {"type": "pages", "disconnect_user":true, "template":"pages/end.tpl"}
+    "ab_text":         {"type": "test", "nb_answers": 9, "turn_nb_step":3,"template": "test/ab.tpl", "variables":{"subtitle":"Test AB (text)","media":"text"}, "next": "ab_image"},
+    "ab_image":        {"type": "test", "nb_answers": 9, "turn_nb_step":3,"turn_next":"ab_text","template": "test/ab.tpl", "variables":{"subtitle":"Test AB (image)","media":"image"}, "next": "fin_du_test"},
+    "fin_du_test":     {"type": "page", "disconnect_user":true, "template":"page/end.tpl"}
   }
 }

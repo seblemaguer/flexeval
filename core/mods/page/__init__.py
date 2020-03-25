@@ -3,7 +3,7 @@ from flask import Blueprint
 
 from core.utils import config,get_provider, render_template
 
-bp = Blueprint('pages', __name__)
+bp = Blueprint('page', __name__)
 
 # Routes
 
