@@ -4,7 +4,7 @@ import json
 
 from flask import Blueprint,request,redirect,session, abort
 
-from core.utils import db,config,NAME_REP_CONFIG,assets, get_provider,render_template
+from core.utils import db,config,NAME_REP_CONFIG,assets,render_template
 from core.mods.test.src.Test import Test
 from core.mods.test.src.System import SystemTemplate
 from core.mods.test.model.Sample import Sample
@@ -58,7 +58,8 @@ def save(name):
         abort(404)
 
     test = Test.get(name)
-
+    test.close_systemsamples_in_eval()
+    
     step = test.unique_system_answer()
 
     if(step >= test.nb_answers_max):

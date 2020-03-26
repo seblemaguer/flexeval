@@ -2,10 +2,11 @@
 
   "ab_text":
   {
+    "system_all_aligned":false,
     "systems":
     [
       {"name": "sys1", "data": "system1.csv"},
-      {"name": "sys2", "data": "system2.csv"}
+      {"name": "sys2", "data": "system2.csv","aligned_with":"sys1"}
     ]
   },
 

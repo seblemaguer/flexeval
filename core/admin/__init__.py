@@ -17,9 +17,9 @@ def secure_mod():
 
     if "admin_password" in session:
         if not(session["admin_password"] == config["admin"]["password"]):
-            abort(401)
+            abort(403)
     else:
-        abort(401)
+        abort(403)
 
 # Enable admin/mod
 for admin_mod_name in os.listdir(ROOT+"/core/admin/mods"):
@@ -44,7 +44,8 @@ def secure():
 
     if "admin_password" in session:
         if not(session["admin_password"] == config["admin"]["password"]):
-            return render_template("admin/auth.tpl")
+            del session["admin_password"]
+            abort(403)
     else:
         return render_template("admin/auth.tpl")
 

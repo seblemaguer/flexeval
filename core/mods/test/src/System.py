@@ -14,24 +14,24 @@ class System():
         systemsamples = SystemSample.query.filter_by(source=self.source).all()
 
         if(len(systemsamples) == 0):
+            try:
+                reader = csv.DictReader(open(NAME_REP_CONFIG+"/systems/"+self.source))
+                for line_id, line in enumerate(reader):
+                    line_value = []
+                    for line_key in list(line.keys()):
+                        line_value.append({line_key:line[line_key]})
 
-            reader = csv.DictReader(open(NAME_REP_CONFIG+"/systems/"+self.source))
-            for line_id, line in enumerate(reader):
-                line_value = []
-                for line_key in list(line.keys()):
-                    line_value.append({line_key:line[line_key]})
+                    systemsample = SystemSample(line_id,line_value,self.source)
+                    db.session.add(systemsample)
+                    systemsamples.append(systemsample)
 
-                systemsample = SystemSample(line_id,line_value,self.source)
-                db.session.add(systemsample)
-                systemsamples.append(systemsample)
-
-            db.session.commit()
-
+                db.session.commit()
+            except Exception as e:
+                raise Exception(source+" doesn't exist. Fix test.json or add the system in your instance.")
         self.systemsamples = systemsamples
 
     def get_line(self,id):
         return SystemSample.query.filter_by(source=self.source,line_id=id).first()
-
 
 class SystemTemplate():
 
@@ -49,21 +49,24 @@ class SystemTemplate():
             self.column_name.append(k)
 
     @classmethod
-    def set_reminder(cls,json_data):
+    def set_reminder(cls,rep,json_data):
+        if rep not in cls.REMINDER:
+            cls.REMINDER[rep]={}
+
         key = ''.join((random.choice(string.ascii_lowercase) for i in range(256)))
-        cls.REMINDER[key] = json_data
+        cls.REMINDER[rep][key] = json_data
 
         return key
 
     @classmethod
-    def get_reminder(cls,key):
-        json_data = SystemTemplate.REMINDER[key]
-        del cls.REMINDER[key]
+    def get_reminder(cls,rep,key):
+        json_data = SystemTemplate.REMINDER[rep][key]
+        del cls.REMINDER[rep][key]
 
         return json_data
 
     def name(self):
-        key = SystemTemplate.set_reminder({"name_system": self.name_system})
+        key = SystemTemplate.set_reminder("/name",{"name_system": self.name_system})
         return "@SystemTemplate:"+str(key)
 
     @classmethod
@@ -72,7 +75,7 @@ class SystemTemplate():
         split = val.split("@SystemTemplate:")
 
         if(len(split) == 2):
-            return SystemTemplate.get_reminder(split[1])["name_system"]
+            return SystemTemplate.get_reminder("/name",split[1])["name_system"]
         else:
             return None
 
@@ -82,7 +85,7 @@ class SystemTemplate():
         split = field.split("@SystemTemplate:")
 
         if(len(split) == 2):
-            return (split[0],SystemTemplate.get_reminder(split[1]))
+            return (split[0],SystemTemplate.get_reminder("/savefield",split[1]))
         else:
             return None
 
@@ -97,7 +100,7 @@ class SystemTemplate():
         for system in systems:
             systems_reminder.append({"systemsample_id":system.systemsample_id,"name_system":system.name_system})
 
-        key = SystemTemplate.set_reminder(systems_reminder)
+        key = SystemTemplate.set_reminder("/savefield",systems_reminder)
 
         return name_field+"@SystemTemplate:"+str(key)
 
