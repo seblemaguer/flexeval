@@ -7,7 +7,8 @@
   },
 
   "admin":{
-    "password":"bflzefinlh67s"
+    "password":"bflzefinlh67s",
+    "mods":["export_bdd"]
   },
 
   "stages": {
@@ -16,6 +17,6 @@
     "ab_image":        {"type": "test", "nb_answers": 5, "template": "test/ab.tpl", "variables":{"subtitle":"Test AB (2/4)","media":"image"}, "next": "ab_audio"},
     "ab_audio":        {"type": "test", "nb_answers": 5, "template": "test/ab.tpl", "variables":{"subtitle":"Test AB (3/4)","media":"audio"}, "next": "ab_video"},
     "ab_video":        {"type": "test", "nb_answers": 5, "template": "test/ab.tpl", "variables":{"subtitle":"Test AB (4/4)","media":"video"}, "next": "fin_du_test"},
-    "fin_du_test":     {"type": "page", "disconnect_user":true, "template":"page/end.tpl"}
+    "fin_du_test":     {"type": "page", "requiere_auth":true, "disconnect_user":true, "template":"page/end.tpl"}
   }
 }

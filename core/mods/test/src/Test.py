@@ -117,7 +117,7 @@ class Test():
             del self.sample_in_eval[user]
 
         except Exception as e:
-            abort(408)
+            pass
 
         if has_timeout:
             abort(408)

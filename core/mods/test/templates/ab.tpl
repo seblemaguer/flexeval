@@ -7,7 +7,7 @@
 
 <h2 class="bd-content-title"> <img src="/assets/static/img/svg_icon/chevron-right.svg" alt=">" /> {{ subtitle }} - step {{step}} over {{nb_step}}</h2>
 
-<form action="./{{stage_name}}/send" method="post"  enctype="multipart/form-data" class="form-example">
+<form action="./{{stage_name}}/send" method="post" enctype="multipart/form-data" class="form-example">
 
   <fieldset class="form-group">
     <legend class="col-form-label"><strong>Question:</strong> Between the following samples, which sample do you prefer in terms of <strong>quality</strong>?</legend>

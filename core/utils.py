@@ -12,8 +12,12 @@ jwt = None
 app = None
 db = None
 
+admin_mod = []
+reserved_name=[]
+
 providers = {"auth":AuthProvider.AnonAuthProvider()}
 assets = None
+admin_panel = None
 
 def set_provider(key,prov):
     providers[key] = prov
@@ -33,7 +37,10 @@ def safe_copy_rep(SRC,DST):
 
         for file in SRC_files:
             if not(file in DST_files):
-                shutil.copyfile(SRC+"/"+file,DST+"/"+file)
+                if(os.path.isdir(SRC+"/"+file)):
+                    safe_copy_rep(SRC+"/"+file,DST+"/"+file)
+                else:
+                    shutil.copyfile(SRC+"/"+file,DST+"/"+file)
 
 def render_template(template,**args):
 

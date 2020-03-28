@@ -1,0 +1,68 @@
+from flask import Blueprint,request,redirect,session, abort
+from core.utils import reserved_name, app,safe_copy_rep,NAME_REP_CONFIG,ROOT,get_provider, admin_mod, config
+
+class Module(Blueprint):
+
+    def __init__(self,modname,name,**args):
+        Blueprint.__init__(self,modname,name,**args)
+        self.name = name
+        splitname = self.name.split(".")
+        self.mod_name = splitname[len(splitname)-1]
+        self.rep_mod_name = self.name.replace(".","/")
+
+        if(self.mod_name in reserved_name):
+            raise Exception("You can't name a module "+mod)
+
+    def __enter__(self):
+        safe_copy_rep(ROOT+"/"+self.rep_mod_name+"/templates",NAME_REP_CONFIG+"/.tmp/templates/"+self.mod_name)
+        return self
+
+    def __exit__(self, *args):
+        app.register_blueprint(self,url_prefix='/'+self.mod_name) # Register Blueprint
+
+
+class AdminModule(Module):
+
+    def __init__(self,modname,name,title,description,**args):
+        Module.__init__(self,modname,name,**args)
+
+        admin_mod.append(self)
+
+        self.TITLE = title
+        self.DESCRIPTION = description
+
+        self.before_request(AdminModule.authentification)
+
+    @classmethod
+    def authentification(cls):
+        if "admin_password" in request.form:
+            session["admin_password"] = request.form["admin_password"]
+
+        if "admin_password" in session:
+            if not(session["admin_password"] == config["admin"]["password"]):
+                abort(403)
+        else:
+            abort(403)
+
+    def __exit__(self, *args):
+        app.register_blueprint(self,url_prefix='/admin/'+self.mod_name)
+
+
+class StageModule(Module):
+
+    def __init__(self,modname,name,requiere_auth=True,**args):
+        Module.__init__(self,modname,name,**args)
+
+        if requiere_auth:
+            self.before_request(StageModule.check_auth)
+
+    @classmethod
+    def check_auth(cls):
+        get_provider("auth").get()
+
+    def requiere_auth(func):
+        def requiere_auth_and_call(*args, **kwargs):
+            StageModule.check_auth()
+
+            return func(*args, **kwargs)
+        return requiere_auth_and_call

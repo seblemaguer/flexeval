@@ -89,24 +89,29 @@ if __name__ == '__main__':
     utils.app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     utils.app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(days=31)
 
+    from core.src.Admin import AdminPanel
     utils.db = SQLAlchemy(utils.app)
-    utils.assets = Assets("/assets")
+    utils.assets = Assets()
+    utils.admin_panel = AdminPanel()
 
-    import core.admin as admin
-    utils.app.register_blueprint(admin.bp,url_prefix='/admin') # Register Blueprint
-    utils.safe_copy_rep(utils.ROOT+"/core/admin/templates",utils.NAME_REP_CONFIG+"/.tmp/templates/admin")
-
-    reserved_name=["admin","assets"]
     for mod in activated_mod:
+        print(mod)
         try:
-            if(mod in reserved_name):
-                raise Exception("You can't name a module "+mod)
-
             lib_imported = importlib.import_module("core.mods."+mod)
-            utils.app.register_blueprint(lib_imported.bp,url_prefix='/'+str(mod)) # Register Blueprint
-            utils.safe_copy_rep(utils.ROOT+"/core/mods/"+mod+"/templates",utils.NAME_REP_CONFIG+"/.tmp/templates/"+mod)
+            #utils.app.register_blueprint(lib_imported.bp,url_prefix='/'+str(mod)) # Register Blueprint
+            #utils.safe_copy_rep(utils.ROOT+"/core/mods/"+mod+"/templates",utils.NAME_REP_CONFIG+"/.tmp/templates/"+mod)
         except Exception as e:
             raise Exception("Module: "+mod+" doesn't exist or can't be initialized properly.")
+
+    try:
+        for admin_mod_name in utils.config["admin"]["mods"]:
+            try:
+                lib_imported = importlib.import_module("core.mods."+admin_mod_name)
+            except Exception as e:
+                print("ADMIN MOD : "+admin_mod_name+" can't be initialized.")
+                print("MSG ERROR: "+str(e))
+    except Exception as e:
+        print("NO ADDITIONAL ADMIN MOD HAVE BEEN SET UP.")
 
     utils.db.create_all()
 

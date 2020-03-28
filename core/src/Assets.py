@@ -8,23 +8,26 @@ import core.utils as utils
 
 class Assets():
 
-    def __init__(self,prefix):
-        self.prefix = prefix
+    def __init__(self):
         self.table = {}
-        utils.app.add_url_rule(self.prefix+'/<path:lpath>','assets',self.get)
-        utils.app.add_url_rule(self.prefix+':obfuscation/<key>','assets:secure',self.retrieve)
+        utils.app.add_url_rule('/assets/<path:lpath>','assets',self.get)
+        utils.app.add_url_rule('/assets:obfuscation/<key>','assets:secure',self.retrieve)
+        utils.reserved_name.append("assets")
 
     def obfuscate(self,url):
-        base = self.prefix+'/'
+        base = 'assets/'
         key = ''.join((random.choice(string.ascii_lowercase) for i in range(256)))
-
+        print(url)
         self.table[key] = url[len(base):]
-        return self.prefix+':obfuscation/'+key
+        return '/assets:obfuscation/'+key
 
     def retrieve(self,key):
-        lpath = self.table[key]
-        del self.table[key]
-        return self.get(lpath)
+        try:
+            lpath = self.table[key]
+            del self.table[key]
+            return self.get(lpath),200,{"Cache-Control": "no-cache"}
+        except Exception as e:
+            abort(410)
 
     def get(self,lpath):
 

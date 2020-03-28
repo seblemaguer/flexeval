@@ -10,120 +10,122 @@ from core.mods.test.src.System import SystemTemplate
 from core.mods.test.model.Sample import Sample
 from core.mods.test.model.SystemSample import SystemSample
 from core.mods.test.src.System import System as mSystem
+from core.src.Module import StageModule
 
-bp = Blueprint('test', __name__)
 tests_data = None
 
 with open(NAME_REP_CONFIG+'/tests.json') as tests_data_json:
     tests_data = json.load(tests_data_json)
 
-# Routes
-@bp.route('/<name>', methods = ['GET'])
-def get(name):
+with StageModule('test', __name__) as bp:
 
-    if(name not in config["stages"]):
-        abort(404)
+    # Routes
+    @bp.route('/<name>', methods = ['GET'])
+    def get(name):
 
-    test = Test.get(name)
+        if(name not in config["stages"]):
+            abort(404)
 
-    unique_system_answer = test.unique_system_answer()
+        test = Test.get(name)
 
-    if(unique_system_answer >= test.nb_answers_max):
-        return redirect(config["stages"][name]["next"])
-    else:
-        system_sample = test.get_system_sample()
+        unique_system_answer = test.unique_system_answer()
 
-        def systems(*args):
-            systems = []
+        if(unique_system_answer >= test.nb_answers_max):
+            return redirect(config["stages"][name]["next"])
+        else:
+            system_sample = test.get_system_sample()
 
-            if(len(args) == 0):
-                for name_system in system_sample.keys():
-                    systems.append(SystemTemplate(name_system,system_sample[name_system]))
-            else:
-                for name_system in args:
-                    systems.append(SystemTemplate(name_system,system_sample[name_system]))
+            def systems(*args):
+                systems = []
 
-            random.shuffle(systems)
-            return systems
+                if(len(args) == 0):
+                    for name_system in system_sample.keys():
+                        systems.append(SystemTemplate(name_system,system_sample[name_system]))
+                else:
+                    for name_system in args:
+                        systems.append(SystemTemplate(name_system,system_sample[name_system]))
 
-        def save_field_with_default_value(field,systems=systems()):
-            return SystemTemplate.save_field(field,systems)
+                random.shuffle(systems)
+                return systems
 
-        return render_template(config["stages"][name]["template"],stage_name=name,step=unique_system_answer+1,nb_step=test.nb_answers_max,systems=systems,save_field=save_field_with_default_value,obfuscate_assets=assets.obfuscate)
+            def save_field_with_default_value(field,systems=systems()):
+                return SystemTemplate.save_field(field,systems)
 
-@bp.route('/<name>/send', methods = ['POST'])
-def save(name):
+            return render_template(config["stages"][name]["template"],stage_name=name,step=unique_system_answer+1,nb_step=test.nb_answers_max,systems=systems,save_field=save_field_with_default_value,obfuscate_assets=assets.obfuscate)
 
-    if(name not in config["stages"]):
-        abort(404)
+    @bp.route('/<name>/send', methods = ['POST'])
+    def save(name):
 
-    test = Test.get(name)
-    test.close_systemsamples_in_eval()
-    
-    step = test.unique_system_answer()
+        if(name not in config["stages"]):
+            abort(404)
 
-    if(step >= test.nb_answers_max):
-        return redirect(config["stages"][name]["next"])
-    else:
+        test = Test.get(name)
+        test.close_systemsamples_in_eval()
 
-        systems_with_resp = {}
+        step = test.unique_system_answer()
 
-        sys_with_anchors = {}
-        sys_data_anchors = {}
-        for data_system in tests_data[test.name]["systems"]:
-            sys_data_anchors[data_system["name"]] = data_system["data"]
-            if "aligned_with" in data_system:
-                sys_with_anchors[data_system["name"]] = data_system["aligned_with"]
+        if(step >= test.nb_answers_max):
+            return redirect(config["stages"][name]["next"])
+        else:
 
-        for sysk in sys_with_anchors.keys():
-            asysk = sys_with_anchors[sysk]
-            while ( asysk in  sys_with_anchors.keys()):
-                asysk = sys_with_anchors[asysk]
-            sys_with_anchors[sysk] = asysk
+            systems_with_resp = {}
 
-        for (type, keys) in [("form",request.form.keys()),("file",request.files.keys())]:
-            for key in keys:
+            sys_with_anchors = {}
+            sys_data_anchors = {}
+            for data_system in tests_data[test.name]["systems"]:
+                sys_data_anchors[data_system["name"]] = data_system["data"]
+                if "aligned_with" in data_system:
+                    sys_with_anchors[data_system["name"]] = data_system["aligned_with"]
 
-                rtn = SystemTemplate.get_save_field(key)
+            for sysk in sys_with_anchors.keys():
+                asysk = sys_with_anchors[sysk]
+                while ( asysk in  sys_with_anchors.keys()):
+                    asysk = sys_with_anchors[asysk]
+                sys_with_anchors[sysk] = asysk
 
-                if not(rtn is None):
-                    (question,systems) = rtn
+            for (type, keys) in [("form",request.form.keys()),("file",request.files.keys())]:
+                for key in keys:
 
-                    answerFORM = None
-                    answerFILE = None
+                    rtn = SystemTemplate.get_save_field(key)
 
-                    if type == "form":
-                        answerFORM = request.form[key]
-                        rtn = SystemTemplate.get_name(answerFORM)
-                        if not(rtn is None):
-                            answerFORM = rtn
-                    else:
-                        answerFILE = request.files[key]
+                    if not(rtn is None):
+                        (question,systems) = rtn
 
-                    for system in systems:
-                        sample = Sample(system["systemsample_id"],name,system["name_system"],step,question,answerSTRING=answerFORM,answerBLOB=answerFILE)
-                        systems_with_resp[system["name_system"]] = system["systemsample_id"]
+                        answerFORM = None
+                        answerFILE = None
+
+                        if type == "form":
+                            answerFORM = request.form[key]
+                            rtn = SystemTemplate.get_name(answerFORM)
+                            if not(rtn is None):
+                                answerFORM = rtn
+                        else:
+                            answerFILE = request.files[key]
+
+                        for system in systems:
+                            sample = Sample(system["systemsample_id"],name,system["name_system"],step,question,answerSTRING=answerFORM,answerBLOB=answerFILE)
+                            systems_with_resp[system["name_system"]] = system["systemsample_id"]
+                            db.session.add(sample)
+
+            swrk = list(systems_with_resp.keys())
+            for s in swrk:
+                if s in sys_with_anchors.keys():
+                    anchor = sys_with_anchors[s]
+                    if not(anchor in systems_with_resp.keys()):
+                        systemsample = SystemSample.query.filter_by(id=systems_with_resp[s]).first()
+                        systemsample = mSystem(sys_data_anchors[anchor]).get_line(systemsample.line_id)
+
+                        sample = Sample(systemsample.id,name,anchor,step,"/dev/null")
+                        systems_with_resp[anchor] = systemsample.id
                         db.session.add(sample)
 
-        swrk = list(systems_with_resp.keys())
-        for s in swrk:
-            if s in sys_with_anchors.keys():
-                anchor = sys_with_anchors[s]
-                if not(anchor in systems_with_resp.keys()):
-                    systemsample = SystemSample.query.filter_by(id=systems_with_resp[s]).first()
-                    systemsample = mSystem(sys_data_anchors[anchor]).get_line(systemsample.line_id)
 
-                    sample = Sample(systemsample.id,name,anchor,step,"/dev/null")
-                    systems_with_resp[anchor] = systemsample.id
-                    db.session.add(sample)
+            db.session.commit()
 
-
-        db.session.commit()
-
-        if(test.turn_nb_step is not None):
-            if (step+1) % test.turn_nb_step == 0:
-                return redirect(test.turn_next)
+            if(test.turn_nb_step is not None):
+                if (step+1) % test.turn_nb_step == 0:
+                    return redirect(test.turn_next)
+                else:
+                    return redirect("../"+name)
             else:
                 return redirect("../"+name)
-        else:
-            return redirect("../"+name)
