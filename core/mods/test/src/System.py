@@ -53,7 +53,7 @@ class SystemTemplate():
         if rep not in cls.REMINDER:
             cls.REMINDER[rep]={}
 
-        key = ''.join((random.choice(string.ascii_lowercase) for i in range(256)))
+        key = ''.join((random.choice(string.ascii_lowercase) for i in range(20)))
         cls.REMINDER[rep][key] = json_data
 
         return key

@@ -14,7 +14,7 @@ class User(db.Model):
 
     def __init__(self,email):
         self.email = email
-        self.token = ''.join((random.choice(string.ascii_lowercase) for i in range(256)))
+        self.token = ''.join((random.choice(string.ascii_lowercase) for i in range(20)))
         self.activated = False
 
     def activate(self):

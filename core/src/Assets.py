@@ -11,19 +11,25 @@ class Assets():
     def __init__(self):
         self.table = {}
         utils.app.add_url_rule('/assets/<path:lpath>','assets',self.get)
-        utils.app.add_url_rule('/assets:obfuscation/<key>','assets:secure',self.retrieve)
+        utils.app.add_url_rule('/oassets/<key>','assets:secure',self.retrieve)
         utils.reserved_name.append("assets")
+        utils.reserved_name.append("ossets")
 
     def obfuscate(self,url):
-        key = ''.join((random.choice(string.ascii_lowercase) for i in range(256)))
+        key = ''.join((random.choice(string.ascii_lowercase) for i in range(20)))
+
+        url_block = url.split(".")
+        if(len(url_block) > 0):
+            key = key + "." + url_block[len(url_block) - 1]
+
         self.table[key] = url
-        return utils.make_url('/assets:obfuscation/'+key)
+        return utils.make_url('/oassets/'+key)
 
     def retrieve(self,key):
         try:
             lpath = self.table[key]
-            del self.table[key]
-            return self.get(lpath),200,{"Cache-Control": "no-cache"}
+            #del self.table[key]
+            return self.get(lpath)
         except Exception as e:
             abort(410)
 
