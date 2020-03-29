@@ -2,10 +2,10 @@
 
 {%block bottomlink%}
   <p class="text-muted" style="letter-spacing: 2px;">
-    <a href="/"> Back to test</a>.
+    <a href="{{make_url('/')}}"> Back to test</a>.
   </p>
 {%endblock%}
 
 {%block userintel%}
-  <a href="/admin/deco"> Log out </a>
+  <a href="{{make_url('/admin/deco')}}"> Log out </a>
 {%endblock%}

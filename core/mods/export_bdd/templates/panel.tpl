@@ -1,7 +1,7 @@
 {% extends 'admin/base.tpl' %}
 
 {% block content %}
-  <h2 class="bd-content-title"> <img src="/assets/static/img/svg_icon/chevron-right.svg" alt=">" /> Download BDD</h2>
+  <h2 class="bd-content-title"> <img src="{{make_url('/assets/static/img/svg_icon/chevron-right.svg')}}" alt=">" /> Download BDD</h2>
 
   <div class="row">
 
@@ -30,6 +30,6 @@
 
   </div>
 
-  <a href="/admin"> Back to admin panel.</a>
+  <a href="{{make_url('/admin')}}"> Back to admin panel.</a>
 
 {% endblock %}

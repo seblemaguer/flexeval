@@ -61,7 +61,7 @@ $(document).ready(function(){
 
 {% block content %}
 
-<h2 class="bd-content-title"> <img src="/assets/static/img/svg_icon/chevron-right.svg" alt=">" /> {{ subtitle }} - step {{step}} over {{nb_step}}</h2>
+<h2 class="bd-content-title"> <img src="{{make_url('/assets/static/img/svg_icon/chevron-right.svg')}}" alt=">" /> {{ subtitle }} - step {{step}} over {{nb_step}}</h2>
 
 <form action="./{{stage_name}}/send" method="post" class="form-example" enctype="multipart/form-data">
 
@@ -73,15 +73,15 @@ $(document).ready(function(){
     {% if media == "text" %}
       {{sysref.data[sysref.get_column_name(0)]}}
     {% elif media == "image" %}
-      <img class="img-fluid" src="{{ obfuscate_assets("/assets/"+sysref.data[sysref.get_column_name(0)]) }}" />
+      <img class="img-fluid" src="{{ obfuscate_assets(sysref.data[sysref.get_column_name(0)]) }}" />
     {% elif media == "audio" %}
       <audio controls readall>
-        <source src="{{ obfuscate_assets("/assets/"+sysref.data[sysref.get_column_name(0)]) }}">
+        <source src="{{ obfuscate_assets(sysref.data[sysref.get_column_name(0)]) }}">
         Your browser does not support the <code>audio</code> element.
       </audio>
     {% elif media == "video" %}
       <video controls readall>
-        <source src="{{ obfuscate_assets("/assets/"+sysref.data[sysref.get_column_name(0)]) }}">
+        <source src="{{ obfuscate_assets(sysref.data[sysref.get_column_name(0)]) }}">
           Your browser does not support the <code>video</code> element.
       </video>
     {% else %}
@@ -102,15 +102,15 @@ $(document).ready(function(){
             {% if media == "text" %}
               {{system.data[system.get_column_name(0)]}}
             {% elif media == "image" %}
-              <img class="img-fluid" src="{{ obfuscate_assets("/assets/"+system.data[system.get_column_name(0)]) }}" />
+              <img class="img-fluid" src="{{ obfuscate_assets(system.data[system.get_column_name(0)]) }}" />
             {% elif media == "audio" %}
               <audio controls readall>
-                <source src="{{ obfuscate_assets("/assets/"+system.data[system.get_column_name(0)]) }}">
+                <source src="{{ obfuscate_assets(system.data[system.get_column_name(0)]) }}">
                 Your browser does not support the <code>audio</code> element.
               </audio>
             {% elif media == "video" %}
               <video controls readall>
-                <source src="{{ obfuscate_assets("/assets/"+system.data[system.get_column_name(0)]) }}">
+                <source src="{{ obfuscate_assets(system.data[system.get_column_name(0)]) }}">
                   Your browser does not support the <code>video</code> element.
               </video>
             {% else %}

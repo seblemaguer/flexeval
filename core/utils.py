@@ -8,6 +8,8 @@ from flask import render_template as flask_render_template
 NAME_REP_CONFIG = None
 ROOT = None
 
+public_url = None
+
 jwt = None
 app = None
 db = None
@@ -42,7 +44,10 @@ def safe_copy_rep(SRC,DST):
                 else:
                     shutil.copyfile(SRC+"/"+file,DST+"/"+file)
 
+make_url = lambda x: public_url+str(x)
+
 def render_template(template,**args):
+    args["make_url"] = make_url
 
     args["next"] = config["entrypoint"]
     args["userprov"] = get_provider("auth")

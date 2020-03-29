@@ -12,7 +12,7 @@
   },
 
   "stages": {
-    "page_de_login":   {"type": "auth_login", "next":"ab_text"},
+    "page_de_login":   {"type": "auth_by_invitation", "next":"ab_text"},
     "ab_text":         {"type": "test", "nb_answers": 5, "time_out_delta_minutes":1, "template": "test/ab.tpl", "variables":{"subtitle":"Test AB (1/4)","media":"text"}, "next": "ab_image"},
     "ab_image":        {"type": "test", "nb_answers": 5, "template": "test/ab.tpl", "variables":{"subtitle":"Test AB (2/4)","media":"image"}, "next": "ab_audio"},
     "ab_audio":        {"type": "test", "nb_answers": 5, "template": "test/ab.tpl", "variables":{"subtitle":"Test AB (3/4)","media":"audio"}, "next": "ab_video"},

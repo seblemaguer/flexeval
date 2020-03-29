@@ -4,7 +4,7 @@
 {%endblock%}
 
 {% block content %}
-  <h2 class="bd-content-title"> <img src="/assets/static/img/svg_icon/chevron-right.svg" alt=">" /> Admin Panel</h2>
+  <h2 class="bd-content-title"> <img src="{{make_url('/assets/static/img/svg_icon/chevron-right.svg')}}" alt=">" /> Admin Panel</h2>
   <form action="./" method="post" class="form-example">
     <div class="form-group">
       <label for="admin_password">Enter password: </label>

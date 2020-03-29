@@ -15,11 +15,9 @@ class Assets():
         utils.reserved_name.append("assets")
 
     def obfuscate(self,url):
-        base = 'assets/'
         key = ''.join((random.choice(string.ascii_lowercase) for i in range(256)))
-        print(url)
-        self.table[key] = url[len(base):]
-        return '/assets:obfuscation/'+key
+        self.table[key] = url
+        return utils.make_url('/assets:obfuscation/'+key)
 
     def retrieve(self,key):
         try:

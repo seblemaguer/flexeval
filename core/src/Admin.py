@@ -4,7 +4,7 @@ import importlib
 
 from flask import Blueprint,request,redirect,session, abort
 
-from core.utils import config, render_template, app, admin_mod,reserved_name, NAME_REP_CONFIG, ROOT
+from core.utils import config, render_template, app, admin_mod,reserved_name, NAME_REP_CONFIG, ROOT, make_url
 
 
 class AdminPanel():
@@ -29,7 +29,7 @@ class AdminPanel():
                     del session["admin_password"]
                     abort(401)
             else:
-                return redirect("/admin/auth")
+                return redirect(make_url("/admin/auth"))
 
             return func(*args, **kwargs)
         return authorize_and_call

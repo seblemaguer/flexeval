@@ -9,7 +9,7 @@ import random
 import string
 import datetime
 
-from flask import Flask,redirect
+from flask import Flask,redirect, request, abort
 from flask_sqlalchemy import SQLAlchemy
 
 from core.src.Assets import Assets
@@ -23,10 +23,18 @@ if __name__ == '__main__':
     parser.add_argument("instance",metavar='NAME_INST', type=str, help='instance\'s name')
     parser.add_argument("host",metavar='HOST', type=str, help='127.0.0.1')
     parser.add_argument("port",metavar='PORT', type=int, help='8080')
+    parser.add_argument('-p', '--public_url', type=str, help='This field need to be fill with the public url. For example: https://monsupersite.com/tests/ab')
     args = parser.parse_args()
 
     utils.ROOT =  os.path.dirname(os.path.abspath(__file__))
     utils.NAME_REP_CONFIG = os.path.dirname(os.path.abspath(__file__))+"/instances/"+args.instance
+
+    utils.public_url = args.public_url
+    if(utils.public_url is None):
+        utils.public_url = "http://"+str(args.host)+":"+str(args.port)
+    else:
+        if(utils.public_url[len(utils.public_url)-1] == "/"):
+            utils.public_url = args.public_url[:len(utils.public_url)-1]
 
     utils.app = Flask(__name__,template_folder = utils.NAME_REP_CONFIG+"/.tmp/templates",static_url_path=None)
 
@@ -53,7 +61,7 @@ if __name__ == '__main__':
             next_stage = config["stages"][next_stage_name]
 
             # REWRITE
-            config["entrypoint"] = "/"+next_stage["type"]+"/"+ next_stage_name
+            config["entrypoint"] = utils.public_url+"/"+next_stage["type"]+"/"+ next_stage_name
             activated_stage.append("entrypoint")
 
             while not(next_stage is None):
@@ -67,7 +75,7 @@ if __name__ == '__main__':
 
                 if "turn_next" in current:
                     turn_next = config["stages"][current["turn_next"]]
-                    current["turn_next"] = "/"+turn_next["type"]+"/"+ current["turn_next"]
+                    current["turn_next"] = utils.public_url+"/"+turn_next["type"]+"/"+ current["turn_next"]
 
                 # Next stage ? (attr next)
                 if "next" in current:
@@ -75,7 +83,7 @@ if __name__ == '__main__':
                         next_stage = config["stages"][current["next"]]
 
                         # REWRITE
-                        current["next"] =  "/"+next_stage["type"]+"/"+ current["next"]
+                        current["next"] =  utils.public_url+"/"+next_stage["type"]+"/"+ current["next"]
                     else:
                         next_stage = None
                 else:
@@ -95,11 +103,8 @@ if __name__ == '__main__':
     utils.admin_panel = AdminPanel()
 
     for mod in activated_mod:
-        print(mod)
         try:
             lib_imported = importlib.import_module("core.mods."+mod)
-            #utils.app.register_blueprint(lib_imported.bp,url_prefix='/'+str(mod)) # Register Blueprint
-            #utils.safe_copy_rep(utils.ROOT+"/core/mods/"+mod+"/templates",utils.NAME_REP_CONFIG+"/.tmp/templates/"+mod)
         except Exception as e:
             raise Exception("Module: "+mod+" doesn't exist or can't be initialized properly.")
 
@@ -117,7 +122,10 @@ if __name__ == '__main__':
 
     @utils.app.route('/')
     def main_route():
-        return redirect(utils.config["entrypoint"])
+        args_GET ="?"
+        for args_key in request.args.keys():
+            args_GET = args_GET + args_key + "=" + request.args[args_key] + "&"
+        return redirect(utils.config["entrypoint"]+args_GET)
 
     @utils.app.route('/deco')
     def deco():
@@ -128,9 +136,9 @@ if __name__ == '__main__':
 
         return redirect(utils.config["entrypoint"])
 
-
     @utils.app.errorhandler(Exception)
-    def not_found(e):
+    def error(e):
+
         print("*******************************")
         print("A CRITICAL ERROR HAS OCCURED")
         print("")
@@ -150,4 +158,5 @@ if __name__ == '__main__':
         return utils.render_template('error.tpl',code=code,entrypoint=utils.config["entrypoint"])
 
     # Run app
+    print(" * Public URL: "+utils.public_url)
     utils.app.run(host=args.host,port=args.port)

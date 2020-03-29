@@ -5,21 +5,21 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" href="/assets/static/img/favicon.ico" />
+  <link rel="icon" href="{{make_url('/assets/static/img/favicon.ico')}}" />
 
   <title> {{ variables("title",default_value="PercEval")}} </title>
 
   <!-- JQuery -->
-  <script src="/assets/static/js/jquery-3.4.1.min.js"></script>
+  <script src="{{make_url('/assets/static/js/jquery-3.4.1.min.js')}}"></script>
 
   <!-- Bootstrap Core CSS -->
-  <script src="/assets/static/js/popper.min.js"></script>
-  <link href="/assets/static/css/bootstrap-4.4.1/bootstrap.min.css" rel="stylesheet">
-  <script src="/assets/static/js/bootstrap-4.4.1/bootstrap.min.js"></script>
+  <script src="{{make_url('/assets/static/js/popper.min.js')}}"></script>
+  <link href="{{make_url('/assets/static/css/bootstrap-4.4.1/bootstrap.min.css')}}" rel="stylesheet">
+  <script src="{{make_url('/assets/static/js/bootstrap-4.4.1/bootstrap.min.js')}}"></script>
 
   <!-- Additional libraries -->
-  <script src="/assets/static/js/perceval.js"></script>
-  <link href="/assets/static/css/perceval.css" rel="stylesheet">
+  <script src="{{make_url('/assets/static/js/perceval.js')}}"></script>
+  <link href="{{make_url('/assets/static/css/perceval.css')}}" rel="stylesheet">
 
   {% block head %}
   {% endblock %}
@@ -43,7 +43,7 @@
           {% endblock %}
 
           <div class="col-12 text-right">
-            <p class="text-muted" style="letter-spacing: 1px;"> &nbsp; {%block userintel%} {% if userprov.connected %} Logged in as {{ userprov.get()}} (<a href="/deco"> Log out </a>) . {% endif %}{%endblock%}</p>
+            <p class="text-muted" style="letter-spacing: 1px;"> &nbsp; {%block userintel%} {% if userprov.connected %} Logged in as {{ userprov.get()}} (<a href="{{make_url('/deco')}}"> Log out </a>) . {% endif %}{%endblock%}</p>
           </div>
 
         </header>
@@ -72,10 +72,10 @@
           <div class="col-12 text-center">
             {% block footer %}
         				<a href="http://www.irisa.fr" target="_blank">
-        					<img src="/assets/static/img/logo/irisa.png" class="img-responsive center-block" alt="IRISA lab">
+        					<img src="{{make_url('/assets/static/img/logo/irisa.png')}}" class="img-responsive center-block" alt="IRISA lab">
         				</a>
         				<a href="http://www-expression.irisa.fr" target="_blank">
-        					<img src="/assets/static/img/logo/expression.png" class="img-responsive center-block" alt="Expression team">
+        					<img src="{{make_url('/assets/static/img/logo/expression.png')}}" class="img-responsive center-block" alt="Expression team">
         				</a>
             {% endblock %}
 
@@ -90,7 +90,7 @@
               </p>
               {%block bottomlink%}
                 <p class="text-muted" style="letter-spacing: 2px;">
-                  Access <a href="/admin"> Admin panel </a>.
+                  Access <a href="{{make_url('/admin')}}"> Admin panel </a>.
                 </p>
               {%endblock%}
           </div>
