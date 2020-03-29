@@ -60,8 +60,6 @@ with AdminModule('auth_by_invitation:admin',__name__,title="Member",description=
     @ap.route('/invite-register',methods=["POST"])
     def inviteregister():
         try:
-
-
             emails = request.form["emails"].split(",")
             message = "<html><body><p>"+request.form["message"].replace("\n","</p><p>")+"</p>"
             title_message = request.form["title_message"]

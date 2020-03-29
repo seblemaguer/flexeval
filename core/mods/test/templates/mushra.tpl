@@ -5,9 +5,9 @@
 {% set media = variables("media",default_value="text") %}
 
 {% set sysref = systems()[0] %}
-{% if "sysref" in variables %}
+{% if variables("sysref") is not none %}
   {% for system in systems() %}
-    {% if system.name_system == variables["sysref"] %}
+    {% if system.name_system == variables("sysref") %}
         {% set sysref = system %}
     {% endif %}
   {% endfor %}
@@ -22,7 +22,7 @@ $(document).ready(function(){
       var poper = $(this).popover();
 
       // Read value on change
-      $(this).change(function(){
+      $(this).on("mouseleave change click",function(){
         $(this).popover('dispose');
         mushra_score = $(this).val()
         if(mushra_score > 80)
