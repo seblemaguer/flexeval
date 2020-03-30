@@ -18,7 +18,7 @@ python3 run.py name_instance IP PORT
 name_instance correspond to the name given to our instance's repository.
 This repository need to be in the following repository: [here](instances/).
 
-If access to our websevice is not via http://IP:PORT/, you need to provide our url via the optinal parameter public_url.
+If access to our websevice is not done via http://IP:PORT/, you need to provide your url via the optional parameter public_url.
 Please consider the following example:
 ```
 python3 run.py name_instance IP PORT -p https://monsupersite.com/tests/
