@@ -29,6 +29,10 @@ with StageModule('test', __name__) as bp:
         test = Test.get(name)
 
         unique_system_answer = test.unique_system_answer()
+        intro = unique_system_answer < test.nb_intro_step
+
+        firstStepAfterIntro = (test.nb_intro_step > 0 and (unique_system_answer == test.nb_intro_step))
+
 
         if(unique_system_answer >= test.nb_answers_max):
             return redirect(config["stages"][name]["next"])
@@ -53,7 +57,7 @@ with StageModule('test', __name__) as bp:
                     raise Exception("Forbidden name for a field (/anchor)")
                 return SystemTemplate.save_field(field,systems)
 
-            return render_template(config["stages"][name]["template"],stage_name=name,step=unique_system_answer+1,nb_step=test.nb_answers_max,systems=systems,save_field=save_field_with_default_value,obfuscate_assets=assets.obfuscate)
+            return render_template(config["stages"][name]["template"],stage_name=name,step=unique_system_answer+1,intro=intro,firstStepAfterIntro=firstStepAfterIntro,nb_step=test.nb_answers_max,systems=systems,save_field=save_field_with_default_value,obfuscate_assets=assets.obfuscate)
 
     @bp.route('/<name>/send', methods = ['POST'])
     def save(name):
@@ -65,6 +69,7 @@ with StageModule('test', __name__) as bp:
         test.close_systemsamples_in_eval()
 
         step = test.unique_system_answer()
+        intro = step < test.nb_intro_step
 
         if(step >= test.nb_answers_max):
             return redirect(config["stages"][name]["next"])
@@ -105,7 +110,7 @@ with StageModule('test', __name__) as bp:
                             answerFILE = request.files[key]
 
                         for system in systems:
-                            sample = Sample(system["systemsample_id"],name,system["name_system"],step,question,answerSTRING=answerFORM,answerBLOB=answerFILE)
+                            sample = Sample(system["systemsample_id"],name,system["name_system"],step,question,answerSTRING=answerFORM,answerBLOB=answerFILE,intro=intro)
                             systems_with_resp[system["name_system"]] = system["systemsample_id"]
                             db.session.add(sample)
 

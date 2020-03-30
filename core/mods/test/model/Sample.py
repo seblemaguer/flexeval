@@ -15,12 +15,13 @@ class Sample(db.Model):
     name_system = db.Column(db.String, nullable=False)
 
     step = db.Column(db.Integer, nullable=False)
+    intro = db.Column(db.Boolean,nullable=False)
 
     question = db.Column(db.String,nullable=False)
     answerSTRING = db.Column(db.String,nullable=True)
     answerBLOB = db.Column(db.BLOB)
 
-    def __init__(self,system_sample_id,name_test,name_system,step,question,answerSTRING=None,answerBLOB=None):
+    def __init__(self,system_sample_id,name_test,name_system,step,question,answerSTRING=None,answerBLOB=None,intro=False):
 
         self.user = get_provider("auth").get()
 
@@ -29,6 +30,7 @@ class Sample(db.Model):
         self.name_system = name_system
 
         self.step = step
+        self.intro = intro
 
         self.question = question
         self.set_answer_STRING(answerSTRING)

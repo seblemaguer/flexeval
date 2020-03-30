@@ -83,6 +83,14 @@ class Test():
 
         self.nb_answers_max = config["stages"][name]["nb_answers"]
 
+        if("nb_intro_step" in config["stages"][name]):
+            self.nb_intro_step = config["stages"][name]["nb_intro_step"]
+            if self.nb_intro_step < 0 :
+                raise Exception("Invalid number of intro step ( negative value)")
+            self.nb_answers_max = self.nb_answers_max + self.nb_intro_step
+        else:
+            self.nb_intro_step = 0
+
     def unique_system_answer(self):
         completed = Sample.query.filter_by(name_test=self.name,user=get_provider("auth").get()).all()
 
