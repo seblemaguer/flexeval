@@ -35,7 +35,7 @@
     {% set name_field = save_field('choosen',systems()) %}
     {% for system in systems() %}
 
-      <div class="form-check">
+      <div class="form-check" style="margin-bottom:10px;">
         <input class="form-check-input" type="radio" name="{{ name_field }}" id="choosen@{{ system.name() }}" value="{{ system.name() }}" checked>
         <label class="form-check-label" for="choosen@{{ system.name() }}">
           {% if media == "text" %}

@@ -106,7 +106,7 @@ $(document).ready(function(){
     {% for system in systems() %}
       {% if not(system.name_system == variables("sysref")) %}
 
-        <div class="form-group">
+        <div class="form-group" style="margin-bottom:10px;">
           {% set name_field = save_field('score',system) %}
           <label for="score@{{ system.name() }}">
 
