@@ -1,22 +1,32 @@
 # PercepEval #
 
-## Getting start ##
+## How to install the webserver ?
 
-* **TODO**
+Installation require pip3.
+You can find the procedure to install it here: https://docs.python.org/fr/3.6/installing/index.html
 
-### Dependencies ####
+```
+pip3 install -r requirements.txt
+```
 
-* **TODO**
+## Launching the webserver
 
-### Start ###
+```
+python3 run.py name_instance IP PORT
+```
 
-* **TODO**
-* Use :
+name_instance correspond to the name given to our instance's repository.
+This repository need to be in the following repository: [here](instances/).
 
-  ```bash
-  ./TODO
-  ```
+If access to our websevice is not via http://IP:PORT/, you need to provide our url via the optinal parameter public_url.
+Please consider the following example:
+```
+python3 run.py name_instance IP PORT -p https://monsupersite.com/tests/
+```
 
-## TODO ##
+For any information concerning run.py, you can get some help with the following flag -h.
+```
+python3 run.py -h
+```
 
-See the [TODO](TODO.md) file.
+-------------------------------------------------
