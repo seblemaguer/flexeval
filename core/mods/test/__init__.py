@@ -49,6 +49,8 @@ with StageModule('test', __name__) as bp:
                 return systems
 
             def save_field_with_default_value(field,systems=systems()):
+                if field == "/anchor":
+                    raise Exception("Forbidden name for a field (/anchor)")
                 return SystemTemplate.save_field(field,systems)
 
             return render_template(config["stages"][name]["template"],stage_name=name,step=unique_system_answer+1,nb_step=test.nb_answers_max,systems=systems,save_field=save_field_with_default_value,obfuscate_assets=assets.obfuscate)
@@ -115,7 +117,7 @@ with StageModule('test', __name__) as bp:
                         systemsample = SystemSample.query.filter_by(id=systems_with_resp[s]).first()
                         systemsample = mSystem(sys_data_anchors[anchor]).get_line(systemsample.line_id)
 
-                        sample = Sample(systemsample.id,name,anchor,step,"/dev/null")
+                        sample = Sample(systemsample.id,name,anchor,step,"/anchor")
                         systems_with_resp[anchor] = systemsample.id
                         db.session.add(sample)
 

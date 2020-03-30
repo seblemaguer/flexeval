@@ -4,7 +4,7 @@
   {
     "systems":
     [
-      {"name": "ref", "data": "system1.csv"},
+      {"name": "ref", "data": "systemr.csv"},
       {"name": "sys1", "data": "system1.csv"},
       {"name": "sys2", "data": "system2.csv"},
       {"name": "hidden_ref", "data": "system1.csv"}
@@ -37,7 +37,7 @@
   {
     "systems":
     [
-      {"name": "reference", "data": "system1000.csv"},
+      {"name": "ref", "data": "system1000.csv"},
       {"name": "sys1", "data": "system1000.csv"},
       {"name": "sys2", "data": "system2000.csv"},
       {"name": "hidden_ref", "data": "system1000.csv"}

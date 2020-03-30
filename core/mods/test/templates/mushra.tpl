@@ -4,16 +4,10 @@
 {% set subtitle = variables("subtitle",default_value="Test " + stage_name) %}
 {% set media = variables("media",default_value="text") %}
 
-{% set sysref = systems()[0] %}
-{% if variables("sysref") is not none %}
-  {% for system in systems() %}
-    {% if system.name_system == variables("sysref") %}
-        {% set sysref = system %}
-    {% endif %}
-  {% endfor %}
-{% endif %}
 
 {% block head %}
+
+
 <script>
 $(document).ready(function(){
 
@@ -69,23 +63,23 @@ $(document).ready(function(){
 
   <fieldset class="form-group">
     <legend class="col-form-label"><strong>Reference:</strong></legend>
-
+    {% set _sysref = systems(variables("sysref"))[0]%}
     {% if media == "text" %}
-      {{sysref.data[sysref.get_column_name(0)]}}
+      {{_sysref.data[_sysref.get_column_name(0)]}}
     {% elif media == "image" %}
-      <img class="img-fluid" src="{{ obfuscate_assets(sysref.data[sysref.get_column_name(0)]) }}" />
+      <img class="img-fluid" src="{{ obfuscate_assets(_sysref.data[_sysref.get_column_name(0)]) }}" />
     {% elif media == "audio" %}
       <audio controls readall>
-        <source src="{{ obfuscate_assets(sysref.data[sysref.get_column_name(0)]) }}">
+        <source src="{{ obfuscate_assets(_sysref.data[_sysref.get_column_name(0)]) }}">
         Your browser does not support the <code>audio</code> element.
       </audio>
     {% elif media == "video" %}
       <video controls readall>
-        <source src="{{ obfuscate_assets(sysref.data[sysref.get_column_name(0)]) }}">
+        <source src="{{ obfuscate_assets(_sysref.data[_sysref.get_column_name(0)]) }}">
           Your browser does not support the <code>video</code> element.
       </video>
     {% else %}
-        {{sysref.data[sysref.get_column_name(0)]}}
+        {{_sysref.data[_sysref.get_column_name(0)]}}
     {% endif %}
 
   </fieldset>
@@ -93,7 +87,7 @@ $(document).ready(function(){
   <fieldset class="form-group">
     <legend class="col-form-label"><strong>Candidates:</strong></legend>
     {% for system in systems() %}
-      {% if not(system.name_system == sysref.name_system) %}
+      {% if not(system.name_system == variables("sysref")) %}
 
         <div class="form-group">
           {% set name_field = save_field('score',system) %}
