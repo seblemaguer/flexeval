@@ -1,5 +1,6 @@
 # Import Libraries
 import csv
+from datetime import datetime
 
 from core.utils import db, get_provider
 
@@ -8,7 +9,7 @@ class Sample(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     user = db.Column(db.String, nullable=False)
-
+    date = db.Column(db.DateTime, nullable=False)
     system_sample_id = db.Column(db.Integer)
 
     name_test = db.Column(db.String, nullable=False)
@@ -24,6 +25,7 @@ class Sample(db.Model):
     def __init__(self,system_sample_id,name_test,name_system,step,question,answerSTRING=None,answerBLOB=None,intro=False):
 
         self.user = get_provider("auth").get()
+        self.date = datetime.now()
 
         self.system_sample_id = system_sample_id
         self.name_test = name_test
