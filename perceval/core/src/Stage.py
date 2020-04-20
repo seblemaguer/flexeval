@@ -80,10 +80,17 @@ class Stage():
 
     @property
     def variables(self):
+        variables = {}
+
         if "variables" in self.params:
-            return self.params["variables"]
-        else:
-            return {}
+            variables = self.params["variables"]
+
+        if "session_variable" in self.session:
+            print(self.session["session_variable"])
+            for session_variable_name in self.session["session_variable"].keys():
+                variables[session_variable_name] = self.session["session_variable"][session_variable_name]
+
+        return variables
 
     def get_variable(self,name,default_value):
         if not(name in self.variables):
@@ -92,13 +99,11 @@ class Stage():
         return self.variables[name]
 
     def set_variable(self,name,value):
-        if not("variables" in self.params):
-            Config().data()["stages"][self.name]["variables"] = {}
-
-        if not(name in Config().data()["stages"][self.name]["variables"]):
-            Config().data()["stages"][self.name]["variables"][name] = None
-
-        Config().data()["stages"][self.name]["variables"][name] = value
+        if not("session_variable" in self.session):
+            self.session["session_variable"] = {}
+        print(name)
+        print(value)
+        self.session["session_variable"][name] = value
 
     @property
     def local_url(self):
@@ -136,9 +141,6 @@ class StageModule(Module):
             template = Provider().get("templates").get(template,"mod:"+str(self.mod_rep))
 
         return super().render_template(template,args=args,parameters=parameters,variables=stage.variables)
-
-    #def get_endpoint_for_local_rule(self,rule):
-    #    return self.name+"."+"local_url@"+str(rule)
 
     def url_for(self,endpoint,stage_name = None,**kwargs):
         if stage_name is None:

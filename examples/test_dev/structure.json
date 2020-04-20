@@ -1,5 +1,5 @@
 {
-  "entrypoint": "page_login",
+  "entrypoint": "page_de_login",
 
   "variables":{
     "title":"PercEval",
@@ -10,8 +10,7 @@
     "entrypoint": "admin_panel",
     "mods": [
               {"mod":"admin_panel","password":"bflzefinlh67s","variables":{"subtitle":"Admin Panel"}},
-              {"mod":"export_bdd","variables":{"subtitle":"Download BDD","subdescription":"Download the database in CSV or SQLite format."}},
-              {"mod":"auth_by_invitation","variables":{"subtitle":"Users","subdescription":"Manage user. Without invitation people can't join this website."}}
+              {"mod":"export_bdd","variables":{"subtitle":"Download BDD","subdescription":"Download the database in CSV or SQLite format."}}
             ]
   },
 

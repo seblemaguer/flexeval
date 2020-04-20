@@ -40,31 +40,12 @@ class OverwritingClassAttributesForbidden(ModuleError):
     def __init__(self,message):
         self.message = message
 
-#class VirtualAttributesMeta(type):
-#
-#    def __setattr__(self,name,val):
-#        if hasattr(self,"__lock__"):
-#            if self.__lock__ and not(name == "__lock__"):
-#                if hasattr(self,name):
-#                    raise OverwritingClassAttributesForbidden("Class Attributes:"+name+" already existing.")
-#
-#        #if hasattr(self,"__remember__"):
-#        #    if isinstance(self.__remember__,list):
-#        #        self.__remember__.append((name,val))
-#
-#        super().__setattr__(name,val)
-
-
 class UserModelAttributesMeta(type(Model)):
     def __setattr__(self,name,val):
         if hasattr(self,"__lock__"):
             if self.__lock__ and not(name == "__lock__"):
                 if hasattr(self,name):
                     raise OverwritingClassAttributesForbidden("Class Attributes:"+name+" already existing.")
-
-        #if hasattr(self,"__remember__"):
-        #    if isinstance(self.__remember__,list):
-        #        self.__remember__.append((name,val))
 
         super().__setattr__(name,val)
 
@@ -105,10 +86,8 @@ class Module(Blueprint):
         __userBase__ = cls_auth.__userBase__
 
         if not(hasattr(cls,"userModel")):
-            #cls.userModel = VirtualAttributesMeta(cls.name_type+"User",(UserBase,),{"__tablename__":cls.__name__+"_User"})
             cls.userModel = UserModelAttributesMeta(cls.name_type+"User",(UserBase,Model,),{"__abstract__":True,"__tablename__":cls.__name__+"_User"})
             setattr(cls.userModel,"__lock__",True)
-            #setattr(cls.userModel,"__remember__",[])
 
         if __userBase__ is not None:
 
@@ -126,17 +105,10 @@ class Module(Blueprint):
                 else:
                     raise MalformationError("Two differents auth provider defined for "+cls.__name__+".")
             else:
-                #oldattrs = []
-                #if hasattr(cls.userModel,'__remember__'):
-                #    oldattrs = cls.userModel.__remember__
+
                 cls.userModel.__lock__ = False
                 cls.userModel = UserModelAttributesMeta(cls.name_type+"User",(cls.userModel,__userBase__),{"__abstract__":False,"__tablename__":cls.__name__+"_User"})
-                #print(dir(cls.user))
                 setattr(cls.userModel,"__lock__",True)
-
-                #for (name,val) in oldattrs:
-                #    setattr(cls.userModel,name,val)
-
                 cls.userModel_init = True
 
     def url_for(self,endpoint,**kwargs):
