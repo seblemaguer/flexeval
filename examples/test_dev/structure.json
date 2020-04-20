@@ -1,0 +1,36 @@
+{
+  "entrypoint": "page_login",
+
+  "variables":{
+    "title":"PercEval",
+    "authors":"Cedric Fayet"
+  },
+
+  "admin":{
+    "entrypoint": "admin_panel",
+    "mods": [
+              {"mod":"admin_panel","password":"bflzefinlh67s","variables":{"subtitle":"Admin Panel"}},
+              {"mod":"export_bdd","variables":{"subtitle":"Download BDD","subdescription":"Download the database in CSV or SQLite format."}},
+              {"mod":"auth_by_invitation","variables":{"subtitle":"Users","subdescription":"Manage user. Without invitation people can't join this website."}}
+            ]
+  },
+
+  "stages": {
+    "page_login":          {"type": "auth_by_invitation",                       "next":"info_user"},
+    "debut_du_test":       {"type": "page:visitor",  "template":"welcome.tpl",  "next":"page_de_login"},
+    "page_de_login":       {"type": "direct_auth",                              "next":"info_user"},
+    "info_user":           {"type": "form",          "template":"info.tpl",     "next":"more_info_user"},
+    "more_info_user":      {"type": "form",          "template":"avatar.tpl",   "next":"test_alternate"},
+
+    "alternate_page_intro_ab":    {"type": "page:user",     "template":"alternate.tpl"},
+    "alternate_page_intro_mos":   {"type": "page:user",     "template":"alternate.tpl"},
+    "alternate_test_ab":          {"type": "test",          "template":"ab.tpl",     "nb_steps":5,   "nb_step_intro":2,  "transaction_timeout_seconds":6, "variables":{"subtitle":"Test AB"} },
+    "alternate_test_mos":         {"type": "test",          "template":"mos.tpl",    "nb_steps":10,   "nb_step_intro":2,  "transaction_timeout_seconds":600, "variables":{"subtitle":"Test MOS"} },
+    "test_alternate":             {"type": "test:alternate","stages":["alternate_page_intro_ab","alternate_test_ab","alternate_page_intro_mos","alternate_test_mos"], "nb_steps_before_alternate":2, "next":"test_ab" },
+
+    "test_ab":             {"type": "test",          "template":"ab.tpl",       "next":"test_mos",     "nb_steps":5,   "nb_step_intro":2,  "transaction_timeout_seconds":600, "variables":{"subtitle":"Test AB"} },
+    "test_mos":            {"type": "test",          "template":"mos.tpl",      "next":"test_mushra",  "nb_steps":5,   "nb_step_intro":2,  "transaction_timeout_seconds":600, "variables":{"subtitle":"Test MOS"} },
+    "test_mushra":         {"type": "test",          "template":"mushra.tpl",   "next":"fin_du_test",  "nb_steps":5,   "nb_step_intro":2,  "transaction_timeout_seconds":600, "variables":{"subtitle":"Test MUSHRA", "sysref":"ref"} },
+    "fin_du_test":         {"type": "page:user",     "template":"end.tpl"}
+  }
+}
