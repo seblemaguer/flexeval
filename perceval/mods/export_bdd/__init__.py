@@ -25,7 +25,6 @@ with AdminModule(__name__) as am:
     @am.route('/perceval.db')
     @am.connection_required
     def sqlite():
-        print(current_app.config["SQLALCHEMY_FILE"])
         return send_file(current_app.config["SQLALCHEMY_FILE"])
 
 

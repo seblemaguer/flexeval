@@ -15,5 +15,5 @@
 
 </p>
 
-<a href="{{url_next}}"> Complete an iteration for the test: {{get_variable("alternate_next_test")}} </a>
+<a class="btn btn-primary" href="{{url_next}}"> Complete an iteration for the test: {{get_variable("alternate_next_test")}} </a>
 {% endblock %}

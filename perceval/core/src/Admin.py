@@ -53,7 +53,6 @@ class AdminModule(Module):
         template = Provider().get("templates").get(template,"mod:"+str(self.mod_rep))
         return super().render_template(template,args=args,parameters=parameters,variables=variables)
 
-
     def get_endpoint_for_local_rule(self,rule):
         return self.name+"."+"local_url@"+str(rule)
 

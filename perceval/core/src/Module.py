@@ -95,7 +95,7 @@ class Module(Blueprint):
 
             try:
                 assert len(bases) == 1
-                UserBase in bases
+                assert UserBase in bases
             except Exception as e:
                 raise NotAUserBase(__userBase__+" is not only or not a subClass of UserBase")
 

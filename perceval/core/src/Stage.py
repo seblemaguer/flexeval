@@ -86,7 +86,6 @@ class Stage():
             variables = self.params["variables"]
 
         if "session_variable" in self.session:
-            print(self.session["session_variable"])
             for session_variable_name in self.session["session_variable"].keys():
                 variables[session_variable_name] = self.session["session_variable"][session_variable_name]
 
@@ -101,8 +100,6 @@ class Stage():
     def set_variable(self,name,value):
         if not("session_variable" in self.session):
             self.session["session_variable"] = {}
-        print(name)
-        print(value)
         self.session["session_variable"][name] = value
 
     @property
