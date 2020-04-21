@@ -20,7 +20,7 @@ class AdminModule(Module):
 
     @classmethod
     def get_all_admin_modules(cls):
-        return Config().data()["admin"]["mods"]
+        return Config().admin_modules
 
     @classmethod
     def get_local_url_for(cls,name):

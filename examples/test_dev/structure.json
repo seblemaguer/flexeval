@@ -7,9 +7,8 @@
   },
 
   "admin":{
-    "entrypoint": "admin_panel",
+    "entrypoint":{"mod":"admin_panel","password":"bflzefinlh67s","variables":{"subtitle":"Admin Panel"}},
     "mods": [
-              {"mod":"admin_panel","password":"bflzefinlh67s","variables":{"subtitle":"Admin Panel"}},
               {"mod":"export_bdd","variables":{"subtitle":"Download BDD","subdescription":"Download the database in CSV or SQLite format."}}
             ]
   },

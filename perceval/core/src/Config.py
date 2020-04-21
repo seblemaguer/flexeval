@@ -39,12 +39,13 @@ class Config(metaclass=AppSingleton):
 
         self.config = None
         self.modules = []
+        self.admin_modules = []
 
         self.load_file()
         self.stages()
         self.default_authProvider_for_StageModule()
 
-        self.admin_mods()
+        self.setup_admin_mods()
 
         current_app.add_url_rule('/','entrypoint',self.entrypoint)
         current_app.add_url_rule('/admin/','entrypoint_admin',self.entrypoint_admin)
@@ -54,22 +55,34 @@ class Config(metaclass=AppSingleton):
     def data(self):
         return self.config
 
-    def admin_mods(self):
+    def setup_admin_mods(self):
         if "mods" in self.data()["admin"]:
             for mods in self.data()["admin"]["mods"]:
+                self.admin_modules.append(mods)
                 try:
                     self.load_module(mods["mod"])
                 except Exception as e:
                     raise MalformationError("Issue in structure.json for "+str(mods))
+        else:
+            self.data()["admin"]["mods"] = []
+
+        entrypoint_admin_mod = self.data()["admin"]["entrypoint"]
+        self.data()["admin"]["mods"].append(entrypoint_admin_mod)
+
+        try:
+            self.load_module(entrypoint_admin_mod["mod"])
+        except Exception as e:
+            raise MalformationError("Issue in structure.json for "+str(mods))
 
     def entrypoint_admin(self):
         from .Admin import AdminModule
+
         args_GET ="?"
         for args_key in request.args.keys():
             args_GET = args_GET + args_key + "=" + request.args[args_key] + "&"
 
         try:
-            return redirect(AdminModule.get_local_url_for(self.data()["admin"]["entrypoint"])+args_GET)
+            return redirect(AdminModule.get_local_url_for(self.data()["admin"]["entrypoint"]["mod"])+args_GET)
         except Exception as e:
             raise MalformationError("No entrypoint for admin set-up.")
 
