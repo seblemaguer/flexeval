@@ -1,5 +1,5 @@
 {
-  "entrypoint": "page_de_login",
+  "entrypoint": "dyn_form_test",
 
   "variables":{
     "title":"PercEval",
@@ -18,7 +18,9 @@
     "debut_du_test":       {"type": "page:visitor",  "template":"welcome.tpl",  "next":"page_de_login"},
     "page_de_login":       {"type": "direct_auth",                              "next":"info_user"},
     "info_user":           {"type": "form",          "template":"info.tpl",     "next":"more_info_user"},
-    "more_info_user":      {"type": "form",          "template":"avatar.tpl",   "next":"test_alternate"},
+    "more_info_user":      {"type": "form",          "template":"avatar.tpl",   "next":"dyn_form_test"},
+    "dyn_form_test":       {"type": "form:autogen",  "data":"monSuperForm.json","next":"test_alternate"},
+
 
     "alternate_page_intro_ab":    {"type": "page:user",     "template":"alternate.tpl"},
     "alternate_page_intro_mos":   {"type": "page:user",     "template":"alternate.tpl"},

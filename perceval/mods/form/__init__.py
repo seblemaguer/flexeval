@@ -1,4 +1,6 @@
 # Import Libraries
+import json
+
 from flask import current_app,request
 
 from perceval.core import StageModule
@@ -6,6 +8,16 @@ from perceval.database import ModelFactory,Column,ForeignKey,db,relationship
 from perceval.utils import redirect
 
 from .model import Form
+
+class FormError(Exception):
+    def __init__(self,message):
+        self.message = message
+
+class FileNotFound(FormError):
+    pass
+
+class MalformationError(FormError):
+    pass
 
 with StageModule(__name__) as sm:
 
@@ -45,7 +57,6 @@ with StageModule(__name__) as sm:
 
         if user_form_for_this_stage is None:
             resp = FormStage.create(user_pseudo=user.pseudo)
-
             try:
                 for field_key in request.form.keys():
                     FormStage.addColumn(field_key,db.String)
@@ -60,3 +71,37 @@ with StageModule(__name__) as sm:
                 resp.delete()
 
         return redirect(stage.local_url_next)
+
+with StageModule(__name__,subname="autogen") as sm_autogen:
+
+    @sm_autogen.route("/", methods = ['GET'])
+    @sm_autogen.connection_required
+    def main():
+
+        stage = sm_autogen.current_stage
+
+        # On récup le json
+        try:
+            with open(current_app.config["PERCEVAL_INSTANCE_DIR"]+'/'+stage.get("data")) as form_json_data:
+                form_json_data = json.load(form_json_data)
+        except Exception as e:
+            raise FileNotFound("Issue when loading: "+current_app.config["PERCEVAL_INSTANCE_DIR"]+'/'+stage.get("data") )
+
+        names = []
+        for component in form_json_data["components"]:
+            if ("id" not in component):
+                raise MalformationError("An ID is required for each component in "+current_app.config["PERCEVAL_INSTANCE_DIR"]+'/'+stage.get("data"))
+
+            if not(component["id"].replace("_","").isalnum()):
+                raise MalformationError("ID: "+component["id"]+" is incorrect. Only alphanumeric's and '_' symbol caracteres are allow.")
+
+            if component["id"] in names:
+                raise MalformationError("ID: "+component["id"]+" is already defined.")
+
+            names.append(component["id"])
+
+        # On ajoute le template à l'étape
+        stage.update("template","dynamicForm.tpl")
+        stage.set_variable("form_json_data",form_json_data)
+
+        return redirect(sm.url_for(sm.get_endpoint_for_local_rule("/")))
