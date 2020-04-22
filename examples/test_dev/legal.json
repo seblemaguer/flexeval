@@ -1,0 +1,41 @@
+{
+  "RGPD":{
+    "data_controller":{
+      "identity":"",
+      "contact":
+      {
+        "email":"",
+        "other":""
+      }
+    },
+
+    "data_collection":
+    {
+      "purpose":"",
+      "legal_basis":"",
+      "recipients":[""],
+    },
+
+    "data_conservation":
+    {
+      "duration":"",
+      "criterions_duration":""
+    },
+
+    "data_protection_officer":
+    {
+      "identity":"",
+      "contact":
+      {
+        "email":"",
+        "phone_number":"",
+        "other":""
+      }
+    }
+  },
+
+  "CGU":
+  {
+    "text":""
+  }
+}

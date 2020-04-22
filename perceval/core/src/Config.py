@@ -39,6 +39,7 @@ class Config(metaclass=AppSingleton):
     def __init__(self):
 
         self.config = None
+        self.legal_terms = {}
         self.modules = []
         self.admin_modules = []
 
@@ -102,6 +103,12 @@ class Config(metaclass=AppSingleton):
                 self.config = json.load(config)
         except Exception as e:
             raise ConfigError("Issue when loading structure.json.",current_app.config["PERCEVAL_INSTANCE_DIR"]+'/structure.json')
+
+        try:
+            with open(current_app.config["PERCEVAL_INSTANCE_DIR"]+'/legal.json',encoding='utf-8') as config:
+                self.legal_terms = json.load(config)
+        except Exception as e:
+            print("The following file is missing:"+current_app.config["PERCEVAL_INSTANCE_DIR"]+'/legal.json')
 
     def stages(self):
 
