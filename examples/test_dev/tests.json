@@ -1,4 +1,12 @@
 {
+  "test_mixt":
+  {
+    "systems":
+    [
+      {"name": "sys1", "data": "system2.csv"},
+      {"name": "sys2", "data": "system21.csv"}
+    ]
+  },
   "test_ab":
   {
     "systems":

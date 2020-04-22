@@ -1,9 +1,9 @@
 {
-  "entrypoint": "dyn_form_test",
+  "entrypoint": "test_mixt",
 
   "variables":{
     "title":"PercEval",
-    "authors":"Cedric Fayet"
+    "authors":"Cédric Fayet"
   },
 
   "admin":{
@@ -31,6 +31,8 @@
     "test_ab":             {"type": "test",          "template":"ab.tpl",       "next":"test_mos",     "nb_steps":5,   "nb_step_intro":2,  "transaction_timeout_seconds":600, "variables":{"subtitle":"Test AB"} },
     "test_mos":            {"type": "test",          "template":"mos.tpl",      "next":"test_mushra",  "nb_steps":5,   "nb_step_intro":2,  "transaction_timeout_seconds":600, "variables":{"subtitle":"Test MOS"} },
     "test_mushra":         {"type": "test",          "template":"mushra.tpl",   "next":"fin_du_test",  "nb_steps":5,   "nb_step_intro":2,  "transaction_timeout_seconds":600, "variables":{"subtitle":"Test MUSHRA", "sysref":"ref"} },
+    "test_mixt":           {"type": "test",          "template":"ab.tpl",       "next":"fin_du_test",     "nb_steps":5,   "nb_step_intro":2,  "transaction_timeout_seconds":600, "variables":{"subtitle":"Test AB"} },
+
     "fin_du_test":         {"type": "page:user",     "template":"end.tpl"}
   }
 }

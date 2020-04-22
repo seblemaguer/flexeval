@@ -40,7 +40,7 @@ class System():
         source_file = current_app.config["PERCEVAL_INSTANCE_DIR"]+"/systems/"+self.name+".csv"
 
         try:
-            reader = csv.DictReader(open(source_file))
+            reader = csv.DictReader(open(source_file,encoding='utf-8'))
         except Exception as e:
             raise SystemFileNotFound(source_file+" doesn't exist. Fix test.json or add the system's file.")
 

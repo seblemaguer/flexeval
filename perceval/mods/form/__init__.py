@@ -83,7 +83,7 @@ with StageModule(__name__,subname="autogen") as sm_autogen:
 
         # On récup le json
         try:
-            with open(current_app.config["PERCEVAL_INSTANCE_DIR"]+'/'+stage.get("data")) as form_json_data:
+            with open(current_app.config["PERCEVAL_INSTANCE_DIR"]+'/'+stage.get("data"),encoding='utf-8') as form_json_data:
                 form_json_data = json.load(form_json_data)
         except Exception as e:
             raise FileNotFound("Issue when loading: "+current_app.config["PERCEVAL_INSTANCE_DIR"]+'/'+stage.get("data") )

@@ -68,7 +68,7 @@ class TestManager(metaclass=AppSingleton):
     def __init__(self):
         self.register={}
 
-        with open(current_app.config["PERCEVAL_INSTANCE_DIR"]+'/tests.json') as config:
+        with open(current_app.config["PERCEVAL_INSTANCE_DIR"]+'/tests.json',encoding='utf-8') as config:
             self.config = json.load(config)
 
     def get(self,name):

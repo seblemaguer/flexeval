@@ -98,7 +98,7 @@ class Config(metaclass=AppSingleton):
 
     def load_file(self):
         try:
-            with open(current_app.config["PERCEVAL_INSTANCE_DIR"]+'/structure.json') as config:
+            with open(current_app.config["PERCEVAL_INSTANCE_DIR"]+'/structure.json',encoding='utf-8') as config:
                 self.config = json.load(config)
         except Exception as e:
             raise ConfigError("Issue when loading structure.json.",current_app.config["PERCEVAL_INSTANCE_DIR"]+'/structure.json')
