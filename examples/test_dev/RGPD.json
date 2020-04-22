@@ -1,4 +1,37 @@
 {
-  "duree":678
-  "fefEZ":
+  "data_controller":
+  {
+    "identity":"",
+    "contact":
+    {
+      "email":"",
+      "other":""
+    }
+  },
+
+  "data_collection":
+  {
+    "purpose":"",
+    "legal_basis":"",
+    "recipients":[],
+  },
+
+  "data_conservation":
+  {
+    "duration":{"years":0,"month":0,"day":0},
+    "criterions_duration":""
+
+  },
+
+  "data_protection":
+  {
+    "identity":"",
+    "contact":
+    {
+      "email":"",
+      "phone_number":0000000000,
+      "other":""
+    }
+  }
+
 }
