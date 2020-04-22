@@ -1,3 +1,4 @@
+# coding: utf8
 import traceback
 
 from flask import current_app

@@ -1,3 +1,4 @@
+# coding: utf8
 from flask import abort,current_app,send_from_directory
 
 from perceval.core import AssetsProvider

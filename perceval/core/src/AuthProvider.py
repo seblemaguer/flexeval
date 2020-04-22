@@ -1,3 +1,4 @@
+# coding: utf8
 from flask import session as flask_session
 from flask import current_app, redirect
 

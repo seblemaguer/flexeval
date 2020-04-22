@@ -1,3 +1,4 @@
+# coding: utf8
 from perceval.utils import AppSingleton
 
 class ProviderError(Exception):

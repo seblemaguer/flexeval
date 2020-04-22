@@ -1,3 +1,4 @@
+# coding: utf8
 from perceval.core import UserBase
 
 class NotAnEmail(Exception):

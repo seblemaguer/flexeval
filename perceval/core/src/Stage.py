@@ -1,3 +1,4 @@
+# coding: utf8
 from flask import g, abort
 from flask import url_for as flask_url_for
 from flask import session as flask_session

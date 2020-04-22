@@ -1,3 +1,4 @@
+# coding: utf8
 # Import Libraries
 from flask import current_app, request
 

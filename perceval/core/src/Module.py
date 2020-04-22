@@ -1,3 +1,4 @@
+# coding: utf8
 from contextlib import contextmanager
 import sqlalchemy
 

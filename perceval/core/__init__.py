@@ -1,3 +1,4 @@
+# coding: utf8
 from .src.Provider import Provider
 from .src.AssetsProvider import AssetsProvider
 from .src.TemplateProvider import TemplateProvider

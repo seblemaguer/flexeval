@@ -1,8 +1,8 @@
+# coding: utf8
 from .extensions import db
 from .utils import AppSingleton
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.inspection import inspect
-
 
 #from sqlalchemy.engine.reflection import Inspector
 

@@ -1,3 +1,4 @@
+# coding: utf8
 from perceval.core import AuthProvider
 from perceval.mods.auth_by_invitation.model import User
 

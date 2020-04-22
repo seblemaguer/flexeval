@@ -1,3 +1,4 @@
+# coding: utf8
 from perceval.database import Model, Column, db
 
 class SystemSample(Model):

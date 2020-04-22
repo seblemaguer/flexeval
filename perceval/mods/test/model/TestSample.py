@@ -1,3 +1,4 @@
+# coding: utf8
 from datetime import datetime
 
 from perceval.database import Model,relationship, Column, ForeignKey, db, declared_attr

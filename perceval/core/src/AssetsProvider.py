@@ -1,3 +1,4 @@
+# coding: utf8
 from flask import current_app
 
 from .Provider import Provider

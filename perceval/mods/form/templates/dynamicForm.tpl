@@ -9,7 +9,6 @@
 
 <form action="./save" method="post" class="form-example">
 
-
   {% for component in form_json["components"] %}
     <div class="form-group">
       <label for="name">{{component["label"]}}</label>

@@ -1,3 +1,4 @@
+# coding: utf8
 import argparse
 
 from perceval import create_app
