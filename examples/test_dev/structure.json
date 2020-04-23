@@ -1,4 +1,6 @@
 {
+  "gdpr_compliance":"relax",
+
   "entrypoint": "page_de_login",
 
   "variables":{

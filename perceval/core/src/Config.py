@@ -34,6 +34,10 @@ class LoadModuleError(ConfigError):
     def __init__(self,message):
         self.message = message
 
+class GdprComplianceError(ConfigError):
+    def __init__(self,message):
+        self.message = message
+
 class Config(metaclass=AppSingleton):
 
     def __init__(self):
@@ -49,6 +53,24 @@ class Config(metaclass=AppSingleton):
         self.setup_admin_mods()
 
         self.legal_terms()
+
+        try:
+            assert("gdpr_compliance" in self.config)
+        except Exception as e:
+            raise GdprComplianceError("Defined a level of GDPR Compliance (field gdpr_compliance) required for this website: strict or relax. The field need to be defined in the following file: "+current_app.config["PERCEVAL_INSTANCE_DIR"]+"/structure.json.")
+
+        if(self.config["gdpr_compliance"] == "strict"):
+            from .LegalTerms import LegalTerms
+            try:
+                assert(LegalTerms().is_GDPR_Compliant())
+            except Exception as e:
+                raise GdprComplianceError("This website require to be fully GDPR Compliant to be run.")
+
+        elif(self.config["gdpr_compliance"] == "relax"):
+            pass
+        else:
+            raise GdprComplianceError("Defined a level of GDPR Compliance (field gdpr_compliance) required for this website: strict or relax")
+
 
         current_app.add_url_rule('/','entrypoint',self.entrypoint)
         current_app.add_url_rule('/admin/','entrypoint_admin',self.entrypoint_admin)
