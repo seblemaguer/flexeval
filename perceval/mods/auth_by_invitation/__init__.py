@@ -31,11 +31,26 @@ with StageModule(__name__) as sm:
             try:
                 token = request.args.get('token')
                 sm.authProvider.connect(token=token)
+                return sm.render_template("legal.tpl",token=token)
+            except BadCredential as e:
+                pass
+
+            return sm.render_template(template="login.tpl")
+
+    @sm.route("/register", methods = ['POST'])
+    def main():
+        stage = sm.current_stage
+
+        if(sm.authProvider.is_connected):
+            return redirect(stage.local_url_next)
+        else:
+            try:
+                token = request.args.get('token')
+                sm.authProvider.connect(token=token)
                 sm.authProvider.user.update(active=True)
 
                 return redirect(stage.local_url_next)
             except BadCredential as e:
-                print(e)
                 pass
 
             return sm.render_template(template="login.tpl")

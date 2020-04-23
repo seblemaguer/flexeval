@@ -1,13 +1,8 @@
 {% extends get_template('base.tpl','perceval') %}
 
 {% block content %}
-  <h2 class="bd-content-title"> <img src="{{get_asset('/img/svg_icon/chevron-right.svg','perceval')}}" alt=">" /> Login</h2>
-  <form action="./register" method="post" class="form-example">
-    <div class="form-group">
-      <label for="email">Enter your email: </label>
-      <input type="email" name="email" id="email" class="form-control" required>
-    </div>
-
+  <h2 class="bd-content-title"> <img src="{{get_asset('/img/svg_icon/chevron-right.svg','perceval')}}" alt=">" /> Legal terms</h2>
+  <form action="./register?{{get_variable('token')}}" method="post" class="form-example">
 
     <div class="form-check">
       <input type="checkbox" class="form-check-input" id="legalterms" required>

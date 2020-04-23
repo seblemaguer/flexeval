@@ -211,7 +211,19 @@ you may contact your local Information Commissioner’s Office: <a href="https:/
 {{get_variable("GCU")["text"]}}
 </p>
 
+{% if get_variable("validate") %}
+  <form action="{{make_url('/legal_terms/ok')}}" method="post" class="form-example">
 
+    <div class="form-check">
+      <input type="checkbox" class="form-check-input" id="legalterms" required>
+      <label class="form-check-label" for="legalterms">I acknowledge having read and accept the GCUs and the privacy policy.</label>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Submit</button>
+
+  </form>
+{% else %}
 <a href="{{make_url('/')}}"> Back</a>
+{% endif %}
 
 {% endblock %}

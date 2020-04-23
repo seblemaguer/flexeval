@@ -1,9 +1,9 @@
 # coding: utf8
 import random
 
-from flask import session
+from flask import session,abort
 
-from perceval.core import AuthProvider, UserBase
+from perceval.core import AuthProvider, UserBase, LegalTerms
 from perceval.database import Model,Column,db
 
 class AnonUser(UserBase):
@@ -19,6 +19,7 @@ class AnonAuthProvider(AuthProvider):
     @property
     def is_connected(self):
         if not(super().is_connected):
+            LegalTerms().user_has_validate()
             self.connect()
 
         return True

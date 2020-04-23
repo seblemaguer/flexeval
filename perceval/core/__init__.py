@@ -4,6 +4,8 @@ from .src.AssetsProvider import AssetsProvider
 from .src.TemplateProvider import TemplateProvider
 from .src.AuthProvider import AuthProvider,UserBase
 
+from .src.LegalTerms import LegalTerms
+
 from .src.ErrorHandler import ErrorHandler
 from .src.Config import Config
 

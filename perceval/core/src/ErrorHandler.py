@@ -7,6 +7,8 @@ from werkzeug.exceptions import HTTPException
 from perceval.utils import AppSingleton
 from .Provider import Provider
 
+from .LegalTerms import LegalTermNotCheckError,LegalTerms
+
 class ErrorHandler(metaclass=AppSingleton):
 
     def __init__(self):
@@ -35,5 +37,8 @@ class ErrorHandler(metaclass=AppSingleton):
         from .Module import Module
 
         code = ErrorHandler.trace(e)
+
+        if isinstance(e,LegalTermNotCheckError):
+            return LegalTerms().page_with_validation_required("/")
 
         return Module.render_template(Provider().get("templates").get("/error.tpl","perceval"),parameters={"code":code})

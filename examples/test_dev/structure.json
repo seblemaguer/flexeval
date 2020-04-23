@@ -1,5 +1,5 @@
 {
-  "entrypoint": "test_mixt",
+  "entrypoint": "page_de_login",
 
   "variables":{
     "title":"PercEval",

@@ -2,10 +2,13 @@
 import json
 
 from flask import current_app
+from flask import session as flask_session
 
-from perceval.utils import AppSingleton
+from perceval.utils import AppSingleton,make_global_url,redirect
 from .Provider import Provider
 
+class LegalTermNotCheckError(Exception):
+    pass
 
 class LegalTerms(metaclass=AppSingleton):
 
@@ -31,6 +34,7 @@ class LegalTerms(metaclass=AppSingleton):
             print("   [LEGAL ISSUE] For any data collection from this website, please fix the warning(s), to ensure GDPR compliance.")
 
         current_app.add_url_rule('/legal_terms','legal_terms',self.page)
+        current_app.add_url_rule('/legal_terms/ok','validate_legal_terms',self.validate_legal_terms,methods=["POST"])
 
     def minimal_GDPR_Compliance(self):
         if not(self.legal_terms["GDPR"] is None):
@@ -67,10 +71,36 @@ class LegalTerms(metaclass=AppSingleton):
 
 
     def page(self):
+        return self.page_with_validation_required()
+
+    def page_with_validation_required(self,validate_next_local_url=None):
         from .Module import Module
         from .Config import Config
 
         GCU  = self.legal_terms["GCU"]
         GDPR = self.legal_terms["GDPR"]
 
-        return Module.render_template(Provider().get("templates").get("/legal.tpl","perceval"),parameters={"GCU":GCU,"GDPR":GDPR},args={"len":len})
+        parameters={"GCU":GCU,"GDPR":GDPR}
+
+        if validate_next_local_url is not None:
+            parameters["validate"] = True
+            self.session["validate_next_local_url"] = validate_next_local_url
+
+        return Module.render_template(Provider().get("templates").get("/legal.tpl","perceval"),parameters=parameters,args={"len":len})
+
+    def validate_legal_terms(self):
+        self.session["validate_by_user"] = True
+        return redirect(self.session["validate_next_local_url"])
+
+    def user_has_validate(self):
+        if "validate_by_user" in self.session:
+            pass
+        else:
+            raise LegalTermNotCheckError()
+
+    @property
+    def session(self):
+        if "legalterms" not in flask_session.keys():
+            flask_session["legalterms"] = {}
+
+        return flask_session["legalterms"]

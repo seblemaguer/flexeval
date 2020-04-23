@@ -39,6 +39,9 @@ $(document).ready(function(){
 Hello,
 If you want to help me, by completing a survey, please click on the link below.
 Thanks for your time - Cédric Fayet.
+
+NB: In order to handle this invitation, we have saved your email in our database.
+For more information concerning our right follow this link: <a href="{{make_url('/legal_terms')}}">{{make_url('/legal_terms')}}</a>
        </textarea>
 
     </div>
