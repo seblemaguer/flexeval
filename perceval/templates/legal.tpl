@@ -2,9 +2,8 @@
 
 {% set gdpr = get_variable("GDPR")%}
 {% block content %}
-<h2 class="bd-content-title"> <img src="{{get_asset('/img/svg_icon/chevron-right.svg','perceval')}}" alt=">" /> Legal Terms  </h2>
 
-<h3 class="bd-content-title"> <img src="{{get_asset('/img/svg_icon/chevron-right.svg','perceval')}}" alt=">" /> Privacy Policy</h3>
+<h2 class="bd-content-title"> <img src="{{get_asset('/img/svg_icon/chevron-right.svg','perceval')}}" alt=">" /> Privacy Policy</h2>
 
 <p>
   This privacy policy, will explain, how your personal data that we collect from you when you use our website are used.
@@ -207,9 +206,9 @@ you may contact your local Information Commissioner’s Office: <a href="https:/
 
 <p>Source : <a href="https://gdpr.eu/privacy-notice/">https://gdpr.eu/privacy-notice/</a>
 
-<h3 class="bd-content-title"> <img src="{{get_asset('/img/svg_icon/chevron-right.svg','perceval')}}" alt=">" /> EULA</h3>
+<h2 class="bd-content-title"> <img src="{{get_asset('/img/svg_icon/chevron-right.svg','perceval')}}" alt=">" /> GCU </h2>
 <p>
-{{get_variable("EULA")["text"]}}
+{{get_variable("GCU")["text"]}}
 </p>
 
 

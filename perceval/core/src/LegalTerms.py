@@ -11,7 +11,7 @@ class LegalTerms(metaclass=AppSingleton):
 
     def __init__(self):
 
-        self.legal_terms = {"EULA":None,"GDPR":None}
+        self.legal_terms = {"GCU":None,"GDPR":None}
         self.is_GDPR_Compliant = False
 
         print(" * Legal information are collected from the following file:"+current_app.config["PERCEVAL_INSTANCE_DIR"]+'/legal.json')
@@ -70,7 +70,7 @@ class LegalTerms(metaclass=AppSingleton):
         from .Module import Module
         from .Config import Config
 
-        EULA  = self.legal_terms["EULA"]
+        GCU  = self.legal_terms["GCU"]
         GDPR = self.legal_terms["GDPR"]
 
-        return Module.render_template(Provider().get("templates").get("/legal.tpl","perceval"),parameters={"EULA":EULA,"GDPR":GDPR},args={"len":len})
+        return Module.render_template(Provider().get("templates").get("/legal.tpl","perceval"),parameters={"GCU":GCU,"GDPR":GDPR},args={"len":len})
