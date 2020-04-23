@@ -206,7 +206,7 @@ you may contact your local Information Commissioner’s Office: <a href="https:/
 
 <p>Source : <a href="https://gdpr.eu/privacy-notice/">https://gdpr.eu/privacy-notice/</a>
 
-<h2 class="bd-content-title"> <img src="{{get_asset('/img/svg_icon/chevron-right.svg','perceval')}}" alt=">" /> GCU </h2>
+<h2 class="bd-content-title"> <img src="{{get_asset('/img/svg_icon/chevron-right.svg','perceval')}}" alt=">" /> GCU (Terms of Use)</h2>
 <p>
 {{get_variable("GCU")["text"]}}
 </p>
