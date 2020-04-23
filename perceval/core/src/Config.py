@@ -69,7 +69,7 @@ class Config(metaclass=AppSingleton):
         elif(self.config["gdpr_compliance"] == "relax"):
             pass
         else:
-            raise GdprComplianceError("Defined a level of GDPR Compliance (field gdpr_compliance) required for this website: strict or relax")
+            raise GdprComplianceError("The level of GDPR Compliance (field gdpr_compliance) need to be one of these two values: strict or relax")
 
 
         current_app.add_url_rule('/','entrypoint',self.entrypoint)
