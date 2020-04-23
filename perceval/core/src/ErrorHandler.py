@@ -36,9 +36,8 @@ class ErrorHandler(metaclass=AppSingleton):
     def error(self,e):
         from .Module import Module
 
-        code = ErrorHandler.trace(e)
-
         if isinstance(e,LegalTermNotCheckError):
             return LegalTerms().page_with_validation_required("/")
 
+        code = ErrorHandler.trace(e)
         return Module.render_template(Provider().get("templates").get("/error.tpl","perceval"),parameters={"code":code})
