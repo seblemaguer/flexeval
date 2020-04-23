@@ -90,8 +90,13 @@
               {% if get_variable("authors") is not none %}
                 Made by {{get_variable("authors")}}.
               {% endif %}
-              Powered by <a href="https://gitlab.inria.fr/dlolive/PercepEval">PercEval</a>.
+
+              <a href="{{make_url('/legal_terms')}}">Privacy Policy & EULA.</a>
               </p>
+
+            <p class="text-muted" style="letter-spacing: 2px;">
+Powered by <a href="https://gitlab.inria.fr/dlolive/PercepEval">PercEval</a>.
+            </p>
               {%block bottomlink%}
                 <p class="text-muted" style="letter-spacing: 2px;">
                   {% if module_class == "AdminModule" %}

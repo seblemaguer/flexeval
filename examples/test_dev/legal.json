@@ -1,41 +1,43 @@
 {
-  "RGPD":{
+  "GDPR":{
     "data_controller":{
-      "identity":"",
+      "identity":null,
       "contact":
       {
-        "email":"",
-        "other":""
+        "email":null,
+        "other":null
       }
     },
 
     "data_collection":
     {
-      "purpose":"",
-      "legal_basis":"",
-      "recipients":[""],
+      "purpose":null,
+      "data":[],
+      "legal_basis":null,
+      "recipients":[]
     },
 
     "data_conservation":
     {
-      "duration":"",
-      "criterions_duration":""
+      "duration":null,
+      "criterions_duration":null,
+      "security_measures":null
     },
 
     "data_protection_officer":
     {
-      "identity":"",
+      "identity":null,
       "contact":
       {
-        "email":"",
-        "phone_number":"",
-        "other":""
+        "email":null,
+        "phone_number":null,
+        "other":null
       }
     }
   },
 
-  "CGU":
+  "EULA":
   {
-    "text":""
+    "text":null
   }
 }

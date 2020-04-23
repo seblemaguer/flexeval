@@ -39,7 +39,6 @@ class Config(metaclass=AppSingleton):
     def __init__(self):
 
         self.config = None
-        self.legal_terms = {}
         self.modules = []
         self.admin_modules = []
 
@@ -49,6 +48,8 @@ class Config(metaclass=AppSingleton):
 
         self.setup_admin_mods()
 
+        self.legal_terms()
+
         current_app.add_url_rule('/','entrypoint',self.entrypoint)
         current_app.add_url_rule('/admin/','entrypoint_admin',self.entrypoint_admin)
 
@@ -56,6 +57,10 @@ class Config(metaclass=AppSingleton):
 
     def data(self):
         return self.config
+
+    def legal_terms(self):
+        from .LegalTerms import LegalTerms
+        LegalTerms()
 
     def setup_admin_mods(self):
         if "mods" in self.data()["admin"]:
@@ -103,12 +108,6 @@ class Config(metaclass=AppSingleton):
                 self.config = json.load(config)
         except Exception as e:
             raise ConfigError("Issue when loading structure.json.",current_app.config["PERCEVAL_INSTANCE_DIR"]+'/structure.json')
-
-        try:
-            with open(current_app.config["PERCEVAL_INSTANCE_DIR"]+'/legal.json',encoding='utf-8') as config:
-                self.legal_terms = json.load(config)
-        except Exception as e:
-            print("The following file is missing:"+current_app.config["PERCEVAL_INSTANCE_DIR"]+'/legal.json')
 
     def stages(self):
 

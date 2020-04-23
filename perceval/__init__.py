@@ -34,7 +34,7 @@ def create_app(INSTANCE_PATH,INSTANCE_URL):
     app.config.setdefault('SQLALCHEMY_DATABASE_URI',"sqlite:///"+app.config["SQLALCHEMY_FILE"])
     app.config.setdefault('SQLALCHEMY_TRACK_MODIFICATIONS',False)
 
-    # On intialise la db & db migration
+    # On intialise la co à la db
     db.init_app(app)
 
     # On initialise session manager

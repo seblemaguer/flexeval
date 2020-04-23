@@ -5,7 +5,7 @@
 {% if get_variable("intro_step",False) %}
 <div class="alert alert-warning alert-dismissible fade show" role="alert">
   <h4 class="alert-heading">This is the <strong>introduction</strong>.</h4>
-  <p>Your answers will <strong>not</strong> be recorded for now.</p>
+  <p>Your answers will <strong>not</strong> be recorded as correct answer.</p>
 
   <button type="button" class="close" data-dismiss="alert" aria-label="Close">
     <span aria-hidden="true">&times;</span>
