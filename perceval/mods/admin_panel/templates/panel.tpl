@@ -2,7 +2,7 @@
 
 {% block content %}
 
-  <h2 class="bd-content-title"> <img src="{{get_asset('/img/svg_icon/chevron-right.svg','perceval')}}" alt=">" />{{get_variable("subtitle",default_value="Admin Panel")}}</h2>
+  <h2 class="bd-content-title"> <img src="{{get_asset('/img/svg_icon/chevron-right.svg','perceval')}}" alt=">" /> {{get_variable("subtitle",default_value="Admin Panel")}}</h2>
 
   <div class="row">
 

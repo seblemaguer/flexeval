@@ -2,7 +2,7 @@
 
 {% block content %}
 
-  <h2 class="bd-content-title"> <img src="{{get_asset('/img/svg_icon/chevron-right.svg','perceval')}}" alt=">" />Admin Panel</h2>
+  <h2 class="bd-content-title"> <img src="{{get_asset('/img/svg_icon/chevron-right.svg','perceval')}}" alt=">" /> Admin Panel</h2>
 
   <form action="./login" method="post" class="form-example">
     <div class="form-group">
