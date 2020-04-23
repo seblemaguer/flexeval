@@ -131,6 +131,37 @@ class Config(metaclass=AppSingleton):
         except Exception as e:
             raise ConfigError("Issue when loading structure.json.",current_app.config["PERCEVAL_INSTANCE_DIR"]+'/structure.json')
 
+    def load_stage(self,current_stage_name):
+
+        current_stage = self.config["stages"][current_stage_name]
+
+        try:
+            assert current_stage_name.replace("_","").isalpha()
+        except Exception as e:
+            raise MalformationError("Stage name:"+current_stage_name+" is incorrect. Only alphabet's and '_' symbol caracteres are allow. ")
+
+        # Activate module (attr type)
+        try:
+            module_name = current_stage["type"]
+        except Exception as e:
+            raise MalformationError("Field: type is missing from the stage: "+current_stage_name)
+
+        self.load_module(module_name)
+
+        # Next stage ?
+        if "next" in current_stage:
+            if isinstance(current_stage["next"],dict):
+                next_stage_names = current_stage["next"].values()
+            else:
+                next_stage_names = [current_stage["next"]]
+
+            for next_stage_name in next_stage_names:
+                if next_stage_name in self.config["stages"]:
+                    next_stage = self.config["stages"][next_stage_name]
+                    self.load_stage(next_stage_name)
+                else:
+                    raise NextStageNotFoundError(current_stage_name,next_stage_name)
+
     def stages(self):
 
         try:
@@ -146,33 +177,7 @@ class Config(metaclass=AppSingleton):
         except Exception as e:
             raise NextStageNotFoundError("entrypoint",self.config["entrypoint"])
 
-        while not(next_stage is None):
-
-            current = next_stage
-            current_stage_name = next_stage_name
-
-            try:
-                assert current_stage_name.replace("_","").isalpha()
-            except Exception as e:
-                raise MalformationError("Stage name:"+current_stage_name+" is incorrect. Only alphabet's and '_' symbol caracteres are allow. ")
-
-            # Activate module (attr type)
-            try:
-                module_name = current["type"]
-            except Exception as e:
-                raise MalformationError("Field: type is missing from the stage: "+current_stage_name)
-
-            self.load_module(module_name)
-
-            # Next stage ?
-            if "next" in current:
-                next_stage_name = current["next"]
-                if next_stage_name in self.config["stages"]:
-                    next_stage = self.config["stages"][current["next"]]
-                else:
-                    raise NextStageNotFoundError(current_stage_name,next_stage_name)
-            else:
-                next_stage = None
+        self.load_stage(next_stage_name)
 
     def load_module(self,name):
         name = name.split(":")

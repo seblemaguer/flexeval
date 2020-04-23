@@ -1,7 +1,7 @@
 {
   "gdpr_compliance":"relax",
 
-  "entrypoint": "page_de_login",
+  "entrypoint": "choiceOneOFTwoTests",
 
   "variables":{
     "title":"PercEval",
@@ -23,6 +23,7 @@
     "more_info_user":      {"type": "form",          "template":"avatar.tpl",   "next":"dyn_form_test"},
     "dyn_form_test":       {"type": "form:autogen",  "data":"dynForm/monSuperForm.json","next":"test_alternate"},
 
+    "choiceOneOFTwoTests": {"type": "page:user",     "template":"choiceBetweenTwoTests.tpl", "next":{"testMOS":"test_mos","testAB":"test_ab"}},
 
     "alternate_page_intro_ab":    {"type": "page:user",     "template":"alternate.tpl"},
     "alternate_page_intro_mos":   {"type": "page:user",     "template":"alternate.tpl"},

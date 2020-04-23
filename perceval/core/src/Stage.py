@@ -53,10 +53,17 @@ class Stage():
 
     @property
     def local_url_next(self):
+
         if "next" not in self.params:
             next_module = "/"
         else:
-            next_module = Stage(self.params["next"]).local_url
+
+            if isinstance(self.params["next"],dict):
+                next_module={}
+                for next_module_name in self.params["next"].keys():
+                    next_module[next_module_name] = Stage(self.params["next"][next_module_name]).local_url
+            else:
+                next_module = Stage(self.params["next"]).local_url
 
         return next_module
 
@@ -131,7 +138,14 @@ class StageModule(Module):
 
         args = {}
         args["THIS_MODULE"] = "mod:"+str(self.mod_rep)
-        args["url_next"] = make_global_url(self.current_stage.local_url_next)
+        
+        if isinstance(self.current_stage.local_url_next,dict):
+            global_url_next = {}
+            for local_url_next_name in self.current_stage.local_url_next:
+                global_url_next[local_url_next_name] = make_global_url(self.current_stage.local_url_next[local_url_next_name])
+            args["url_next"] = global_url_next
+        else:
+            args["url_next"] = make_global_url(self.current_stage.local_url_next)
 
         if isinstance(template,ResolvedStageTemplate):
             template = template.path
