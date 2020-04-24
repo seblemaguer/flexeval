@@ -1,4 +1,6 @@
 # coding: utf8
+# license : CeCILL-C
+
 # Import Libraries
 from flask import current_app, request
 from flask_mail import Mail,Message

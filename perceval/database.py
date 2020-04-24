@@ -4,8 +4,6 @@ from .utils import AppSingleton
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.inspection import inspect
 
-#from sqlalchemy.engine.reflection import Inspector
-
 # From cookie cutter
 # https://github.com/cookiecutter-flask/cookiecutter-flask/blob/master/%7B%7Bcookiecutter.app_name%7D%7D/%7B%7Bcookiecutter.app_name%7D%7D/database.py
 

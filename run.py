@@ -1,4 +1,5 @@
 # coding: utf8
+# license : CeCILL-C
 import argparse
 
 from perceval import create_app

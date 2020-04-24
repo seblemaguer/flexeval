@@ -1,4 +1,6 @@
 # coding: utf8
+# license : CeCILL-C
+
 # Import Libraries
 import json
 import os

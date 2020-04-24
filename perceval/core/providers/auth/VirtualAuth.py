@@ -1,4 +1,6 @@
 # coding: utf8
+# license : CeCILL-C
+
 from perceval.core import AuthProvider
 
 class NotConnectedError(Exception):

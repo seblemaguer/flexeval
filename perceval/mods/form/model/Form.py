@@ -1,4 +1,6 @@
 # coding: utf8
+# license : CeCILL-C
+
 # Import Libraries
 from perceval.core import StageModule
 from perceval.database import Model,relationship, Column, ForeignKey, db, declared_attr

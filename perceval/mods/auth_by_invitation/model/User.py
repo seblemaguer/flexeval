@@ -1,4 +1,6 @@
 # coding: utf8
+# license : CeCILL-C
+
 import random
 import string
 

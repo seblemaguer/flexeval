@@ -1,4 +1,6 @@
 # coding: utf8
+# license : CeCILL-C
+
 from perceval.utils import AppSingleton
 
 class ProviderError(Exception):

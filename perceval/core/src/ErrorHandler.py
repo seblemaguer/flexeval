@@ -1,4 +1,6 @@
 # coding: utf8
+# license : CeCILL-C
+
 import traceback
 
 from flask import current_app

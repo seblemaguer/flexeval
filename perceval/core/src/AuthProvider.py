@@ -1,4 +1,6 @@
 # coding: utf8
+# license : CeCILL-C
+
 from flask import session as flask_session
 from flask import current_app, redirect
 

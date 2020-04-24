@@ -1,4 +1,6 @@
 # coding: utf8
+# license : CeCILL-C
+
 from pathlib import Path
 
 from flask import current_app, g

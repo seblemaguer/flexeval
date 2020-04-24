@@ -1,4 +1,6 @@
 # coding: utf8
+# license : CeCILL-C
+
 from contextlib import contextmanager
 import sqlalchemy
 

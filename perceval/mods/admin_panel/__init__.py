@@ -1,4 +1,6 @@
 # coding: utf8
+# license : CeCILL-C
+
 from flask import current_app, request
 
 from perceval.core import AdminModule

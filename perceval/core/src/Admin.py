@@ -1,4 +1,5 @@
 # coding: utf8
+# license : CeCILL-C
 
 from flask import g, abort
 from flask import url_for as flask_url_for

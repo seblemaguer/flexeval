@@ -1,4 +1,6 @@
 # coding: utf8
+# license : CeCILL-C
+
 from flask import g, abort
 from flask import url_for as flask_url_for
 from flask import session as flask_session
@@ -138,7 +140,7 @@ class StageModule(Module):
 
         args = {}
         args["THIS_MODULE"] = "mod:"+str(self.mod_rep)
-        
+
         if isinstance(self.current_stage.local_url_next,dict):
             global_url_next = {}
             for local_url_next_name in self.current_stage.local_url_next:
