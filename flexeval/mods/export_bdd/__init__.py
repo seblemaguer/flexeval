@@ -85,7 +85,7 @@ with AdminModule(__name__) as am:
             with open(current_app.config["FLEXEVAL_INSTANCE_TMP_DIR"]+"/export_bdd/"+repository_name+".bdd/"+name_table+".csv","w") as f:
                 f.write(content)
 
-        shutil.make_archive(current_app.config["FLEXEVAL_INSTANCE_TMP_DIR"]+"/export_bdd/"+repository_name,"zip",current_app.config["PERCEVAL_INSTANCE_TMP_DIR"]+"/export_bdd/"+repository_name+".bdd")
+        shutil.make_archive(current_app.config["FLEXEVAL_INSTANCE_TMP_DIR"]+"/export_bdd/"+repository_name,"zip",current_app.config["FLEXEVAL_INSTANCE_TMP_DIR"]+"/export_bdd/"+repository_name+".bdd")
         shutil.rmtree(current_app.config["FLEXEVAL_INSTANCE_TMP_DIR"]+"/export_bdd/"+repository_name+".bdd")
 
         return send_file(current_app.config["FLEXEVAL_INSTANCE_TMP_DIR"]+"/export_bdd/"+repository_name+".zip")
