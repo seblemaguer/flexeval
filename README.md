@@ -1,11 +1,7 @@
 # FlexEval #
-
 FlexEval is a software that aim to help you create a web-based evaluation platform.
 
--------------------------------------------------
-
 # How to install
-
 Installation require pip3.
 You can find the procedure to install it here: https://docs.python.org/fr/3.6/installing/index.html
 
@@ -13,13 +9,9 @@ You can find the procedure to install it here: https://docs.python.org/fr/3.6/in
 pip3 install -r requirements.txt
 ```
 
--------------------------------------------------
-
 # Launching the webserver
 
 ## Launching a local instance
-
-
 ```
 python3 run.py absolute_path_to_instance
 ```
@@ -40,9 +32,6 @@ python3 run.py -h
 ```
 
 ## Launching a local instance
-
-
--------------------------------------------------
 
 # How to cite
 
