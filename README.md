@@ -1,6 +1,10 @@
 # FlexEval #
 
-## How to install the webserver ?
+FlexEval is a software that aim to help you create a web-based evaluation platform.
+
+-------------------------------------------------
+
+# How to install
 
 Installation require pip3.
 You can find the procedure to install it here: https://docs.python.org/fr/3.6/installing/index.html
@@ -9,19 +13,25 @@ You can find the procedure to install it here: https://docs.python.org/fr/3.6/in
 pip3 install -r requirements.txt
 ```
 
-## Launching the webserver
+-------------------------------------------------
+
+# Launching the webserver
+
+## Launching a local instance
+
 
 ```
-python3 run.py name_instance IP PORT
+python3 run.py absolute_path_to_instance
 ```
 
-name_instance correspond to the name given to our instance's repository.
-This repository need to be in the following repository: [here](instances/).
+absolute_path_to_instance correspond to the absolute path to our instance's repository.
+The server's IP and PORT are defined by default: http://127.0.0.1:8080
 
-If access to your websevice is not done via http://IP:PORT/, you need to provide your url via the optional parameter public_url.
+How to build [here](INSTANCE.md).
+
 Please consider the following example:
 ```
-python3 run.py name_instance IP PORT -p https://monsupersite.com/tests/
+python3 run.py C:\Users\User\Documents\FlexEval\examples\test_dev
 ```
 
 For any information concerning run.py, you can get some help with the following flag -h.
@@ -29,4 +39,14 @@ For any information concerning run.py, you can get some help with the following 
 python3 run.py -h
 ```
 
+## Launching a local instance
+
+
 -------------------------------------------------
+
+# How to cite
+
+```bibtex
+@inproceedings{
+}
+```
