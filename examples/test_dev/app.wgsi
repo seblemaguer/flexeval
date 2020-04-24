@@ -4,5 +4,5 @@
 import sys
 sys.path.insert(0, '/path/to/the/application')
 
-from perceval import create_app
+from flexeval import create_app
 application = create_app("/path/to/instance","http://127.0.0.1:8080")

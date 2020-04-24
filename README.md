@@ -1,4 +1,4 @@
-# PercepEval #
+# FlexEval #
 
 ## How to install the webserver ?
 

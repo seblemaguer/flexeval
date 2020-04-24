@@ -4,7 +4,7 @@
   "entrypoint": "choiceOneOFTwoTests",
 
   "variables":{
-    "title":"PercEval",
+    "title":"FlexEval",
     "authors":"Cédric Fayet"
   },
 
