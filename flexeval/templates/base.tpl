@@ -95,7 +95,7 @@
               </p>
 
             <p class="text-muted" style="letter-spacing: 2px;">
-Powered by <a href="https://gitlab.inria.fr/dlolive/PercepEval">FlexEval</a>.
+Powered by <a href="https://gitlab.inria.fr/expression/tools/FlexEval">FlexEval</a>.
             </p>
               {%block bottomlink%}
                 <p class="text-muted" style="letter-spacing: 2px;">
