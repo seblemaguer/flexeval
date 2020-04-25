@@ -45,10 +45,10 @@ class SystemSampleTemplate():
             if not(file_path[0] == "/"):
                 file_path = "/"+file_path
 
-            if(Path(current_app.config["FLEXEVAL_INSTANCE_DIR"]+"/systems/files"+file_path).is_file()):
-                mime, _ = mimetypes.guess_type(current_app.config["FLEXEVAL_INSTANCE_DIR"]+"/systems/files"+file_path)
+            if(Path(current_app.config["FLEXEVAL_INSTANCE_DIR"]+"/systems"+file_path).is_file()):
+                mime, _ = mimetypes.guess_type(current_app.config["FLEXEVAL_INSTANCE_DIR"]+"/systems"+file_path)
 
-                with open(current_app.config["FLEXEVAL_INSTANCE_DIR"]+"/systems/files"+file_path, 'rb') as f:
+                with open(current_app.config["FLEXEVAL_INSTANCE_DIR"]+"/systems"+file_path, 'rb') as f:
                     data64 = base64.b64encode(f.read()).decode('utf-8')
                     value = u'data:%s;base64,%s' % (mime, data64)
                 mime = mime.split("/")[0]
