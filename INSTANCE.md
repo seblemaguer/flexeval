@@ -10,6 +10,8 @@ They are described in a directory refer as "Instance's Repository".
 ## Minimal Configuration
 
 
+> * structure.json
+
 ## Examples
 
 You can find examples of instance's repository in the following repository: [examples](/examples).
