@@ -41,6 +41,7 @@ Two available values:
 - strict: The server will start only if all the legal requirement are available.
 - relax: The server will start even if all the legal requirement are not available.
 
+More information about [legal compliance](LEGAL.md).
 
 ## entrypoint
 
@@ -75,10 +76,12 @@ All the key defined in variables are available in any template. (More informatio
 | `authors`     | array | Additionnal |
 
 ## admin
+The admin's field give you the possibility to setup our instance's admin panel.
+The admin panel is composed of admin mods (More information about [admin mods](MOD.md/#ADMIN)), that you setup within this field.
 
-All the key defined in variables are available in any template. (More information about [admin mods](MODS.md/#ADMIN).)
+If admin is not defined, you will get a 404 error if you try to acces to our admin panel.
 
-`variables`
+`admin`
 
 - is Additional
 - type: `object`
@@ -89,8 +92,121 @@ All the key defined in variables are available in any template. (More informatio
 
 | Property        | Type  | Required     |
 | --------------- | ----- | ------------ |
-| `entrypoint` | object | Additionnal |
-| `mods` | array | Additionnal |
+| `entrypoint` | object | **Required** |
+| `mods` | array | **Required** |
+
+
+#### entrypoint
+
+`entrypoint`
+
+- is **required**
+- type: `object`
+
+##### entrypoint Type
+
+Array type: `object[]`
+
+| Property   | Type   | Required     |
+| ---------- | ------ | ------------ |
+| `mod`  | string | **Required** |
+|*|any|Additional|
+
+###### mod
+`mod`
+
+- is **required**
+- type: `string`
+
+###### mod Type
+
+mod's value correspond to the name of one of the admin modules available.
+More information about the [admin modules](MOD.md#ADMIN).
+
+#### mods
+
+`mods`
+
+- is **required**
+- type: `object[]`
+
+##### mods Type
+
+Array type: `object[]`
+
+All items must be of the type: `object` with following properties:
+
+| Property   | Type   | Required     |
+| ---------- | ------ | ------------ |
+| `mod`  | string | **Required** |
+|*|any|Additional|
+
+###### mod
+`mod`
+
+- is **required**
+- type: `string`
+
+###### mod Type
+
+mod's value correspond to the name of one of the admin modules available.
+More information about the [admin modules](MOD.tpl#ADMIN).
+
+
+
+#### stages
+
+`stages`
+
+- is **required**
+- type: `object`
+
+##### stages Type
+
+Each property of this object correspond to a stage.
+The name of the property correspond to the name assigned to the stage.
+It's the name of one of our stages, that you need to assign to the [entrypoint](#entrypoint) field.
+
+| Property   | Type   | Required     |
+| ---------- | ------ | ------------ |
+|* |object| At least one|
+
+##### *
+
+`*`
+The name given to this property correspond to the name of this stage.
+- type: `object`
+
+###### stage Type
+
+All items must be of the type: `object` with following properties:
+
+| Property   | Type   | Required     |
+| ---------- | ------ | ------------ |
+| `type`  | string | **Required** |
+| `next`  | string | Additional |
+|*|any|Additional|
+
+###### type
+`type`
+
+- is **required**
+- type: `string`
+
+###### type Type
+
+type's value correspond to the name of one of the stage modules available.
+More information about the [stage modules](MOD.tpl#STAGE).
+
+###### next
+`next`
+
+- is Additionnal
+- type: `string`
+
+###### next Type
+
+Name of one of our stages, except this one, that you want show to our user after this stage.
 
 ## Example
 
