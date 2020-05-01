@@ -10,7 +10,15 @@ legal.json need to be place in our instance's repository.
              /legal.json
 ```
 
-### legal.json
+## legal.json
+
+| Property              | Type     | Required     | Nullable |
+| --------------------- | -------- | ------------ | -------- |
+| [GDPR](#GDPR) | `object` | **Required** | No  |
+| [GCU](#GCU) | `object` | Additional | Yes |
+
+## GPDR
+In order to be fully GPDR Compliant you need to fill all the fields.
 
 
 ## Backbone
