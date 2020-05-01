@@ -20,6 +20,51 @@ legal.json need to be place in our instance's repository.
 ## GPDR
 In order to be fully GPDR Compliant you need to fill all the fields.
 
+The different fields described in the GPDR field, will be used to generate the GPDR, based on the text written in [legal.tpl](flexeval/templates/legal.tpl).
+
+## data_controller
+
+`data_controller`
+
+- is **required**
+- type: `object`
+
+### data_controller Type
+
+
+## data_collection
+
+`data_collection`
+
+- is **required**
+- type: `object`
+
+### data_collection Type
+
+
+## data_conservation
+
+`data_conservation`
+
+- is **required**
+- type: `object`
+
+### data_conservation Type
+
+
+## data_protection_officer
+
+`data_protection_officer`
+
+- is **required**
+- type: `object`
+
+### data_protection_officer Type
+
+
+
+## CGU
+If the field is null, FlexEval will use the default CGU that can be found in [legal.tpl](flexeval/templates/legal.tpl). Beware, that in order to properly generate the CGU you need to complete the minimal requirement for the [GDPR](#GDPR) field.
 
 ## Backbone
 
