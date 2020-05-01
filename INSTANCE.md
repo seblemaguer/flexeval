@@ -202,11 +202,15 @@ More information about the [stage modules](MOD.tpl#STAGE).
 `next`
 
 - is Additionnal
-- type: `string`
+- type: `string` or `object`
 
 ###### next Type
 
-Name of one of our stages, except this one, that you want show to our user after this stage.
+If type is `string`:
+  Name of one of our stages, except this one, that you want show to our user after this stage.
+
+If type is `object`:
+  Each property name correspo
 
 ## Example
 
