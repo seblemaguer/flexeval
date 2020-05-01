@@ -150,7 +150,7 @@ All items must be of the type: `object` with following properties:
 ###### mod Type
 
 mod's value correspond to the name of one of the admin modules available.
-More information about the [admin modules](MOD.tpl#ADMIN).
+More information about the [admin modules](MOD.md#ADMIN).
 
 
 
@@ -196,7 +196,7 @@ All items must be of the type: `object` with following properties:
 ###### type Type
 
 type's value correspond to the name of one of the stage modules available.
-More information about the [stage modules](MOD.tpl#STAGE).
+More information about the [stage modules](MOD.md#STAGE).
 
 ###### next
 `next`

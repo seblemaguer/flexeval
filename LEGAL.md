@@ -15,7 +15,7 @@ legal.json need to be place in our instance's repository.
 | Property              | Type     | Required     | Nullable |
 | --------------------- | -------- | ------------ | -------- |
 | [GDPR](#GDPR) | `object` | **Required** | No  |
-| [GCU](#GCU) | `object` | Additional | Yes |
+| [GCU](#GCU) | `object` |  **Required** | Yes |
 
 ## GPDR
 In order to be fully GPDR Compliant you need to fill all the fields.
