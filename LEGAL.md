@@ -31,6 +31,30 @@ The different fields described in the GPDR field, will be used to generate the G
 
 ### data_controller Type
 
+`object` with following properties:
+
+| Property        | Type  | Required     |
+| --------------- | ----- | ------------ |
+| `identity` | string | Additionnal |
+| `contact` | object | Additionnal |
+
+
+#### identity
+
+##### identity Type
+
+
+#### contact
+
+##### contact Type
+
+`object` with following properties:
+
+| Property        | Type  | Required     |
+| --------------- | ----- | ------------ |
+| `email` | string | Additionnal |
+| `other` | string | Additionnal |
+
 
 ## data_collection
 
@@ -41,6 +65,30 @@ The different fields described in the GPDR field, will be used to generate the G
 
 ### data_collection Type
 
+`object` with following properties:
+
+| Property        | Type  | Required     |
+| --------------- | ----- | ------------ |
+| `purpose` | string | Additionnal |
+| `data` | array[string]| Additionnal |
+| `legal_basis` | string | Additionnal |
+| `recipients` | array[string] | Additionnal |
+
+#### purpose
+
+##### purpose Type
+
+#### data
+
+##### data Type
+
+#### legal_basis
+
+##### legal_basis Type
+
+#### recipients
+
+##### recipients Type
 
 ## data_conservation
 
@@ -51,6 +99,14 @@ The different fields described in the GPDR field, will be used to generate the G
 
 ### data_conservation Type
 
+`object` with following properties:
+
+| Property        | Type  | Required     |
+| --------------- | ----- | ------------ |
+| `duration` | integer | Additionnal |
+| `criterions_duration` | string| Additionnal |
+| `security_measures` | string | Additionnal |
+
 
 ## data_protection_officer
 
@@ -60,6 +116,31 @@ The different fields described in the GPDR field, will be used to generate the G
 - type: `object`
 
 ### data_protection_officer Type
+
+`object` with following properties:
+
+| Property        | Type  | Required     |
+| --------------- | ----- | ------------ |
+| `identity` | string | Additionnal |
+| `contact` | object| Additionnal |
+
+
+#### contact
+
+`contact`
+
+- is **required**
+- type: `object`
+
+##### contact Type
+
+`object` with following properties:
+
+| Property        | Type  | Required     |
+| --------------- | ----- | ------------ |
+| `email` | string | Additionnal |
+| `phone_number` | object| Additionnal |
+| `other` | object| Additionnal |
 
 
 
