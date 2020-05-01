@@ -13,6 +13,9 @@ legal.json need to be place in our instance's repository.
 ### legal.json
 
 
+## Backbone
+
+```
 
 {
   "GDPR":{
@@ -57,3 +60,4 @@ legal.json need to be place in our instance's repository.
     "text":null
   }
 }
+```
