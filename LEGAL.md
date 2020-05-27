@@ -1,8 +1,8 @@
 # LEGAL #
 
-By completing the legal's file (legal.json), FlexEval will generate automatically our CGU and GDPR file.
+By completing the legal's file (legal.json), FlexEval will generate automatically your CGU and GDPR file.
 
-legal.json need to be place in our instance's repository.
+legal.json need to be place in your instance's repository.
 
 ```
  /instance_directory_name

@@ -16,7 +16,7 @@ pip3 install -r requirements.txt
 ```
 python3 run.py absolute_path_to_instance
 ```
-absolute_path_to_instance correspond to the absolute path to our instance's repository.
+absolute_path_to_instance correspond to the absolute path to your instance's repository.
 The server's IP and PORT are defined by default: http://127.0.0.1:8080.
 For any information concerning run.py, you can get some help with the following flag -h.
 

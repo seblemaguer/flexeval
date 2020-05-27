@@ -1,8 +1,8 @@
 # INSTANCE #
 
-FlexEval create a flask's application based on our settings.
+FlexEval create a flask's application based on your settings.
 An application create by FlexEval is refer as "Instance".
-These settings give you the possibility to highly configure our application.
+These settings give you the possibility to highly configure your application.
 They are described in a directory refer as "Instance's Repository".
 
 # Instance's Repository
@@ -54,7 +54,7 @@ The first page that any user will see.
 
 ### entrypoint Type
 
-The value of entrypoint need to be one of the name defined for one of our [stages](#stages).
+The value of entrypoint need to be one of the name defined for one of your [stages](#stages).
 
 ## variables
 
@@ -76,10 +76,10 @@ All the key defined in variables are available in any template. (More informatio
 | `authors`     | array | Additionnal |
 
 ## admin
-The admin's field give you the possibility to setup our instance's admin panel.
+The admin's field give you the possibility to setup your instance's admin panel.
 The admin panel is composed of admin mods (More information about [admin mods](MOD.md/#ADMIN)), that you setup within this field.
 
-If admin is not defined, you will get a 404 error if you try to acces to our admin panel.
+If admin is not defined, you will get a 404 error if you try to acces to your admin panel.
 
 `admin`
 
@@ -165,7 +165,7 @@ More information about the [admin modules](MOD.md#ADMIN).
 
 Each property of this object correspond to a stage.
 The name of the property correspond to the name assigned to the stage.
-It's the name of one of our stages, that you need to assign to the [entrypoint](#entrypoint) field.
+It's the name of one of your stages, that you need to assign to the [entrypoint](#entrypoint) field.
 
 | Property   | Type   | Required     |
 | ---------- | ------ | ------------ |
@@ -207,7 +207,7 @@ More information about the [stage modules](MOD.md#STAGE).
 ###### next Type
 
 If type is `string`:
-  Name of one of our stages, except this one, that you want show to our user after this stage.
+  Name of one of your stages, except this one, that you want show to your user after this stage.
 
 If type is `object`:
   Each property name correspo
