@@ -184,7 +184,7 @@ All items must be of the type: `object` with following properties:
 | Property   | Type   | Required     |
 | ---------- | ------ | ------------ |
 | `type`  | string | **Required** |
-| `next`  | string | Additional |
+| `next`  | string or object | Additional |
 |*|any|Additional|
 
 ###### type
@@ -210,7 +210,34 @@ If type is `string`:
   Name of one of your stages, except this one, that you want show to your user after this stage.
 
 If type is `object`:
-  Each property name correspo
+
+  Each property is the name of a road.
+  The value associate to each property is the name of one of the stage.
+  Each road is link to one of the stage defined in the application.
+
+  structure.json
+  ```
+  "stages": {
+    "intro":{
+              ...
+              "next":{"roadToMOS":"test_mos","roadToAB":"test_ab"}
+            },
+    "test_ab":  {... },
+    "test_mos":  {... }
+  }
+
+  ```
+
+  someTemplate.tpl
+  ```
+    ...
+  <a class="btn btn-primary" href="{{url_next['testAB']}}"> Test AB </a>
+  <a class="btn btn-primary" href="{{url_next['testMOS']}}"> Test MOS </a>
+    ...
+
+  ```
+
+
 
 ## Example
 
