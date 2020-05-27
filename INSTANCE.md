@@ -207,13 +207,15 @@ More information about the [stage modules](MOD.md#STAGE).
 ###### next Type
 
 If type is `string`:
-  Name of one of your stages, except this one, that you want show to your user after this stage.
+  The name of one of the stages, this stage will be display when the user trigger the action to go to the next stage.
 
 If type is `object`:
 
   Each property is the name of a road.
-  The value associate to each property is the name of one of the stage.
-  Each road is link to one of the stage defined in the application.
+  The value associate to each property is the name of one of the stages.
+  Each road is link to one of the stages.
+
+Example:
 
   structure.json
   ```
@@ -231,8 +233,8 @@ If type is `object`:
   someTemplate.tpl
   ```
     ...
-  <a class="btn btn-primary" href="{{url_next['testAB']}}"> Test AB </a>
-  <a class="btn btn-primary" href="{{url_next['testMOS']}}"> Test MOS </a>
+  <a class="btn btn-primary" href="{{url_next['roadToAB']}}"> Test AB </a>
+  <a class="btn btn-primary" href="{{url_next['roadToMOS']}}"> Test MOS </a>
     ...
 
   ```
