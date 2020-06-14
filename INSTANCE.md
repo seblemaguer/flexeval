@@ -18,13 +18,13 @@ Structure.json is the only mandatory file in an instance's repository.
 
 ### stucture.json
 
-| Property              | Type     | Required     | Nullable |
-| --------------------- | -------- | ------------ | -------- |
-| [gdpr_compliance](#gdpr_compliance) | `string` | **Required** | No|
-| [entrypoint](#entrypoint) | `string` | **Required** | No |
-| [variables](#variables) | `object` | Additional | Yes |
-| [admin](#admin) | `object` | Additional | No |
-| [stages](#stages) | `object` | **Required** | No |
+| Property              | Type     | Required?     |
+| --------------------- | -------- | ------------ |
+| [gdpr_compliance](#gdpr_compliance) | `string` | **Yes** |
+| [entrypoint](#entrypoint) | `string` | **Yes** |
+| [variables](#variables) | `object` | No |
+| [admin](#admin) | `object` | No |
+| [stages](#stages) | `object` | **Yes** |
 
 ## gdpr_compliance
 

@@ -87,23 +87,24 @@ class Config(metaclass=AppSingleton):
         LegalTerms()
 
     def setup_admin_mods(self):
-        if "mods" in self.data()["admin"]:
-            for mods in self.data()["admin"]["mods"]:
-                self.admin_modules.append(mods)
-                try:
-                    self.load_module(mods["mod"])
-                except Exception as e:
-                    raise MalformationError("Issue in structure.json for "+str(mods))
-        else:
-            self.data()["admin"]["mods"] = []
+        if "admin" in self.data():
+            if "mods" in self.data()["admin"]:
+                for mods in self.data()["admin"]["mods"]:
+                    self.admin_modules.append(mods)
+                    try:
+                        self.load_module(mods["mod"])
+                    except Exception as e:
+                        raise MalformationError("Issue in structure.json for "+str(mods))
+            else:
+                self.data()["admin"]["mods"] = []
 
-        entrypoint_admin_mod = self.data()["admin"]["entrypoint"]
-        self.data()["admin"]["mods"].append(entrypoint_admin_mod)
+            entrypoint_admin_mod = self.data()["admin"]["entrypoint"]
+            self.data()["admin"]["mods"].append(entrypoint_admin_mod)
 
-        try:
-            self.load_module(entrypoint_admin_mod["mod"])
-        except Exception as e:
-            raise MalformationError("Issue in structure.json for "+str(mods))
+            try:
+                self.load_module(entrypoint_admin_mod["mod"])
+            except Exception as e:
+                raise MalformationError("Issue in structure.json for "+str(mods))
 
     def entrypoint_admin(self):
         from .Admin import AdminModule

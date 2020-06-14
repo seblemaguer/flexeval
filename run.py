@@ -1,6 +1,7 @@
 # coding: utf8
 # license : CeCILL-C
 import argparse
+import os
 
 from flexeval import create_app
 
@@ -13,6 +14,7 @@ if __name__ == '__main__':
     parser.add_argument("-p","--port", type=int, help="port",default="8080")
     args = parser.parse_args()
 
-    app = create_app(args.instance,"http://"+args.ip+":"+str(args.port))
+    instance_abs_path = os.path.abspath(args.instance)
+    app = create_app(instance_abs_path, "http://"+args.ip+":"+str(args.port))
 
     app.run(host=args.ip,port=args.port)

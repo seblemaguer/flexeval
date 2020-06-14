@@ -32,6 +32,10 @@ def safe_make_rep(REP):
 
     return REP
 
+def create_file(FILE):
+    with open(FILE, "w"):
+        pass
+
 def del_file(FILE):
     if os.path.isfile(FILE):
         os.remove(FILE)

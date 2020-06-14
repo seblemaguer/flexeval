@@ -42,6 +42,15 @@ More information concerning application factory [here](https://flask.palletsproj
 # How to cite
 
 ```bibtex
-@inproceedings{
+@inproceedings{fayet:hal-02768500,
+  TITLE = {{FlexEval, cr{\'e}ation de sites web l{\'e}gers pour des campagnes de tests perceptifs multim{\'e}dias}},
+  AUTHOR = {Fayet, C{\'e}dric and Blond, Alexis and Coulombel, Gr{\'e}goire and Simon, Claude and Lolive, Damien and Lecorv{\'e}, Gw{\'e}nol{\'e} and Chevelu, Jonathan and Le Maguer, S{\'e}bastien},
+  URL = {https://hal.archives-ouvertes.fr/hal-02768500},
+  BOOKTITLE = {{6e conf{\'e}rence conjointe Journ{\'e}es d'{\'E}tudes sur la Parole (JEP, 31e {\'e}dition), Traitement Automatique des Langues Naturelles (TALN, 27e {\'e}dition), Rencontre des {\'E}tudiants Chercheurs en Informatique pour le Traitement Automatique des Langues (R{\'E}CITAL, 22e {\'e}dition)}},
+  ADDRESS = {Nancy, France},
+  EDITOR = {Benzitoun, Christophe and Braud, Chlo{\'e} and Huber, Laurine and Langlois, David and Ouni, Slim and Pogodalla, Sylvain and Schneider, St{\'e}phane},
+  PUBLISHER = {{ATALA}},
+  PAGES = {22-25},
+  YEAR = {2020}
 }
 ```
