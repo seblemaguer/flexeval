@@ -1,0 +1,7 @@
+{
+  "title":"Super formulaire",
+  "components":
+  [
+    {"id":"prenom","label":"Quel est ton prénom ?", "input":{"type":"text"}}
+  ]
+}

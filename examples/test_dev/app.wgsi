@@ -1,0 +1,8 @@
+# MOD WGSI APACHE
+# FICHIER EN COURS DE CREATION NE PAS UTILISER
+
+import sys
+sys.path.insert(0, '/path/to/the/application')
+
+from flexeval import create_app
+application = create_app("/path/to/instance","http://127.0.0.1:8080")

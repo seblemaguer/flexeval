@@ -1,66 +1,56 @@
-# Subjective test web platform
-***
-## Utilisation du test
-script de test : `test.sh`
+# FlexEval #
 
-lancement de l'application : `python platform.py`
+FlexEval is a software that aim to help you create a web-based evaluation platform.
 
-templates utilisés : `template.tpl`, `completed.tpl`, `index.tpl`
+# How to install
+Installation require pip3.
+You can find the procedure to install it here: https://docs.python.org/fr/3.6/installing/index.html
 
+```
+pip3 install -r requirements.txt
+```
 
-## Module python utilisés
-- argparse
-- beaker.middleware
-- bottle
-- csv
-- datetime
-- itertools
-- json
-- model
-- operator
-- os
-- paste
-- pprint
-- random
-- re
-- shutil
-- sqlite3
-- sys
+# Launching the webserver
 
+## Launching a local instance
+```
+python3 run.py absolute_path_to_instance
+```
+absolute_path_to_instance correspond to the absolute path to your instance's repository.
+The server's IP and PORT are defined by default: http://127.0.0.1:8080.
+For any information concerning run.py, you can get some help with the following flag -h.
 
-## Notes sur le script de test
-Celui-ci peut être exécuté avec l'option 'rm'. Cete option permet de supprimer préalablement l'ensemble du dossier `tests`.
+```
+python3 run.py -h
+```
 
----
-## Utilisation sans script de test
-Il possible de lancer une génération sans utiliser le script de test en exécutant le script python `generator.py`.
-Ce dernier accepte les arguments suivants :
+Please consider the following example:
+```
+python3 run.py C:\Users\User\Documents\FlexEval\examples\test_dev
+```
 
-| court | long              | description                                                                           | requis |
-| ----- | ----------------- | ------------------------------------------------------------------------------------- |:------:|
-| `-j`  | `--json`          | fichier JSON                                                                          | oui    |
-| `-t`  | `--main-tpl`      | modèle principal                                                                      | oui    |
-| `-i`  | `--index-tpl`     | modèle pour la page d'index                                                           | oui    |
-| `-c`  | `--completed-tpl` | modèle pour la page de fin de test                                                    | oui    |
-| `-s`  | `--systems`       | liste des fichiers CSV des systèmes                                                   | oui    |
-| `-n`  | `--name`          | booléen décirvant si le nom est écrit après le chemin du système (par défaut : faux)  | non    |
-| `-v`  | `--verbose`       | mode verbeux                                                                          | non    |
-|       | `--csv-delimiter` | définit le délimiteur CSV utilisé (par défaut : ';')                                  | non    |
+In order to build your instance you need to create an instance respository, you can find help on how to do it by clicking [here](INSTANCE.md).
 
 
----
-Dans platform.py, ne pas oublier de changer la valeur de `myapp.APP_PREFIX`.
-Ici c'est la valeur '/perceptualTestA' (comme indiqué dans l'exemple de config apache ci-dessous)
+## Application Factory
 
----
-Configuration WSGI avec Apache :
-- ajouter le mod_wsgi
-  libapache2-mod-wsgi
-  
-- dans le virtualhost :
-	# Cette directive peut être ajoutée autant de fois que nécessaire
-	WSGIScriptAlias /perceptualTestA /var/www/apps/perceptualTestA/platform.py
+You are not satisfy with run.py ?
+A FlexEval's application is built using the application factory pattern.
+More information concerning application factory [here](https://flask.palletsprojects.com/en/1.1.x/patterns/appfactories/).
 
-		<Directory /var/www/apps>
-			Require all granted
-		</Directory>
+
+# How to cite
+
+```bibtex
+@inproceedings{fayet:hal-02768500,
+  TITLE = {{FlexEval, cr{\'e}ation de sites web l{\'e}gers pour des campagnes de tests perceptifs multim{\'e}dias}},
+  AUTHOR = {Fayet, C{\'e}dric and Blond, Alexis and Coulombel, Gr{\'e}goire and Simon, Claude and Lolive, Damien and Lecorv{\'e}, Gw{\'e}nol{\'e} and Chevelu, Jonathan and Le Maguer, S{\'e}bastien},
+  URL = {https://hal.archives-ouvertes.fr/hal-02768500},
+  BOOKTITLE = {{6e conf{\'e}rence conjointe Journ{\'e}es d'{\'E}tudes sur la Parole (JEP, 31e {\'e}dition), Traitement Automatique des Langues Naturelles (TALN, 27e {\'e}dition), Rencontre des {\'E}tudiants Chercheurs en Informatique pour le Traitement Automatique des Langues (R{\'E}CITAL, 22e {\'e}dition)}},
+  ADDRESS = {Nancy, France},
+  EDITOR = {Benzitoun, Christophe and Braud, Chlo{\'e} and Huber, Laurine and Langlois, David and Ouni, Slim and Pogodalla, Sylvain and Schneider, St{\'e}phane},
+  PUBLISHER = {{ATALA}},
+  PAGES = {22-25},
+  YEAR = {2020}
+}
+```
