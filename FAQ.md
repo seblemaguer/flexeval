@@ -26,6 +26,19 @@ Yes, you can find  examples in the *examples/test_dev* folder.
 
 ### What if I do not include an admin module in my website?
 
+It is possible to have no admin module in the website. To do this, simply provide an empty list of "mods" in the "admin" entry of the *structure.json* configuration file. The application works well with no administration menu in the admin panel.
+Here is an example of configuration for the "admin" entry  in the *structure.json* file:
+```
+...
+"admin":{
+    "entrypoint":{"mod":"admin_panel","password":"bflzefinlh67s","variables":{"subtitle":"Admin Panel"}},
+    "mods": [
+            ]
+  }
+...
+```
+
+
 ### How do I get results from the SQLite database (flexeval.db) ?
 
 ## Authentication
