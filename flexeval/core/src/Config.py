@@ -8,7 +8,7 @@ import importlib
 
 from flask import current_app, request
 
-from flexeval.utils import safe_copy_rep,AppSingleton, redirect
+from flexeval.utils import AppSingleton, redirect
 
 class ConfigError(Exception):
     pass
