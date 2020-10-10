@@ -11,7 +11,7 @@ from .Provider import Provider
 from .Config import Config
 from .AuthProvider import AuthProvider, UserBase
 
-from flexeval.utils import safe_copy_rep, make_global_url, redirect
+from flexeval.utils import make_global_url, redirect
 from flexeval.core.providers.auth import virtual
 from flexeval.database import Model
 
