@@ -3,7 +3,8 @@
 
 from flask import abort,current_app,send_from_directory
 
-from flexeval.core import AssetsProvider
+from flexeval.core import Provider
+from .AssetsProvider import AssetsProvider
 
 def decode(path):
     try:
@@ -32,7 +33,10 @@ def generate_path(repositories):
 class DefaultProvider(AssetsProvider):
 
     def __init__(self,url_prefix):
-        super().__init__(url_prefix)
+        self.url_prefix = url_prefix
+        current_app.add_url_rule(self.url_prefix+'/<path:path>',self.__class__.__name__+':assets:'+url_prefix,self.get_content)
+        Provider().set("assets",self)
+        print(" * AssetsProvider:"+self.__class__.__name__+" loaded and bound to: "+self.url_prefix)
 
     def url_flexeval(self,path):
         return self.url_prefix+"/flexeval"+path
