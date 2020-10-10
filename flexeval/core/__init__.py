@@ -1,7 +1,7 @@
 # coding: utf8
 # license : CeCILL-C
 
-from .src.Provider import Provider
+from .Provider import Provider, UndefinedError
 from .src.TemplateProvider import TemplateProvider
 from .src.AuthProvider import AuthProvider,UserBase
 

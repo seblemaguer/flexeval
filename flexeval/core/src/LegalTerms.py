@@ -7,7 +7,8 @@ from flask import current_app
 from flask import session as flask_session
 
 from flexeval.utils import AppSingleton,make_global_url,redirect
-from .Provider import Provider
+
+from flexeval.core import Provider
 
 class LegalTermNotCheckError(Exception):
     pass

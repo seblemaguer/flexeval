@@ -5,7 +5,7 @@ from pathlib import Path
 
 from flask import current_app
 
-from .Provider import Provider
+from flexeval.core import Provider
 
 
 class TemplateProviderError(Exception):

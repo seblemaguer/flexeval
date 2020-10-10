@@ -7,7 +7,8 @@ from flask import current_app
 from werkzeug.exceptions import HTTPException
 
 from flexeval.utils import AppSingleton
-from .Provider import Provider
+
+from flexeval.core import Provider
 
 from .LegalTerms import LegalTermNotCheckError,LegalTerms
 

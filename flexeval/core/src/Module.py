@@ -7,7 +7,8 @@ import sqlalchemy
 from flask import Blueprint, current_app, abort
 from flask import render_template as flask_render_template
 
-from .Provider import Provider
+
+from flexeval.core import Provider
 from .Config import Config
 from .AuthProvider import AuthProvider, UserBase
 

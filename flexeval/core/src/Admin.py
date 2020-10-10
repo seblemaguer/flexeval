@@ -9,7 +9,8 @@ from flexeval.utils import make_global_url
 
 from .Module import Module
 from .Config import Config
-from .Provider import Provider
+
+from flexeval.core import Provider
 
 from flexeval.utils import AppSingleton
 
