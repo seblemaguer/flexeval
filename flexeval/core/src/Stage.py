@@ -9,9 +9,7 @@ from flexeval.utils import make_global_url
 
 from .Module import Module
 from .Config import Config
-from flexeval.core import Provider
-
-from .TemplateProvider import NotFoundError
+from flexeval.core import ProviderFactory
 
 
 class StageError(Exception):
@@ -83,10 +81,10 @@ class Stage:
             template = self.params["template"]
 
             try:
-                template_path = Provider().get("templates").get(template)
+                template_path = ProviderFactory().get("templates").get(template)
             except NotFoundError as e:
                 template_path = (
-                    Provider()
+                    ProviderFactory()
                     .get("templates")
                     .get(template, "mod:" + str(self.mod_rep))
                 )
@@ -168,7 +166,7 @@ class StageModule(Module):
             template = template.path
         else:
             template = (
-                Provider().get("templates").get(template, "mod:" + str(self.mod_rep))
+                ProviderFactory().get("templates").get(template, "mod:" + str(self.mod_rep))
             )
 
         return super().render_template(

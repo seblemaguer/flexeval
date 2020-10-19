@@ -1,6 +1,7 @@
 # coding: utf8
 # license : CeCILL-C
 
+import logging
 import traceback
 
 from flask import current_app
@@ -8,29 +9,23 @@ from werkzeug.exceptions import HTTPException
 
 from flexeval.utils import AppSingleton
 
-from flexeval.core import Provider
+from flexeval.core import ProviderFactory
 
 from .LegalTerms import LegalTermNotCheckError, LegalTerms
 
 
 class ErrorHandler(metaclass=AppSingleton):
     def __init__(self):
+        self._logger = logging.getLogger(self.__class__.__name__)
         current_app.register_error_handler(Exception, self.error)
 
-    def trace(e):
+    def trace(self, e):
         code = 500
         if not (isinstance(e, HTTPException)):
-            print("*******************************")
-            print("A CRITICAL ERROR HAS OCCURED")
-            print("")
-            print("--> MSG")
-            print(str(e))
-            print("")
-            print("--> TRACEBACK")
+            self._logger.critical("Error \"%s\"" % str(e))
+            self._logger.critical("Traceback:" % str(e))
             for eline in traceback.format_exc().splitlines():
-                print(eline)
-
-            print("*******************************")
+                self._logger.critical(eline)
         else:
             code = e.code
 
@@ -42,8 +37,8 @@ class ErrorHandler(metaclass=AppSingleton):
         if isinstance(e, LegalTermNotCheckError):
             return LegalTerms().page_with_validation_required("/")
 
-        code = ErrorHandler.trace(e)
+        code = self.trace(e)
         return Module.render_template(
-            Provider().get("templates").get("/error.tpl", "flexeval"),
+            ProviderFactory().get("templates").get("/error.tpl", "flexeval"),
             parameters={"code": code},
         )

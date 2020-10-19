@@ -10,11 +10,9 @@ from flexeval.utils import make_global_url
 from .Module import Module
 from .Config import Config
 
-from flexeval.core import Provider
+from flexeval.core import ProviderFactory
 
 from flexeval.utils import AppSingleton
-
-from .TemplateProvider import NotFoundError
 
 
 class AdminModule(Module):
@@ -54,7 +52,7 @@ class AdminModule(Module):
         except Exception as e:
             pass
 
-        template = Provider().get("templates").get(template, "mod:" + str(self.mod_rep))
+        template = ProviderFactory().get("templates").get(template, "mod:" + str(self.mod_rep))
         return super().render_template(
             template, args=args, parameters=parameters, variables=variables
         )

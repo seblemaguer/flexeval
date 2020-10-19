@@ -15,7 +15,7 @@ import sqlalchemy
 
 # FlexEval
 from .utils import safe_make_rep, del_file, create_file
-from .core import Config, Provider, ErrorHandler
+from .core import Config, ProviderFactory, ErrorHandler
 from .core.providers import assets, templates
 from .extensions import db, session_manager
 

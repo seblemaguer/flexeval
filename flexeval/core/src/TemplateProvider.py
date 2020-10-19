@@ -1,11 +1,14 @@
 # coding: utf8
 # license : CeCILL-C
 
+import os
+import errno
+
 from pathlib import Path
 
 from flask import current_app
 
-from flexeval.core import Provider
+from flexeval.core import ProviderFactory
 
 
 class TemplateProviderError(Exception):
@@ -19,11 +22,6 @@ class ImportError(TemplateProviderError):
 
 class UnknowSourceError(TemplateProviderError):
     pass
-
-
-class NotFoundError(TemplateProviderError):
-    def __init__(self, file):
-        self.file = file
 
 
 class TemplateProvider:
@@ -45,7 +43,7 @@ class TemplateProvider:
         except Exception as e:
             raise ImportError("Import from instance's templates failed.")
 
-        Provider().set("templates", self)
+        ProviderFactory().set("templates", self)
         print(" * TemplateProvider:" + self.__class__.__name__ + " loaded. ")
 
     def register(self, name_module):
@@ -87,6 +85,7 @@ class TemplateProvider:
             raise UnknowSourceError()
 
         if not (Path(self.folder + template_url_file).is_file()):
-            raise NotFoundError(self.folder + template_url_file)
+            raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),
+                                    os.path.join(self.folder, template_url_file))
 
         return template_url_file

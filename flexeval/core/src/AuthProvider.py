@@ -4,7 +4,7 @@
 from flask import session as flask_session
 from flask import current_app, redirect
 
-from flexeval.core import Provider, UndefinedError
+from flexeval.core import ProviderFactory, UndefinedError
 from flexeval.utils import make_global_url, redirect
 from flexeval.database import Model, Column, db
 
@@ -41,11 +41,11 @@ class AuthProvider:
             + " is loaded."
         )
 
-        Provider().set(name, self)
+        ProviderFactory().set(name, self)
 
     @classmethod
     def disconnect_action(cls, name):
-        provider = Provider().get(name)
+        provider = ProviderFactory().get(name)
 
         try:
             provider.disconnect()

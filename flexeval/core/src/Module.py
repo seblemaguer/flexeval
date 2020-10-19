@@ -8,7 +8,7 @@ from flask import Blueprint, current_app, abort
 from flask import render_template as flask_render_template
 
 
-from flexeval.core import Provider
+from flexeval.core import ProviderFactory
 from .Config import Config
 from .AuthProvider import AuthProvider, UserBase
 
@@ -68,15 +68,15 @@ class Module(Blueprint):
             self.__class__.name_type + ":" + self.get_mod_name(), namespace
         )
 
-        if not (Provider().exists("auth_mod_" + self.__class__.name_type)):
+        if not (ProviderFactory().exists("auth_mod_" + self.__class__.name_type)):
             self.__class__.set_authProvider(virtual)
 
     @classmethod
     def get_authProvider(cls):
-        if not (Provider().exists("auth_mod_" + cls.name_type)):
+        if not (ProviderFactory().exists("auth_mod_" + cls.name_type)):
             cls.set_authProvider(virtual)
 
-        return Provider().get("auth_mod_" + cls.name_type)
+        return ProviderFactory().get("auth_mod_" + cls.name_type)
 
     @property
     def authProvider(self):
@@ -147,7 +147,7 @@ class Module(Blueprint):
 
     def __enter__(self):
 
-        Provider().get("templates").register(self.mod_rep)
+        ProviderFactory().get("templates").register(self.mod_rep)
 
         return self
 
@@ -194,7 +194,7 @@ class Module(Blueprint):
     def render_template(cls, path_template, args={}, variables={}, parameters={}):
 
         try:
-            args["auth"] = Provider().get("auth_mod_" + cls.name_type)
+            args["auth"] = ProviderFactory().get("auth_mod_" + cls.name_type)
             args["homepage"] = make_global_url(cls.homepage)
         except Exception as e:
             args["auth"] = virtual()
@@ -227,11 +227,11 @@ class Module(Blueprint):
                     return default_value
 
         def get_asset(name, rep=None):
-            return make_global_url(Provider().get("assets").local_url(name, rep))
+            return make_global_url(ProviderFactory().get("assets").local_url(name, rep))
 
         args["get_variable"] = get_variable
         args["get_asset"] = get_asset
-        args["get_template"] = Provider().get("templates").get
+        args["get_template"] = ProviderFactory().get("templates").get
         args["make_url"] = make_global_url
 
         try:

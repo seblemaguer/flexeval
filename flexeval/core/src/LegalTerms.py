@@ -8,7 +8,7 @@ from flask import session as flask_session
 
 from flexeval.utils import AppSingleton, make_global_url, redirect
 
-from flexeval.core import Provider
+from flexeval.core import ProviderFactory
 
 
 class LegalTermNotCheckError(Exception):
@@ -123,7 +123,7 @@ class LegalTerms(metaclass=AppSingleton):
             self.session["validate_next_local_url"] = validate_next_local_url
 
         return Module.render_template(
-            Provider().get("templates").get("/legal.tpl", "flexeval"),
+            ProviderFactory().get("templates").get("/legal.tpl", "flexeval"),
             parameters=parameters,
             args={"len": len},
         )

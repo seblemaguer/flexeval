@@ -14,17 +14,9 @@ from flexeval.utils import AppSingleton, redirect
 class ConfigError(Exception):
     pass
 
-
-class ConfigFileError(ConfigError):
-    def __init__(self, message, file):
-        self.message = message
-        self.file = file
-
-
 class MalformationError(ConfigError):
     def __init__(self, message):
         self.message = message
-
 
 class NextStageNotFoundError(ConfigError):
     def __init__(self, stage, next_stage):
@@ -37,7 +29,6 @@ class NextStageNotFoundError(ConfigError):
             + self.next_stage
             + " can't be found in structure.json."
         )
-
 
 class LoadModuleError(ConfigError):
     def __init__(self, message):
