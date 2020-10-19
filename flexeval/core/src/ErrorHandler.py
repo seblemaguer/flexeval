@@ -10,16 +10,16 @@ from flexeval.utils import AppSingleton
 
 from flexeval.core import Provider
 
-from .LegalTerms import LegalTermNotCheckError,LegalTerms
+from .LegalTerms import LegalTermNotCheckError, LegalTerms
+
 
 class ErrorHandler(metaclass=AppSingleton):
-
     def __init__(self):
         current_app.register_error_handler(Exception, self.error)
 
     def trace(e):
         code = 500
-        if not(isinstance(e,HTTPException)):
+        if not (isinstance(e, HTTPException)):
             print("*******************************")
             print("A CRITICAL ERROR HAS OCCURED")
             print("")
@@ -36,11 +36,14 @@ class ErrorHandler(metaclass=AppSingleton):
 
         return code
 
-    def error(self,e):
+    def error(self, e):
         from .Module import Module
 
-        if isinstance(e,LegalTermNotCheckError):
+        if isinstance(e, LegalTermNotCheckError):
             return LegalTerms().page_with_validation_required("/")
 
         code = ErrorHandler.trace(e)
-        return Module.render_template(Provider().get("templates").get("/error.tpl","flexeval"),parameters={"code":code})
+        return Module.render_template(
+            Provider().get("templates").get("/error.tpl", "flexeval"),
+            parameters={"code": code},
+        )

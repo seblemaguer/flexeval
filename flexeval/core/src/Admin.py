@@ -16,22 +16,22 @@ from flexeval.utils import AppSingleton
 
 from .TemplateProvider import NotFoundError
 
+
 class AdminModule(Module):
 
     name_type = "admin"
     homepage = "/admin"
-
 
     @classmethod
     def get_all_admin_modules(cls):
         return Config().admin_modules
 
     @classmethod
-    def get_local_url_for(cls,name):
-        return "/"+cls.name_type+'/'+name+'/'
+    def get_local_url_for(cls, name):
+        return "/" + cls.name_type + "/" + name + "/"
 
     @classmethod
-    def get_config_for(cls,name):
+    def get_config_for(cls, name):
         for mod in Config().data()["admin"]["mods"]:
             if mod["mod"] == name:
                 return mod
@@ -41,12 +41,12 @@ class AdminModule(Module):
         return self.__class__.get_config_for(self.get_mod_name())
 
     def local_rule(self):
-        return "/"+self.__class__.name_type+'/'+self.get_mod_name()+'/'
+        return "/" + self.__class__.name_type + "/" + self.get_mod_name() + "/"
 
-    def render_template(self,template,next=None,**parameters):
+    def render_template(self, template, next=None, **parameters):
 
         args = {}
-        args["THIS_MODULE"] = "mod:"+str(self.mod_rep)
+        args["THIS_MODULE"] = "mod:" + str(self.mod_rep)
 
         variables = {}
         try:
@@ -54,23 +54,28 @@ class AdminModule(Module):
         except Exception as e:
             pass
 
-        template = Provider().get("templates").get(template,"mod:"+str(self.mod_rep))
-        return super().render_template(template,args=args,parameters=parameters,variables=variables)
+        template = Provider().get("templates").get(template, "mod:" + str(self.mod_rep))
+        return super().render_template(
+            template, args=args, parameters=parameters, variables=variables
+        )
 
-    def get_endpoint_for_local_rule(self,rule):
-        return self.name+"."+"local_url@"+str(rule)
+    def get_endpoint_for_local_rule(self, rule):
+        return self.name + "." + "local_url@" + str(rule)
 
-    def url_for(self,endpoint,**kwargs):
-        return flask_url_for(endpoint,**kwargs)
+    def url_for(self, endpoint, **kwargs):
+        return flask_url_for(endpoint, **kwargs)
 
-    def get_endpoint_for_local_rule(self,rule):
-        return self.name+"."+"local_url@"+str(rule.replace(".","_"))
+    def get_endpoint_for_local_rule(self, rule):
+        return self.name + "." + "local_url@" + str(rule.replace(".", "_"))
 
-    def route(self,rule, **options):
+    def route(self, rule, **options):
         def decorated(func):
             def wrapper(*args, **kwargs):
                 return func(*args, **kwargs)
-            self.add_url_rule(rule,"local_url@"+str(rule.replace(".","_")),wrapper,**options)
+
+            self.add_url_rule(
+                rule, "local_url@" + str(rule.replace(".", "_")), wrapper, **options
+            )
 
             return wrapper
 
