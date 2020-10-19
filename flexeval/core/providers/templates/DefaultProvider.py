@@ -12,7 +12,7 @@ from pathlib import Path
 
 from flask import current_app, g
 
-from flexeval.core import TemplateProvider
+from .TemplateProvider import TemplateProvider
 
 
 class DefaultProvider(TemplateProvider):

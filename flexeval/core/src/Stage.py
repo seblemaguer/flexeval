@@ -82,7 +82,7 @@ class Stage:
 
             try:
                 template_path = ProviderFactory().get("templates").get(template)
-            except NotFoundError as e:
+            except FileNotFoundError:
                 template_path = (
                     ProviderFactory()
                     .get("templates")

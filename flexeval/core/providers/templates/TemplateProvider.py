@@ -4,6 +4,8 @@
 import os
 import errno
 
+import abc
+
 from pathlib import Path
 
 from flask import current_app
@@ -24,10 +26,7 @@ class UnknowSourceError(TemplateProviderError):
     pass
 
 
-class TemplateProvider:
-
-    __abstract__ = True
-
+class TemplateProvider(metaclass=abc.ABCMeta):
     def __init__(self, folder):
 
         self.folder = folder
@@ -52,24 +51,6 @@ class TemplateProvider:
         except Exception as e:
             raise ImportError("Import from mod:" + name_module + " failed.")
 
-    def register_flexeval(self):
-        raise NotImplementedError()
-
-    def register_instance(self):
-        raise NotImplementedError()
-
-    def register_module(self, name):
-        raise NotImplementedError()
-
-    def get_flexeval(self, path):
-        raise NotImplementedError()
-
-    def get_mod(self, name_mod, path):
-        raise NotImplementedError()
-
-    def get_instance(self, path):
-        raise NotImplementedError()
-
     def get(self, path, _from=None):
 
         if not (path[0] == "/"):
@@ -85,7 +66,10 @@ class TemplateProvider:
             raise UnknowSourceError()
 
         if not (Path(self.folder + template_url_file).is_file()):
-            raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),
-                                    os.path.join(self.folder, template_url_file))
+            raise FileNotFoundError(
+                errno.ENOENT,
+                os.strerror(errno.ENOENT),
+                os.path.join(self.folder, template_url_file),
+            )
 
         return template_url_file

@@ -2,7 +2,6 @@
 # license : CeCILL-C
 
 from .ProviderFactory import ProviderFactory, UndefinedError
-from .src.TemplateProvider import TemplateProvider
 from .src.AuthProvider import AuthProvider,UserBase
 
 from .src.LegalTerms import LegalTerms
