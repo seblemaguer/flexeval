@@ -1,22 +1,36 @@
 # coding: utf8
 # license : CeCILL-C
 
+# Global/Systems
 import os
-import shutil
-import json
 import importlib
 
+# Yaml
+from yaml import load, dump
+
+try:
+    from yaml import CLoader as Loader
+except ImportError:
+    from yaml import Loader
+
+# Flask
 from flask import current_app, request
 
+# Utils
 from flexeval.utils import AppSingleton, redirect
+
+
+STRUCTURE_CONFIGURATION_BASENAME = "structure"
 
 
 class ConfigError(Exception):
     pass
 
+
 class MalformationError(ConfigError):
     def __init__(self, message):
         self.message = message
+
 
 class NextStageNotFoundError(ConfigError):
     def __init__(self, stage, next_stage):
@@ -27,8 +41,10 @@ class NextStageNotFoundError(ConfigError):
             + self.stage
             + ", named "
             + self.next_stage
-            + " can't be found in structure.json."
+            + " can't be found in "
+            + STRUCTURE_CONFIGURATION_BASENAME
         )
+
 
 class LoadModuleError(ConfigError):
     def __init__(self, message):
@@ -61,7 +77,7 @@ class Config(metaclass=AppSingleton):
             raise GdprComplianceError(
                 "Defined a level of GDPR Compliance (field gdpr_compliance) required for this website: strict or relax. The field need to be defined in the following file: "
                 + current_app.config["FLEXEVAL_INSTANCE_DIR"]
-                + "/structure.json."
+                + "%s.yaml." % STRUCTURE_CONFIGURATION_BASENAME
             )
 
         if self.config["gdpr_compliance"] == "strict":
@@ -87,7 +103,7 @@ class Config(metaclass=AppSingleton):
         print(
             " * WebService configuration made; using "
             + current_app.config["FLEXEVAL_INSTANCE_DIR"]
-            + "/structure.json."
+            + "%s.yaml." % STRUCTURE_CONFIGURATION_BASENAME
         )
 
     def data(self):
@@ -147,14 +163,20 @@ class Config(metaclass=AppSingleton):
     def load_file(self):
         try:
             with open(
-                current_app.config["FLEXEVAL_INSTANCE_DIR"] + "/structure.json",
+                os.path.join(
+                    current_app.config["FLEXEVAL_INSTANCE_DIR"],
+                    "%s.yaml" % STRUCTURE_CONFIGURATION_BASENAME,
+                ),
                 encoding="utf-8",
-            ) as config:
-                self.config = json.load(config)
+            ) as config_stream:
+                self.config = load(config_stream, Loader=Loader)
         except Exception as e:
             raise ConfigError(
                 "Issue when loading structure.json.",
-                current_app.config["FLEXEVAL_INSTANCE_DIR"] + "/structure.json",
+                os.path.join(
+                    current_app.config["FLEXEVAL_INSTANCE_DIR"],
+                    "%s.yaml" % STRUCTURE_CONFIGURATION_BASENAME,
+                ),
             )
 
     def load_stage(self, current_stage_name):

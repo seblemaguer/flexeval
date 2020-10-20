@@ -1,14 +1,27 @@
 # coding: utf8
 # license : CeCILL-C
 
-import json
+# Global
+import os
 
+# Yaml
+from yaml import load, dump
+
+try:
+    from yaml import CLoader as Loader
+except ImportError:
+    from yaml import Loader
+
+# Flask
 from flask import current_app
 from flask import session as flask_session
 
+# Flexeval
 from flexeval.utils import AppSingleton, make_global_url, redirect
-
 from flexeval.core import ProviderFactory
+
+
+LEGAL_CONFIGURATION_BASENAME = "legal"
 
 
 class LegalTermNotCheckError(Exception):
@@ -24,15 +37,18 @@ class LegalTerms(metaclass=AppSingleton):
         print(
             " * Legal information are collected from the following file:"
             + current_app.config["FLEXEVAL_INSTANCE_DIR"]
-            + "/legal.json"
+            + "%s.yaml" % LEGAL_CONFIGURATION_BASENAME
         )
 
         try:
             with open(
-                current_app.config["FLEXEVAL_INSTANCE_DIR"] + "/legal.json",
+                os.path.join(
+                    current_app.config["FLEXEVAL_INSTANCE_DIR"],
+                    "%s.yaml" % LEGAL_CONFIGURATION_BASENAME,
+                ),
                 encoding="utf-8",
-            ) as config:
-                self.legal_terms = json.load(config)
+            ) as config_stream:
+                self.legal_terms = load(config_stream, Loader=Loader)
         except FileNotFoundError as e:
             print("   WARNING: The legal file is missing")
         except Exception as e:
