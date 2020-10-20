@@ -86,7 +86,7 @@ class Stage:
                 template_path = (
                     ProviderFactory()
                     .get("templates")
-                    .get(template, "mod:" + str(self.mod_rep))
+                    .get(template)
                 )
 
             return ResolvedStageTemplate(template_path)
@@ -166,7 +166,7 @@ class StageModule(Module):
             template = template.path
         else:
             template = (
-                ProviderFactory().get("templates").get(template, "mod:" + str(self.mod_rep))
+                ProviderFactory().get("templates").get(template)
             )
 
         return super().render_template(

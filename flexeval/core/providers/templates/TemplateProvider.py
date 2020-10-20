@@ -93,9 +93,8 @@ class TemplateProvider:
         )
 
     def register_module(self, name):
-
         def ignore_instance(src, names):
-            return set(names).difference(set(self._instance_files))
+            return set(names).intersection(set(self._instance_files))
 
         copytree(
             current_app.config["FLEXEVAL_DIR"] + "/mods/" + name + "/templates",
