@@ -139,7 +139,7 @@ class LegalTerms(metaclass=AppSingleton):
             self.session["validate_next_local_url"] = validate_next_local_url
 
         return Module.render_template(
-            ProviderFactory().get("templates").get("/legal.tpl", "flexeval"),
+            ProviderFactory().get("templates").get("/legal.tpl"),
             parameters=parameters,
             args={"len": len},
         )

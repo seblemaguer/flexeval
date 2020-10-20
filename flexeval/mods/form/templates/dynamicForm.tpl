@@ -1,4 +1,4 @@
-{% extends get_template('base.tpl','flexeval') %}
+{% extends get_template('base.tpl') %}
 
 {% block content %}
 

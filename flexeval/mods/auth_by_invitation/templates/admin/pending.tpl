@@ -1,4 +1,4 @@
-{% extends get_template('base.tpl','flexeval') %}
+{% extends get_template('base.tpl') %}
 
 {% block content %}
   <h2 class="bd-content-title"> <img src="{{get_asset('/img/svg_icon/chevron-right.svg','flexeval')}}" alt=">" /> Pending Invitation</h2>

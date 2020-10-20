@@ -51,25 +51,16 @@ class TemplateProvider(metaclass=abc.ABCMeta):
         except Exception as e:
             raise ImportError("Import from mod:" + name_module + " failed.")
 
-    def get(self, path, _from=None):
+    def get(self, path):
 
         if not (path[0] == "/"):
             path = "/" + path
 
-        if _from is None:
-            template_url_file = self.get_instance(path)
-        elif _from == "flexeval":
-            template_url_file = self.get_flexeval(path)
-        elif _from[:3] == "mod":
-            template_url_file = self.get_mod(_from[4:], path)
-        else:
-            raise UnknowSourceError()
-
-        if not (Path(self.folder + template_url_file).is_file()):
+        if not (Path(self.folder + path).is_file()):
             raise FileNotFoundError(
                 errno.ENOENT,
                 os.strerror(errno.ENOENT),
-                os.path.join(self.folder, template_url_file),
+                os.path.join(self.folder, path),
             )
 
-        return template_url_file
+        return path

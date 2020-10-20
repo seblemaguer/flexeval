@@ -39,6 +39,6 @@ class ErrorHandler(metaclass=AppSingleton):
 
         code = self.trace(e)
         return Module.render_template(
-            ProviderFactory().get("templates").get("/error.tpl", "flexeval"),
+            ProviderFactory().get("templates").get("/error.tpl"),
             parameters={"code": code},
         )

@@ -22,21 +22,21 @@ class DefaultProvider(TemplateProvider):
     def register_flexeval(self):
         copytree(
             current_app.config["FLEXEVAL_INSTANCE_DIR"] + "/templates",
-            self.folder + "/instance/",
+            self.folder,
             dirs_exist_ok=True,
         )
 
     def register_instance(self):
         copytree(
             current_app.config["FLEXEVAL_DIR"] + "/templates",
-            self.folder + "/flexeval/",
+            self.folder,
             dirs_exist_ok=True,
         )
 
     def register_module(self, name):
         copytree(
             current_app.config["FLEXEVAL_DIR"] + "/mods/" + name + "/templates",
-            self.folder + "/flexeval/mods/" + name,
+            self.folder,
             dirs_exist_ok=True,
         )
 
@@ -49,21 +49,3 @@ class DefaultProvider(TemplateProvider):
         else:
             g.loaded_template.append(rep + ":" + path)
             return False
-
-    def get_flexeval(self, path):
-        if Path(self.folder + "/instance/flexeval" + path).is_file() and \
-           (not self.template_loaded("flexeval", path)):
-            return "/instance/flexeval" + path
-        else:
-            return "/flexeval" + path
-
-    def get_mod(self, name_mod, path):
-        if Path(
-            self.folder + "/instance/flexeval/mods/" + str(name_mod) + path
-        ).is_file() and not (self.template_loaded("mods:" + str(name_mod), path)):
-            return "/instance/flexeval/mods/" + str(name_mod) + path
-        else:
-            return "/flexeval/mods/" + str(name_mod) + path
-
-    def get_instance(self, path):
-        return "/instance" + path
