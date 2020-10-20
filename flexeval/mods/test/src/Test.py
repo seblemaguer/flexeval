@@ -1,21 +1,37 @@
 # coding: utf8
-import json
-import random
-import string
+
+# Global/system
+import os
 from pathlib import Path
+import string
+
+# Yaml
+from yaml import load, dump
+
+try:
+    from yaml import CLoader as Loader
+except ImportError:
+    from yaml import Loader
+
+# Data type
 import base64
 import mimetypes
+import random
 from datetime import datetime, timedelta
 
+# Flask
 from flask import current_app
 
+# Flexeval
 from flexeval.utils import AppSingleton
 from flexeval.core import StageModule
 from flexeval.database import Column, ForeignKey, ModelFactory, db
-
 from flexeval.mods.test.model import TestSample, SystemSample
 
+# Current package
 from .System import SystemManager
+
+TEST_CONFIGURATION_BASENAME = "tests"
 
 
 class SystemSampleTemplate:
@@ -77,19 +93,25 @@ class MalformationError(TestError):
 class TestManager(metaclass=AppSingleton):
     def __init__(self):
         self.register = {}
-
         with open(
-            current_app.config["FLEXEVAL_INSTANCE_DIR"] + "/tests.json",
+            os.path.join(
+                current_app.config["FLEXEVAL_INSTANCE_DIR"],
+                "%s.yaml" % TEST_CONFIGURATION_BASENAME,
+            ),
             encoding="utf-8",
-        ) as config:
-            self.config = json.load(config)
+        ) as config_stream:
+            self.config = load(config_stream, Loader=Loader)
 
     def get(self, name):
         if not (name in self.register):
             try:
                 config = self.config[name]
             except Exception as e:
-                raise MalformationError("Test " + name + " not found in tests.json .")
+                raise MalformationError(
+                    "Test "
+                    + name
+                    + " not found in %s.yaml." % TEST_CONFIGURATION_BASENAME
+                )
             self.register[name] = Test(name, config)
 
         return self.register[name]
