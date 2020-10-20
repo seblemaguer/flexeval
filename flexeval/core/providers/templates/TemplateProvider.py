@@ -7,9 +7,11 @@ import errno
 
 py_version = sys.version_info
 if (py_version.major >= 3) and (py_version.minor >= 8):
-    from shutil import copytree
+    from flexeval.utils import copytree # from shutil import copytree
 else:
     from flexeval.utils import copytree
+
+import glob
 
 from pathlib import Path
 
@@ -34,6 +36,7 @@ class UnknowSourceError(TemplateProviderError):
 class TemplateProvider:
     def __init__(self, folder):
 
+        self._instance_files = []
         self.folder = folder
         current_app.template_folder = self.folder
 
@@ -78,17 +81,27 @@ class TemplateProvider:
         )
 
     def register_instance(self):
+
+        # Save instance templates path to not replace them when registering mods
+        tpl_dir = current_app.config["FLEXEVAL_DIR"] + "/templates"
+        self._instance_files = [f.replace(tpl_dir + "/", "") for f in glob.glob(tpl_dir + '/**/*', recursive=True)]
+
         copytree(
-            current_app.config["FLEXEVAL_DIR"] + "/templates",
+            tpl_dir,
             self.folder,
             dirs_exist_ok=True,
         )
 
     def register_module(self, name):
+
+        def ignore_instance(src, names):
+            return set(names).difference(set(self._instance_files))
+
         copytree(
             current_app.config["FLEXEVAL_DIR"] + "/mods/" + name + "/templates",
             self.folder,
             dirs_exist_ok=True,
+            ignore=ignore_instance
         )
 
     def template_loaded(self, rep, path):
