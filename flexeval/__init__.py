@@ -53,7 +53,7 @@ def create_app(INSTANCE_PATH, INSTANCE_URL):
 
         # Instantiating the default providers
         assets.default("/assets")
-        templates.default(app.config["FLEXEVAL_INSTANCE_TMP_DIR"] + "/templates")
+        templates.TemplateProvider(app.config["FLEXEVAL_INSTANCE_TMP_DIR"] + "/templates")
 
         # Config app based on structure.json
         Config()
