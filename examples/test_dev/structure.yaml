@@ -1,6 +1,5 @@
 # Test global information
-gdpr_compliance: relax
-entrypoint: choiceOneOFTwoTests
+entrypoint: welcome
 variables:
   title: FlexEval
   authors: Cédric Fayet
@@ -20,102 +19,42 @@ admin:
 
 # Structure of the evaluation
 stages:
-  page_login:
-    type: auth_by_invitation
-    next: info_user
-  debut_du_test:
+  # First steps
+  welcome:
     type: page:visitor
     template: welcome.tpl
-    next: page_de_login
-  page_de_login:
-    type: direct_auth
-    next: info_user
-  info_user:
-    type: form
-    template: info.tpl
-    next: more_info_user
-  more_info_user:
-    type: form
-    template: avatar.tpl
-    next: dyn_form_test
-  dyn_form_test:
-    type: form:autogen
-    data: dynForm/monSuperForm.json
-    next: test_alternate
+    next: choiceOneOFTwoTests
+
   choiceOneOFTwoTests:
     type: page:user
     template: choiceBetweenTwoTests.tpl
     next:
       testMOS: test_mos
       testAB: test_ab
-  alternate_page_intro_ab:
-    type: page:user
-    template: alternate.tpl
-  alternate_page_intro_mos:
-    type: page:user
-    template: alternate.tpl
-  alternate_test_ab:
-    type: test
-    template: ab.tpl
-    nb_steps: 5
-    nb_step_intro: 2
-    transaction_timeout_seconds: 6
-    variables:
-      subtitle: Test AB
-  alternate_test_mos:
-    type: test
-    template: mos.tpl
-    nb_steps: 10
-    nb_step_intro: 2
-    transaction_timeout_seconds: 600
-    variables:
-      subtitle: Test MOS
-  test_alternate:
-    type: test:alternate
-    stages:
-    - alternate_page_intro_ab
-    - alternate_test_ab
-    - alternate_page_intro_mos
-    - alternate_test_mos
-    nb_steps_before_alternate: 2
-    next: test_ab
+
+  # AB Test configuration
   test_ab:
     type: test
     template: ab.tpl
-    next: test_mos
+    next: end_test
     nb_steps: 5
     nb_step_intro: 2
     transaction_timeout_seconds: 600
     variables:
       subtitle: Test AB
+
+  # MOS Test configuration
   test_mos:
     type: test
     template: mos.tpl
-    next: test_mushra
+    next: end_test
     nb_steps: 5
     nb_step_intro: 2
     transaction_timeout_seconds: 600
     variables:
       subtitle: Test MOS
-  test_mushra:
-    type: test
-    template: mushra.tpl
-    next: fin_du_test
-    nb_steps: 5
-    nb_step_intro: 2
-    transaction_timeout_seconds: 600
-    variables:
-      subtitle: Test MUSHRA
-      sysref: ref
-  test_mixt:
-    type: test
-    template: ab.tpl
-    next: fin_du_test
-    nb_steps: 5
-    nb_step_intro: 2
-    transaction_timeout_seconds: 600
-    variables:
-      subtitle: Test AB
-  fin_du_test:
+
+  # End of the test
+  end_test:
     type: page:user
     template: end.tpl

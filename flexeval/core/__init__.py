@@ -4,8 +4,6 @@
 from .ProviderFactory import ProviderFactory, UndefinedError
 from .src.AuthProvider import AuthProvider,UserBase
 
-from .src.LegalTerms import LegalTerms
-
 from .src.ErrorHandler import ErrorHandler
 from .src.Config import Config
 

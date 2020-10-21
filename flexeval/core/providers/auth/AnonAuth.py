@@ -5,7 +5,7 @@ import random
 
 from flask import session,abort
 
-from flexeval.core import AuthProvider, UserBase, LegalTerms
+from flexeval.core import AuthProvider, UserBase
 from flexeval.database import Model,Column,db
 
 class AnonUser(UserBase):
@@ -16,7 +16,6 @@ class AnonAuthProvider(AuthProvider):
     __userBase__ = AnonUser
 
     def connect(self):
-        LegalTerms().user_has_validate()
         super().connect(self.userModel.create(pseudo="anon@"+str(random.randint(1,999999999999999))))
 
     @property

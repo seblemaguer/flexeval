@@ -7,7 +7,7 @@ import errno
 
 py_version = sys.version_info
 if (py_version.major >= 3) and (py_version.minor >= 8):
-    from flexeval.utils import copytree # from shutil import copytree
+    from shutil import copytree
 else:
     from flexeval.utils import copytree
 

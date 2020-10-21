@@ -11,8 +11,6 @@ from flexeval.utils import AppSingleton
 
 from flexeval.core import ProviderFactory
 
-from .LegalTerms import LegalTermNotCheckError, LegalTerms
-
 
 class ErrorHandler(metaclass=AppSingleton):
     def __init__(self):
@@ -33,9 +31,6 @@ class ErrorHandler(metaclass=AppSingleton):
 
     def error(self, e):
         from .Module import Module
-
-        if isinstance(e, LegalTermNotCheckError):
-            return LegalTerms().page_with_validation_required("/")
 
         code = self.trace(e)
         return Module.render_template(
