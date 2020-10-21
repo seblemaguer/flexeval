@@ -151,8 +151,12 @@ class Test:
             if system_all_aligned and system_i > 0:
                 aligned_with = config["systems"][0]["name"]
 
+            delimiter = "," # NOTE: hardcoded
+            if "delimiter" in system:
+                delimiter = system["delimiter"]
+
             self.systems[system["name"]] = (
-                SystemManager().get(system["data"].replace(".csv", "")),
+                SystemManager().get(system["data"].replace(".csv", ""), delimiter),
                 aligned_with,
             )
 

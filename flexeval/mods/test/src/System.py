@@ -23,15 +23,15 @@ class SystemManager(metaclass=AppSingleton):
     def __init__(self):
         self.register = {}
 
-    def get(self, name):
+    def get(self, name, delimiter=","):
         if not (name in self.register):
-            self.register[name] = System(name)
+            self.register[name] = System(name, delimiter)
 
         return self.register[name]
 
 
 class System:
-    def __init__(self, name):
+    def __init__(self, name, delimiter=","):
 
         if name[0] == "/":
             name = name[1:]
@@ -45,7 +45,7 @@ class System:
         )
 
         try:
-            reader = csv.DictReader(open(source_file, encoding="utf-8"))
+            reader = csv.DictReader(open(source_file, encoding="utf-8"), delimiter=delimiter)
         except Exception as e:
             raise SystemFileNotFound(
                 source_file + " doesn't exist. Fix test.json or add the system's file."
