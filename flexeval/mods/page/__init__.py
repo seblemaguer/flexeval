@@ -15,10 +15,15 @@ with StageModule(__name__,subname="visitor") as sm:
         authProvider = sm.authProvider
 
         if authProvider.is_connected:
-            if stage.has_next_module():
-                return redirect(stage.local_url_next)
-            else:
-                return sm.render_template(template=stage.template)
+            return sm.render_template(template=stage.template)
+
+            # NOTE: the rediction is faulty as virtual leads to automatically to connected anonymous user
+            # NOTE: Redirection based on remembering what was the last visited page
+
+            # if stage.has_next_module():
+            #     return redirect(stage.local_url_next)
+            # else:
+            #     return sm.render_template(template=stage.template)
         else:
             return sm.render_template(template=stage.template)
 
