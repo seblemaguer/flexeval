@@ -1,6 +1,8 @@
 # coding: utf8
 # license : CeCILL-C
 
+import logging
+
 from flask import abort, current_app, send_from_directory
 
 from flexeval.core import ProviderFactory
@@ -49,19 +51,20 @@ def generate_path(repositories):
 
 class AssetsProvider:
     def __init__(self, url_prefix):
+        # Define logger
+        self._logger = logging.getLogger(self.__class__.__name__)
+
+        # Define and setup app url
         self.url_prefix = url_prefix
         current_app.add_url_rule(
             self.url_prefix + "/<path:path>",
             self.__class__.__name__ + ":assets:" + url_prefix,
             self.get_content,
         )
+
+        # Indicate to the factory that current object is the asset provider
         ProviderFactory().set("assets", self)
-        print(
-            " * AssetsProvider:"
-            + self.__class__.__name__
-            + " loaded and bound to: "
-            + self.url_prefix
-        )
+        self._logger.info("Loaded and bound to " + self.url_prefix)
 
     def local_url(self, path, _from=None):
 

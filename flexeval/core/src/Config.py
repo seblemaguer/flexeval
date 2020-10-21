@@ -4,6 +4,7 @@
 # Global/Systems
 import os
 import importlib
+import logging
 
 # Yaml
 from yaml import load, dump
@@ -52,6 +53,8 @@ class LoadModuleError(ConfigError):
 
 class Config(metaclass=AppSingleton):
     def __init__(self):
+        # Define logger
+        self._logger = logging.getLogger(self.__class__.__name__)
 
         self.config = None
         self.modules = []
@@ -67,10 +70,9 @@ class Config(metaclass=AppSingleton):
         current_app.add_url_rule("/", "entrypoint", self.entrypoint)
         current_app.add_url_rule("/admin/", "entrypoint_admin", self.entrypoint_admin)
 
-        print(
-            " * WebService configuration made; using "
-            + current_app.config["FLEXEVAL_INSTANCE_DIR"]
-            + "%s.yaml." % STRUCTURE_CONFIGURATION_BASENAME
+        self._logger.info("WebService configuration made; using "
+            + os.path.join(current_app.config["FLEXEVAL_INSTANCE_DIR"],
+                           "%s.yaml." % STRUCTURE_CONFIGURATION_BASENAME)
         )
 
     def data(self):

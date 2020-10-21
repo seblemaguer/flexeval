@@ -1,6 +1,8 @@
 # coding: utf8
 # license : CeCILL-C
 
+import logging
+
 from contextlib import contextmanager
 import sqlalchemy
 
@@ -60,6 +62,9 @@ class UserModelAttributesMeta(type(Model)):
 
 class Module(Blueprint):
     def __init__(self, namespace, subname=None):
+        # Define logger
+        self._logger = logging.getLogger(self.__class__.__name__)
+
         self.namespace = namespace.split(".")
         self.subname = subname
         self.mod_rep = self.namespace[2]
@@ -155,14 +160,7 @@ class Module(Blueprint):
 
         try:
             current_app.register_blueprint(self, url_prefix=self.local_rule())
-            print(
-                " * "
-                + self.__class__.__name__
-                + " named "
-                + self.get_mod_name()
-                + " is loaded and bound to: "
-                + self.local_rule()
-            )
+            self._logger.info("%s is loaded and bound to: %s" % (self.get_mod_name(), self.local_rule()))
         except Exception as e:
             raise MalformationError(
                 "There are already a "

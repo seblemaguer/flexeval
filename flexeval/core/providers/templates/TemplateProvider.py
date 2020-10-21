@@ -1,6 +1,7 @@
 # coding: utf8
 # license : CeCILL-C
 
+import logging
 import sys
 import os
 import errno
@@ -35,6 +36,8 @@ class UnknowSourceError(TemplateProviderError):
 
 class TemplateProvider:
     def __init__(self, folder):
+        # Define logger
+        self._logger = logging.getLogger(self.__class__.__name__)
 
         self._instance_files = []
         self.folder = folder
@@ -51,7 +54,7 @@ class TemplateProvider:
             raise ImportError("Import from instance's templates failed.")
 
         ProviderFactory().set("templates", self)
-        print(" * TemplateProvider:" + self.__class__.__name__ + " loaded. ")
+        self._logger.info(" loaded and bound to  " + folder)
 
     def register(self, name_module):
         try:
@@ -61,6 +64,7 @@ class TemplateProvider:
 
     def get(self, path):
 
+        self._logger.debug("Getting template \"%s\"" % path)
         if not (path[0] == "/"):
             path = "/" + path
 

@@ -1,6 +1,8 @@
 # coding: utf8
 # license : CeCILL-C
 
+import logging
+
 from flask import session as flask_session
 from flask import current_app, redirect
 
@@ -22,6 +24,9 @@ class UserBase:
 
 class AuthProvider:
     def __init__(self, name, local_url_homepage, userModel):
+        # Define logger
+        self._logger = logging.getLogger(self.__class__.__name__)
+
         self.local_url_homepage = local_url_homepage
         self.name = name
         self.userModel = userModel
@@ -33,13 +38,7 @@ class AuthProvider:
         except AssertionError as e:
             pass
 
-        print(
-            " * AuthProvider:"
-            + self.__class__.__name__
-            + " named:"
-            + name
-            + " is loaded."
-        )
+        self._logger.info("%s is loaded" % name)
 
         ProviderFactory().set(name, self)
 
