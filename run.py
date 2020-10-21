@@ -7,6 +7,9 @@ import os
 # Logging part
 import logging
 
+# Globbing
+import glob
+
 # FlexEval entry points
 from flexeval import create_app
 
@@ -21,6 +24,9 @@ if __name__ == "__main__":
     )
 
     # Connection options
+    parser.add_argument(
+        "-d", "--debug", action="store_true", help="Start the server in debugging mode"
+    )
     parser.add_argument("-i", "--ip", type=str, default="127.0.0.1", help="IP's server")
     parser.add_argument("-p", "--port", type=int, default="8080", help="port")
 
@@ -54,7 +60,22 @@ if __name__ == "__main__":
     ch.setFormatter(formatter)
     logger.addHandler(ch)
 
+    # Get the instance absolute path
     instance_abs_path = os.path.abspath(args.instance)
-    app = create_app(instance_abs_path, "http://%s:%d" % (args.ip, args.port))
 
-    app.run(host=args.ip, port=args.port)
+    # List all the instance files to listen
+    all_files = glob.glob(instance_abs_path + "/**/*", recursive=True)
+    extra_files = []
+    for f in all_files:
+        if (f.find("/.tmp/") == -1) and (not f.endswith(".db")):
+            extra_files.append(f)
+
+    # Finally create and run app
+    app = create_app(instance_abs_path, "http://%s:%d" % (args.ip, args.port))
+    app.run(
+        host=args.ip,
+        port=args.port,
+        use_reloader=True,
+        debug=args.debug,
+        extra_files=extra_files,
+    )

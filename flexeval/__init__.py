@@ -20,7 +20,7 @@ from .core.providers import assets, templates
 from .extensions import db, session_manager
 
 
-def create_app(INSTANCE_PATH, INSTANCE_URL):
+def create_app(INSTANCE_PATH, INSTANCE_URL, debug=False):
     """Application-factory pattern"""
 
     app = Flask(__name__, template_folder=None, static_url_path=None)
