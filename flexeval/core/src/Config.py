@@ -61,6 +61,7 @@ class Config(metaclass=AppSingleton):
         self.stages()
         self.default_authProvider_for_StageModule()
 
+        self.setup_mods()
         self.setup_admin_mods()
 
         current_app.add_url_rule("/", "entrypoint", self.entrypoint)
@@ -74,6 +75,20 @@ class Config(metaclass=AppSingleton):
 
     def data(self):
         return self.config
+
+    def setup_mods(self):
+        if "mods" in self.data():
+            for mods in self.data()["mods"]:
+
+                try:
+                    self.load_module(mods["mod"])
+                except Exception as e:
+                    raise MalformationError(
+                        "Issue in structure.json for " + str(mods)
+                    )
+        else:
+            self.data()["mods"] = []
+
 
     def setup_admin_mods(self):
         if "admin" in self.data():
@@ -95,7 +110,7 @@ class Config(metaclass=AppSingleton):
             try:
                 self.load_module(entrypoint_admin_mod["mod"])
             except Exception as e:
-                raise MalformationError("Issue in structure.json for " + str(mods))
+                raise MalformationError("Issue in " + STRUCTURE_CONFIGURATION_BASENAME + ".yaml for " + str(mods))
 
     def entrypoint_admin(self):
         from .Admin import AdminModule
