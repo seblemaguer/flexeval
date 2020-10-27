@@ -17,12 +17,24 @@ admin:
       subtitle: Download BDD
       subdescription: Download the database in CSV or SQLite format.
 
+mods:
+  - mod: gdpr
+    variables:
+      gdpr_compliance: relax
+      validate: True
+
 # Structure of the evaluation
 stages:
   # First steps
   welcome:
     type: page:visitor
     template: welcome.tpl
+    next: gdpr
+
+  # First steps
+  gdpr:
+    type: gdpr
+    template: legal.tpl
     next: choiceOneOFTwoTests
 
   choiceOneOFTwoTests:

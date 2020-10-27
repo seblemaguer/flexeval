@@ -81,7 +81,6 @@ class Config(metaclass=AppSingleton):
     def setup_mods(self):
         if "mods" in self.data():
             for mods in self.data()["mods"]:
-
                 try:
                     self.load_module(mods["mod"])
                 except Exception as e:
@@ -214,6 +213,8 @@ class Config(metaclass=AppSingleton):
     def load_module(self, name):
         name = name.split(":")
         name = name[0]
+
+        self._logger.info("Loading moodule \"%s\"" % name)
 
         if name not in self.modules:
 

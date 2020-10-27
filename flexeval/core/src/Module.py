@@ -151,6 +151,7 @@ class Module(Blueprint):
         return cls.get_authProvider().userModel
 
     def __enter__(self):
+        self._logger.info("Registering module: %s" % self.mod_rep)
 
         ProviderFactory().get("templates").register(self.mod_rep)
 

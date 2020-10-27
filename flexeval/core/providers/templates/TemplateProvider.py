@@ -78,6 +78,7 @@ class TemplateProvider:
         return path
 
     def register_flexeval(self):
+        self._logger.debug("Copy templates from %s to %s" % (current_app.config["FLEXEVAL_INSTANCE_DIR"] + "/templates", self.folder))
         copytree(
             current_app.config["FLEXEVAL_INSTANCE_DIR"] + "/templates",
             self.folder,
@@ -85,6 +86,7 @@ class TemplateProvider:
         )
 
     def register_instance(self):
+        self._logger.debug("Copy templates from %s to %s" % (current_app.config["FLEXEVAL_DIR"] + "/templates", self.folder))
 
         # Save instance templates path to not replace them when registering mods
         tpl_dir = current_app.config["FLEXEVAL_DIR"] + "/templates"
@@ -100,6 +102,7 @@ class TemplateProvider:
         def ignore_instance(src, names):
             return set(names).intersection(set(self._instance_files))
 
+        self._logger.debug("Copy templates from %s to %s" % (current_app.config["FLEXEVAL_DIR"] + "/mods/" + name + "/templates", self.folder))
         copytree(
             current_app.config["FLEXEVAL_DIR"] + "/mods/" + name + "/templates",
             self.folder,
