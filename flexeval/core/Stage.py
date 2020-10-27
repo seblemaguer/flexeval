@@ -188,6 +188,10 @@ class StageModule(Module):
                 del kwargs["stage_name"]
 
                 try:
+                    self._logger.debug("Goto ==> %s" % stage_name)
+                    self._logger.debug("Current session:")
+                    for k in flask_session.keys():
+                        self._logger.debug(" - %s: %s" % (k, flask_session[k]))
                     g.stage = Stage(stage_name)
                 except Exception as e:
                     abort(404)
