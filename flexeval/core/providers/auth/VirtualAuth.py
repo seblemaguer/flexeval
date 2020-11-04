@@ -1,7 +1,7 @@
 # coding: utf8
 # license : CeCILL-C
 
-from flexeval.core import AuthProvider
+from .AuthProvider import AuthProvider
 
 class NotConnectedError(Exception):
     pass

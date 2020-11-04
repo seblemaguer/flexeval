@@ -2,7 +2,6 @@
 # license : CeCILL-C
 
 from .ProviderFactory import ProviderFactory, UndefinedError
-from .AuthProvider import AuthProvider, UserBase
 
 from .ErrorHandler import ErrorHandler
 from .Config import Config

@@ -3,7 +3,7 @@
 
 import random
 
-from flexeval.core import AuthProvider
+from flexeval.core.providers.auth import AuthProvider
 from flexeval.mods.direct_auth.model import EmailUser
 
 class EmailAuth(AuthProvider):

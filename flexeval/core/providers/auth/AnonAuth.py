@@ -5,7 +5,7 @@ import random
 
 from flask import session,abort
 
-from flexeval.core import AuthProvider, UserBase
+from .AuthProvider import AuthProvider, UserBase
 from flexeval.database import Model,Column,db
 
 class AnonUser(UserBase):

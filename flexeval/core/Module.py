@@ -12,10 +12,9 @@ from flask import render_template as flask_render_template
 
 from flexeval.core import ProviderFactory
 from .Config import Config
-from .AuthProvider import AuthProvider, UserBase
+from flexeval.core.providers.auth import AuthProvider, UserBase, virtual
 
 from flexeval.utils import make_global_url, redirect
-from flexeval.core.providers.auth import virtual
 from flexeval.database import Model
 
 

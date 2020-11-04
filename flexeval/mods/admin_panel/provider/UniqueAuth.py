@@ -1,7 +1,7 @@
 # coding: utf8
 # license : CeCILL-C
 
-from flexeval.core import AuthProvider
+from flexeval.core.providers.auth import AuthProvider
 
 class AdminUser():
 
