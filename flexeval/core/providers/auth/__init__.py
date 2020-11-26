@@ -3,5 +3,5 @@
 
 from .AuthProvider import AuthProvider, UserBase
 
-from .AnonAuth import AnonAuthProvider as anon
-from .VirtualAuth import VirtualAuthProvider as virtual
+from .AnonAuth import AnonAuthProvider
+from .VirtualAuth import VirtualAuthProvider

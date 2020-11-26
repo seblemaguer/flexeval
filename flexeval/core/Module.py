@@ -12,7 +12,7 @@ from flask import render_template as flask_render_template
 
 from flexeval.core import ProviderFactory
 from .Config import Config
-from flexeval.core.providers.auth import AuthProvider, UserBase, virtual
+from flexeval.core.providers.auth import AuthProvider, UserBase, VirtualAuthProvider
 
 from flexeval.utils import make_global_url, redirect
 from flexeval.database import Model
@@ -73,12 +73,12 @@ class Module(Blueprint):
         )
 
         if not (ProviderFactory().exists("auth_mod_" + self.__class__.name_type)):
-            self.__class__.set_authProvider(virtual)
+            self.__class__.set_authProvider(VirtualAuthProvider)
 
     @classmethod
     def get_authProvider(cls):
         if not (ProviderFactory().exists("auth_mod_" + cls.name_type)):
-            cls.set_authProvider(virtual)
+            cls.set_authProvider(VirtualAuthProvider)
 
         return ProviderFactory().get("auth_mod_" + cls.name_type)
 
@@ -160,7 +160,10 @@ class Module(Blueprint):
 
         try:
             current_app.register_blueprint(self, url_prefix=self.local_rule())
-            self._logger.info("%s is loaded and bound to: %s" % (self.get_mod_name(), self.local_rule()))
+            self._logger.info(
+                "%s is loaded and bound to: %s"
+                % (self.get_mod_name(), self.local_rule())
+            )
         except Exception as e:
             raise MalformationError(
                 "There are already a "
@@ -195,7 +198,7 @@ class Module(Blueprint):
             args["auth"] = ProviderFactory().get("auth_mod_" + cls.name_type)
             args["homepage"] = make_global_url(cls.homepage)
         except Exception as e:
-            args["auth"] = virtual()
+            args["auth"] = VirtualAuthProvider()
             args["homepage"] = make_global_url("/")
 
         args["module_class"] = cls.__name__

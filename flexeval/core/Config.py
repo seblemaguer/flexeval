@@ -61,11 +61,16 @@ class Config(metaclass=AppSingleton):
         self.admin_modules = []
 
         self.load_file()
-        self.stages()
-        self.default_authProvider_for_StageModule()
 
+        # Register and load modules
         self.setup_mods()
         self.setup_admin_mods()
+
+        # Load stages
+        self.stages()
+
+        # Define provider
+        self.default_authProvider_for_StageModule()
 
         current_app.add_url_rule("/", "entrypoint", self.entrypoint)
         current_app.add_url_rule("/admin/", "entrypoint_admin", self.entrypoint_admin)
@@ -230,7 +235,7 @@ class Config(metaclass=AppSingleton):
 
     def default_authProvider_for_StageModule(self):
         from .Stage import StageModule
-        from flexeval.core.providers.auth import virtual, anon
+        from flexeval.core.providers.auth import VirtualAuthProvider, AnonAuthProvider
 
-        if isinstance(StageModule.get_authProvider(), virtual):
-            StageModule.set_authProvider(anon)
+        if isinstance(StageModule.get_authProvider(), VirtualAuthProvider):
+            StageModule.set_authProvider(AnonAuthProvider)
