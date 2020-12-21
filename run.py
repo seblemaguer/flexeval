@@ -71,7 +71,11 @@ if __name__ == "__main__":
             extra_files.append(f)
 
     # Finally create and run app
-    app = create_app(instance_abs_path, "http://%s:%d" % (args.ip, args.port))
+    app = create_app(instance_abs_path, "http://%s:%d" % (args.ip, args.port), debug=args.debug)
+
+    log = logging.getLogger('werkzeug')
+    log.setLevel(log_level)
+
     app.run(
         host=args.ip,
         port=args.port,
