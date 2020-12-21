@@ -23,6 +23,9 @@ class UserBase:
 
 
 class AuthProvider:
+
+    checkers = set()
+
     def __init__(self, name, local_url_homepage, userModel):
         # Define logger
         self._logger = logging.getLogger(self.__class__.__name__)
@@ -41,6 +44,10 @@ class AuthProvider:
         self._logger.info("%s is loaded" % name)
 
         ProviderFactory().set(name, self)
+
+    @classmethod
+    def connect_checker(cls, checker):
+        AuthProvider.checkers.add(checker)
 
     @classmethod
     def disconnect_action(cls, name):
@@ -63,6 +70,9 @@ class AuthProvider:
             ).first()
 
     def connect(self, user):
+        for checker in AuthProvider.checkers:
+            checker()
+
         if self.userModel.__abstract__:
             self.session["user"] = user
         else:

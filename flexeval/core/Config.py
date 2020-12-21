@@ -59,6 +59,7 @@ class Config(metaclass=AppSingleton):
         self.config = None
         self.modules = []
         self.admin_modules = []
+        self._stages = dict()
 
         self.load_file()
 
@@ -79,6 +80,9 @@ class Config(metaclass=AppSingleton):
             + os.path.join(current_app.config["FLEXEVAL_INSTANCE_DIR"],
                            "%s.yaml." % STRUCTURE_CONFIGURATION_BASENAME)
         )
+
+    def get_stages(self, module_name):
+        return self._stages[module_name]
 
     def data(self):
         return self.config
@@ -183,6 +187,11 @@ class Config(metaclass=AppSingleton):
             )
 
         self.load_module(module_name)
+
+        # Save Stage
+        if module_name not in self._stages:
+            self._stages[module_name] = list()
+        self._stages[module_name].append(current_stage_name)
 
         # Next stage ?
         if "next" in current_stage:

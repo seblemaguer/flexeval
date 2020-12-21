@@ -29,10 +29,10 @@ stages:
   welcome:
     type: page:visitor
     template: welcome.tpl
-    next: gdpr
+    next: validate_legal
 
   # First steps
-  gdpr:
+  validate_legal:
     type: gdpr
     template: legal.tpl
     next: choiceOneOFTwoTests
