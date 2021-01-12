@@ -10,7 +10,7 @@ import sys
 from flask import current_app
 from flask import redirect as flask_redirect
 
-def copytree(src, dst, dirs_exist_ok=True):
+def copytree(src, dst, dirs_exist_ok=True, ignore=None):
     """Alternative copytree to the shutils.copytree which is only available in python >= 3.8
 
     Parameters
@@ -27,10 +27,10 @@ def copytree(src, dst, dirs_exist_ok=True):
         s = os.path.join(src, item)
         d = os.path.join(dst, item)
         if os.path.isdir(s):
-            shutil.copytree(s, d)
+            copytree(s, d, dirs_exist_ok=dirs_exist_ok, ignore=ignore)
         else:
             from pathlib import Path
-            os.makedirs(Path(d).parent, exist_ok=True)
+            os.makedirs(Path(d).parent, exist_ok=dirs_exist_ok)
             shutil.copyfile(s, d)
 
 
