@@ -16,7 +16,7 @@ import sqlalchemy
 # FlexEval
 from .utils import safe_make_rep, del_file, create_file
 from .core import Config, ProviderFactory, ErrorHandler
-from .core.providers import templates, AssetsProvider
+from .core.providers import TemplateProvider, AssetsProvider
 from .extensions import db, session_manager
 
 
@@ -53,7 +53,7 @@ def create_app(INSTANCE_PATH, INSTANCE_URL, debug=False):
 
         # Instantiating the default providers
         AssetsProvider("/assets")
-        templates.TemplateProvider(app.config["FLEXEVAL_INSTANCE_TMP_DIR"] + "/templates")
+        TemplateProvider(app.config["FLEXEVAL_INSTANCE_TMP_DIR"] + "/templates")
 
         # Config app based on structure.json
         Config()

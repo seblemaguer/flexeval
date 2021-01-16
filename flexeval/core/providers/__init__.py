@@ -2,5 +2,5 @@
 # license : CeCILL-C
 
 from .AssetsProvider import AssetsProvider
-from . import templates
+from .TemplateProvider import TemplateProvider
 from . import auth
