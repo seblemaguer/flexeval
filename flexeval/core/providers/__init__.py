@@ -1,6 +1,6 @@
 # coding: utf8
 # license : CeCILL-C
 
-from . import assets
+from .AssetsProvider import AssetsProvider
 from . import templates
 from . import auth
