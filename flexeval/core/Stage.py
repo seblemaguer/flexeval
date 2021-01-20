@@ -326,12 +326,12 @@ class StageModule(Module):
 
     def local_rule(self):
         """Method which defines the rule to access the current module
-        
+
         Parameters
         ----------
         self: StageModule
             The current object
-        
+
         Returns
         -------
         string: the rule to access the current module
@@ -359,9 +359,9 @@ class StageModule(Module):
 
     def render_template(self, template, next=None, **parameters):
         """Method which renders the given template.
-        
+
         As a stage
-        
+
         """
         args = {}
         args["THIS_MODULE"] = "mod:" + str(self.mod_rep)
@@ -385,7 +385,10 @@ class StageModule(Module):
 
         # Achieve the rendering
         return super().render_template(
-            template, args=args, parameters=parameters, variables=self.current_stage.variables
+            template,
+            args=args,
+            parameters=parameters,
+            variables=self.current_stage.variables,
         )
 
     def url_for(self, endpoint, stage_name=None, **kwargs):
@@ -408,15 +411,15 @@ class StageModule(Module):
         -------
         string: the generated URL
         """
-        
+
         if stage_name is None:
             stage_name = self.current_stage.name
-            
+
         return flask_url_for(endpoint, stage_name=stage_name, **kwargs)
 
     def get_endpoint_for_local_rule(self, rule):
         """Method to generate the end point for the given local rule
-        
+
         Parameters
         ----------
         self: StageModule
@@ -447,6 +450,7 @@ class StageModule(Module):
         -------
         ????: the routing decorator
         """
+
         def decorated(func):
             def wrapper(*args, **kwargs):
                 stage_name = kwargs["stage_name"]
