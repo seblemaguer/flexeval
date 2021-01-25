@@ -3,6 +3,9 @@
 
 import logging
 
+import abc
+
+
 from flask import session as flask_session
 from flask import current_app, redirect
 
@@ -17,14 +20,30 @@ class AuthProviderError(Exception):
 
 class UserBase:
     pseudo = Column(db.String, primary_key=True)
+    conditions = Column(db.String, default="")
 
-    def allow(self, role=None):
-        return True
+    def has_validated(self, value):
+        list_conditions = self.conditions.split(",")
+        return value in list_conditions
+
+    def validates(self, value):
+        if self.has_validated(value):
+            pass
+        else:
+            if self.conditions:
+                self.conditions += ",%s" % value
+            else:
+                self.conditions += str(value)
+
+    def __str__(self):
+        the_str = "User \"%s\":\n" % self.pseudo
+        the_str += "\t- validated_conditions: %s" % self.conditions
+        return the_str
 
 
-class AuthProvider:
+class AuthProvider(metaclass=abc.ABCMeta):
 
-    checkers = set()
+    checkers = dict()
 
     def __init__(self, name, local_url_homepage, userModel):
         # Define logger
@@ -45,9 +64,18 @@ class AuthProvider:
 
         ProviderFactory().set(name, self)
 
+    def connect(self, user):
+        if self.userModel.__abstract__:
+            self.session["user"] = user
+        else:
+            self.session["user"] = user.pseudo
+
+    def disconnect(self):
+        del self.session["user"]
+
     @classmethod
-    def connect_checker(cls, checker):
-        AuthProvider.checkers.add(checker)
+    def connect_checker(cls, checker_name, checker):
+        AuthProvider.checkers[checker_name] = checker
 
     @classmethod
     def disconnect_action(cls, name):
@@ -69,21 +97,24 @@ class AuthProvider:
                 self.userModel.pseudo == self.session["user"]
             ).first()
 
-    def connect(self, user):
-        for checker in AuthProvider.checkers:
-            checker()
-
-        if self.userModel.__abstract__:
-            self.session["user"] = user
+    def validates_connection(self, condition=None):
+        if condition is not None:
+            if (condition != "connected"):
+                return (AuthProvider.checkers[condition](self.user), condition)
+            else:
+                return ("user" in self.session, "connected")
         else:
-            self.session["user"] = user.pseudo
+            validated = ("user" in self.session, "connected")
+            if not validated[0]:
+                return validated
 
-    def disconnect(self):
-        del self.session["user"]
+            for checker_name in AuthProvider.checkers:
+                if not AuthProvider.checkers[checker_name](self.user):
+                    validated = (False, checker_name)
+                    break
 
-    @property
-    def is_connected(self):
-        return "user" in self.session
+            return validated
+
 
     @property
     def url_deco(self):

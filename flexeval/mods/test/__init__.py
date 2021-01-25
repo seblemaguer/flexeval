@@ -22,7 +22,7 @@ class MalformationError(TestsAlternateError):
 with StageModule(__name__) as sm:
 
     @sm.route("/", methods=["GET"])
-    @sm.connection_required
+    @sm.valid_connection_required
     def main():
 
         stage = sm.current_stage
@@ -96,7 +96,7 @@ with StageModule(__name__) as sm:
             return redirect(stage.local_url_next)
 
     @sm.route("/save", methods=["POST"])
-    @sm.connection_required
+    @sm.valid_connection_required
     def save():
 
         stage = sm.current_stage
@@ -187,7 +187,7 @@ with StageModule(__name__) as sm:
 with StageModule(__name__, subname="alternate") as sm_alternate:
 
     @sm_alternate.route("/", methods=["GET"])
-    @sm_alternate.connection_required
+    @sm_alternate.valid_connection_required
     def main():
         stage = sm_alternate.current_stage
         user = sm_alternate.authProvider.user

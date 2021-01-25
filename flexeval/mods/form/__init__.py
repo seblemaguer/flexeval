@@ -25,7 +25,7 @@ class MalformationError(FormError):
 with StageModule(__name__) as sm:
 
     @sm.route("/", methods = ['GET'])
-    @sm.connection_required
+    @sm.valid_connection_required
     def main():
         stage = sm.current_stage
         userModel = sm.authProvider.userModel
@@ -47,7 +47,7 @@ with StageModule(__name__) as sm:
             return redirect(stage.local_url_next)
 
     @sm.route("/save", methods = ['POST'])
-    @sm.connection_required
+    @sm.valid_connection_required
     def save():
         stage = sm.current_stage
         FormStage = ModelFactory().get(stage.name,Form)
@@ -78,7 +78,7 @@ with StageModule(__name__) as sm:
 with StageModule(__name__,subname="autogen") as sm_autogen:
 
     @sm_autogen.route("/", methods = ['GET'])
-    @sm_autogen.connection_required
+    @sm_autogen.valid_connection_required
     def main():
 
         stage = sm_autogen.current_stage

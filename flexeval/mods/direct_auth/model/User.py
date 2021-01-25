@@ -3,14 +3,14 @@
 
 from flexeval.core import UserBase
 
-class NotAnEmail(Exception):
 
-    def __init__(self,email):
+class NotAnEmail(Exception):
+    def __init__(self, email):
         self.email = email
 
-class EmailUser(UserBase):
 
-    def __init__(self,email):
+class EmailUser(UserBase):
+    def __init__(self, email):
 
         try:
             split = email.split("@")

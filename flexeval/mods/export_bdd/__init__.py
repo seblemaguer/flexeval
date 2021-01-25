@@ -21,12 +21,12 @@ with AdminModule(__name__) as am:
 
     # Routes
     @am.route('/')
-    @am.connection_required
+    @am.valid_connection_required
     def panel():
         return am.render_template("index.tpl")
 
     @am.route('/flexeval.db')
-    @am.connection_required
+    @am.valid_connection_required
     def sqlite():
         return send_file(current_app.config["SQLALCHEMY_FILE"])
 
@@ -39,7 +39,7 @@ with AdminModule(__name__) as am:
         return response
 
     @am.route('/flexeval.zip')
-    @am.connection_required
+    @am.valid_connection_required
     def csv():
         repository_name = ''.join((random.choice(string.ascii_lowercase) for i in range(15)))
         safe_make_rep(current_app.config["FLEXEVAL_INSTANCE_TMP_DIR"]+"/export_bdd/"+repository_name+".bdd")

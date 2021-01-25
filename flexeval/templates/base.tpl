@@ -47,7 +47,7 @@
           {% endblock %}
 
           <div class="col-12 text-right">
-              <p class="text-muted" style="letter-spacing: 1px;"> &nbsp; {%block userintel%} {% if auth.is_connected %} Logged in as {{ auth.user.pseudo}} (<a href="{{ auth.url_deco  }} "> Log out </a>) . {% endif %}{%endblock%}</p>
+              <p class="text-muted" style="letter-spacing: 1px;"> &nbsp; {%block userintel%} {% if auth.validates_connection("connected")[0] %} Logged in as {{ auth.user.pseudo}} (<a href="{{ auth.url_deco  }} "> Log out </a>) . {% endif %}{%endblock%}</p>
           </div>
 
         </header>

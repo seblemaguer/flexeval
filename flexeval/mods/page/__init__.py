@@ -14,7 +14,7 @@ with StageModule(__name__, subname="visitor") as sm:
         stage = sm.current_stage
         authProvider = sm.authProvider
 
-        if authProvider.is_connected:
+        if authProvider.validates_connection("connected")[0]:
             return sm.render_template(template=stage.template)
 
             # NOTE: the rediction is faulty as virtual leads to automatically to connected anonymous user
@@ -31,7 +31,7 @@ with StageModule(__name__, subname="visitor") as sm:
 with StageModule(__name__, subname="user") as sm_user:
 
     @sm_user.route("/", methods=["GET"])
-    @sm_user.connection_required
+    @sm_user.valid_connection_required
     def main():
         stage = sm_user.current_stage
         user = sm_user.authProvider.user

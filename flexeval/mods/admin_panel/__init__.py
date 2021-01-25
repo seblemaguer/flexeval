@@ -16,7 +16,7 @@ with AdminModule(__name__) as am:
     def main():
         authProvider = am.authProvider
 
-        if authProvider.is_connected:
+        if authProvider.validates_connection("connected")[0]:
             return redirect(am.url_for(am.get_endpoint_for_local_rule("/panel")))
         else:
             return redirect(am.url_for(am.get_endpoint_for_local_rule("/auth")))
@@ -39,7 +39,7 @@ with AdminModule(__name__) as am:
 
 
     @am.route("/panel", methods = ['GET'])
-    @am.connection_required
+    @am.valid_connection_required
     def panel():
 
         admin_modules=[]

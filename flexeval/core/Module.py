@@ -3,6 +3,8 @@
 
 import logging
 
+import abc
+
 from contextlib import contextmanager
 import sqlalchemy
 
@@ -19,32 +21,53 @@ from flexeval.database import Model
 
 
 class ModuleError(Exception):
-    pass
+    """Default exception for Module errors
+
+    Attributes
+    ----------
+    message: string
+        The error message
+    """
+
+    def __init__(self, message):
+        self.message = message
 
 
 class MalformationError(ModuleError):
-    def __init__(self, message):
-        self.message = message
+    """Exception raised when something is malformed"""
+    pass
 
 
 class MalformationTemplateError(MalformationError):
-    def __init__(self, file):
-        self.file = file
+    """Exception raised when a template is malformed
+
+    Attributes
+    ==========
+    file: string or File
+       The template file
+    """
+
+    def __init__(self, tpl_file):
+        super().__init__('The template "%s" is malformed' % tpl_file)
+        self.file = tpl_file
 
 
 class NotAnAuthProvider(ModuleError):
-    def __init__(self, message):
-        self.message = message
+    """Exception raised when the provider given is not an AuthProvider"""
+
+    pass
 
 
 class NotAUserBase(ModuleError):
-    def __init__(self, message):
-        self.message = message
+    """Exception raised when an object is not instanciating the UserBase class"""
+
+    pass
 
 
 class OverwritingClassAttributesForbidden(ModuleError):
-    def __init__(self, message):
-        self.message = message
+    """Exception raised when an object is not instanciating the UserBase class"""
+
+    pass
 
 
 class UserModelAttributesMeta(type(Model)):
@@ -59,7 +82,9 @@ class UserModelAttributesMeta(type(Model)):
         super().__setattr__(name, val)
 
 
-class Module(Blueprint):
+class Module(Blueprint, abc.ABC):
+    default_checker_handlers = dict()
+
     def __init__(self, namespace, subname=None):
         # Define logger
         self._logger = logging.getLogger(self.__class__.__name__)
@@ -67,6 +92,7 @@ class Module(Blueprint):
         self.namespace = namespace.split(".")
         self.subname = subname
         self.mod_rep = self.namespace[2]
+        self.checker_handlers = dict()
 
         super().__init__(
             self.__class__.name_type + ":" + self.get_mod_name(), namespace
@@ -75,6 +101,24 @@ class Module(Blueprint):
         if not (ProviderFactory().exists("auth_mod_" + self.__class__.name_type)):
             self.__class__.set_authProvider(VirtualAuthProvider)
 
+    @property
+    def authProvider(self):
+        return self.__class__.get_authProvider()
+
+    @classmethod
+    def connect_default_checker_handler(cls, name, handler):
+        cls.default_checker_handlers[name] = handler
+
+    def connect_checker_handler(self, name, handler):
+        self.checker_handlers[name] = handler
+
+    @classmethod
+    def disconnect_default_checker_handler(cls, name):
+        cls.default_checker_handlers.pop(name, None)
+
+    def disconnect_checker_handler(self, name):
+        self.checker_handlers.pop(name, None)
+
     @classmethod
     def get_authProvider(cls):
         if not (ProviderFactory().exists("auth_mod_" + cls.name_type)):
@@ -82,13 +126,8 @@ class Module(Blueprint):
 
         return ProviderFactory().get("auth_mod_" + cls.name_type)
 
-    @property
-    def authProvider(self):
-        return self.__class__.get_authProvider()
-
     @classmethod
     def set_authProvider(cls, cls_auth):
-
         cls.init_UserModel(cls_auth)
 
         if not (
@@ -107,7 +146,10 @@ class Module(Blueprint):
         if not (hasattr(cls, "userModel")):
             cls.userModel = UserModelAttributesMeta(
                 cls.name_type + "User",
-                (UserBase, Model,),
+                (
+                    UserBase,
+                    Model,
+                ),
                 {"__abstract__": True, "__tablename__": cls.__name__ + "_User"},
             )
             setattr(cls.userModel, "__lock__", True)
@@ -115,7 +157,6 @@ class Module(Blueprint):
         if __userBase__ is not None:
 
             bases = __userBase__.__bases__
-
             try:
                 assert len(bases) == 1
                 assert UserBase in bases
@@ -142,8 +183,9 @@ class Module(Blueprint):
                 setattr(cls.userModel, "__lock__", True)
                 cls.userModel_init = True
 
+    @abc.abstractmethod
     def url_for(self, endpoint, **kwargs):
-        raise NotImplementedError()
+        pass
 
     @classmethod
     def get_UserModel(cls):
@@ -151,9 +193,7 @@ class Module(Blueprint):
 
     def __enter__(self):
         self._logger.info("Registering module: %s" % self.mod_rep)
-
         ProviderFactory().get("templates").register(self.mod_rep)
-
         return self
 
     def __exit__(self, *args):
@@ -181,11 +221,21 @@ class Module(Blueprint):
         else:
             return self.mod_rep + ":" + self.subname
 
-    def connection_required(self, f):
+    def valid_connection_required(self, f):
         def wrapper(*args, **kwargs):
+            (user_validates, condition) = self.authProvider.validates_connection()
 
-            if not (self.authProvider.is_connected):
-                abort(401)
+            if not user_validates:
+                if (condition is None) or (condition == "connected"):
+                    abort(401)
+                else:
+                    if condition in self.checker_handlers:
+                        self.checker_handlers[condition]() # TODO: Arguments
+                    else:
+                        if condition in self.__class__.default_checker_handlers:
+                            self.__class__.default_checker_handlers[condition]() # TODO: Arguments
+                        else:
+                            raise Exception("No handler to deal with invalid condition \"%s\"" % condition)
 
             return f(*args, **kwargs)
 
@@ -193,6 +243,25 @@ class Module(Blueprint):
 
     @classmethod
     def render_template(cls, path_template, args={}, variables={}, parameters={}):
+        """Class method which renders the given template
+
+        Parameters
+        ----------
+        self: Module
+            The current Module object
+        path_template: string or file
+            The path to the template
+        args: dict of strings
+            The dictionnary of arguments
+        variables: dict of strings
+            The dictionnary of variables
+        parameters: dict of strings
+            The dictionnary of parameters
+
+        Returns
+        -------
+        string: the rendered template
+        """
 
         try:
             args["auth"] = ProviderFactory().get("auth_mod_" + cls.name_type)

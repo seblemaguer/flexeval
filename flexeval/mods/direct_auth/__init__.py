@@ -18,7 +18,7 @@ with StageModule(__name__) as sm:
     def main():
         stage = sm.current_stage
 
-        if(sm.authProvider.is_connected):
+        if (sm.authProvider.validates_connection("connected")[0]):
             return redirect(stage.local_url_next)
         else:
             return sm.render_template(template="login.tpl")

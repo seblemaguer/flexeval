@@ -16,11 +16,12 @@ class VirtualAuthProvider(AuthProvider):
         if name == None:
             pass
         else:
-            super(VirtualAuthProvider, self).__init__(name, local_url_homepage, userModel)
+            super(VirtualAuthProvider, self).__init__(
+                name, local_url_homepage, userModel
+            )
 
     def connect(self, *args):
         raise NotConnectedError()
 
-    @property
-    def is_connected(self):
-        return False
+    def validates_connection(self, condition=None):
+        return (False, "connected")
