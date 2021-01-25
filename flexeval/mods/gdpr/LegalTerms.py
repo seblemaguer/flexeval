@@ -6,7 +6,7 @@ import os
 import logging
 
 # Yaml
-from yaml import load, dump
+from yaml import load
 
 try:
     from yaml import CLoader as Loader
@@ -18,15 +18,11 @@ from flask import current_app
 from flask import session as flask_session
 
 # Flexeval
-from flexeval.utils import AppSingleton, make_global_url, redirect
-from flexeval.core import ProviderFactory, Module, Config
-
+from flexeval.utils import AppSingleton, redirect
+from flexeval.core import ProviderFactory, Module
+from flexeval.extensions import session_manager
 
 LEGAL_CONFIGURATION_BASENAME = "legal"
-
-
-class LegalTermNotCheckError(Exception):
-    pass
 
 
 class LegalTerms(metaclass=AppSingleton):
@@ -95,7 +91,9 @@ class LegalTerms(metaclass=AppSingleton):
                 self.is_GDPR_Compliant = False
 
             if GDPR["data_collection"]["purpose"] is None:
-                self._logger.warning("Missing data_collection:purpose in your legal file.")
+                self._logger.warning(
+                    "Missing data_collection:purpose in your legal file."
+                )
                 self.is_GDPR_Compliant = False
 
             if (
@@ -126,7 +124,12 @@ class LegalTerms(metaclass=AppSingleton):
                 self.is_GDPR_Compliant = False
 
     def page(self):
-        return self.page_with_validation_required(self.next_url)
+        if "source_url" in flask_session:
+            next_url = flask_session["source_url"]
+            flask_session.pop("source_url", None)
+        else:
+            next_url = self.next_url
+        return self.page_with_validation_required(next_url)
 
     def page_with_validation_required(self, validate_next_local_url=None):
 
@@ -150,10 +153,7 @@ class LegalTerms(metaclass=AppSingleton):
         return redirect(self.session["validate_next_local_url"])
 
     def user_has_validate(self):
-        if "validate_by_user" in self.session:
-            pass
-        else:
-            raise LegalTermNotCheckError()
+        return "validate_by_user" in self.session
 
     @property
     def session(self):

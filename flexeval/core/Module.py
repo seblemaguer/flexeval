@@ -230,10 +230,10 @@ class Module(Blueprint, abc.ABC):
                     abort(401)
                 else:
                     if condition in self.checker_handlers:
-                        self.checker_handlers[condition]() # TODO: Arguments
+                        return self.checker_handlers[condition](self) # TODO: Arguments
                     else:
                         if condition in self.__class__.default_checker_handlers:
-                            self.__class__.default_checker_handlers[condition]() # TODO: Arguments
+                            return self.__class__.default_checker_handlers[condition](self) # TODO: Arguments
                         else:
                             raise Exception("No handler to deal with invalid condition \"%s\"" % condition)
 

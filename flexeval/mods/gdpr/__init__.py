@@ -1,42 +1,30 @@
 # coding: utf8
 # license : CeCILL-C
 
-# Global
-import os
-import logging
-
-# Yaml
-from yaml import load, dump
-
-try:
-    from yaml import CLoader as Loader
-except ImportError:
-    from yaml import Loader
-
 # Flask
-from flask import current_app
+from flask import redirect
 from flask import session as flask_session
 
 # Flexeval
-from flexeval.utils import AppSingleton, make_global_url, redirect
-from flexeval.core import ProviderFactory, Module, Config
 from flexeval.core.providers.auth import AuthProvider
 from flexeval.core import StageModule
-from flexeval.core import ErrorHandler
 
-from .LegalTerms import LegalTerms, LegalTermNotCheckError
+from .LegalTerms import LegalTerms
 
-def check_validate_gdpr():
-    LegalTerms().user_has_validate()
+# Check the authentification
+def check_validate_gdpr(user):
+    return LegalTerms().user_has_validate()
 
-AuthProvider.connect_checker(check_validate_gdpr)
+AuthProvider.connect_checker("legal", check_validate_gdpr)
 
-def legal_error_manager(error):
-    stage_path = "/stage/gdpr/%s" % Config().get_stages("gdpr")[0]
-    return LegalTerms().page_with_validation_required(stage_path)
+# Check the validation of the legal informations
+def legal_error_manager(source_module):
+    flask_session["source_url"] = source_module.current_stage.local_url
+    return redirect('/stage/gdpr/validate_legal')
 
-ErrorHandler.add_error_manager(LegalTermNotCheckError, legal_error_manager)
+StageModule.connect_default_checker_handler("legal", legal_error_manager)
 
+# Ready to serve!
 with StageModule(__name__) as sm:
 
     @sm.route("/", methods=["GET"])
