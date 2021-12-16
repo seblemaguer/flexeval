@@ -78,3 +78,17 @@ class AdminModule(Module):
             return wrapper
 
         return decorated
+
+    def valid_connection_required(self, f):
+        def wrapper(*args, **kwargs):
+            (user_validates, condition) = self.authProvider.validates_connection()
+
+            if not user_validates:
+                if (condition is None) or (condition == "connected"):
+                    abort(401)
+                # else:
+                #     raise Exception("No handler to deal with invalid condition \"%s\"" % condition)
+
+            return f(*args, **kwargs)
+
+        return wrapper

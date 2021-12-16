@@ -228,14 +228,12 @@ class Module(Blueprint, abc.ABC):
             if not user_validates:
                 if (condition is None) or (condition == "connected"):
                     abort(401)
+                elif condition in self.checker_handlers:
+                    return self.checker_handlers[condition](self) # TODO: Arguments
+                elif condition in self.__class__.default_checker_handlers:
+                    return self.__class__.default_checker_handlers[condition](self) # TODO: Arguments
                 else:
-                    if condition in self.checker_handlers:
-                        return self.checker_handlers[condition](self) # TODO: Arguments
-                    else:
-                        if condition in self.__class__.default_checker_handlers:
-                            return self.__class__.default_checker_handlers[condition](self) # TODO: Arguments
-                        else:
-                            raise Exception("No handler to deal with invalid condition \"%s\"" % condition)
+                    raise Exception("No handler to deal with invalid condition \"%s\"" % condition)
 
             return f(*args, **kwargs)
 
