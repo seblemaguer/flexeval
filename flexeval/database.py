@@ -33,7 +33,7 @@ class DataBaseError(Exception):
     """
     def __init__(self, message):
         """Constructor which simply set the message of the exception
-        
+
         Parameters
         ----------
         self: DataBaseError
@@ -124,8 +124,8 @@ class Model(CRUDMixin, db.Model):
                     + " is incorrect. Only alphanumeric's and '_' symbol caracteres are allow. "
                 )
 
-            if db.engine.dialect.has_table(db.engine, cls.__tablename__):
 
+            if inspect(db.engine).has_table(cls.__tablename__):
                 name_columns_in_table = [
                     col_in_table["name"]
                     for col_in_table in inspect(db.engine).get_columns(
@@ -166,7 +166,7 @@ class ModelFactory(metaclass=AppSingleton):
             if Model in base.__bases__:
                 assert base.__abstract__
 
-            if db.engine.dialect.has_table(db.engine, base.__name__ + "_" + name_table):
+            if inspect(db.engine).has_table(base.__name__ + "_" + name_table):
                 self.register[base.__name__ + "_" + name_table] = type(
                     base.__name__ + "_" + name_table,
                     (
@@ -201,7 +201,8 @@ class ModelFactory(metaclass=AppSingleton):
             return self.register[base.__name__ + "_" + name_table]
 
     def commit(self, cls):
-        if not (db.engine.dialect.has_table(db.engine, cls.__tablename__)):
+
+        if not (inspect(db.engine).has_table(cls.__tablename__)):
             cls.__table__.create(db.engine)
 
         return cls

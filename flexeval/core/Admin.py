@@ -52,7 +52,7 @@ class AdminModule(Module):
         except Exception as e:
             pass
 
-        template = ProviderFactory().get("templates").get(template, "mod:" + str(self.mod_rep))
+        template = ProviderFactory().get("templates").get(template) # "mod:" + str(self.mod_rep)
         return super().render_template(
             template, args=args, parameters=parameters, variables=variables
         )
