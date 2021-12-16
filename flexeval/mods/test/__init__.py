@@ -42,6 +42,8 @@ with StageModule(__name__) as sm:
         user = sm.authProvider.user
 
         steps = test.nb_steps_complete_by(user)
+        if steps is None:
+            steps = 0
 
         intro_step = False
         if nb_step_intro > steps:
@@ -106,6 +108,10 @@ with StageModule(__name__) as sm:
 
         nb_step_intro = stage.get("nb_step_intro")
         steps = test.nb_steps_complete_by(user)
+        if nb_step_intro is None:
+            nb_step_intro = 0
+        if steps is None:
+            steps = 0
 
         intro_step = False
         if nb_step_intro > steps:
