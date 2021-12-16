@@ -44,7 +44,7 @@
           {{content}}
         {% elif mimetype == "image" %}
           <img class="img-fluid" src="{{content}}" />
-        {% elif media == "audio" %}
+        {% elif mimetype == "audio" %}
           <audio controls readall>
             <source src="{{content}}">
             Your browser does not support the <code>audio</code> element.
