@@ -90,8 +90,6 @@
               {% if get_variable("authors") is not none %}
                 Made by {{get_variable("authors")}}.
               {% endif %}
-
-              <a href="{{make_url('/legal_terms')}}">Privacy Policy & GCU.</a>
               </p>
 
             <p class="text-muted" style="letter-spacing: 2px;">

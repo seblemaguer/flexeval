@@ -8,13 +8,6 @@
       <input type="email" name="email" id="email" class="form-control" required>
     </div>
 
-
-    <div class="form-check">
-      <input type="checkbox" class="form-check-input" id="legalterms" required>
-      <label class="form-check-label" for="legalterms">I acknowledge having read and accept <a href="{{make_url('/legal_terms')}}">the GCUs and the privacy policy</a>.</label>
-    </div>
-
     <button type="submit" class="btn btn-primary">Submit</button>
-
   </form>
 {% endblock %}
