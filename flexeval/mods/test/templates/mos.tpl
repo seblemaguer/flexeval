@@ -45,7 +45,7 @@
         {% elif mimetype == "image" %}
           <img class="img-fluid" src="{{content}}" />
         {% elif mimetype == "audio" %}
-          <audio controls readall>
+          <audio id="sample" controls readall>
             <source src="{{content}}">
             Your browser does not support the <code>audio</code> element.
           </audio>
@@ -60,12 +60,12 @@
 
       </label>
       <select id="score@{{syssample.ID}}" name="{{ name_field }}" class="form-control" required>
-      <option value="" selected disabled hidden>Choose here</option>
+       <option value="" selected disabled hidden>Choose here</option>
        <option value="5">Excellent</option>
        <option value="4">Good</option>
        <option value="3">Fair</option>
-       <option value="2"> Poor </option>
-       <option value="1"> Bad </option>
+       <option value="2">Poor</option>
+       <option value="1">Bad</option>
       </select>
 
     </div>
@@ -73,7 +73,7 @@
 
   </fieldset>
 
-  <button type="submit" class="btn btn-primary">Submit</button>
+  <button type="submit" id="submit" class="btn btn-primary">Submit</button>
 
 </form>
 {% endblock %}
