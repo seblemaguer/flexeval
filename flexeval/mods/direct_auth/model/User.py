@@ -1,7 +1,7 @@
 # coding: utf8
 # license : CeCILL-C
 
-from flexeval.core import UserBase
+from flexeval.core.providers.auth import UserBase
 
 
 class NotAnEmail(Exception):
