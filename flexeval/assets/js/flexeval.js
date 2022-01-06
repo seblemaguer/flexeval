@@ -1,48 +1,44 @@
-$(document).ready(function(){
-
+$(document).ready(function () {
   var locked = 0;
 
-  $("input[type='range']").map(function()
-  {
-    if(this.required)
-    {
-      locked = locked + 1
+  $("input[type='range']").map(function () {
+    if (this.required) {
+        locked = locked + 1;
 
-      $("*[type=submit]").map(function(){
-        $(this).attr("disabled",true);
+      $("*[type=submit]").map(function () {
+        $(this).attr("disabled", true);
       });
-
     }
 
-    $(this).one("click",function(e)
-    {
-      locked = locked - 1
-
-      if(locked == 0)
-      {
-        $("*[type=submit]").map(function(){$(this).attr("disabled",false)});
+    $(this).one("click", function (e) {
+      locked = locked - 1; // FIXME: nope doesn't work this way....
+        console.log("ok => " . locked);
+      if (locked == 0) {
+        $("*[type=submit]").map(function () {
+          $(this).attr("disabled", false);
+        });
       }
+    });
+  });
 
-    })
-  })
-
-  $("*[readall]").map(function() {
+  $("*[readall]")
+    .map(function () {
       locked = locked + 1;
 
-      $("*[type=submit]").map(function(){
-        $(this).attr("disabled",true);
+      $("*[type=submit]").map(function () {
+        $(this).attr("disabled", true);
       });
 
-      $(this).on("ended", function(e) {
-          locked = locked - 1;
+      $(this).on("ended", function (e) {
+        locked = locked - 1;
 
-          if(locked == 0)
-          {
-            $("*[type=submit]").map(function(){$(this).attr("disabled",false)});
-          }
+        if (locked == 0) {
+          $("*[type=submit]").map(function () {
+            $(this).attr("disabled", false);
+          });
+        }
       });
-
-    }).get()
-  .join();
-
+    })
+    .get()
+    .join();
 });
