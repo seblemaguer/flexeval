@@ -18,6 +18,7 @@ except ImportError:
 from flask import current_app, request
 
 # Utils
+from flexeval.core import ProviderFactory
 from flexeval.utils import AppSingleton, redirect
 
 
@@ -72,6 +73,9 @@ class Config(metaclass=AppSingleton):
 
         # Define provider
         self.default_authProvider_for_StageModule()
+
+        # Finalize templating
+        ProviderFactory().get("templates").register_instance()
 
         current_app.add_url_rule("/", "entrypoint", self.entrypoint)
         current_app.add_url_rule("/admin/", "entrypoint_admin", self.entrypoint_admin)

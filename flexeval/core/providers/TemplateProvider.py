@@ -48,11 +48,6 @@ class TemplateProvider:
         except Exception as e:
             raise ImportError("Import from flexeval's templates failed.")
 
-        try:
-            self.register_instance()
-        except Exception as e:
-            raise ImportError("Import from instance's templates failed.")
-
         ProviderFactory().set("templates", self)
         self._logger.info(" loaded and bound to  " + folder)
 
@@ -78,20 +73,20 @@ class TemplateProvider:
         return path
 
     def register_flexeval(self):
-        self._logger.debug("Copy templates from %s to %s" % (current_app.config["FLEXEVAL_INSTANCE_DIR"] + "/templates", self.folder))
+        self._logger.debug("[Core] Copy templates from %s to %s" % (current_app.config["FLEXEVAL_DIR"] + "/templates", self.folder))
+
         copytree(
-            current_app.config["FLEXEVAL_INSTANCE_DIR"] + "/templates",
+            current_app.config["FLEXEVAL_DIR"] + "/templates",
             self.folder,
             dirs_exist_ok=True,
         )
 
     def register_instance(self):
-        self._logger.debug("Copy templates from %s to %s" % (current_app.config["FLEXEVAL_DIR"] + "/templates", self.folder))
+        self._logger.debug("[Instance] Copy templates from %s to %s" % (current_app.config["FLEXEVAL_INSTANCE_DIR"] + "/templates", self.folder))
 
         # Save instance templates path to not replace them when registering mods
-        tpl_dir = current_app.config["FLEXEVAL_DIR"] + "/templates"
+        tpl_dir = current_app.config["FLEXEVAL_INSTANCE_DIR"] + "/templates"
         self._instance_files = [f.replace(tpl_dir + "/", "") for f in glob.glob(tpl_dir + '/**/*', recursive=True)]
-
         copytree(
             tpl_dir,
             self.folder,
@@ -102,7 +97,7 @@ class TemplateProvider:
         def ignore_instance(src, names):
             return set(names).intersection(set(self._instance_files))
 
-        self._logger.debug("Copy templates from %s to %s" % (current_app.config["FLEXEVAL_DIR"] + "/mods/" + name + "/templates", self.folder))
+        self._logger.debug("[Module] Copy templates from %s to %s" % (current_app.config["FLEXEVAL_DIR"] + "/mods/" + name + "/templates", self.folder))
         copytree(
             current_app.config["FLEXEVAL_DIR"] + "/mods/" + name + "/templates",
             self.folder,
