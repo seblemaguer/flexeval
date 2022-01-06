@@ -3,7 +3,6 @@
 
 from flask import g, abort
 from flask import url_for as flask_url_for
-from flask import session as flask_session
 
 from flexeval.utils import make_global_url
 

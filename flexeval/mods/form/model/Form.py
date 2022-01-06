@@ -3,9 +3,10 @@
 
 # Import Libraries
 from flexeval.core import StageModule
-from flexeval.database import Model,relationship, Column, ForeignKey, db, declared_attr
+from flexeval.database import Model, relationship, Column, ForeignKey, db, declared_attr
 
 userModel = StageModule.get_UserModel()
+
 
 class Form(Model):
 
@@ -15,4 +16,4 @@ class Form(Model):
 
     @declared_attr
     def user_pseudo(cls):
-        return Column(db.String, ForeignKey(userModel.__tablename__+'.pseudo'))
+        return Column(db.String, ForeignKey(userModel.__tablename__ + ".pseudo"))
