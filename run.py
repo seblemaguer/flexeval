@@ -29,6 +29,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("-i", "--ip", type=str, default="127.0.0.1", help="IP's server")
     parser.add_argument("-p", "--port", type=int, default="8080", help="port")
+    parser.add_argument("-u", "--url", type=str, help="URL of the server (needed for flask redirections!) if different from http://<ip>:<port>/")
 
     # Logging options
     parser.add_argument(
@@ -71,7 +72,11 @@ if __name__ == "__main__":
             extra_files.append(f)
 
     # Finally create and run app
-    app = create_app(instance_abs_path, "http://%s:%d" % (args.ip, args.port), debug=args.debug)
+    if args.url:
+        app = create_app(instance_abs_path, args.url, debug=args.debug)
+    else:
+        app = create_app(instance_abs_path, "http://%s:%d" % (args.ip, args.port), debug=args.debug)
+
 
     log = logging.getLogger('werkzeug')
     log.setLevel(log_level)
