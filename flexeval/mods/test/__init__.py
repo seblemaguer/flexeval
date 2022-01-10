@@ -3,6 +3,11 @@ import random
 from math import ceil
 from flask import current_app, request, abort
 
+
+# Processes
+from multiprocessing import Lock
+
+
 from flexeval.core import StageModule, Stage, Config
 from flexeval.utils import redirect
 from flexeval.database import db, commit_all
@@ -19,23 +24,37 @@ class MalformationError(TestsAlternateError):
         self.message = message
 
 
+
 with StageModule(__name__) as sm:
+
+    # Instanciate locker to avoid conflict when getting the step!
+    lock = Lock()
 
     @sm.route("/", methods=["GET"])
     @sm.valid_connection_required
     def main():
 
+        # Get the current Stage
         stage = sm.current_stage
+
+        # Get the type of test of the current stage
+        test = TestManager().get(stage.name)
+
+        # Load steps information
         max_steps = int(stage.get("nb_steps"))
         nb_step_intro = stage.get("nb_step_intro")
-
-        transaction_timeout_seconds = stage.get("transaction_timeout_seconds")
-
         if nb_step_intro is None:
             nb_step_intro = 0
 
-        test = TestManager().get(stage.name)
+        # Load systems per step information
+        nb_systems_per_step = 1
+        if stage.has("nb_systems_per_step"):
+            nb_systems_per_step = int(stage.get("nb_systems_per_step"))
+            if nb_systems_per_step <= 0:
+                nb_systems_per_step = len(test.systems.keys())
 
+        # Load transaction information
+        transaction_timeout_seconds = stage.get("transaction_timeout_seconds")
         if transaction_timeout_seconds is not None:
             test.set_timeout_for_transaction(int(transaction_timeout_seconds))
 
@@ -52,7 +71,13 @@ with StageModule(__name__) as sm:
             intro_step = False
 
         if steps < max_steps:
-            syssamples_for_this_step = test.get_step(user, is_intro_step=intro_step)
+
+            # Get the step
+            lock.acquire()
+            try:
+                syssamples_for_this_step = test.get_step(user, nb_systems=nb_systems_per_step, is_intro_step=intro_step)
+            finally:
+                lock.release()
 
             def get_syssamples(*system_names):
                 systems = []
@@ -141,15 +166,8 @@ with StageModule(__name__) as sm:
                                     user, idsyssample
                                 )
                                 tmp_system_names.append(system_name)
-                                # test.testSampleModel.addColumn(system_name,db.String)
                                 sys = {system_name: syssample_id}
 
-                                while test.systems[system_name][1] is not None:
-                                    system_name = test.systems[system_name][1]
-                                    syssample_id = test.get_in_transaction(
-                                        user, "choice_for_systems"
-                                    )[system_name]._systemsample.id
-                                    sys[system_name] = syssample_id
                                 resp.update(commit=False, **sys)
 
                             tmp_system_names.sort()

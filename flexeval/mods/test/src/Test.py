@@ -7,7 +7,6 @@ import string
 
 # Yaml
 from yaml import load, dump
-
 try:
     from yaml import CLoader as Loader
 except ImportError:
@@ -32,6 +31,7 @@ from flexeval.mods.test.model import TestSample, SystemSample
 from .System import SystemManager
 
 TEST_CONFIGURATION_BASENAME = "tests"
+DEFAULT_CSV_DELIMITER = ","
 
 
 class SystemSampleTemplate:
@@ -75,7 +75,7 @@ class SystemSampleTemplate:
                     "rb",
                 ) as f:
                     data64 = base64.b64encode(f.read()).decode("utf-8")
-                    value = u"data:%s;base64,%s" % (mime, data64)
+                    value = "data:%s;base64,%s" % (mime, data64)
                 mime = mime.split("/")[0]
 
             return (value, mime)
@@ -116,90 +116,10 @@ class TestManager(metaclass=AppSingleton):
 
         return self.register[name]
 
-
-class Test:
-    def __init__(self, name, config):
-
-        # Init l'objet Test
-        self.name = name
-        self.systems = {}
+class TransactionalObject:
+    def __init__(self):
         self.transactions = {}
         self.time_out_seconds = 3600
-
-        if "system_all_aligned" in config:
-            system_all_aligned = config["system_all_aligned"]
-        else:
-            system_all_aligned = True
-
-        try:
-            assert isinstance(system_all_aligned, bool)
-        except Exception as e:
-            raise MalformationError("system_all_aligned need to be a boolean value.")
-
-        for system_i, system in enumerate(config["systems"]):
-
-            aligned_with = None
-
-            if "aligned_with" in system:
-                if config["system_all_aligned"]:
-                    raise MalformationError(
-                        "You can't specified a field 'aligned_with' if the system are all aligned (default behavior). "
-                    )
-                else:
-                    aligned_with = system["aligned_with"]
-
-            if system_all_aligned and system_i > 0:
-                aligned_with = config["systems"][0]["name"]
-
-            delimiter = "," # NOTE: hardcoded
-            if "delimiter" in system:
-                delimiter = system["delimiter"]
-
-            self.systems[system["name"]] = (
-                SystemManager().get(system["data"].replace(".csv", ""), delimiter),
-                aligned_with,
-            )
-
-        # Init ou Regen la repr en bdd & les relations
-
-        # TestSample établie une relation TestSample -> User
-        # On ne commit pas cad on ne crée pas la table en BDD directement après create (commit=False)
-        # Si la table est créée on ne peut pas ajouter de contrainte (ForeignKey) à une colonne.
-        self.testSampleModel = ModelFactory().create(
-            self.name, TestSample, commit=False
-        )
-
-        foreign_key_for_each_system = []
-        for system_name in self.systems.keys():
-            foreign_key_for_each_system.append(
-                (
-                    system_name,
-                    self.testSampleModel.addColumn(
-                        system_name,
-                        db.Integer,
-                        ForeignKey(SystemSample.__tablename__ + ".id"),
-                    ),
-                )
-            )
-
-        # Une fois les clefs étrang. gen on créée la table
-        ModelFactory().commit(self.testSampleModel)
-
-        # On utilise les clefs etrang. nouvellement créées pour gen les relations bidirect. entre self.testSampleModel <-> SystemSample
-        for (system_name, foreign_key) in foreign_key_for_each_system:
-            # self.testSampleModel.addRelationship("SystemSample_"+system_name,SystemSample,uselist=False,foreign_keys=[foreign_key])
-            SystemSample.addRelationship(
-                self.testSampleModel.__name__ + "_" + system_name,
-                self.testSampleModel,
-                uselist=True,
-                foreign_keys=[foreign_key],
-                backref="SystemSample_" + system_name,
-            )
-
-        # On établie la relation One User -> Many TestSample
-        StageModule.get_UserModel().addRelationship(
-            self.testSampleModel.__name__, self.testSampleModel, uselist=True
-        )
 
     def set_timeout_for_transaction(self, timeout):
         self.time_out_seconds = timeout
@@ -247,118 +167,200 @@ class Test:
             return self.transactions[user.pseudo][name]
 
     def create_row_in_transaction(self, user):
-        ID = "".join((random.choice(string.ascii_lowercase) for i in range(20)))
-        if ID in self.transactions[user.pseudo].keys():
-            return self.create_row_in_transaction()
-        else:
+        ID = "".join((random.choice(string.ascii_lowercase) for _ in range(20)))
+
+        # Row not created, just create it
+        if not (ID in self.transactions[user.pseudo].keys()):
             self.transactions[user.pseudo][ID] = None
-            return ID
+
+        # Returns the ID of the row
+        return ID
+
+class Test(TransactionalObject):
+    def __init__(self, name, config):
+        super().__init__()
+
+        # Init l'objet Test
+        self.name = name
+        self.systems = {}
+
+        if "system_all_aligned" in config:
+            system_all_aligned = config["system_all_aligned"]
+        else:
+            system_all_aligned = True
+
+        try:
+            assert isinstance(system_all_aligned, bool)
+        except Exception as e:
+            raise MalformationError("system_all_aligned need to be a boolean value.")
+
+        for system_i, system in enumerate(config["systems"]):
+
+            aligned_with = None
+
+            if "aligned_with" in system:
+                if config["system_all_aligned"]:
+                    raise MalformationError(
+                        "You can't specified a field 'aligned_with' if the system are all aligned (default behavior). "
+                    )
+                else:
+                    aligned_with = system["aligned_with"]
+
+            if system_all_aligned and system_i > 0:
+                aligned_with = config["systems"][0]["name"]
+
+            delimiter = DEFAULT_CSV_DELIMITER
+            if "delimiter" in system:
+                delimiter = system["delimiter"]
+
+            self.systems[system["name"]] = (
+                SystemManager().get(system["data"].replace(".csv", ""), delimiter),
+                aligned_with,
+            )
+
+        # Init ou Regen la repr en bdd & les relations
+
+        # TestSample établie une relation TestSample -> User
+        # On ne commit pas cad on ne crée pas la table en BDD directement après create (commit=False)
+        # Si la table est créée on ne peut pas ajouter de contrainte (ForeignKey) à une colonne.
+        self.testSampleModel = ModelFactory().create(
+            self.name, TestSample, commit=False
+        )
+
+        foreign_key_for_each_system = []
+        for system_name in self.systems.keys():
+            foreign_key_for_each_system.append(
+                (
+                    system_name,
+                    self.testSampleModel.addColumn(
+                        system_name,
+                        db.Integer,
+                        ForeignKey(SystemSample.__tablename__ + ".id"),
+                    ),
+                )
+            )
+
+        # Une fois les clefs étrang. gen on créée la table
+        ModelFactory().commit(self.testSampleModel)
+
+        # On utilise les clefs etrang. nouvellement créées pour gen les relations bidirect. entre self.testSampleModel <-> SystemSample
+        for (system_name, foreign_key) in foreign_key_for_each_system:
+            SystemSample.addRelationship(
+                self.testSampleModel.__name__ + "_" + system_name,
+                self.testSampleModel,
+                uselist=True,
+                foreign_keys=[foreign_key],
+                backref="SystemSample_" + system_name,
+            )
+
+        # On établie la relation One User -> Many TestSample
+        StageModule.get_UserModel().addRelationship(
+            self.testSampleModel.__name__, self.testSampleModel, uselist=True
+        )
+
 
     def nb_steps_complete_by(self, user):
         return len(getattr(user, self.testSampleModel.__name__))
 
+    def select_systems(self, nb_systems):
+
+        # Get the total amount of time a system is seen
+        system_counts = {}
+        for system_name, system_info in self.systems.items():
+            (system, _) = system_info
+            system_counts[system_name] = 0
+
+            # Count the samples number of samples
+            for syssample in system.system_samples:
+                system_counts[system_name] += len(getattr(syssample, self.testSampleModel.__name__ + "_" + system_name))
+
+
+        # Compute list
+        count_systems = {}
+        for system_name, count in system_counts.items():
+            if count not in system_counts:
+                count_systems[count] = [system_name]
+            else:
+                count_systems[count].append(system_name)
+
+        # Randomize by prioritizing the system seen the minimum amount of time
+        pool_systems = []
+        sorted_counts = list(count_systems.keys())
+        sorted_counts.sort();
+        remaining = nb_systems
+        for cur_count in sorted_counts:
+            available_systems = count_systems[cur_count]
+            if len(available_systems) >= remaining:
+                pool_systems += random.choices(available_systems)
+            else:
+                pool_systems += random.choices(available_systems[:remaining])
+
+            remaining -= len(count_systems[cur_count])
+
+            if remaining <= 0:
+                break
+
+        # Return the number of needed systems
+        return pool_systems
+
+
     def choose_syssample_for_system(self, user, system_name):
-        (system, aligned_with) = self.systems[system_name]
-
-        assert aligned_with is None
-
-        choices = []
-        min_times_syssample_have_been_selected = None
-
-        system_syssamples = system.system_samples
+        (system, _) = self.systems[system_name]
 
         transactions = self.get_transactions()
         syssample_in_process = {}
-        for transaction in transactions:
 
+        for transaction in transactions:
             if "choice_for_systems" in transaction:
 
-                intro_step = transaction["intro_step"]
+                if ("choice_for_systems" in transaction) and \
+                   ("system_name" in transaction["choice_for_systems"]):
+                    idsyssample = transaction["choice_for_systems"][
+                        system_name
+                    ]._systemsample.id
 
-                if not (intro_step):
-                    if "choice_for_systems" in transaction:
-                        idsyssample = transaction["choice_for_systems"][
-                            system_name
-                        ]._systemsample.id
+                    if idsyssample in syssample_in_process:
+                        syssample_in_process[str(idsyssample)] = (
+                            syssample_in_process[str(idsyssample)] + 1
+                        )
+                    else:
+                        syssample_in_process[str(idsyssample)] = 1
 
-                        if idsyssample in syssample_in_process:
-                            syssample_in_process[str(idsyssample)] = (
-                                syssample_in_process[str(idsyssample)] + 1
-                            )
-                        else:
-                            syssample_in_process[str(idsyssample)] = 1
 
-        for syssample in system_syssamples:
+        # Ignore samples already seen by the users
+        syssample_already_seen_by_user = set()
+        for tSample in getattr(user, self.testSampleModel.__name__):
+            syssample_already_seen_by_user.add(
+                getattr(tSample, "SystemSample_" + system_name)
+            )
+        available_samples = set(system.system_samples).difference(syssample_already_seen_by_user)
 
-            syssample_already_seen_by_user = []
-            for tSample in getattr(user, self.testSampleModel.__name__):
-                if not (
-                    tSample.intro
-                ):  # Si le testSample correspond à un testSample d'intro, on ne le compte pas pour le brassage.
-                    syssample_already_seen_by_user.append(
-                        getattr(tSample, "SystemSample_" + system_name)
-                    )
-
-            if not (syssample in syssample_already_seen_by_user):
-
-                nb_times_syssample_have_been_selected = len(
-                    getattr(
-                        syssample, self.testSampleModel.__name__ + "_" + system_name
-                    )
+        # List samples for system by ascending counts
+        count_samples = dict()
+        for sample in available_samples:
+            sample_selected_count = len(
+                getattr(
+                    sample, self.testSampleModel.__name__ + "_" + system_name
                 )
-                if str(syssample.id) in syssample_in_process:
-                    nb_times_syssample_have_been_selected = (
-                        syssample_in_process[str(syssample.id)]
-                        + nb_times_syssample_have_been_selected
-                    )
+            )
+            if sample_selected_count not in count_samples:
+                count_samples[sample_selected_count] = []
+            count_samples[sample_selected_count].append(sample)
 
-                if min_times_syssample_have_been_selected is None:
-                    min_times_syssample_have_been_selected = (
-                        nb_times_syssample_have_been_selected
-                    )
-                    choices.append(syssample)
-                elif (
-                    min_times_syssample_have_been_selected
-                    == nb_times_syssample_have_been_selected
-                ):
-                    choices.append(syssample)
-                elif (
-                    min_times_syssample_have_been_selected
-                    > nb_times_syssample_have_been_selected
-                ):
-                    min_times_syssample_have_been_selected = (
-                        nb_times_syssample_have_been_selected
-                    )
-                    choices = [syssample]
 
-        if len(choices) == 0:
-            choices = system.system_samples
+        # Select the sample with the priority of the less seen sample
+        sorted_counts = list(count_samples.keys())
+        sorted_counts.sort();
 
-        return random.choice(choices)
-
-    def make_same_choice_syssample(self, system_name, syssample_source):
-        (system, aligned_with) = self.systems[system_name]
-        return system.system_samples[syssample_source.line_id]
+        rand_sample = random.choice(count_samples[sorted_counts[0]])
+        return rand_sample
 
     def get_syssample_for_step(self, choice_for_systems, system_name, user):
-        (system, aligned_with) = self.systems[system_name]
+        choice_for_systems[system_name] = self.choose_syssample_for_system(
+            user, system_name
+        )
 
-        if system_name in choice_for_systems:
-            choice_for_systems[system_name]
-        else:
-            if aligned_with is None:
-                choice_for_systems[system_name] = self.choose_syssample_for_system(
-                    user, system_name
-                )
-            else:
-                if not (aligned_with in choice_for_systems):
-                    self.get_syssample_for_step(choice_for_systems, aligned_with, user)
-
-                choice_for_systems[system_name] = self.make_same_choice_syssample(
-                    system_name, choice_for_systems[aligned_with]
-                )
-
-    def get_step(self, user, is_intro_step=False):
+    def get_step(self, user, nb_systems, is_intro_step=False):
 
         choice_for_systems = {}
 
@@ -368,13 +370,14 @@ class Test:
 
             self.create_transaction(user)
 
-            for system_name in self.systems.keys():
+            # Select the systems
+            pool_systems = self.select_systems(nb_systems)
+            for system_name in pool_systems:
                 self.get_syssample_for_step(choice_for_systems, system_name, user)
 
+            # For each system, select the samples
             for system_name in choice_for_systems.keys():
-                (system, aligned_with) = self.systems[system_name]
                 syssample = choice_for_systems[system_name]
-
                 id_in_transaction = self.create_row_in_transaction(user)
                 self.set_in_transaction(
                     user, id_in_transaction, (system_name, syssample.id)
@@ -383,7 +386,11 @@ class Test:
                     id_in_transaction, system_name, syssample
                 )
 
+            # Define if it is an introduction step
             self.set_in_transaction(user, "intro_step", is_intro_step)
+
+            # Set the systems/samples information
             self.set_in_transaction(user, "choice_for_systems", choice_for_systems)
 
+            # Validate everything
             return choice_for_systems
