@@ -174,7 +174,7 @@ class Config(metaclass=AppSingleton):
         current_stage = self.config["stages"][current_stage_name]
 
         try:
-            assert current_stage_name.replace("_", "").isalpha()
+            assert current_stage_name.replace("_", "").isalnum()
         except Exception as e:
             raise MalformationError(
                 "Stage name:"
