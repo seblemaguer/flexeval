@@ -1,21 +1,98 @@
+#!/usr/bin/env python3
 # coding: utf8
 # license : CeCILL-C
 
-import argparse
-import os
+# Python
+from typing import Tuple
 
-# Logging part
+# Arguments
+import argparse
+
+# Messaging/logging
 import logging
+from logging.config import dictConfig
 
 # Globbing
 import glob
+import os
 
 # FlexEval entry points
 from flexeval import create_app
 
+###############################################################################
+# global constants
+###############################################################################
 LEVEL = [logging.WARNING, logging.INFO, logging.DEBUG]
 
-if __name__ == "__main__":
+###############################################################################
+# Functions
+###############################################################################
+def configure_logger(args) -> Tuple[logging.Logger, int]:
+    """Setup the global logging configurations and instanciate a specific logger for the current script
+
+    Parameters
+    ----------
+    args : dict
+        The arguments given to the script
+
+    Returns
+    --------
+    the logger: logger.Logger
+    """
+    # create logger and formatter
+    logger = logging.getLogger()
+
+    # Verbose level => logging level
+    log_level = args.verbosity
+    if args.verbosity >= len(LEVEL):
+        log_level = len(LEVEL) - 1
+        # logging.warning("verbosity level is too high, I'm gonna assume you're taking the highest (%d)" % log_level)
+
+    # Define the default logger configuration
+    logging_config = dict(
+        version=1,
+        disable_existing_logger=True,
+        formatters={
+            "f": {
+                "format": "[%(asctime)s] [%(levelname)s] — [%(name)s — %(funcName)s:%(lineno)d] %(message)s",
+                "datefmt": "%d/%b/%Y: %H:%M:%S ",
+            }
+        },
+        handlers={
+            "h": {
+                "class": "logging.StreamHandler",
+                "formatter": "f",
+                "level": LEVEL[log_level],
+            }
+        },
+        root={"handlers": ["h"], "level": LEVEL[log_level]},
+    )
+
+    # Add file handler if file logging required
+    if args.log_file is not None:
+        logging_config["handlers"]["f"] = {
+            "class": "logging.FileHandler",
+            "formatter": "f",
+            "level": LEVEL[log_level],
+            "filename": args.log_file,
+        }
+        logging_config["root"]["handlers"] = ["h", "f"]
+
+    # Setup logging configuration
+    dictConfig(logging_config)
+
+    # Retrieve and return the logger dedicated to the script
+    logger = logging.getLogger(__name__)
+    return logger, log_level
+
+
+def define_argument_parser() -> argparse.ArgumentParser:
+    """Defines the argument parser
+
+    Returns
+    --------
+    The argument parser: argparse.ArgumentParser
+    """
 
     # On récup les args liés à l'instance a créer
     parser = argparse.ArgumentParser(description="FlexEval")
@@ -32,34 +109,23 @@ if __name__ == "__main__":
     parser.add_argument("-u", "--url", type=str, help="URL of the server (needed for flask redirections!) if different from http://<ip>:<port>/")
 
     # Logging options
+    parser.add_argument("-l", "--log_file", default=None, help="Logger file")
     parser.add_argument(
         "-v", "--verbosity", action="count", default=0, help="increase output verbosity"
     )
 
-    args = parser.parse_args()
+    # Return parser
+    return parser
 
-    # create logger and formatter
-    logger = logging.getLogger()
-    formatter = logging.Formatter(
-        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    )
 
-    # Verbose level => logging level
-    log_level = args.verbosity
-    if args.verbosity >= len(LEVEL):
-        log_level = len(LEVEL) - 1
-        logger.setLevel(log_level)
-        logging.warning(
-            "verbosity level is too high, I'm gonna assume you're taking the highest (%d)"
-            % log_level
-        )
-    else:
-        logger.setLevel(LEVEL[log_level])
-
-    # create console handler
-    ch = logging.StreamHandler()
-    ch.setFormatter(formatter)
-    logger.addHandler(ch)
+###############################################################################
+#  Envelopping
+###############################################################################
+if __name__ == "__main__":
+    # Initialization
+    arg_parser = define_argument_parser()
+    args = arg_parser.parse_args()
+    logger, log_level = configure_logger(args)
 
     # Get the instance absolute path
     instance_abs_path = os.path.abspath(args.instance)
@@ -73,13 +139,9 @@ if __name__ == "__main__":
 
     # Finally create and run app
     if args.url:
-        app = create_app(instance_abs_path, args.url, debug=args.debug)
+        app = create_app(instance_abs_path, args.url, debug=args.debug, log_level=log_level)
     else:
-        app = create_app(instance_abs_path, "http://%s:%d" % (args.ip, args.port), debug=args.debug)
-
-
-    log = logging.getLogger('werkzeug')
-    log.setLevel(log_level)
+        app = create_app(instance_abs_path, "http://%s:%d" % (args.ip, args.port), debug=args.debug, log_level=log_level)
 
     app.run(
         host=args.ip,

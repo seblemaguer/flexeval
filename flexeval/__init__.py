@@ -6,24 +6,27 @@ import os
 import random
 import string
 import datetime
+import logging
 
 # Flask
-from flask import Flask, current_app, g
-
-# SQL
-import sqlalchemy
+from flask import Flask
 
 # FlexEval
-from .utils import safe_make_rep, del_file, create_file
-from .core import Config, ProviderFactory, ErrorHandler
+from .utils import safe_make_rep
+from .core import Config, ErrorHandler
 from .core.providers import TemplateProvider, AssetsProvider
 from .extensions import db, session_manager
 
 
-def create_app(INSTANCE_PATH, INSTANCE_URL, debug=False):
+def create_app(INSTANCE_PATH, INSTANCE_URL, debug=False, log_level=logging.INFO):
     """Application-factory pattern"""
 
+    # Create Flask application
     app = Flask(__name__, template_folder=None, static_url_path=None)
+
+    # Set logging level
+    log = logging.getLogger('werkzeug')
+    log.setLevel(log_level)
 
     # Config FLEXEVAL
     app.config.setdefault("FLEXEVAL_DIR", os.path.dirname(os.path.abspath(__file__)))
@@ -34,7 +37,7 @@ def create_app(INSTANCE_PATH, INSTANCE_URL, debug=False):
     # Config Session
     app.config.setdefault("SESSION_TYPE", "filesystem")
     app.config.setdefault('PERMANENT_SESSION_LIFETIME', datetime.timedelta(days=31))
-    app.config.setdefault('SECRET_KEY', ''.join((random.choice(string.ascii_lowercase) for i in range(20))).encode('ascii'))
+    app.config.setdefault('SECRET_KEY', ''.join((random.choice(string.ascii_lowercase) for _ in range(20))).encode('ascii'))
     app.config.setdefault('SESSION_FILE_DIR', safe_make_rep(INSTANCE_PATH+"/.tmp/.sessions"))
 
     # Config SqlAlchemy
