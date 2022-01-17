@@ -161,20 +161,21 @@ class ModelFactory(metaclass=AppSingleton):
         except Exception as e:
             return None
 
-    def create(self, name_table, base, commit=True):
-        if not (base.__name__ + "_" + name_table in self.register):
+    def create(self, table_suffix, base, commit=True):
+        table_name = base.__name__.replace("Model", "") + "_" + table_suffix
+        if not (table_name in self.register):
             if Model in base.__bases__:
                 assert base.__abstract__
 
-            if inspect(db.engine).has_table(base.__name__ + "_" + name_table):
-                self.register[base.__name__ + "_" + name_table] = type(
-                    base.__name__ + "_" + name_table,
+            if inspect(db.engine).has_table(table_name):
+                self.register[table_name] = type(
+                    table_name,
                     (
                         base,
                         Model,
                     ),
                     {
-                        "__tablename__": base.__name__ + "_" + name_table,
+                        "__tablename__": table_name,
                         "__table_args__": {
                             "extend_existing": True,
                             "autoload": True,
@@ -183,22 +184,22 @@ class ModelFactory(metaclass=AppSingleton):
                     },
                 )
             else:
-                self.register[base.__name__ + "_" + name_table] = type(
-                    base.__name__ + "_" + name_table,
+                self.register[table_name] = type(
+                    table_name,
                     (
                         base,
                         Model,
                     ),
                     {
-                        "__tablename__": base.__name__ + "_" + name_table,
+                        "__tablename__": table_name,
                         "__table_args__": {"extend_existing": True},
                     },
                 )
 
         if commit:
-            return self.commit(self.register[base.__name__ + "_" + name_table])
+            return self.commit(self.register[table_name])
         else:
-            return self.register[base.__name__ + "_" + name_table]
+            return self.register[table_name]
 
     def commit(self, cls):
 
