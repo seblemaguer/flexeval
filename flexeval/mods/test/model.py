@@ -6,9 +6,9 @@ from flexeval.core import StageModule
 
 usermodel = StageModule.get_UserModel()
 
-class SystemSample(Model):
+class SampleModel(Model):
 
-    __tablename__ = "SystemSample"
+    __tablename__ = "Sample"
 
     id = Column(db.Integer, primary_key=True)
     system = Column(db.String, nullable=False)

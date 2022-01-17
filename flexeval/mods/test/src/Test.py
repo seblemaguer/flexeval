@@ -28,7 +28,7 @@ from flask import current_app
 from flexeval.utils import AppSingleton
 from flexeval.core import StageModule, UserBase
 from flexeval.database import ForeignKey, ModelFactory, db
-from flexeval.mods.test.model import TestModel, SystemSample
+from flexeval.mods.test.model import TestModel, SampleModel
 
 # Current package
 from .System import SystemManager
@@ -37,7 +37,7 @@ TEST_CONFIGURATION_BASENAME = "tests"
 DEFAULT_CSV_DELIMITER = ","
 
 
-class SystemSampleTemplate:
+class SampleModelTemplate:
     def __init__(self, id, system_name, systemsample):
         self._system = SystemManager().get(systemsample.system)
         self._systemsample = systemsample
@@ -238,7 +238,7 @@ class Test(TransactionalObject):
                     self.model.addColumn(
                         system_name,
                         db.Integer,
-                        ForeignKey(SystemSample.__tablename__ + ".id"),
+                        ForeignKey(SampleModel.__tablename__ + ".id"),
                     ),
                 )
             )
@@ -246,14 +246,14 @@ class Test(TransactionalObject):
         # Une fois les clefs étrang. gen on créée la table
         ModelFactory().commit(self.model)
 
-        # On utilise les clefs etrang. nouvellement créées pour gen les relations bidirect. entre self.model <-> SystemSample
+        # On utilise les clefs etrang. nouvellement créées pour gen les relations bidirect. entre self.model <-> SampleModel
         for (system_name, foreign_key) in foreign_key_for_each_system:
-            SystemSample.addRelationship(
+            SampleModel.addRelationship(
                 self.model.__name__ + "_" + system_name,
                 self.model,
                 uselist=True,
                 foreign_keys=[foreign_key],
-                backref="SystemSample_" + system_name,
+                backref="SampleModel_" + system_name,
             )
 
         # On établie la relation One User -> Many TestModel
@@ -344,7 +344,7 @@ class Test(TransactionalObject):
         syssample_already_seen_by_user = set()
         for tSample in getattr(user, self.model.__name__):
             syssample_already_seen_by_user.add(
-                getattr(tSample, "SystemSample_" + system_name)
+                getattr(tSample, "SampleModel_" + system_name)
             )
         available_samples = set(system.system_samples).difference(syssample_already_seen_by_user)
 
@@ -395,7 +395,7 @@ class Test(TransactionalObject):
                 self.set_in_transaction(
                     user, id_in_transaction, (system_name, syssample.id)
                 )
-                choice_for_systems[system_name] = SystemSampleTemplate(
+                choice_for_systems[system_name] = SampleModelTemplate(
                     id_in_transaction, system_name, syssample
                 )
 

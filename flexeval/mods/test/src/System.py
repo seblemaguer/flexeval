@@ -7,7 +7,7 @@ from sqlalchemy import asc
 from flexeval.utils import AppSingleton
 from flexeval.database import db, commit_all
 
-from flexeval.mods.test.model import SystemSample
+from flexeval.mods.test.model import SampleModel
 
 
 class SystemError(Exception):
@@ -53,11 +53,11 @@ class System:
 
         self.cols_name = reader.fieldnames
 
-        # On crée ou réhydrate la classe SystemSample
-        # Il est important de faire cela avant de créer les instances de SystemSample
-        # Sinon seulement les columns définies de base dans SystemSample seront disponibles.
+        # On crée ou réhydrate la classe SampleModel
+        # Il est important de faire cela avant de créer les instances de SampleModel
+        # Sinon seulement les columns définies de base dans SampleModel seront disponibles.
         for col_name in self.cols_name:
-            SystemSample.addColumn(col_name, db.String)
+            SampleModel.addColumn(col_name, db.String)
 
         if len(self.system_samples) == 0:
 
@@ -69,7 +69,7 @@ class System:
                     for col_name in self.cols_name:
                         vars[col_name] = line[col_name]
 
-                    SystemSample.create(commit=False, **vars)
+                    SampleModel.create(commit=False, **vars)
 
                 except Exception as e:
                     raise SystemError(
@@ -85,7 +85,7 @@ class System:
     def system_samples(self):
 
         return (
-            SystemSample.query.filter(SystemSample.system == self.name)
-            .order_by(SystemSample.line_id.asc())
+            SampleModel.query.filter(SampleModel.system == self.name)
+            .order_by(SampleModel.line_id.asc())
             .all()
         )
