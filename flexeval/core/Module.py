@@ -11,7 +11,7 @@ from flask import render_template as flask_render_template
 
 from flexeval.core import ProviderFactory
 from .Config import Config
-from flexeval.core.providers.auth import AuthProvider, UserBase, VirtualAuthProvider
+from flexeval.core.providers.auth import AuthProvider, UserModel, VirtualAuthProvider
 
 from flexeval.utils import make_global_url
 from flexeval.database import Model
@@ -55,14 +55,14 @@ class NotAnAuthProvider(ModuleError):
     pass
 
 
-class NotAUserBase(ModuleError):
-    """Exception raised when an object is not instanciating the UserBase class"""
+class NotAUserModel(ModuleError):
+    """Exception raised when an object is not instanciating the UserModel class"""
 
     pass
 
 
 class OverwritingClassAttributesForbidden(ModuleError):
-    """Exception raised when an object is not instanciating the UserBase class"""
+    """Exception raised when an object is not instanciating the UserModel class"""
 
     pass
 
@@ -139,15 +139,17 @@ class Module(Blueprint, abc.ABC):
     def init_UserModel(cls, cls_auth):
 
         __userBase__ = cls_auth.__userBase__
+        table_name = cls.__name__ + "User"
+        table_type = cls.name_type + "User"
 
         if not (hasattr(cls, "userModel")):
             cls.userModel = UserModelAttributesMeta(
-                cls.name_type + "User",
+                table_type,
                 (
-                    UserBase,
+                    UserModel,
                     Model,
                 ),
-                {"__abstract__": True, "__tablename__": cls.__name__ + "_User"},
+                {"__abstract__": True, "__tablename__": table_name},
             )
             setattr(cls.userModel, "__lock__", True)
 
@@ -156,10 +158,10 @@ class Module(Blueprint, abc.ABC):
             bases = __userBase__.__bases__
             try:
                 assert len(bases) == 1
-                assert UserBase in bases
+                assert UserModel in bases
             except Exception as e:
-                raise NotAUserBase(
-                    __userBase__ + " is not only or not a subClass of UserBase"
+                raise NotAUserModel(
+                    __userBase__ + " is not only or not a subClass of UserModel"
                 )
 
             if hasattr(cls, "userModel_init"):
@@ -173,9 +175,9 @@ class Module(Blueprint, abc.ABC):
 
                 cls.userModel.__lock__ = False
                 cls.userModel = UserModelAttributesMeta(
-                    cls.name_type + "User",
+                    table_type,
                     (cls.userModel, __userBase__),
-                    {"__abstract__": False, "__tablename__": cls.__name__ + "_User"},
+                    {"__abstract__": False, "__tablename__": table_name},
                 )
                 setattr(cls.userModel, "__lock__", True)
                 cls.userModel_init = True

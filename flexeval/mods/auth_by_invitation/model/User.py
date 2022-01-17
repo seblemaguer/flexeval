@@ -4,10 +4,10 @@
 import random
 import string
 
-from flexeval.core import UserBase
+from flexeval.core import UserModel
 from flexeval.database import Column,db
 
-class User(UserBase):
+class User(UserModel):
 
     token =  Column(db.String,unique=True,nullable=False)
     active = Column(db.Boolean,nullable=False)

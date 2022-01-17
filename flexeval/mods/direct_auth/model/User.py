@@ -1,7 +1,7 @@
 # coding: utf8
 # license : CeCILL-C
 
-from flexeval.core.providers.auth import UserBase
+from flexeval.core.providers.auth import UserModel
 
 
 class NotAnEmail(Exception):
@@ -9,7 +9,7 @@ class NotAnEmail(Exception):
         self.email = email
 
 
-class EmailUser(UserBase):
+class EmailUser(UserModel):
     def __init__(self, email):
 
         try:

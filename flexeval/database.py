@@ -106,7 +106,6 @@ class Model(CRUDMixin, db.Model):
 
     @classmethod
     def addRelationship(cls, name, TargetClass, **kwargs):
-
         if not (hasattr(cls, name)):
             setattr(cls, name, relationship(TargetClass.__name__, **kwargs))
 

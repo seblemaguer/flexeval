@@ -26,7 +26,7 @@ from flask import current_app
 
 # Flexeval
 from flexeval.utils import AppSingleton
-from flexeval.core import StageModule, UserBase
+from flexeval.core import StageModule, UserModel
 from flexeval.database import ForeignKey, ModelFactory, db
 from flexeval.mods.test.model import TestModel, SampleModel
 
@@ -261,7 +261,7 @@ class Test(TransactionalObject):
         )
 
 
-    def nb_steps_complete_by(self, user: UserBase) -> int:
+    def nb_steps_complete_by(self, user: UserModel) -> int:
         return len(getattr(user, self.model.__name__))
 
     def select_systems(self, nb_systems: int) -> List[str]:
@@ -316,7 +316,7 @@ class Test(TransactionalObject):
         return pool_systems
 
 
-    def choose_syssample_for_system(self, user: UserBase, system_name: str):
+    def choose_syssample_for_system(self, user: UserModel, system_name: str):
         (system, _) = self.systems[system_name]
 
         transactions = self.get_transactions()
@@ -367,12 +367,12 @@ class Test(TransactionalObject):
         rand_sample = random.choice(count_samples[sorted_counts[0]])
         return rand_sample
 
-    def get_syssample_for_step(self, choice_for_systems, system_name: str, user: UserBase) -> None:
+    def get_syssample_for_step(self, choice_for_systems, system_name: str, user: UserModel) -> None:
         choice_for_systems[system_name] = self.choose_syssample_for_system(
             user, system_name
         )
 
-    def get_step(self, id_step: int, user: UserBase, nb_systems: int, is_intro_step:bool=False):
+    def get_step(self, id_step: int, user: UserModel, nb_systems: int, is_intro_step:bool=False):
         """Get the samples needed for one step of the test
         """
 

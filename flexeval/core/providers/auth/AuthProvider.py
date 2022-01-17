@@ -18,7 +18,7 @@ class AuthProviderError(Exception):
     pass
 
 
-class UserBase:
+class UserModel:
     pseudo = Column(db.String, primary_key=True)
     conditions = Column(db.String, default="")
 

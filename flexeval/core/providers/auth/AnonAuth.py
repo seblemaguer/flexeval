@@ -3,10 +3,10 @@
 
 import random
 
-from .AuthProvider import AuthProvider, UserBase
+from .AuthProvider import AuthProvider, UserModel
 
 
-class AnonUser(UserBase):
+class AnonUser(UserModel):
     pass
 
 
