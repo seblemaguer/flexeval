@@ -72,7 +72,7 @@ with StageModule(__name__) as sm:
             # Get the step
             sem.acquire()
             print(f"Acquiring step for user {user.pseudo}")
-            syssamples_for_this_step = test.get_step(user, nb_systems=nb_systems_per_step, is_intro_step=intro_step)
+            syssamples_for_this_step = test.get_step(cur_step, user, nb_systems=nb_systems_per_step, is_intro_step=intro_step)
             print(f"Releasing step for user {user.pseudo}")
             sem.release()
 
@@ -143,7 +143,7 @@ with StageModule(__name__) as sm:
 
         if test.has_transaction(user):
             resp = test.model.create(
-                user_pseudo=user.pseudo, intro=intro_step, commit=False
+                user_pseudo=user.pseudo, intro=intro_step, step_idx=cur_step+1, commit=False
             )
             try:
                 for field_type, field_list in [

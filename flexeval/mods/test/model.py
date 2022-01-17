@@ -21,6 +21,7 @@ class TestModel(Model):
 
     id = Column(db.Integer, primary_key=True)
     date = db.Column(db.DateTime, nullable=False)
+    step_idx = db.Column(db.Integer, nullable=False)
     intro = db.Column(db.Boolean, nullable=False)
 
     def __init__(self,*args,**kwargs):
