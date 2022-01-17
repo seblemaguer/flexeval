@@ -1,12 +1,9 @@
 # coding: utf8
 import random
 from math import ceil
-from flask import current_app, request, abort
+from flask import request, abort
 
-
-# Processes
-from multiprocessing import Lock
-
+import threading
 
 from flexeval.core import StageModule, Stage, Config
 from flexeval.utils import redirect

@@ -1,12 +1,15 @@
 # coding: utf8
 
+from typing import Dict, List
+
 # Global/system
 import os
 from pathlib import Path
 import string
+import logging
 
 # Yaml
-from yaml import load, dump
+from yaml import load
 try:
     from yaml import CLoader as Loader
 except ImportError:
@@ -23,8 +26,8 @@ from flask import current_app
 
 # Flexeval
 from flexeval.utils import AppSingleton
-from flexeval.core import StageModule
-from flexeval.database import Column, ForeignKey, ModelFactory, db
+from flexeval.core import StageModule, UserBase
+from flexeval.database import ForeignKey, ModelFactory, db
 from flexeval.mods.test.model import TestSample, SystemSample
 
 # Current package

@@ -9,3 +9,5 @@ from .Module import Module
 
 from .Stage import StageModule, Stage
 from .Admin import AdminModule
+
+from .providers.auth import AuthProvider, UserBase, VirtualAuthProvider

@@ -5,9 +5,6 @@ import logging
 
 import abc
 
-from contextlib import contextmanager
-import sqlalchemy
-
 from flask import Blueprint, current_app, abort
 from flask import render_template as flask_render_template
 
@@ -16,7 +13,7 @@ from flexeval.core import ProviderFactory
 from .Config import Config
 from flexeval.core.providers.auth import AuthProvider, UserBase, VirtualAuthProvider
 
-from flexeval.utils import make_global_url, redirect
+from flexeval.utils import make_global_url
 from flexeval.database import Model
 
 
