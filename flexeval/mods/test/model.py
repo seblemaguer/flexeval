@@ -6,7 +6,16 @@ from flexeval.core import StageModule
 
 usermodel = StageModule.get_UserModel()
 
-class TestSample(Model):
+class SystemSample(Model):
+
+    __tablename__ = "SystemSample"
+
+    id = Column(db.Integer, primary_key=True)
+    system = Column(db.String, nullable=False)
+    line_id = Column(db.Integer,nullable=False)
+
+
+class TestModel(Model):
 
     __abstract__ = True
 

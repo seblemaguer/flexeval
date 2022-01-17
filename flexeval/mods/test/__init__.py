@@ -142,7 +142,7 @@ with StageModule(__name__) as sm:
             intro_step = True
 
         if test.has_transaction(user):
-            resp = test.testSampleModel.create(
+            resp = test.model.create(
                 user_pseudo=user.pseudo, intro=intro_step, commit=False
             )
             try:
@@ -176,7 +176,7 @@ with StageModule(__name__) as sm:
                             name_col = field_key
 
                         if field_type == "string":
-                            test.testSampleModel.addColumn(name_col, db.String)
+                            test.model.addColumn(name_col, db.String)
                             # On check si field_value n'est pas un lien vers un sysSample.
                             sysval = test.get_in_transaction(user, field_value)
 
@@ -186,7 +186,7 @@ with StageModule(__name__) as sm:
                                 (system_name, syssample_id) = sysval
                                 resp.update(**{name_col: system_name})
                         else:
-                            test.testSampleModel.addColumn(name_col, db.BLOB)
+                            test.model.addColumn(name_col, db.BLOB)
 
                             with field_value.stream as f:
                                 resp.update(commit=False, **{name_col: f.read()})

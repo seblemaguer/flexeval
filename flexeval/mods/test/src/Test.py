@@ -28,7 +28,7 @@ from flask import current_app
 from flexeval.utils import AppSingleton
 from flexeval.core import StageModule, UserBase
 from flexeval.database import ForeignKey, ModelFactory, db
-from flexeval.mods.test.model import TestSample, SystemSample
+from flexeval.mods.test.model import TestModel, SystemSample
 
 # Current package
 from .System import SystemManager
@@ -223,11 +223,11 @@ class Test(TransactionalObject):
 
         # Init ou Regen la repr en bdd & les relations
 
-        # TestSample établie une relation TestSample -> User
+        # TestModel établie une relation TestModel -> User
         # On ne commit pas cad on ne crée pas la table en BDD directement après create (commit=False)
         # Si la table est créée on ne peut pas ajouter de contrainte (ForeignKey) à une colonne.
-        self.testSampleModel = ModelFactory().create(
-            self.name, TestSample, commit=False
+        self.model = ModelFactory().create(
+            self.name, TestModel, commit=False
         )
 
         foreign_key_for_each_system = []
@@ -235,7 +235,7 @@ class Test(TransactionalObject):
             foreign_key_for_each_system.append(
                 (
                     system_name,
-                    self.testSampleModel.addColumn(
+                    self.model.addColumn(
                         system_name,
                         db.Integer,
                         ForeignKey(SystemSample.__tablename__ + ".id"),
@@ -244,28 +244,28 @@ class Test(TransactionalObject):
             )
 
         # Une fois les clefs étrang. gen on créée la table
-        ModelFactory().commit(self.testSampleModel)
+        ModelFactory().commit(self.model)
 
-        # On utilise les clefs etrang. nouvellement créées pour gen les relations bidirect. entre self.testSampleModel <-> SystemSample
+        # On utilise les clefs etrang. nouvellement créées pour gen les relations bidirect. entre self.model <-> SystemSample
         for (system_name, foreign_key) in foreign_key_for_each_system:
             SystemSample.addRelationship(
-                self.testSampleModel.__name__ + "_" + system_name,
-                self.testSampleModel,
+                self.model.__name__ + "_" + system_name,
+                self.model,
                 uselist=True,
                 foreign_keys=[foreign_key],
                 backref="SystemSample_" + system_name,
             )
 
-        # On établie la relation One User -> Many TestSample
+        # On établie la relation One User -> Many TestModel
         StageModule.get_UserModel().addRelationship(
-            self.testSampleModel.__name__, self.testSampleModel, uselist=True
+            self.model.__name__, self.model, uselist=True
         )
 
 
-    def nb_steps_complete_by(self, user):
-        return len(getattr(user, self.testSampleModel.__name__))
+    def nb_steps_complete_by(self, user: UserBase) -> int:
+        return len(getattr(user, self.model.__name__))
 
-    def select_systems(self, nb_systems):
+    def select_systems(self, nb_systems: int) -> List[str]:
 
         # Get the total amount of time a system is seen
         system_counts = {}
@@ -275,16 +275,26 @@ class Test(TransactionalObject):
 
             # Count the samples number of samples
             for syssample in system.system_samples:
-                system_counts[system_name] += len(getattr(syssample, self.testSampleModel.__name__ + "_" + system_name))
+                system_counts[system_name] += len(getattr(syssample, self.model.__name__ + "_" + system_name))
+
+        # Don't forget the one which are in transactions
+        transactions = self.get_transactions()
+        for transaction in transactions:
+            if "choice_for_systems" in transaction:
+                if ("choice_for_systems" in transaction) and \
+                   ("system_name" in transaction["choice_for_systems"]):
+                    system_name = transaction["choice_for_systems"]["system_name"]._systemsample.system
+                    system_counts[system_name] += 1
 
 
         # Compute list
         count_systems = {}
         for system_name, count in system_counts.items():
-            if count not in system_counts:
+            if count not in count_systems:
                 count_systems[count] = [system_name]
             else:
                 count_systems[count].append(system_name)
+        self._logger.info(f"The systems sorted by occurrences is {count_systems}")
 
         # Randomize by prioritizing the system seen the minimum amount of time
         pool_systems = []
@@ -332,7 +342,7 @@ class Test(TransactionalObject):
 
         # Ignore samples already seen by the users
         syssample_already_seen_by_user = set()
-        for tSample in getattr(user, self.testSampleModel.__name__):
+        for tSample in getattr(user, self.model.__name__):
             syssample_already_seen_by_user.add(
                 getattr(tSample, "SystemSample_" + system_name)
             )
@@ -343,7 +353,7 @@ class Test(TransactionalObject):
         for sample in available_samples:
             sample_selected_count = len(
                 getattr(
-                    sample, self.testSampleModel.__name__ + "_" + system_name
+                    sample, self.model.__name__ + "_" + system_name
                 )
             )
             if sample_selected_count not in count_samples:
