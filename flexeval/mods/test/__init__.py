@@ -21,15 +21,15 @@ class MalformationError(TestsAlternateError):
         self.message = message
 
 
+sem = threading.Semaphore()
 
 with StageModule(__name__) as sm:
-
-    # Instanciate locker to avoid conflict when getting the step!
-    lock = Lock()
 
     @sm.route("/", methods=["GET"])
     @sm.valid_connection_required
     def main():
+        """Entry point for the Test
+        """
 
         # Get the current Stage
         stage = sm.current_stage
@@ -57,24 +57,25 @@ with StageModule(__name__) as sm:
 
         user = sm.authProvider.user
 
-        steps = test.nb_steps_complete_by(user)
-        if steps is None:
-            steps = 0
+        cur_step = test.nb_steps_complete_by(user)
+        if cur_step is None:
+            cur_step = 0
 
         intro_step = False
-        if nb_step_intro > steps:
+        if nb_step_intro > cur_step:
             intro_step = True
         else:
             intro_step = False
 
-        if steps < max_steps:
+        if cur_step < max_steps:
 
             # Get the step
-            lock.acquire()
-            try:
-                syssamples_for_this_step = test.get_step(user, nb_systems=nb_systems_per_step, is_intro_step=intro_step)
-            finally:
-                lock.release()
+            sem.acquire()
+            print(f"Acquiring step for user {user.pseudo}")
+            syssamples_for_this_step = test.get_step(user, nb_systems=nb_systems_per_step, is_intro_step=intro_step)
+            print(f"Releasing step for user {user.pseudo}")
+            sem.release()
+
 
             def get_syssamples(*system_names):
                 systems = []
@@ -97,21 +98,21 @@ with StageModule(__name__) as sm:
                     ID = ID + ":" + syssample.ID
 
                 ID = "save:" + name + ID
-
+                print(ID)
                 return ID
 
             # On change les valeurs max_steps et steps pour l'affichage sur la page web
             if intro_step:
                 max_steps = nb_step_intro
-                steps = steps + 1
+                cur_step += 1
             else:
                 max_steps = max_steps - nb_step_intro
-                steps = steps + 1 - nb_step_intro
+                cur_step = cur_step +  1 - nb_step_intro
 
             return sm.render_template(
                 template=stage.template,
                 max_steps=max_steps,
-                step=steps,
+                step=cur_step,
                 intro_step=intro_step,
                 syssamples=get_syssamples,
                 field_name=save_field_name,
@@ -122,21 +123,22 @@ with StageModule(__name__) as sm:
     @sm.route("/save", methods=["POST"])
     @sm.valid_connection_required
     def save():
-
+        """Saving routine of the test
+        """
         stage = sm.current_stage
         test = TestManager().get(stage.name)
         user = sm.authProvider.user
         skip_after_n_step = stage.get("skip_after_n_step")
 
         nb_step_intro = stage.get("nb_step_intro")
-        steps = test.nb_steps_complete_by(user)
+        cur_step = test.nb_steps_complete_by(user)
         if nb_step_intro is None:
             nb_step_intro = 0
-        if steps is None:
-            steps = 0
+        if cur_step is None:
+            cur_step = 0
 
         intro_step = False
-        if nb_step_intro > steps:
+        if nb_step_intro > cur_step:
             intro_step = True
 
         if test.has_transaction(user):
@@ -190,171 +192,18 @@ with StageModule(__name__) as sm:
                                 resp.update(commit=False, **{name_col: f.read()})
 
             except Exception as e:
+                sm._logger.error(f"Exception found: {e}")
                 test.delete_transaction(user)
                 return redirect(sm.url_for(sm.get_endpoint_for_local_rule("/")))
 
+            # Commit the results and clean the transations of the user
             commit_all()
             test.delete_transaction(user)
 
             if skip_after_n_step is not None:
-                if (steps + 1) % skip_after_n_step == 0:
+                if (cur_step + 1) % skip_after_n_step == 0:
                     return redirect(stage.local_url_next)
 
             return redirect(sm.url_for(sm.get_endpoint_for_local_rule("/")))
         else:
             abort(408)
-
-
-with StageModule(__name__, subname="alternate") as sm_alternate:
-
-    @sm_alternate.route("/", methods=["GET"])
-    @sm_alternate.valid_connection_required
-    def main():
-        stage = sm_alternate.current_stage
-        user = sm_alternate.authProvider.user
-        nb_steps_before_alternate = stage.get("nb_steps_before_alternate")
-
-        if "previous_stage" in stage.session:
-            previous_stage = stage.session["previous_stage"]
-        else:
-            previous_stage = None
-
-        stages_before_test = []
-        tests = {}
-
-        alternate_step = []
-        alternate_max_step = []
-
-        for alternate_stage_name in stage.get("stages"):
-            alternate_stage = Stage(alternate_stage_name)
-            alternate_stage.update("next", stage.name)
-
-            Config().load_module(alternate_stage.mod_name)
-
-            if alternate_stage.mod_name == sm.mod_rep:
-                alternate_stage.update("skip_after_n_step", nb_steps_before_alternate)
-                test = TestManager().get(alternate_stage_name)
-                steps = test.nb_steps_complete_by(user)
-                nb_steps = alternate_stage.get("nb_steps")
-
-                alternate_max_step.append(ceil(nb_steps / nb_steps_before_alternate))
-                is_end = False
-                if steps >= nb_steps:
-                    is_end = True
-                else:
-                    alternate_step.append(ceil(steps / nb_steps_before_alternate))
-
-                tests[alternate_stage_name] = (steps, stages_before_test, is_end)
-                stages_before_test = []
-            else:
-                stages_before_test.append(alternate_stage_name)
-
-        try:
-            alternate_step = min(alternate_step)
-            alternate_max_step = max(alternate_max_step)
-            alternate_step = alternate_step + 1
-        except Exception as e:
-            alternate_max_step = max(alternate_max_step)
-            alternate_step = alternate_max_step
-
-        if len(stages_before_test) > 0:
-            raise MalformationError(
-                "Issue with field:stages declared in structure.json; for stage:"
-                + stage.name
-                + ". The last element of the list 'stages' need to be a stage of the type:"
-                + sm.mod_rep
-                + "."
-            )
-
-        selected_test = None
-        for test_name in tests.keys():
-            steps = tests[test_name][0]
-            is_active = not (steps % nb_steps_before_alternate == 0)
-            is_end = tests[test_name][2]
-            if not (is_end):
-                if is_active:
-                    stage.session["previous_stage"] = test_name
-
-                    n_stage = Stage(test_name)
-                    n_stage.set_variable("alternate_step", alternate_step)
-                    n_stage.set_variable("alternate_max_step", alternate_max_step)
-                    n_stage.set_variable(
-                        "alternate_nb_steps_per_iteration", nb_steps_before_alternate
-                    )
-                    n_stage.set_variable(
-                        "alternate_next_test",
-                        Stage(test_name).get_variable("subtitle", test_name),
-                    )
-                    return redirect(n_stage.local_url)
-                else:
-                    if selected_test is None:
-                        selected_test = test_name
-                    else:
-                        steps_selected_test = tests[selected_test][0]
-                        if steps < steps_selected_test:
-                            selected_test = test_name
-
-        if previous_stage in tests.keys():
-            previous_stage = None
-            stage.session["previous_stage"] = None
-
-        if previous_stage is None:
-            if not (selected_test is None):
-                if len(tests[selected_test][1]) > 0:
-                    stage.session["previous_stage"] = tests[selected_test][1][0]
-
-                    n_stage = Stage(tests[selected_test][1][0])
-                    n_stage.set_variable("alternate_step", alternate_step)
-                    n_stage.set_variable("alternate_max_step", alternate_max_step)
-                    n_stage.set_variable(
-                        "alternate_nb_steps_per_iteration", nb_steps_before_alternate
-                    )
-                    n_stage.set_variable(
-                        "alternate_next_test",
-                        Stage(selected_test).get_variable("subtitle", selected_test),
-                    )
-                    return redirect(n_stage.local_url)
-
-                else:
-                    stage.session["previous_stage"] = selected_test
-
-                    n_stage = Stage(selected_test)
-                    n_stage.set_variable("alternate_step", alternate_step)
-                    n_stage.set_variable(
-                        "alternate_nb_steps_per_iteration", nb_steps_before_alternate
-                    )
-                    n_stage.set_variable("alternate_max_step", alternate_max_step)
-                    n_stage.set_variable(
-                        "alternate_next_test",
-                        Stage(selected_test).get_variable("subtitle", selected_test),
-                    )
-                    return redirect(Stage(selected_test).local_url)
-        else:
-            next_stage = None
-            for name_test in tests.keys():
-                if previous_stage in tests[name_test][1]:
-                    i_next_stage = tests[name_test][1].index(previous_stage) + 1
-                    try:
-                        next_stage = tests[name_test][1][i_next_stage]
-                    except Exception as e:
-                        next_stage = name_test
-                    finally:
-                        break
-
-            if next_stage is not None:
-                stage.session["previous_stage"] = next_stage
-
-                n_stage = Stage(next_stage)
-                n_stage.set_variable("alternate_step", alternate_step)
-                n_stage.set_variable(
-                    "alternate_nb_steps_per_iteration", nb_steps_before_alternate
-                )
-                n_stage.set_variable("alternate_max_step", alternate_max_step)
-                n_stage.set_variable(
-                    "alternate_next_test",
-                    Stage(name_test).get_variable("subtitle", name_test),
-                )
-
-                return redirect(n_stage.local_url)
-
-        return redirect(stage.local_url_next)
