@@ -17,6 +17,7 @@ import glob
 import os
 
 # FlexEval entry points
+from waitress import serve
 from flexeval import create_app
 
 ###############################################################################
@@ -143,10 +144,14 @@ if __name__ == "__main__":
     else:
         app = create_app(instance_abs_path, "http://%s:%d" % (args.ip, args.port), debug=args.debug, log_level=log_level)
 
-    app.run(
-        host=args.ip,
-        port=args.port,
-        use_reloader=True,
-        debug=args.debug,
-        extra_files=extra_files,
-    )
+
+    if args.debug:
+        app.run(
+            host=args.ip,
+            port=args.port,
+            use_reloader=True,
+            debug=args.debug,
+            extra_files=extra_files,
+        )
+    else:
+        serve(app, host=args.ip, port=args.port)
