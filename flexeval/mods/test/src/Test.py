@@ -180,8 +180,10 @@ class TransactionalObject:
         return ID
 
 class Test(TransactionalObject):
-    def __init__(self, name, config):
+    def __init__(self, name: str, config) -> None:
         super().__init__()
+
+        self._logger = logging.getLogger(__name__)
 
         # Init l'objet Test
         self.name = name
@@ -192,10 +194,7 @@ class Test(TransactionalObject):
         else:
             system_all_aligned = True
 
-        try:
-            assert isinstance(system_all_aligned, bool)
-        except Exception as e:
-            raise MalformationError("system_all_aligned need to be a boolean value.")
+        assert isinstance(system_all_aligned, bool), MalformationError("system_all_aligned need to be a boolean value.")
 
         for system_i, system in enumerate(config["systems"]):
 
@@ -303,10 +302,10 @@ class Test(TransactionalObject):
         remaining = nb_systems
         for cur_count in sorted_counts:
             available_systems = count_systems[cur_count]
-            if len(available_systems) >= remaining:
+            if len(available_systems) < remaining:
                 pool_systems += random.choices(available_systems)
             else:
-                pool_systems += random.choices(available_systems[:remaining])
+                pool_systems += random.choices(available_systems)[:remaining]
 
             remaining -= len(count_systems[cur_count])
 
@@ -317,7 +316,7 @@ class Test(TransactionalObject):
         return pool_systems
 
 
-    def choose_syssample_for_system(self, user, system_name):
+    def choose_syssample_for_system(self, user: UserBase, system_name: str):
         (system, _) = self.systems[system_name]
 
         transactions = self.get_transactions()
@@ -368,25 +367,31 @@ class Test(TransactionalObject):
         rand_sample = random.choice(count_samples[sorted_counts[0]])
         return rand_sample
 
-    def get_syssample_for_step(self, choice_for_systems, system_name, user):
+    def get_syssample_for_step(self, choice_for_systems, system_name: str, user: UserBase) -> None:
         choice_for_systems[system_name] = self.choose_syssample_for_system(
             user, system_name
         )
 
-    def get_step(self, user, nb_systems, is_intro_step=False):
+    def get_step(self, id_step: int, user: UserBase, nb_systems: int, is_intro_step:bool=False):
+        """Get the samples needed for one step of the test
+        """
 
         choice_for_systems = {}
 
         if self.has_transaction(user):
             return self.get_in_transaction(user, "choice_for_systems")
         else:
-
             self.create_transaction(user)
 
-            # Select the systems
+            # Select the systems and the samples
+            self._logger.debug(f"Select systems for user {user.pseudo}")
             pool_systems = self.select_systems(nb_systems)
+
+            self._logger.debug(f"Select samples for user {user.pseudo}")
             for system_name in pool_systems:
                 self.get_syssample_for_step(choice_for_systems, system_name, user)
+
+            self._logger.info(f"This is what we will give to {user.pseudo}: {choice_for_systems}")
 
             # For each system, select the samples
             for system_name in choice_for_systems.keys():
