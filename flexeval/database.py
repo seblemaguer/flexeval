@@ -7,10 +7,14 @@ Its implementation is mainly based on the cookiebuffer-flask repository and espe
 
 """
 # coding: utf8
-from .extensions import db
 from .utils import AppSingleton
+from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.inspection import inspect
+
+
+# Instanciate database
+db = SQLAlchemy()
 
 
 # Alias common SQLAlchemy names

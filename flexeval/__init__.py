@@ -15,7 +15,8 @@ from flask import Flask
 from .utils import safe_make_rep
 from .core import Config, ErrorHandler
 from .core.providers import TemplateProvider, AssetsProvider
-from .extensions import db, session_manager
+from .database import db
+from .extensions import session_manager
 
 
 def create_app(INSTANCE_PATH, INSTANCE_URL, debug=False, log_level=logging.INFO):
