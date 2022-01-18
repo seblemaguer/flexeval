@@ -6,7 +6,7 @@ from flexeval.core.providers.auth import AuthProvider
 class AdminUser():
 
     @property
-    def pseudo(self):
+    def id(self):
         return "admin"
 
 class UniqueAuth(AuthProvider):

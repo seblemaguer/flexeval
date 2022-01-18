@@ -11,7 +11,7 @@ class EmailAuth(AuthProvider):
     __userBase__ = EmailUser
 
     def connect(self,email):
-        user = self.userModel.query.filter(self.userModel.pseudo == email).first()
+        user = self.userModel.query.filter(self.userModel.id == email).first()
 
         if user is None:
             user = self.userModel.create(email=email)

@@ -19,7 +19,7 @@ class AuthProviderError(Exception):
 
 
 class UserModel:
-    pseudo = Column(db.String, primary_key=True)
+    id = Column(db.String, primary_key=True)
     conditions = Column(db.String, default="")
 
     def has_validated(self, value):
@@ -36,7 +36,7 @@ class UserModel:
                 self.conditions += str(value)
 
     def __str__(self):
-        the_str = "User \"%s\":\n" % self.pseudo
+        the_str = "User \"%s\":\n" % self.id
         the_str += "\t- validated_conditions: %s" % self.conditions
         return the_str
 
@@ -68,7 +68,7 @@ class AuthProvider(metaclass=abc.ABCMeta):
         if self.userModel.__abstract__:
             self.session["user"] = user
         else:
-            self.session["user"] = user.pseudo
+            self.session["user"] = user.id
 
     def disconnect(self):
         del self.session["user"]
@@ -94,7 +94,7 @@ class AuthProvider(metaclass=abc.ABCMeta):
             return self.session["user"]
         else:
             return self.userModel.query.filter(
-                self.userModel.pseudo == self.session["user"]
+                self.userModel.id == self.session["user"]
             ).first()
 
     def validates_connection(self, condition=None):

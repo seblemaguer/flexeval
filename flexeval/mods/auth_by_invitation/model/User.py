@@ -16,4 +16,4 @@ class User(UserModel):
 
         self.token = ''.join((random.choice(string.ascii_lowercase) for i in range(20)))
         self.active = False
-        self.pseudo = email
+        self.id = email

@@ -59,7 +59,7 @@ with StageModule(__name__) as sm:
         user_form_for_this_stage = getattr(user,FormStage.__name__)
 
         if user_form_for_this_stage is None:
-            resp = FormStage.create(user_pseudo=user.pseudo)
+            resp = FormStage.create(user_id=user.id)
             try:
                 for field_key in request.form.keys():
                     FormStage.addColumn(field_key,db.String)

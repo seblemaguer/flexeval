@@ -20,4 +20,4 @@ class EmailUser(UserModel):
         except Exception as e:
             raise NotAnEmail(email)
 
-        self.pseudo = email
+        self.id = email

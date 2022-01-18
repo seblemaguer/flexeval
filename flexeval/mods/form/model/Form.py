@@ -15,5 +15,5 @@ class Form(Model):
     id = Column(db.Integer, primary_key=True)
 
     @declared_attr
-    def user_pseudo(cls):
-        return Column(db.String, ForeignKey(userModel.__tablename__ + ".pseudo"))
+    def user_id(cls):
+        return Column(db.String, ForeignKey(userModel.__tablename__ + ".id"))

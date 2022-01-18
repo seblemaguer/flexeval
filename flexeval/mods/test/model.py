@@ -30,11 +30,11 @@ class TestModel(Model):
         self.date = datetime.now()
 
     @declared_attr
-    def user_pseudo(cls):
-        return Column(db.String, ForeignKey(usermodel.__tablename__+'.pseudo'))
+    def user_id(cls):
+        return Column(db.String, ForeignKey(usermodel.__tablename__+'.id'))
 
     @declared_attr
     def user(cls):
         return relationship(usermodel.__name__,
-            primaryjoin=usermodel.__name__+".pseudo==%s.user_pseudo" % cls.__name__
+            primaryjoin=usermodel.__name__+".id==%s.user_id" % cls.__name__
         )

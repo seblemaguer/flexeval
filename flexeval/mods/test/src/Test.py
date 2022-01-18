@@ -128,10 +128,10 @@ class TransactionalObject:
         self.time_out_seconds = timeout
 
     def delete_transaction(self, user):
-        del self.transactions[user.pseudo]
+        del self.transactions[user.id]
 
     def create_transaction(self, user):
-        self.transactions[user.pseudo] = {"date": datetime.now()}
+        self.transactions[user.id] = {"date": datetime.now()}
 
     def get_transactions(self):
 
@@ -155,26 +155,26 @@ class TransactionalObject:
         return transactions
 
     def has_transaction(self, user):
-        return user.pseudo in self.transactions
+        return user.id in self.transactions
 
     def get_transaction(self, user):
-        return self.transactions[user.pseudo]
+        return self.transactions[user.id]
 
     def set_in_transaction(self, user, name, obj):
-        self.transactions[user.pseudo][name] = obj
+        self.transactions[user.id][name] = obj
 
     def get_in_transaction(self, user, name):
-        if name not in self.transactions[user.pseudo]:
+        if name not in self.transactions[user.id]:
             return None
         else:
-            return self.transactions[user.pseudo][name]
+            return self.transactions[user.id][name]
 
     def create_row_in_transaction(self, user):
         ID = "".join((random.choice(string.ascii_lowercase) for _ in range(20)))
 
         # Row not created, just create it
-        if not (ID in self.transactions[user.pseudo].keys()):
-            self.transactions[user.pseudo][ID] = None
+        if not (ID in self.transactions[user.id].keys()):
+            self.transactions[user.id][ID] = None
 
         # Returns the ID of the row
         return ID
@@ -384,14 +384,14 @@ class Test(TransactionalObject):
             self.create_transaction(user)
 
             # Select the systems and the samples
-            self._logger.debug(f"Select systems for user {user.pseudo}")
+            self._logger.debug(f"Select systems for user {user.id}")
             pool_systems = self.select_systems(nb_systems)
 
-            self._logger.debug(f"Select samples for user {user.pseudo}")
+            self._logger.debug(f"Select samples for user {user.id}")
             for system_name in pool_systems:
                 self.get_syssample_for_step(choice_for_systems, system_name, user)
 
-            self._logger.info(f"This is what we will give to {user.pseudo}: {choice_for_systems}")
+            self._logger.info(f"This is what we will give to {user.id}: {choice_for_systems}")
 
             # For each system, select the samples
             for system_name in choice_for_systems.keys():

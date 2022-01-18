@@ -17,7 +17,7 @@ class AnonAuthProvider(AuthProvider):
     def connect(self):
         super().connect(
             self.userModel.create(
-                pseudo="anon@" + str(random.randint(1, 999999999999999))
+                id="anon@" + str(random.randint(1, 999999999999999))
             )
         )
 

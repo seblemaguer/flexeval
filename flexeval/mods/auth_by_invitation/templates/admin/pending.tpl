@@ -14,7 +14,7 @@
     <tbody>
       {% for w in get_variable("users")%}
       <tr>
-        <th>{{w.pseudo}}</th>
+        <th>{{w.id}}</th>
         <td>{% if w.active %}No{% else %}Yes{% endif %}</td>
       </tr>
       {% endfor %}
