@@ -17,7 +17,7 @@ import glob
 import os
 
 # FlexEval entry points
-from waitress import serve
+from werkzeug.serving import run_simple
 from flexeval import create_app
 
 ###############################################################################
@@ -154,4 +154,4 @@ if __name__ == "__main__":
             extra_files=extra_files,
         )
     else:
-        serve(app, host=args.ip, port=args.port)
+        run_simple(hostname=args.ip, port=args.port, application=app, threaded=False, use_reloader=True)
