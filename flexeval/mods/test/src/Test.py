@@ -249,10 +249,6 @@ class Test(TransactionalObject):
         return len(getattr(user, self.model.__name__))
 
 
-    def get_syssample_for_step(self, choice_for_systems, system_name: str, user: UserModel) -> None:
-        samples = self._selection_strategy.select_samples(system_name, 1) # NOTE: 1 is hardcoded here
-        choice_for_systems[system_name] = samples[0]
-
     def get_step(self, id_step: int, user: UserModel, nb_systems: int, is_intro_step:bool=False):
         """Get the samples needed for one step of the test
         """
@@ -262,17 +258,19 @@ class Test(TransactionalObject):
         if self.has_transaction(user):
             return self.get_in_transaction(user, "choice_for_systems")
         else:
-            # Select the systems and the samples
+            # Select the systems
             self._logger.debug(f"Select systems for user {user.id}")
             pool_systems = self._selection_strategy.select_systems(nb_systems)
 
+            # Select the samples
             self._logger.debug(f"Select samples for user {user.id}")
             for system_name in pool_systems:
-                self.get_syssample_for_step(choice_for_systems, system_name, user)
+                samples = self._selection_strategy.select_samples(system_name, 1) # NOTE: 1 is hardcoded here
+                choice_for_systems[system_name] = samples[0]
 
             self._logger.info(f"This is what we will give to {user.id}: {choice_for_systems}")
 
-
+            # Now we are ready to create the transaction
             self.create_transaction(user)
 
             # For each system, select the samples
