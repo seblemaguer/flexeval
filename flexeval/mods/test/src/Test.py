@@ -32,6 +32,7 @@ from flexeval.mods.test.model import TestModel, SampleModel
 
 # Current package
 from .System import SystemManager
+from .selection_strategy import FirstServerSelection
 
 TEST_CONFIGURATION_BASENAME = "tests"
 DEFAULT_CSV_DELIMITER = ","
@@ -183,52 +184,32 @@ class Test(TransactionalObject):
     def __init__(self, name: str, config) -> None:
         super().__init__()
 
+        self.name = name
         self._logger = logging.getLogger(__name__)
 
-        # Init l'objet Test
-        self.name = name
+        # Load systems
         self.systems = {}
-
-        if "system_all_aligned" in config:
-            system_all_aligned = config["system_all_aligned"]
-        else:
-            system_all_aligned = True
-
-        assert isinstance(system_all_aligned, bool), MalformationError("system_all_aligned need to be a boolean value.")
-
-        for system_i, system in enumerate(config["systems"]):
-
-            aligned_with = None
-
-            if "aligned_with" in system:
-                if config["system_all_aligned"]:
-                    raise MalformationError(
-                        "You can't specified a field 'aligned_with' if the system are all aligned (default behavior). "
-                    )
-                else:
-                    aligned_with = system["aligned_with"]
-
-            if system_all_aligned and system_i > 0:
-                aligned_with = config["systems"][0]["name"]
-
+        for cur_system in config["systems"]:
             delimiter = DEFAULT_CSV_DELIMITER
-            if "delimiter" in system:
-                delimiter = system["delimiter"]
+            if "delimiter" in cur_system:
+                delimiter = cur_system["delimiter"]
 
-            self.systems[system["name"]] = (
-                SystemManager().get(system["data"].replace(".csv", ""), delimiter),
-                aligned_with,
+            max_samples = -1
+            if "max_samples" in cur_system:
+                max_samples = cur_system["max_samples"]
+
+            self.systems[cur_system["name"]] = (
+                SystemManager().get(cur_system["data"].replace(".csv", ""), delimiter, max_samples),
             )
 
-        # Init ou Regen la repr en bdd & les relations
 
-        # TestModel établie une relation TestModel -> User
-        # On ne commit pas cad on ne crée pas la table en BDD directement après create (commit=False)
-        # Si la table est créée on ne peut pas ajouter de contrainte (ForeignKey) à une colonne.
+        # Create Test table in the database
+        # NOTE: commit is delayed in order to enable to set later the foreign key constraint on needed columns
         self.model = ModelFactory().create(
             self.name, TestModel, commit=False
         )
 
+        # Set the foreign key constraints
         foreign_key_for_each_system = []
         for system_name in self.systems.keys():
             foreign_key_for_each_system.append(
@@ -242,10 +223,10 @@ class Test(TransactionalObject):
                 )
             )
 
-        # Une fois les clefs étrang. gen on créée la table
+        # Commit created table
         ModelFactory().commit(self.model)
 
-        # On utilise les clefs etrang. nouvellement créées pour gen les relations bidirect. entre self.model <-> SampleModel
+        # Set relations between used samples and the current test
         for (system_name, foreign_key) in foreign_key_for_each_system:
             SampleModel.addRelationship(
                 self.model.__name__ + "_" + system_name,
@@ -255,122 +236,22 @@ class Test(TransactionalObject):
                 backref="SampleModel_" + system_name,
             )
 
-        # On établie la relation One User -> Many TestModel
+        # Set relations to associate multiple steps to a user
         StageModule.get_UserModel().addRelationship(
             self.model.__name__, self.model, uselist=True
         )
+
+        # Initialize the sample selection strategy
+        self._selection_strategy = FirstServerSelection(self.systems)
 
 
     def nb_steps_complete_by(self, user: UserModel) -> int:
         return len(getattr(user, self.model.__name__))
 
-    def select_systems(self, nb_systems: int) -> List[str]:
-
-        # Get the total amount of time a system is seen
-        system_counts = {}
-        for system_name, system_info in self.systems.items():
-            (system, _) = system_info
-            system_counts[system_name] = 0
-
-            # Count the samples number of samples
-            for syssample in system.system_samples:
-                system_counts[system_name] += len(getattr(syssample, self.model.__name__ + "_" + system_name))
-
-        # Don't forget the one which are in transactions
-        transactions = self.get_transactions()
-        for transaction in transactions:
-            if "choice_for_systems" in transaction:
-                if ("choice_for_systems" in transaction) and \
-                   ("system_name" in transaction["choice_for_systems"]):
-                    system_name = transaction["choice_for_systems"]["system_name"]._systemsample.system
-                    system_counts[system_name] += 1
-
-
-        # Compute list
-        count_systems = {}
-        for system_name, count in system_counts.items():
-            if count not in count_systems:
-                count_systems[count] = [system_name]
-            else:
-                count_systems[count].append(system_name)
-        self._logger.info(f"The systems sorted by occurrences is {count_systems}")
-
-        # Randomize by prioritizing the system seen the minimum amount of time
-        pool_systems = []
-        sorted_counts = list(count_systems.keys())
-        sorted_counts.sort();
-        remaining = nb_systems
-        for cur_count in sorted_counts:
-            available_systems = count_systems[cur_count]
-            if len(available_systems) < remaining:
-                pool_systems += random.choices(available_systems)
-            else:
-                pool_systems += random.choices(available_systems)[:remaining]
-
-            remaining -= len(count_systems[cur_count])
-
-            if remaining <= 0:
-                break
-
-        # Return the number of needed systems
-        return pool_systems
-
-
-    def choose_syssample_for_system(self, user: UserModel, system_name: str):
-        (system, _) = self.systems[system_name]
-
-        transactions = self.get_transactions()
-        syssample_in_process = {}
-
-        for transaction in transactions:
-            if "choice_for_systems" in transaction:
-
-                if ("choice_for_systems" in transaction) and \
-                   ("system_name" in transaction["choice_for_systems"]):
-                    idsyssample = transaction["choice_for_systems"][
-                        system_name
-                    ]._systemsample.id
-
-                    if idsyssample in syssample_in_process:
-                        syssample_in_process[str(idsyssample)] = (
-                            syssample_in_process[str(idsyssample)] + 1
-                        )
-                    else:
-                        syssample_in_process[str(idsyssample)] = 1
-
-
-        # Ignore samples already seen by the users
-        syssample_already_seen_by_user = set()
-        for tSample in getattr(user, self.model.__name__):
-            syssample_already_seen_by_user.add(
-                getattr(tSample, "SampleModel_" + system_name)
-            )
-        available_samples = set(system.system_samples).difference(syssample_already_seen_by_user)
-
-        # List samples for system by ascending counts
-        count_samples = dict()
-        for sample in available_samples:
-            sample_selected_count = len(
-                getattr(
-                    sample, self.model.__name__ + "_" + system_name
-                )
-            )
-            if sample_selected_count not in count_samples:
-                count_samples[sample_selected_count] = []
-            count_samples[sample_selected_count].append(sample)
-
-
-        # Select the sample with the priority of the less seen sample
-        sorted_counts = list(count_samples.keys())
-        sorted_counts.sort();
-
-        rand_sample = random.choice(count_samples[sorted_counts[0]])
-        return rand_sample
 
     def get_syssample_for_step(self, choice_for_systems, system_name: str, user: UserModel) -> None:
-        choice_for_systems[system_name] = self.choose_syssample_for_system(
-            user, system_name
-        )
+        samples = self._selection_strategy.select_samples(system_name, 1) # NOTE: 1 is hardcoded here
+        choice_for_systems[system_name] = samples[0]
 
     def get_step(self, id_step: int, user: UserModel, nb_systems: int, is_intro_step:bool=False):
         """Get the samples needed for one step of the test
@@ -381,17 +262,18 @@ class Test(TransactionalObject):
         if self.has_transaction(user):
             return self.get_in_transaction(user, "choice_for_systems")
         else:
-            self.create_transaction(user)
-
             # Select the systems and the samples
             self._logger.debug(f"Select systems for user {user.id}")
-            pool_systems = self.select_systems(nb_systems)
+            pool_systems = self._selection_strategy.select_systems(nb_systems)
 
             self._logger.debug(f"Select samples for user {user.id}")
             for system_name in pool_systems:
                 self.get_syssample_for_step(choice_for_systems, system_name, user)
 
             self._logger.info(f"This is what we will give to {user.id}: {choice_for_systems}")
+
+
+            self.create_transaction(user)
 
             # For each system, select the samples
             for system_name in choice_for_systems.keys():
