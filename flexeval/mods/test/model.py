@@ -7,7 +7,10 @@ from flexeval.core import StageModule
 usermodel = StageModule.get_UserModel()
 
 class SampleModel(Model):
+    """Model which represent a sample
 
+    A sample is identified by an \"id\" and is associated to a \"system\"
+    """
     __tablename__ = "Sample"
 
     id = Column(db.Integer, primary_key=True)
@@ -16,10 +19,17 @@ class SampleModel(Model):
 
 
 class TestModel(Model):
+    """Model which represents a test.
+
+    A test is composed by different steps and each row of the table corresponds to one of these steps.
+
+    A step is identified by an \"id\", has a \"date\" when it was created, and index (\"step_idx\") and a flag indicating if it is an introduction step (\"intro\")
+    """
 
     __abstract__ = True
 
     id = Column(db.Integer, primary_key=True)
+
     date = db.Column(db.DateTime, nullable=False)
     step_idx = db.Column(db.Integer, nullable=False)
     intro = db.Column(db.Boolean, nullable=False)
