@@ -23,15 +23,15 @@ class SystemManager(metaclass=AppSingleton):
     def __init__(self):
         self.register = {}
 
-    def get(self, name, delimiter=","):
+    def get(self, name, delimiter=",", max_samples=-1):
         if not (name in self.register):
-            self.register[name] = System(name, delimiter)
+            self.register[name] = System(name, delimiter, max_samples)
 
         return self.register[name]
 
 
 class System:
-    def __init__(self, name, delimiter=","):
+    def __init__(self, name, delimiter=",", max_samples=-1):
 
         if name[0] == "/":
             name = name[1:]
@@ -59,9 +59,15 @@ class System:
         for col_name in self.cols_name:
             SampleModel.addColumn(col_name, db.String)
 
+        if max_samples < 0:
+            max_samples = len(reader)
+
         if len(self.system_samples) == 0:
 
             for line_id, line in enumerate(reader):
+
+                if line_id > max_samples:
+                    break
 
                 vars = {"system": self.name, "line_id": line_id}
 
