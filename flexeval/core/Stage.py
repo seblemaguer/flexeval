@@ -6,6 +6,8 @@ Module which defines all utilities to represent a stage in the pipeline
 
 """
 
+import logging
+
 from flask import g, abort
 from flask import url_for as flask_url_for
 from flask import session as flask_session
@@ -84,6 +86,7 @@ class Stage:
 
         self.mod_name = self.params["type"]
         self.mod_rep = self.params["type"].split(":")[0]
+
 
     def update(self, name, val):
         """Method to update the value of a parameter of the stage
@@ -309,6 +312,22 @@ class Stage:
         else:
             return None
 
+    def has(self, name):
+        """Method to check if the value of a parameter is set
+
+        Parameters
+        ----------
+        self: Stage
+            The current object
+        name: string
+            The name of the parameter of the current stage
+
+        Returns
+        -------
+        boolean: True if the parameter exists and has a value, False else
+        """
+        return name in self.params
+
 
 class StageModule(Module):
     """Class which defines the entry point of a stage.
@@ -456,10 +475,10 @@ class StageModule(Module):
                 stage_name = kwargs["stage_name"]
                 del kwargs["stage_name"]
 
-                self._logger.debug("Goto ==> %s" % stage_name)
-                self._logger.debug("Current session:")
+                self.logger.debug("Goto ==> %s" % stage_name)
+                self.logger.debug("Current session:")
                 for k in flask_session.keys():
-                    self._logger.debug(" - %s: %s" % (k, flask_session[k]))
+                    self.logger.debug(" - %s: %s" % (k, flask_session[k]))
                 try:
                     g.stage = Stage(stage_name)
                 except Exception as e:

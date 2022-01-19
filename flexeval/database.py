@@ -11,10 +11,13 @@ from .utils import AppSingleton
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.inspection import inspect
-
+import threading
 
 # Instanciate database
 db = SQLAlchemy()
+
+sem = threading.Semaphore()
+
 
 
 # Alias common SQLAlchemy names
@@ -110,12 +113,14 @@ class Model(CRUDMixin, db.Model):
 
     @classmethod
     def addRelationship(cls, name, TargetClass, **kwargs):
+        sem.acquire()
         if not (hasattr(cls, name)):
             setattr(cls, name, relationship(TargetClass.__name__, **kwargs))
+        sem.release()
 
     @classmethod
     def addColumn(cls, name, col_type, *constraints):
-
+        sem.acquire()
         if not (hasattr(cls, name)):
             column = Column(col_type, *constraints)
             setattr(cls, name, column)
@@ -149,9 +154,11 @@ class Model(CRUDMixin, db.Model):
                             + cls.__tablename__
                             + " already existing. Due to SQLite limitation, you can't add a constraint via ALTER TABLE ___ ADD COLUMN ___ ."
                         )
-            return column
         else:
-            return getattr(cls, name)
+            column =  getattr(cls, name)
+
+        sem.release()
+        return column
 
 
 class ModelFactory(metaclass=AppSingleton):
@@ -164,8 +171,17 @@ class ModelFactory(metaclass=AppSingleton):
         except Exception as e:
             return None
 
+    def has(self, name_table, base):
+        try:
+            self.register[base.__name__ + "_" + name_table]
+            return True
+        except Exception as e:
+            return False
+
     def create(self, table_suffix, base, commit=True):
         table_name = base.__name__.replace("Model", "") + "_" + table_suffix
+
+        sem.acquire()
         if not (table_name in self.register):
             if Model in base.__bases__:
                 assert base.__abstract__
@@ -200,13 +216,24 @@ class ModelFactory(metaclass=AppSingleton):
                 )
 
         if commit:
-            return self.commit(self.register[table_name])
+            model_cls = self.register[table_name]
+            if not (inspect(db.engine).has_table(model_cls.__tablename__)):
+                model_cls.__table__.create(db.engine)
+            table = model_cls
         else:
-            return self.register[table_name]
+            table = self.register[table_name]
 
-    def commit(self, cls):
+        sem.release()
 
-        if not (inspect(db.engine).has_table(cls.__tablename__)):
-            cls.__table__.create(db.engine)
+        return table
 
-        return cls
+    def commit(self, model_cls):
+        """Commit the model to the database
+        """
+
+        sem.acquire()
+        if not (inspect(db.engine).has_table(model_cls.__tablename__)):
+            model_cls.__table__.create(db.engine)
+        sem.release()
+
+        return model_cls

@@ -4,80 +4,94 @@
 # Import Libraries
 import json
 
-from flask import current_app,request
+from flask import current_app, request
 
 from flexeval.core import StageModule
-from flexeval.database import ModelFactory,Column,ForeignKey,db,relationship
+from flexeval.database import ModelFactory, Column, ForeignKey, db, relationship
 from flexeval.utils import redirect
+
+import threading
+
+sem_form = threading.Semaphore()
+
 
 from .model import Form
 
+
 class FormError(Exception):
-    def __init__(self,message):
+    def __init__(self, message):
         self.message = message
+
 
 class FileNotFound(FormError):
     pass
 
+
 class MalformationError(FormError):
     pass
 
+
 with StageModule(__name__) as sm:
 
-    @sm.route("/", methods = ['GET'])
+    @sm.route("/", methods=["GET"])
     @sm.valid_connection_required
     def main():
+        # Get the current stage and the user
         stage = sm.current_stage
-        userModel = sm.authProvider.userModel
 
-        # Form établie une relation FormStage -> User
-        FormStage = ModelFactory().create(stage.name,Form)
+        # Create Form table and link the user to this form
+        if ModelFactory().has(stage.name, Form):
 
-        # On établie la relation User -> FormStage
-        userModel.addRelationship(FormStage.__name__,FormStage,uselist=False)
+            FormStage = ModelFactory().get(stage.name, Form)
+            user = sm.authProvider.user
+            user_form_for_this_stage = getattr(user, FormStage.__name__)
 
-        # Lorsque l'on utilise sm.authProvider.user on créée une nouvelle instance de UserModel
-        # Cette instance est impacté par les changements précédants
-        user = sm.authProvider.user
-        user_form_for_this_stage = getattr(user,FormStage.__name__)
-
-        if user_form_for_this_stage is None:
-            return sm.render_template(template=stage.template)
+            if user_form_for_this_stage is None:
+                return sm.render_template(template=stage.template)
+            else:
+                return redirect(stage.local_url_next)
         else:
-            return redirect(stage.local_url_next)
+            return sm.render_template(template=stage.template)
 
-    @sm.route("/save", methods = ['POST'])
+    @sm.route("/save", methods=["POST"])
     @sm.valid_connection_required
     def save():
         stage = sm.current_stage
-        FormStage = ModelFactory().get(stage.name,Form)
+        userModel = sm.authProvider.userModel
 
-        if FormStage is None:
-            return redirect(sm.url_for(sm.get_endpoint_for_local_rule("/")))
+
+        sem_form.acquire()
+        if not ModelFactory().has(stage.name, Form):
+            FormStage = ModelFactory().create(stage.name, Form)
+            userModel.addRelationship(FormStage.__name__, FormStage, uselist=False)
+        else:
+            FormStage = ModelFactory().get(stage.name, Form)
 
         user = sm.authProvider.user
-        user_form_for_this_stage = getattr(user,FormStage.__name__)
+        user_form_for_this_stage = getattr(user, FormStage.__name__)
 
         if user_form_for_this_stage is None:
             resp = FormStage.create(user_id=user.id)
             try:
                 for field_key in request.form.keys():
-                    FormStage.addColumn(field_key,db.String)
-                    resp.update(**{field_key:request.form[field_key]})
+                    FormStage.addColumn(field_key, db.String)
+                    resp.update(**{field_key: request.form[field_key]})
 
                 for field_key in request.files.keys():
-                    FormStage.addColumn(field_key,db.BLOB)
+                    FormStage.addColumn(field_key, db.BLOB)
                     with request.files[field_key].stream as f:
-                        resp.update(**{field_key:f.read()})
+                        resp.update(**{field_key: f.read()})
 
             except Exception as e:
                 resp.delete()
 
+        sem_form.release()
         return redirect(stage.local_url_next)
 
-with StageModule(__name__,subname="autogen") as sm_autogen:
 
-    @sm_autogen.route("/", methods = ['GET'])
+with StageModule(__name__, subname="autogen") as sm_autogen:
+
+    @sm_autogen.route("/", methods=["GET"])
     @sm_autogen.valid_connection_required
     def main():
 
@@ -85,26 +99,45 @@ with StageModule(__name__,subname="autogen") as sm_autogen:
 
         # On récup le json
         try:
-            with open(current_app.config["FLEXEVAL_INSTANCE_DIR"]+'/'+stage.get("data"),encoding='utf-8') as form_json_data:
+            with open(
+                current_app.config["FLEXEVAL_INSTANCE_DIR"] + "/" + stage.get("data"),
+                encoding="utf-8",
+            ) as form_json_data:
                 form_json_data = json.load(form_json_data)
         except Exception as e:
-            raise FileNotFound("Issue when loading: "+current_app.config["FLEXEVAL_INSTANCE_DIR"]+'/'+stage.get("data") )
+            raise FileNotFound(
+                "Issue when loading: "
+                + current_app.config["FLEXEVAL_INSTANCE_DIR"]
+                + "/"
+                + stage.get("data")
+            )
 
         names = []
         for component in form_json_data["components"]:
-            if ("id" not in component):
-                raise MalformationError("An ID is required for each component in "+current_app.config["FLEXEVAL_INSTANCE_DIR"]+'/'+stage.get("data"))
+            if "id" not in component:
+                raise MalformationError(
+                    "An ID is required for each component in "
+                    + current_app.config["FLEXEVAL_INSTANCE_DIR"]
+                    + "/"
+                    + stage.get("data")
+                )
 
-            if not(component["id"].replace("_","").isalnum()):
-                raise MalformationError("ID: "+component["id"]+" is incorrect. Only alphanumeric's and '_' symbol caracteres are allow.")
+            if not (component["id"].replace("_", "").isalnum()):
+                raise MalformationError(
+                    "ID: "
+                    + component["id"]
+                    + " is incorrect. Only alphanumeric's and '_' symbol caracteres are allow."
+                )
 
             if component["id"] in names:
-                raise MalformationError("ID: "+component["id"]+" is already defined.")
+                raise MalformationError(
+                    "ID: " + component["id"] + " is already defined."
+                )
 
             names.append(component["id"])
 
         # On ajoute le template à l'étape
-        stage.update("template","dynamicForm.tpl")
-        stage.set_variable("form_json_data",form_json_data)
+        stage.update("template", "dynamicForm.tpl")
+        stage.set_variable("form_json_data", form_json_data)
 
         return redirect(sm.url_for(sm.get_endpoint_for_local_rule("/")))

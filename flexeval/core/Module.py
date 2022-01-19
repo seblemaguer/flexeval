@@ -84,7 +84,7 @@ class Module(Blueprint, abc.ABC):
 
     def __init__(self, namespace, subname=None):
         # Define logger
-        self._logger = logging.getLogger(self.__class__.__name__)
+        self.logger = logging.getLogger(f"{self.__class__.__name__} ({namespace}:{subname})")
 
         self.namespace = namespace.split(".")
         self.subname = subname
@@ -191,7 +191,7 @@ class Module(Blueprint, abc.ABC):
         return cls.get_authProvider().userModel
 
     def __enter__(self):
-        self._logger.info("Registering module: %s" % self.mod_rep)
+        self.logger.info("Registering module: %s" % self.mod_rep)
         ProviderFactory().get("templates").register(self.mod_rep)
         return self
 
@@ -199,7 +199,7 @@ class Module(Blueprint, abc.ABC):
 
         try:
             current_app.register_blueprint(self, url_prefix=self.local_rule())
-            self._logger.info(
+            self.logger.info(
                 "%s is loaded and bound to: %s"
                 % (self.get_mod_name(), self.local_rule())
             )

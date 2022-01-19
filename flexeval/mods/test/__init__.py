@@ -11,6 +11,8 @@ from flexeval.database import db, commit_all
 
 from .src import TestManager
 
+sem_test = threading.Semaphore()
+
 
 class TestsAlternateError(Exception):
     pass
@@ -20,8 +22,6 @@ class MalformationError(TestsAlternateError):
     def __init__(self, message):
         self.message = message
 
-
-sem = threading.Semaphore()
 
 with StageModule(__name__) as sm:
 
@@ -70,11 +70,10 @@ with StageModule(__name__) as sm:
         if cur_step < max_steps:
 
             # Get the step
-            sem.acquire()
-            print(f"Acquiring step for user {user.id}")
+            sem_test.acquire()
             syssamples_for_this_step = test.get_step(cur_step, user, nb_systems=nb_systems_per_step, is_intro_step=intro_step)
-            print(f"Releasing step for user {user.id}")
-            sem.release()
+            sm.logger.debug(f"Sample selected for this step is {syssamples_for_this_step}")
+            sem_test.release()
 
 
             def get_syssamples(*system_names):
@@ -130,80 +129,90 @@ with StageModule(__name__) as sm:
         user = sm.authProvider.user
         skip_after_n_step = stage.get("skip_after_n_step")
 
+        sm.logger.debug(request.form)
+        # Initialize the number of intro steps
         nb_step_intro = stage.get("nb_step_intro")
-        cur_step = test.nb_steps_complete_by(user)
         if nb_step_intro is None:
             nb_step_intro = 0
+
+        # Get the current step
+        cur_step = test.nb_steps_complete_by(user)
         if cur_step is None:
             cur_step = 0
 
+        # Validate is the current step is an introduction step
         intro_step = False
         if nb_step_intro > cur_step:
             intro_step = True
 
-        if test.has_transaction(user):
-            resp = test.model.create(
-                user_id=user.id, intro=intro_step, step_idx=cur_step+1, commit=False
-            )
-            try:
-                for field_type, field_list in [
-                    ("string", request.form),
-                    ("file", request.files),
-                ]:
-                    for field_key in field_list.keys():
-                        field_value = field_list[field_key]
-
-                        if field_key[:5] == "save:":
-                            field_key = field_key[5:]
-                            (name_field, *idsyssamples) = field_key.split(":")
-
-                            name_col = name_field
-                            tmp_system_names = []
-
-                            for idsyssample in idsyssamples:
-                                (system_name, syssample_id) = test.get_in_transaction(
-                                    user, idsyssample
-                                )
-                                tmp_system_names.append(system_name)
-                                sys = {system_name: syssample_id}
-
-                                resp.update(commit=False, **sys)
-
-                            tmp_system_names.sort()
-                            for name_system in tmp_system_names:
-                                name_col = name_col + "_" + name_system
-                        else:
-                            name_col = field_key
-
-                        if field_type == "string":
-                            test.model.addColumn(name_col, db.String)
-                            # On check si field_value n'est pas un lien vers un sysSample.
-                            sysval = test.get_in_transaction(user, field_value)
-
-                            if sysval is None:
-                                resp.update(commit=False, **{name_col: field_value})
-                            else:
-                                (system_name, syssample_id) = sysval
-                                resp.update(**{name_col: system_name})
-                        else:
-                            test.model.addColumn(name_col, db.BLOB)
-
-                            with field_value.stream as f:
-                                resp.update(commit=False, **{name_col: f.read()})
-
-            except Exception as e:
-                sm._logger.error(f"Exception found: {e}")
-                test.delete_transaction(user)
-                return redirect(sm.url_for(sm.get_endpoint_for_local_rule("/")))
-
-            # Commit the results and clean the transations of the user
-            commit_all()
-            test.delete_transaction(user)
-
-            if skip_after_n_step is not None:
-                if (cur_step + 1) % skip_after_n_step == 0:
-                    return redirect(stage.local_url_next)
-
-            return redirect(sm.url_for(sm.get_endpoint_for_local_rule("/")))
-        else:
+        sem_test.acquire()
+        # If there is no transaction, a timeout happened somewhere
+        if not test.has_transaction(user):
+            sem_test.release()
             abort(408)
+
+        resp = test.model.create(
+            user_id=user.id, intro=intro_step, step_idx=cur_step+1, commit=False
+        )
+        try:
+            for field_type, field_list in [
+                ("string", request.form),
+                ("file", request.files),
+            ]:
+                for field_key in field_list.keys():
+                    field_value = field_list[field_key]
+
+                    if field_key[:5] == "save:":
+                        field_key = field_key[5:]
+                        (name_field, *idsyssamples) = field_key.split(":")
+
+                        name_col = name_field
+                        tmp_system_names = []
+
+                        for idsyssample in idsyssamples:
+                            (system_name, syssample_id) = test.get_in_transaction(
+                                user, idsyssample
+                            )
+                            tmp_system_names.append(system_name)
+                            sys = {system_name: syssample_id}
+
+                            resp.update(commit=False, **sys)
+
+                        tmp_system_names.sort()
+                        for name_system in tmp_system_names:
+                            name_col = name_col + "_" + name_system
+                    else:
+                        name_col = field_key
+
+                    if field_type == "string":
+                        test.model.addColumn(name_col, db.String)
+                        # On check si field_value n'est pas un lien vers un sysSample.
+                        sysval = test.get_in_transaction(user, field_value)
+
+                        if sysval is None:
+                            resp.update(commit=False, **{name_col: field_value})
+                        else:
+                            (system_name, syssample_id) = sysval
+                            resp.update(**{name_col: system_name})
+                    else:
+                        test.model.addColumn(name_col, db.BLOB)
+
+                        with field_value.stream as f:
+                            resp.update(commit=False, **{name_col: f.read()})
+
+        except Exception as e:
+            sm._logger.error(f"Exception found: {e}")
+            test.delete_transaction(user)
+            sem_test.release()
+            return redirect(sm.url_for(sm.get_endpoint_for_local_rule("/")))
+
+        # Commit the results and clean the transations of the user
+        commit_all()
+        test.delete_transaction(user)
+        sem_test.release()
+
+        if skip_after_n_step is not None:
+            if (cur_step + 1) % skip_after_n_step == 0:
+                return redirect(stage.local_url_next)
+
+        return redirect(sm.url_for(sm.get_endpoint_for_local_rule("/")))
