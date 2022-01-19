@@ -1,13 +1,17 @@
 
 from typing import Dict, List, Any
 
+import random
+import logging
+
 from .System import System
 
-import random
 
 
 class FirstServerSelection:
     def __init__(self, systems: Dict[str, System]) -> None:
+        self._logger = logging.getLogger(self.__class__.__name__)
+
         # Initialize content elements
         self._systems = systems
         samples = [sample.id for _, cur_system in systems.items() for sample in cur_system[0].system_samples]
@@ -18,7 +22,7 @@ class FirstServerSelection:
 
 
     def select_systems(self, nb_systems: int) -> List[str]:
-        print(self._system_counters)
+        self._logger.debug(self._system_counters)
 
         # Sort systems by descending order of usage
         pool_systems = sorted(self._system_counters.items(), key=lambda item: item[1])
