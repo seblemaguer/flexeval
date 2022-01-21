@@ -32,7 +32,7 @@ from flexeval.mods.test.model import TestModel, SampleModel
 
 # Current package
 from .System import SystemManager
-from .selection_strategy import FirstServerSelection
+from .selection_strategy import FirstServeSelection, GraecoLatinSelection
 
 TEST_CONFIGURATION_BASENAME = "tests"
 DEFAULT_CSV_DELIMITER = ","
@@ -242,7 +242,7 @@ class Test(TransactionalObject):
         )
 
         # Initialize the sample selection strategy
-        self._selection_strategy = FirstServerSelection(self.systems)
+        self._selection_strategy = FirstServeSelection(self.systems)
 
 
     def nb_steps_complete_by(self, user: UserModel) -> int:
