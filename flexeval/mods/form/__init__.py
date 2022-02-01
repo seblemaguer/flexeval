@@ -42,11 +42,10 @@ with StageModule(__name__) as sm:
         # Create Form table and link the user to this form
         if ModelFactory().has(stage.name, Form):
 
-            FormStage = ModelFactory().get(stage.name, Form)
+            form_stage = ModelFactory().get(stage.name, Form)
             user = sm.authProvider.user
-            user_form_for_this_stage = getattr(user, FormStage.__name__)
-
-            if user_form_for_this_stage is None:
+            res = form_stage.query.filter_by(user_id=user.id)
+            if res.first() is None:
                 return sm.render_template(template=stage.template)
             else:
                 return redirect(stage.local_url_next)
@@ -62,23 +61,23 @@ with StageModule(__name__) as sm:
 
         sem_form.acquire()
         if not ModelFactory().has(stage.name, Form):
-            FormStage = ModelFactory().create(stage.name, Form)
-            userModel.addRelationship(FormStage.__name__, FormStage, uselist=False)
+            form_stage = ModelFactory().create(stage.name, Form)
+            userModel.addRelationship(form_stage.__name__, form_stage, uselist=False)
         else:
-            FormStage = ModelFactory().get(stage.name, Form)
+            form_stage = ModelFactory().get(stage.name, Form)
 
         user = sm.authProvider.user
-        user_form_for_this_stage = getattr(user, FormStage.__name__)
+        user_form_for_this_stage = getattr(user, form_stage.__name__)
 
         if user_form_for_this_stage is None:
-            resp = FormStage.create(user_id=user.id)
+            resp = form_stage.create(user_id=user.id)
             try:
                 for field_key in request.form.keys():
-                    FormStage.addColumn(field_key, db.String)
+                    form_stage.addColumn(field_key, db.String)
                     resp.update(**{field_key: request.form[field_key]})
 
                 for field_key in request.files.keys():
-                    FormStage.addColumn(field_key, db.BLOB)
+                    form_stage.addColumn(field_key, db.BLOB)
                     with request.files[field_key].stream as f:
                         resp.update(**{field_key: f.read()})
 

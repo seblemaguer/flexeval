@@ -173,9 +173,33 @@ class ModelFactory(metaclass=AppSingleton):
 
     def has(self, name_table, base):
         try:
-            self.register[base.__name__ + "_" + name_table]
+            table_name = base.__name__ + "_" + name_table
+            # Register already knows the table
+            if table_name in self.register:
+                return True
+
+            sem.acquire()
+
+            if inspect(db.engine).has_table(table_name):
+                self.register[table_name] = type(
+                    table_name,
+                    (
+                        base,
+                        Model,
+                    ),
+                    {
+                        "__tablename__": table_name,
+                        "__table_args__": {
+                            "extend_existing": True,
+                            "autoload": True,
+                            "autoload_with": db.engine,
+                        },
+                    },
+                )
+            sem.release()
             return True
         except Exception as e:
+            sem.release()
             return False
 
     def create(self, table_suffix, base, commit=True):

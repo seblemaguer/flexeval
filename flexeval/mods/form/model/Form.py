@@ -16,4 +16,4 @@ class Form(Model):
 
     @declared_attr
     def user_id(cls):
-        return Column(db.String, ForeignKey(userModel.__tablename__ + ".id"))
+        return Column(db.String, ForeignKey(userModel.__tablename__ + ".id"), nullable=False, unique=True)
