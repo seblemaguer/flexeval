@@ -161,7 +161,6 @@ with StageModule(__name__) as sm:
             ]:
                 for field_key in field_list.keys():
                     field_value = field_list[field_key]
-
                     if field_key[:5] == "save:":
                         field_key = field_key[5:]
                         (name_field, *idsyssamples) = field_key.split(":")

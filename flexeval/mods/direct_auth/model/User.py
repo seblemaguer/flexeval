@@ -3,21 +3,21 @@
 
 from flexeval.core.providers.auth import UserModel
 
+import re
 
 class NotAnEmail(Exception):
     def __init__(self, email):
         self.email = email
 
 
+
+EMAIL_REGEX = re.compile(r'^([\w\.\-]+)@([\w\-]+)((\.([\w-]){2,63}){1,3})$')
 class EmailUser(UserModel):
     def __init__(self, email):
 
-        try:
-            split = email.split("@")
-            assert len(split) == 2
-            domain = split[1].split(".")
-            assert len(domain) == 2
-        except Exception as e:
+        # Validate email
+        if not re.fullmatch(EMAIL_REGEX, email):
             raise NotAnEmail(email)
 
+        # Set the email as the ID
         self.id = email

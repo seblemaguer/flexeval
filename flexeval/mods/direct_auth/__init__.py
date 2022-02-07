@@ -32,6 +32,7 @@ with StageModule(__name__) as sm:
         try:
             sm.authProvider.connect(email)
         except NotAnEmail as e:
+            sm.logger.error(f"Problem with the email: {e}")
             return redirect(sm.url_for(sm.get_endpoint_for_local_rule("/")))
 
         return redirect(stage.local_url_next)
