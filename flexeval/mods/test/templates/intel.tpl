@@ -33,11 +33,16 @@
 
     <fieldset class="form-group">
         <legend class="col-form-label">
-            <strong>Question:</strong> Transcribe the following sample
-            <ul>
-                <li>if you don't understand a word use the joker ' * '</li>
-                <li>if you don't understand part of a word, use the joker '#' to replace the part and transcribe the rest of the word</li>
-            </ul>
+            <p>
+                Please try to enter all of the words you hear, but <b>do not enter any comments.</b>
+                If you cannot hear any sound coming out of the headphones, please make sure that your browser can handle embedded audio players (all current browsers do), and that you have not turned javascript off.
+                If you can hear the audio, but you cannot understand ANY of the words, just write <b>"&lt;&gt;"</b> (without the quotes) and nothing else.
+                If you can understand some, but not all of the words, just type in the ones you heard.
+            </p>
+            <p>
+                <b>Listen to the audio file by clicking on the image below, and type what you hear into the text box.&nbsp; </b>
+                <br><br>
+            </p>
         </legend>
 
 

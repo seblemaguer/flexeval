@@ -32,7 +32,7 @@
 <form action="./save" method="post" enctype="multipart/form-data" class="form-example">
   <fieldset class="form-group">
     <legend class="col-form-label">
-      <strong>Question: </strong> How do you judge the <strong>quality</strong> of the following sample?
+        Listen to the example below:
     </legend>
 
     {% set syssample = get_variable("syssamples")[0] %}
@@ -40,34 +40,39 @@
       {% set name_field = get_variable("field_name",name="MOS_score",syssamples=[syssample]) %}
       {% set content,mimetype = syssample.get(num=0)  %}
 
-      <label for="score@{{syssample.ID}}">
+      <center>
+          <label for="score@{{syssample.ID}}">
+              {% if mimetype == "text" %}
+                {{content}}
+              {% elif mimetype == "image" %}
+                <img class="img-fluid" src="{{content}}" />
+              {% elif mimetype == "audio" %}
+                <audio id="sample" controls readall>
+                    <source src="{{content}}">
+                    Your browser does not support the <code>audio</code> element.
+                </audio>
+              {% elif mimetype == "video" %}
+                <video controls readall>
+                    <source src="{{content}}">
+                    Your browser does not support the <code>video</code> element.
+                </video>
+              {% else %}
+                {{content}}
+              {% endif %}
+          </label>
+      </center>
 
-        {% if mimetype == "text" %}
-          {{content}}
-        {% elif mimetype == "image" %}
-          <img class="img-fluid" src="{{content}}" />
-        {% elif mimetype == "audio" %}
-          <audio id="sample" controls readall>
-            <source src="{{content}}">
-            Your browser does not support the <code>audio</code> element.
-          </audio>
-        {% elif mimetype == "video" %}
-          <video controls readall>
-            <source src="{{content}}">
-            Your browser does not support the <code>video</code> element.
-          </video>
-        {% else %}
-          {{content}}
-        {% endif %}
-
-      </label>
-      <select id="mos_score@{{syssample.ID}}" name="{{name_field}}" class="form-control" required>
-        <option value="" selected disabled hidden>Choose here</option>
-        <option value="5">Excellent</option>
-        <option value="4">Good</option>
-        <option value="3">Fair</option>
-        <option value="2">Poor</option>
-        <option value="1">Bad</option>
+      <legend class="col-form-label">
+          Now choose a score for how <b>natural</b> or <b>unnatural</b> the sentence <b><i>sounded</i></b>.
+          The scale is from <b>1 [Completely Unnatural] to 5 [Completely Natural]</b>.
+    </legend>
+    <select id="mos_score@{{syssample.ID}}" name="{{name_field}}" class="form-control" required>
+          <option value="" selected disabled hidden>Choose here</option>
+          <option value="1">1 : Completely Unnatural</option>
+          <option value="2">2 : Mostly Unnatural</option>
+          <option value="3">3 : Equally Natural and Unnatural</option>
+          <option value="4">4 : Mostly Natural</option>
+          <option value="5">5 : Completely Natural</option>
       </select>
     </div>
   </fieldset>
