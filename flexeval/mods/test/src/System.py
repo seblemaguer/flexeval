@@ -66,7 +66,7 @@ class System:
 
             for line_id, line in enumerate(reader):
 
-                if line_id > max_samples:
+                if line_id >= max_samples:
                     break
 
                 vars = {"system": self.name, "line_id": line_id}

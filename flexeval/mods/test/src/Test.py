@@ -20,6 +20,8 @@ import base64
 import mimetypes
 import random
 from datetime import datetime, timedelta
+import hashlib
+import shutil
 
 # Flask
 from flask import current_app
@@ -32,10 +34,11 @@ from flexeval.mods.test.model import TestModel, SampleModel
 
 # Current package
 from .System import SystemManager
-from .selection_strategy import FirstServeSelection, GraecoLatinSelection
+from .selection_strategy import RandomizedBalancedSelection
 
 TEST_CONFIGURATION_BASENAME = "tests"
 DEFAULT_CSV_DELIMITER = ","
+
 
 
 class SampleModelTemplate:
@@ -44,6 +47,12 @@ class SampleModelTemplate:
         self._systemsample = systemsample
         self.system_name = system_name
         self._ID = id
+        self._cache = dict()
+        self._cached = True # TODO: add as a configuration parameter
+
+        if self._cached:
+            self.CACHE_DIR=Path(current_app.config["FLEXEVAL_INSTANCE_DIR"] + "/assets/tmp_eval")
+            self.CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
     @property
     def ID(self):
@@ -65,25 +74,45 @@ class SampleModelTemplate:
             if not (file_path[0] == "/"):
                 file_path = "/" + file_path
 
-            if Path(
-                current_app.config["FLEXEVAL_INSTANCE_DIR"] + "/systems" + file_path
-            ).is_file():
-                mime, _ = mimetypes.guess_type(
-                    current_app.config["FLEXEVAL_INSTANCE_DIR"] + "/systems" + file_path
-                )
+            cur_sample_path = Path(current_app.config["FLEXEVAL_INSTANCE_DIR"] + "/systems" + file_path)
+            if cur_sample_path.is_file():
+                if self._cached:
+                    if cur_sample_path not in self._cache:
+                        mime, _ = mimetypes.guess_type(cur_sample_path)
+                        mime = mime.split("/")[0]
 
-                with open(
-                    current_app.config["FLEXEVAL_INSTANCE_DIR"]
-                    + "/systems"
-                    + file_path,
-                    "rb",
-                ) as f:
+                        hashing = hashlib.md5()
+                        hashing.update(str(cur_sample_path).encode())
+                        value = self.CACHE_DIR/(str(hashing.hexdigest()) + ".wav")
+                        shutil.copy(cur_sample_path, value)
+
+                        value = value.relative_to(current_app.config["FLEXEVAL_INSTANCE_DIR"])
+                        value = current_app.config["FLEXEVAL_INSTANCE_URL"] + "/" + str(value)
+                        self._cache[cur_sample_path] = (value, mime)
+
+                    return self._cache[cur_sample_path]
+            else:
+
+                mime, _ = mimetypes.guess_type(cur_sample_path)
+
+
+                with open(cur_sample_path, "rb") as f:
                     data64 = base64.b64encode(f.read()).decode("utf-8")
                     value = "data:%s;base64,%s" % (mime, data64)
-                mime = mime.split("/")[0]
 
+                mime = mime.split("/")[0]
             return (value, mime)
 
+    def __str__(self):
+
+        return f"(Sys={self.system_name}, Sample={self._systemsample.audio})"
+        # self._system = SystemManager().get(systemsample.system)
+        # self._systemsample = systemsample
+        # self.system_name = system_name
+        # self._ID = id
+        # self._cache = dict()
+        # self._cached = True # TODO: add as a configuration parameter
+        # pass
 
 class TestError(Exception):
     def __init__(self, message):
@@ -242,7 +271,8 @@ class Test(TransactionalObject):
         )
 
         # Initialize the sample selection strategy
-        self._selection_strategy = FirstServeSelection(self.systems)
+        # self._selection_strategy = LeastSeenSelection(self.systems)
+        self._selection_strategy = RandomizedBalancedSelection(self.systems)
 
 
     def nb_steps_complete_by(self, user: UserModel) -> int:
@@ -258,17 +288,11 @@ class Test(TransactionalObject):
         if self.has_transaction(user):
             return self.get_in_transaction(user, "choice_for_systems")
         else:
-            # Select the systems
-            self._logger.debug(f"Select systems for user {user.id}")
-            pool_systems = self._selection_strategy.select_systems(nb_systems)
 
-            # Select the samples
-            self._logger.debug(f"Select samples for user {user.id}")
-            for system_name in pool_systems:
-                samples = self._selection_strategy.select_samples(system_name, 1) # NOTE: 1 is hardcoded here
+            # Select samples (NOTE: 1 is hardcoded here)
+            selected_samples = self._selection_strategy.select_samples(user.id, nb_systems, 1) #
+            for system_name, samples in selected_samples.items():
                 choice_for_systems[system_name] = samples[0]
-
-            self._logger.info(f"This is what we will give to {user.id}: {choice_for_systems}")
 
             # Now we are ready to create the transaction
             self.create_transaction(user)

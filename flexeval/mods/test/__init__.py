@@ -72,7 +72,6 @@ with StageModule(__name__) as sm:
             # Get the step
             sem_test.acquire()
             syssamples_for_this_step = test.get_step(cur_step, user, nb_systems=nb_systems_per_step, is_intro_step=intro_step)
-            sm.logger.debug(f"Sample selected for this step is {syssamples_for_this_step}")
             sem_test.release()
 
 
@@ -97,8 +96,9 @@ with StageModule(__name__) as sm:
                     ID = ID + ":" + syssample.ID
 
                 ID = "save:" + name + ID
-                print(ID)
                 return ID
+
+            sm.logger.debug(f"Sample selected for this step is {get_syssamples()[0]}")
 
             # On change les valeurs max_steps et steps pour l'affichage sur la page web
             if intro_step:
@@ -200,7 +200,6 @@ with StageModule(__name__) as sm:
                             resp.update(commit=False, **{name_col: f.read()})
 
         except Exception as e:
-            sm._logger.error(f"Exception found: {e}")
             test.delete_transaction(user)
             sem_test.release()
             return redirect(sm.url_for(sm.get_endpoint_for_local_rule("/")))

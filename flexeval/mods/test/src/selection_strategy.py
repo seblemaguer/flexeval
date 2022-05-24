@@ -1,4 +1,4 @@
-
+from flexeval.mods.test.model import SampleModel
 from typing import Dict, List, Any
 
 import random
@@ -7,19 +7,25 @@ import logging
 from .System import System
 
 
+class LeastSeenSelection:
+    """Class implementing the selection strategy based on the "least
+    seen" paradigm: the least seen sample is selected first!
+    """
 
-class FirstServeSelection:
     def __init__(self, systems: Dict[str, System]) -> None:
         self._logger = logging.getLogger(self.__class__.__name__)
 
         # Initialize content elements
         self._systems = systems
-        samples = [sample.id for _, cur_system in systems.items() for sample in cur_system[0].system_samples]
+        samples = [
+            sample.id
+            for _, cur_system in systems.items()
+            for sample in cur_system[0].system_samples
+        ]
 
         # Initialize counters
         self._system_counters = dict([(cur_system, 0) for cur_system in systems.keys()])
         self._sample_counters = dict([(cur_sample, 0) for cur_sample in samples])
-
 
     def select_systems(self, nb_systems: int) -> List[str]:
         self._logger.debug(self._system_counters)
@@ -28,12 +34,13 @@ class FirstServeSelection:
         pool_systems = sorted(self._system_counters.items(), key=lambda item: item[1])
 
         # Assert/Fix the number of required systems
-        assert (nb_systems < len(pool_systems)) and (nb_systems != 0), \
-            f"The required number of systems ({nb_systems}) is greater than the available number of systems {len(pool_systems)} or it is 0"
+        assert (nb_systems < len(pool_systems)) and (
+            nb_systems != 0
+        ), f"The required number of systems ({nb_systems}) is greater than the available number of systems {len(pool_systems)} or it is 0"
 
         # Preparing pool of systems
         if nb_systems > 0:
-            min_count = 9999999 # NOTE: Infinite is hardcoded here!
+            min_count = 9999999  # NOTE: Infinite is hardcoded here!
             tmp_pool = []
             for system, count in pool_systems:
                 if count > min_count:
@@ -57,23 +64,31 @@ class FirstServeSelection:
 
         return pool_systems
 
-    def select_samples(self, system_id: str, nb_samples: int) -> List[Any]:
+    def internal_select_samples(self, system_id: str, nb_samples: int) -> List[Any]:
 
         # Subset the list of samples
-        dict_samples = dict([(sample.id, sample) for sample in self._systems[system_id][0].system_samples])
-        sample_subset = {sample_id: self._sample_counters[sample_id] for sample_id in dict_samples.keys()}
+        dict_samples = dict(
+            [
+                (sample.id, sample)
+                for sample in self._systems[system_id][0].system_samples
+            ]
+        )
+        sample_subset = {
+            sample_id: self._sample_counters[sample_id]
+            for sample_id in dict_samples.keys()
+        }
 
         # Sort by counting the pool of samples
         pool_samples = sorted(sample_subset.items(), key=lambda item: item[1])
 
-
         # Assert/Fix the number of required samples
-        assert (nb_samples < len(pool_samples)) and (nb_samples != 0), \
-            f"The required number of samples ({nb_samples}) is greater than the available number of samples {len(pool_samples)} or it is 0"
+        assert (nb_samples < len(pool_samples)) and (
+            nb_samples != 0
+        ), f"The required number of samples ({nb_samples}) is greater than the available number of samples {len(pool_samples)} or it is 0"
 
         # Preparing pool of samples
         if nb_samples > 0:
-            min_count = 9999999 # NOTE: Infinite is hardcoded here!
+            min_count = 9999999  # NOTE: Infinite is hardcoded here!
             tmp_pool = []
             for sample, count in pool_samples:
                 if count > min_count:
@@ -97,92 +112,191 @@ class FirstServeSelection:
 
         return [dict_samples[sample_id] for sample_id in pool_samples]
 
+    def select_samples(
+        self, user_id: str, nb_systems: int, nb_samples: int
+    ) -> Dict[str, SampleModel]:
+        # Select the systems
+        self._logger.debug(f"Select systems for user {user_id}")
+        pool_systems = self.select_systems(nb_systems)
 
-class GraecoLatinSelection:
+        # Select the samples
+        self._logger.debug(f"Select samples for user {user_id}")
+        dict_samples = dict()
+        for system_name in pool_systems:
+            dict_samples[system_name] = self.internal_select_samples(
+                system_name, nb_samples
+            )
+
+        self._logger.info(f"This is what we will give to {user_id}: {dict_samples}")
+
+        return dict_samples
+
+
+class LatinSquareSystemLeastSeenSampleSelection(LeastSeenSelection):
+    """Class implementing the selection strategy based a latin square
+    for the system and on the "least seen" paradigm for the samples.
+
+    """
+
     def __init__(self, systems: Dict[str, System]) -> None:
+        """Initialization wi"""
+        super().__init__(systems)
+
+        # Initialize user/permutation info
+        self._user_infos = dict()
+        self._current_permutation_idx = 0
+
+        # Generate system permuations based on a latin square
+        nb_systems = len(systems.keys())
+        permutation_system = [
+            ((i + j) % nb_systems) for i in range(nb_systems) for j in range(nb_systems)
+        ]
+
+        # Initialize flatten system list based on permutation
+        list_system_names = list(systems.keys())
+        self._permutation_system_names = []
+        for i_perm in permutation_system:
+            system_name = list_system_names[i_perm]
+            self._permutation_system_names.append(system_name)
+
+    def select_systems(self, user_id: str, nb_systems: int) -> List[str]:
+        # Create user if not really
+        if user_id not in self._user_infos:
+            self._user_infos[user_id] = [self._current_permutation_idx, 0]
+            self._logger.debug(
+                f"{user_id} has been associated to permutation {self._current_permutation_idx}"
+            )
+            self._current_permutation_idx += 1
+
+        # Resume position
+        cur_position = (
+            self._user_infos[user_id][0] * len(self._systems)
+        ) + self._user_infos[user_id][1]
+
+        # Select samples
+        pool_systems = []
+        shift = 0
+        for _ in range(nb_systems):
+            system_name = self._permutation_system_names[
+                cur_position % len(self._permutation_system_names)
+            ]
+            pool_systems.append(system_name)
+
+            self._logger.warning(
+                f"{user_id} (with permutation [{self._user_infos[user_id][0]}]) has been selecting couple (cur_pos = {cur_position}, sys={system_name})"
+            )
+
+            cur_position += 1
+            shift += 1
+
+        # Prepare to move next
+        self._user_infos[user_id][1] += shift
+
+        return pool_systems
+
+    def select_samples(
+        self, user_id: str, nb_systems: int, nb_samples: int
+    ) -> Dict[str, SampleModel]:
+        # Select the systems
+        self._logger.debug(f"Select systems for user {user_id}")
+        pool_systems = self.select_systems(user_id, nb_systems)
+
+        # Select the samples
+        self._logger.debug(f"Select samples for user {user_id}")
+        dict_samples = dict()
+        for system_name in pool_systems:
+            dict_samples[system_name] = self.internal_select_samples(
+                system_name, nb_samples
+            )
+
+        self._logger.info(f"This is what we will give to {user_id}: {dict_samples}")
+
+        return dict_samples
+
+
+class RandomizedBalancedSelection:
+    """Class implementing the selection strategy based a latin square
+    for the system and on the "least seen" paradigm for the samples.
+
+    """
+
+    def __init__(self, systems: Dict[str, System]) -> None:
+        """Initialization"""
+
         self._logger = logging.getLogger(self.__class__.__name__)
 
         # Initialize content elements
         self._systems = systems
-        samples = [sample.id for _, cur_system in systems.items() for sample in cur_system[0].system_samples]
+        self._system_names = list(systems.keys())
 
-        # Initialize counters
-        self._system_counters = dict([(cur_system, 0) for cur_system in systems.keys()])
-        self._sample_counters = dict([(cur_sample, 0) for cur_sample in samples])
+        # Be sure that the number of samples per systems equal the number of systems
+        nb_systems = len(systems.keys())
+        for sys_name, cur_system in systems.items():
+            assert (
+                len(cur_system[0].system_samples) == nb_systems
+            ), f'The number of samples ({len(cur_system[0].system_samples)}) for the system "{sys_name}" is different from the number of available systems ({nb_systems})'
 
+        # Initialize user/permutation info
+        self._user_infos = dict()
+        self._start_idx = 5
 
-    def select_systems(self, nb_systems: int) -> List[str]:
-        self._logger.debug(self._system_counters)
+        # Generate permutation matrix
+        self._init_permutations = []
+        for i_sys in range(nb_systems):
+            for i_utt in range(nb_systems):
+                self._init_permutations.append((i_sys, i_utt))
 
-        # Sort systems by descending order of usage
-        pool_systems = sorted(self._system_counters.items(), key=lambda item: item[1])
+    def select_samples(
+        self, user_id: str, nb_systems: int, nb_samples: int
+    ) -> Dict[str, SampleModel]:
+        assert (
+            nb_systems == 1
+        ), f"RandomizedBalanced selection strategy imposes that the number of systems required per step is 1 . The requested number of systems is {nb_systems}."
 
-        # Assert/Fix the number of required systems
-        assert (nb_systems < len(pool_systems)) and (nb_systems != 0), \
-            f"The required number of systems ({nb_systems}) is greater than the available number of systems {len(pool_systems)} or it is 0"
+        assert (
+            nb_samples == 1
+        ), f"RandomizedBalanced selection that the number of requested samples to be 1."
 
-        # Preparing pool of systems
-        if nb_systems > 0:
-            min_count = 9999999 # NOTE: Infinite is hardcoded here!
-            tmp_pool = []
-            for system, count in pool_systems:
-                if count > min_count:
-                    break
+        # Create user if not ready
+        if user_id not in self._user_infos:
+            # Select permutations
+            total_nb_systems = len(self._systems)
+            cur_permutation = []
+            cur_idx = self._start_idx
+            offset = 0
+            for _ in range(total_nb_systems):
+                cur_permutation.append(self._init_permutations[cur_idx])
+                offset += 1
+                self._logger.debug(
+                    f"boundary = {(cur_idx + 1) % total_nb_systems}, cur_idx = {cur_idx}, total_nb_systems={total_nb_systems}, len={len(self._init_permutations)}"
+                )
 
-                tmp_pool.append((system, count))
-                min_count = count
+                if ((cur_idx + 1) % total_nb_systems) == 0:
+                    cur_idx += 1
+                else:
+                    step = total_nb_systems + 1
+                    cur_idx += step
 
-            pool_systems = tmp_pool
+            random.shuffle(cur_permutation)
+            self._user_infos[user_id] = [cur_permutation, 0]
+            self._logger.debug(
+                f"{user_id} has been associated to permutation {self._start_idx} with the following permutation (sys_idx, samp_idx): {cur_permutation}"
+            )
+            self._start_idx += 1
+            self._start_idx = self._start_idx % total_nb_systems
 
-        # Ignore the counting from now, we are only interested with the systems themselves
-        pool_systems = [system[0] for system in pool_systems]
+        # Retrieve sample
+        cur_position = self._user_infos[user_id][1]
+        system_idx, sample_idx = self._user_infos[user_id][0][cur_position]
 
-        # Shuffle the systems to guarantee variation in the presentation order
-        random.shuffle(pool_systems)
+        system_name = self._system_names[system_idx]
 
-        # Select the desired number of systems
-        pool_systems = pool_systems[:nb_systems]
-        for p in pool_systems:
-            self._system_counters[p] += 1
+        # Indicate that we move to the next position
+        self._user_infos[user_id][1] += 1
 
-        return pool_systems
+        dict_samples = dict()
+        dict_samples[system_name] = [self._systems[system_name][0].system_samples[sample_idx]]
 
-    def select_samples(self, system_id: str, nb_samples: int) -> List[Any]:
+        self._logger.info(f"This is what we will give to {user_id}: {dict_samples}")
 
-        # Subset the list of samples
-        dict_samples = dict([(sample.id, sample) for sample in self._systems[system_id][0].system_samples])
-        sample_subset = {sample_id: self._sample_counters[sample_id] for sample_id in dict_samples.keys()}
-
-        # Sort by counting the pool of samples
-        pool_samples = sorted(sample_subset.items(), key=lambda item: item[1])
-
-
-        # Assert/Fix the number of required samples
-        assert (nb_samples < len(pool_samples)) and (nb_samples != 0), \
-            f"The required number of samples ({nb_samples}) is greater than the available number of samples {len(pool_samples)} or it is 0"
-
-        # Preparing pool of samples
-        if nb_samples > 0:
-            min_count = 9999999 # NOTE: Infinite is hardcoded here!
-            tmp_pool = []
-            for sample, count in pool_samples:
-                if count > min_count:
-                    break
-
-                tmp_pool.append((sample, count))
-                min_count = count
-
-            pool_samples = tmp_pool
-
-        # Ignore the counting from now, we are only interested with the samples themselves
-        pool_samples = [sample[0] for sample in pool_samples]
-
-        # Shuffle the samples to guarantee variation in the presentation order
-        random.shuffle(pool_samples)
-
-        # Select the desired number of samples
-        pool_samples = pool_samples[:nb_samples]
-        for p in pool_samples:
-            self._sample_counters[p] += 1
-
-        return [dict_samples[sample_id] for sample_id in pool_samples]
+        return dict_samples
