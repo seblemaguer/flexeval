@@ -41,7 +41,6 @@ with StageModule(__name__) as sm:
 
         # Create Form table and link the user to this form
         if ModelFactory().has(stage.name, Form):
-
             form_stage = ModelFactory().get(stage.name, Form)
             user = sm.authProvider.user
             res = form_stage.query.filter_by(user_id=user.id)
@@ -62,9 +61,9 @@ with StageModule(__name__) as sm:
         sem_form.acquire()
         if not ModelFactory().has(stage.name, Form):
             form_stage = ModelFactory().create(stage.name, Form)
-            userModel.addRelationship(form_stage.__name__, form_stage, uselist=False)
         else:
             form_stage = ModelFactory().get(stage.name, Form)
+        userModel.addRelationship(form_stage.__name__, form_stage, uselist=False)
 
         user = sm.authProvider.user
         user_form_for_this_stage = getattr(user, form_stage.__name__)
