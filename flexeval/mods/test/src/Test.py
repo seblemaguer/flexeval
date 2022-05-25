@@ -34,7 +34,7 @@ from flexeval.mods.test.model import TestModel, SampleModel
 
 # Current package
 from .System import SystemManager
-from .selection_strategy import RandomizedBalancedSelection
+from .selection_strategy import *
 
 TEST_CONFIGURATION_BASENAME = "tests"
 DEFAULT_CSV_DELIMITER = ","
@@ -211,10 +211,20 @@ class TransactionalObject:
 
 class Test(TransactionalObject):
     def __init__(self, name: str, config) -> None:
+        """Constructor
+
+        Parameters
+        ----------
+        name: str
+            The name of the section
+        config: ????
+            The configuration of the test
+
+        """
         super().__init__()
 
         self.name = name
-        self._logger = logging.getLogger(__name__)
+        self._logger = logging.getLogger(f"{__name__} ({self.name})")
 
         # Load systems
         self.systems = {}
@@ -230,7 +240,6 @@ class Test(TransactionalObject):
             self.systems[cur_system["name"]] = (
                 SystemManager().get(cur_system["data"].replace(".csv", ""), delimiter, max_samples),
             )
-
 
         # Create Test table in the database
         # NOTE: commit is delayed in order to enable to set later the foreign key constraint on needed columns
@@ -271,11 +280,18 @@ class Test(TransactionalObject):
         )
 
         # Initialize the sample selection strategy
-        # self._selection_strategy = LeastSeenSelection(self.systems)
-        self._selection_strategy = RandomizedBalancedSelection(self.systems)
+        if "selection_strategy" in config:
+            selection_strategy_name = config["selection_strategy"]
+            self._logger.info(f"The selection strategy is user defined to \"{selection_strategy_name}\"")
+            constructor = globals()[selection_strategy_name]
+            self._selection_strategy = constructor(self.systems)
+        else:
+            self._logger.info(f"The selection strategy is defaulted to \"LeastSeenSelection\"")
+            self._selection_strategy = LeastSeenSelection(self.systems)
 
 
     def nb_steps_complete_by(self, user: UserModel) -> int:
+
         return len(getattr(user, self.model.__name__))
 
 
