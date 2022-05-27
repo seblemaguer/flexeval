@@ -1,18 +1,25 @@
-from flexeval.mods.test.model import SampleModel
 from typing import Dict, List, Any
 
 import random
 import logging
 
 from .System import System
-
+from flexeval.mods.test.model import SampleModel
 
 class LeastSeenSelection:
-    """Class implementing the selection strategy based on the "least
-    seen" paradigm: the least seen sample is selected first!
+    """Class implementing the selection strategy based on the "least seen" paradigm:
+        1. list the least seen system(s)
+        2. for the the least system(s), select the least seen sample(s)
     """
 
     def __init__(self, systems: Dict[str, System]) -> None:
+        """Constructor
+
+        Parameters
+        ----------
+        systems: Dict[str, System]
+            The dictionnary of systems indexed by their names
+        """
         self._logger = logging.getLogger(self.__class__.__name__)
 
         # Initialize content elements
@@ -28,7 +35,18 @@ class LeastSeenSelection:
         self._sample_counters = dict([(cur_sample, 0) for cur_sample in samples])
 
     def select_systems(self, nb_systems: int) -> List[str]:
-        self._logger.debug(self._system_counters)
+        """Select a certain amount systems among the least seen ones
+
+        Parameters
+        ----------
+        nb_systems: int
+            The desired number of systems
+
+        Returns
+        -------
+        List[str]
+            the list of names of the selected systems
+        """
 
         # Sort systems by descending order of usage
         pool_systems = sorted(self._system_counters.items(), key=lambda item: item[1])
@@ -64,13 +82,26 @@ class LeastSeenSelection:
 
         return pool_systems
 
-    def internal_select_samples(self, system_id: str, nb_samples: int) -> List[Any]:
+    def internal_select_samples(self, system_name: str, nb_samples: int) -> List[SampleModel]:
+        """Select a given number of samples of a given system
 
+        Parameters
+        ----------
+        system_name: str
+           The name of the system
+        nb_samples: int
+           The desired number of sample
+
+        Returns
+        -------
+        List[SampleModel]
+            The list of selected samples
+        """
         # Subset the list of samples
         dict_samples = dict(
             [
                 (sample.id, sample)
-                for sample in self._systems[system_id][0].system_samples
+                for sample in self._systems[system_name][0].system_samples
             ]
         )
         sample_subset = {
@@ -112,9 +143,28 @@ class LeastSeenSelection:
 
         return [dict_samples[sample_id] for sample_id in pool_samples]
 
-    def select_samples(
-        self, user_id: str, nb_systems: int, nb_samples: int
-    ) -> Dict[str, SampleModel]:
+    def select_samples(self, user_id: str, nb_systems: int, nb_samples: int) -> Dict[str, List[SampleModel]]:
+        """Method to select a given number of samples for a given number of systems for a specific user
+
+        The selection strategy is twofold:
+           1. select the desired number of least systems
+           2. for each selected system, select the least seen samples (the desired number of samples for each system)
+
+        Parameters
+        ----------
+        user_id: str
+            The identifier of the participant
+        nb_systems: int
+            The desired number of systems
+        nb_samples: int
+            The desired number of samples
+
+        Returns
+        -------
+        Dict[str, List[SampleModel]]
+            The dictionary providing for a system name the associated sample embedded in a list
+        """
+
         # Select the systems
         self._logger.debug(f"Select systems for user {user_id}")
         pool_systems = self.select_systems(nb_systems)
@@ -133,13 +183,19 @@ class LeastSeenSelection:
 
 
 class LatinSquareSystemLeastSeenSampleSelection(LeastSeenSelection):
-    """Class implementing the selection strategy based a latin square
-    for the system and on the "least seen" paradigm for the samples.
-
+    """Class implementing the following selection strategy:
+        1. Select the systems using the latin square paradigm
+        2. for the the selected system(s), select the least seen sample(s)
     """
 
     def __init__(self, systems: Dict[str, System]) -> None:
-        """Initialization wi"""
+        """Constructor
+
+        Parameters
+        ----------
+        systems: Dict[str, System]
+            The dictionnary of systems indexed by their names
+        """
         super().__init__(systems)
 
         # Initialize user/permutation info
@@ -160,6 +216,18 @@ class LatinSquareSystemLeastSeenSampleSelection(LeastSeenSelection):
             self._permutation_system_names.append(system_name)
 
     def select_systems(self, user_id: str, nb_systems: int) -> List[str]:
+        """Select a certain amount systems using the latin square paradigm
+
+        Parameters
+        ----------
+        nb_systems: int
+            The desired number of systems
+
+        Returns
+        -------
+        List[str]
+            the list of names of the selected systems
+        """
         # Create user if not really
         if user_id not in self._user_infos:
             self._user_infos[user_id] = [self._current_permutation_idx, 0]
@@ -194,9 +262,28 @@ class LatinSquareSystemLeastSeenSampleSelection(LeastSeenSelection):
 
         return pool_systems
 
-    def select_samples(
-        self, user_id: str, nb_systems: int, nb_samples: int
-    ) -> Dict[str, SampleModel]:
+    def select_samples(self, user_id: str, nb_systems: int, nb_samples: int) -> Dict[str, List[SampleModel]]:
+        """Method to select a given number of samples for a given number of systems for a specific user
+
+        The selection strategy is twofold:
+           1. select the desired number of least systems
+           2. for each selected system, select the least seen samples (the desired number of samples for each system)
+
+        Parameters
+        ----------
+        user_id: str
+            The identifier of the participant
+        nb_systems: int
+            The desired number of systems (it should be = 1 )
+        nb_samples: int
+            The desired number of samples (it should be = 1)
+
+        Returns
+        -------
+        Dict[str, List[SampleModel]]
+            The dictionary providing for a system name the associated sample embedded in a list
+        """
+
         # Select the systems
         self._logger.debug(f"Select systems for user {user_id}")
         pool_systems = self.select_systems(user_id, nb_systems)
@@ -214,14 +301,20 @@ class LatinSquareSystemLeastSeenSampleSelection(LeastSeenSelection):
         return dict_samples
 
 
-class RandomizedBalancedSelection:
-    """Class implementing the selection strategy based a latin square
-    for the system and on the "least seen" paradigm for the samples.
+class RandomizedSampleBalancedSelection:
+    """Class implementing the selection strategy using a permutation matrix allowing
 
+    For now, this selection strategy is only desined for MOS/CMOS/DMOS or any test only presenting one sample to evaluate per step!
     """
 
     def __init__(self, systems: Dict[str, System]) -> None:
-        """Initialization"""
+        """Constructor
+
+        Parameters
+        ----------
+        systems: Dict[str, System]
+            The dictionnary of systems indexed by their names
+        """
 
         self._logger = logging.getLogger(self.__class__.__name__)
 
@@ -238,7 +331,7 @@ class RandomizedBalancedSelection:
 
         # Initialize user/permutation info
         self._user_infos = dict()
-        self._start_idx = 5
+        self._start_idx = 5 # NOTE: hardcoded (aber warum?!)
 
         # Generate permutation matrix
         self._init_permutations = []
@@ -246,9 +339,34 @@ class RandomizedBalancedSelection:
             for i_utt in range(nb_systems):
                 self._init_permutations.append((i_sys, i_utt))
 
-    def select_samples(
-        self, user_id: str, nb_systems: int, nb_samples: int
-    ) -> Dict[str, SampleModel]:
+    def select_samples(self, user_id: str, nb_systems: int=1, nb_samples: int=1) -> Dict[str, List[SampleModel]]:
+        """Method to select a sample for a system (the parmeters should be set to 1 for both the number of systems and the number of samples)
+
+        This method relies on an internal (prefilled) permutation matrix which provides the sequence of samples seen by the participant.
+        When a new participant is found, the strategy is as follows:
+          1. select, based on an incremented index, which permutation to use
+          2. shuffle the permutation ()
+          3. associate to the participant the shuffled permutation and an index used as an iterator
+
+        In all cases:
+          1. fill the needed information to be returned using the permutation and the current index
+          2. increment the index associated to the user
+
+        Parameters
+        ----------
+        user_id: str
+            The identifier of the participant
+        nb_systems: int
+            The desired number of systems (it should be = 1 )
+        nb_samples: int
+            The desired number of samples (it should be = 1)
+
+        Returns
+        -------
+        Dict[str, List[SampleModel]]
+            The dictionary providing for a system name the associated sample embedded in a list
+        """
+
         assert (
             nb_systems == 1
         ), f"RandomizedBalanced selection strategy imposes that the number of systems required per step is 1 . The requested number of systems is {nb_systems}."
@@ -259,11 +377,13 @@ class RandomizedBalancedSelection:
 
         # Create user if not ready
         if user_id not in self._user_infos:
+
             # Select permutations
             total_nb_systems = len(self._systems)
             cur_permutation = []
             cur_idx = self._start_idx
             offset = 0
+
             for _ in range(total_nb_systems):
                 cur_permutation.append(self._init_permutations[cur_idx])
                 offset += 1
@@ -277,7 +397,9 @@ class RandomizedBalancedSelection:
                     step = total_nb_systems + 1
                     cur_idx += step
 
+            # Suffle the permutations
             random.shuffle(cur_permutation)
+
             self._user_infos[user_id] = [cur_permutation, 0]
             self._logger.debug(
                 f"{user_id} has been associated to permutation {self._start_idx} with the following permutation (sys_idx, samp_idx): {cur_permutation}"
@@ -289,14 +411,13 @@ class RandomizedBalancedSelection:
         cur_position = self._user_infos[user_id][1]
         system_idx, sample_idx = self._user_infos[user_id][0][cur_position]
 
-        system_name = self._system_names[system_idx]
-
         # Indicate that we move to the next position
         self._user_infos[user_id][1] += 1
 
+        # Fill the dictionnary of samples to return
         dict_samples = dict()
+        system_name = self._system_names[system_idx]
         dict_samples[system_name] = [self._systems[system_name][0].system_samples[sample_idx]]
 
-        self._logger.info(f"This is what we will give to {user_id}: {dict_samples}")
-
+        self._logger.debug(f"This is what we will give to {user_id}: {dict_samples}")
         return dict_samples
