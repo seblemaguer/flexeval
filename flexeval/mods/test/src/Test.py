@@ -59,6 +59,7 @@ class SampleModelTemplate:
         return self._ID
 
     def get(self, name=None, num=None):
+        print("Get", name)
         if num is not None:
             name = self._system.cols_name[num]
 
@@ -75,25 +76,27 @@ class SampleModelTemplate:
                 file_path = "/" + file_path
 
             cur_sample_path = Path(current_app.config["FLEXEVAL_INSTANCE_DIR"] + "/systems" + file_path)
-            if cur_sample_path.is_file():
-                if self._cached:
-                    if cur_sample_path not in self._cache:
-                        mime, _ = mimetypes.guess_type(cur_sample_path)
-                        mime = mime.split("/")[0]
+            try:
+                if cur_sample_path.is_file():
+                    if self._cached:
+                        if cur_sample_path not in self._cache:
+                            mime, _ = mimetypes.guess_type(cur_sample_path)
+                            mime = mime.split("/")[0]
 
-                        hashing = hashlib.md5()
-                        hashing.update(str(cur_sample_path).encode())
-                        value = self.CACHE_DIR/(str(hashing.hexdigest()) + ".wav")
-                        shutil.copy(cur_sample_path, value)
+                            hashing = hashlib.md5()
+                            hashing.update(str(cur_sample_path).encode())
+                            value = self.CACHE_DIR/(str(hashing.hexdigest()) + ".wav")
+                            shutil.copy(cur_sample_path, value)
 
-                        value = value.relative_to(current_app.config["FLEXEVAL_INSTANCE_DIR"])
-                        value = current_app.config["FLEXEVAL_INSTANCE_URL"] + "/" + str(value)
-                        self._cache[cur_sample_path] = (value, mime)
+                            value = value.relative_to(current_app.config["FLEXEVAL_INSTANCE_DIR"])
+                            value = current_app.config["FLEXEVAL_INSTANCE_URL"] + "/" + str(value)
+                            self._cache[cur_sample_path] = (value, mime)
 
-                    return self._cache[cur_sample_path]
-            else:
-
-                mime, _ = mimetypes.guess_type(cur_sample_path)
+                        return self._cache[cur_sample_path]
+                else:
+                    mime, _ = mimetypes.guess_type(cur_sample_path)
+            except FileNotFoundError:
+                pass
 
 
                 with open(cur_sample_path, "rb") as f:
@@ -105,7 +108,8 @@ class SampleModelTemplate:
 
     def __str__(self):
 
-        return f"(Sys={self.system_name}, Sample={self._systemsample.audio})"
+        # return f"(Sys={self.system_name}, Sample={self._systemsample.audio})"
+        return f"(Sys={self.system_name}, Sample={self._systemsample.__dict__})"
         # self._system = SystemManager().get(systemsample.system)
         # self._systemsample = systemsample
         # self.system_name = system_name

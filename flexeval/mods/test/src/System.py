@@ -60,7 +60,7 @@ class System:
             SampleModel.addColumn(col_name, db.String)
 
         if max_samples < 0:
-            max_samples = len(reader)
+            max_samples = len(list(csv.DictReader(open(source_file, encoding="utf-8"), delimiter=delimiter)))
 
         if len(self.system_samples) == 0:
 

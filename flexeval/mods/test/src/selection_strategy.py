@@ -52,9 +52,9 @@ class LeastSeenSelection:
         pool_systems = sorted(self._system_counters.items(), key=lambda item: item[1])
 
         # Assert/Fix the number of required systems
-        assert (nb_systems < len(pool_systems)) and (
+        assert (nb_systems <= len(pool_systems)) and (
             nb_systems != 0
-        ), f"The required number of systems ({nb_systems}) is greater than the available number of systems {len(pool_systems)} or it is 0"
+        ), f"The required number of systems ({nb_systems}) is greater than the available number of systems ({len(pool_systems)}) or it is 0"
 
         # Preparing pool of systems
         if nb_systems > 0:
