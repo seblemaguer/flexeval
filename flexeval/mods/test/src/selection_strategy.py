@@ -1,4 +1,4 @@
-from typing import Dict, List, Any
+from typing import Dict, List, Set
 
 import random
 import logging
@@ -301,7 +301,7 @@ class LatinSquareSystemLeastSeenSampleSelection(LeastSeenSelection):
         return dict_samples
 
 
-class RandomizedSampleBalancedSelection:
+class RandomizedBalancedSelection:
     """Class implementing the selection strategy using a permutation matrix allowing
 
     For now, this selection strategy is only desined for MOS/CMOS/DMOS or any test only presenting one sample to evaluate per step!
@@ -420,4 +420,139 @@ class RandomizedSampleBalancedSelection:
         dict_samples[system_name] = [self._systems[system_name][0].system_samples[sample_idx]]
 
         self._logger.debug(f"This is what we will give to {user_id}: {dict_samples}")
+        return dict_samples
+
+
+
+class LeastSeenPerUserSelection(LeastSeenSelection):
+    """Class implementing the selection strategy based on the "least seen" (user focused) paradigm:
+        1. list the least seen system(s)
+        2. for the the least system(s), select the least seen sample(s)
+    """
+
+    def __init__(self, systems: Dict[str, System]) -> None:
+        """Constructor
+
+        Parameters
+        ----------
+        systems: Dict[str, System]
+            The dictionnary of systems indexed by their names
+        """
+        super().__init__(systems)
+        self._logger = logging.getLogger(self.__class__.__name__)
+
+        self._user_history = dict()
+
+
+    def select_user_systems(self, user_history: Dict[str, Set[str]], nb_systems: int) -> List[str]:
+        # Get the list of available systems sorted in ascending order
+        system_count_list = [(sys_name, len(seen_samples)) for sys_name, seen_samples in user_history.items()]
+        system_count_list.sort(key=lambda x: x[1])
+
+        # Get the cutting edge
+        cut_idx = 1
+        start_count = system_count_list[0][1]
+        for cut_idx, cur_elt in enumerate(system_count_list[1:], 1):
+            if cur_elt[1] != start_count:
+                break
+
+        print(cut_idx)
+        # Subset and shuffle
+        if cut_idx < nb_systems:
+            pool_systems = system_count_list[:nb_systems]
+        else:
+            pool_systems = system_count_list[:cut_idx]
+        random.shuffle(pool_systems)
+
+        return [x[0] for x in pool_systems[:nb_systems]]
+
+    def user_select_samples(self, user_history: Set[str], system_name: str, nb_samples: int) -> List[SampleModel]:
+        """Select a given number of samples of a given system
+
+        Parameters
+        ----------
+        system_name: str
+           The name of the system
+        nb_samples: int
+           The desired number of sample
+
+        Returns
+        -------
+        List[SampleModel]
+            The list of selected samples
+        """
+        # Subset the list of samples
+        dict_samples = dict(
+            [
+                (sample.id, sample)
+                for sample in self._systems[system_name][0].system_samples
+            ]
+        )
+        sample_subset = {
+            sample_id: self._sample_counters[sample_id]
+            for sample_id in dict_samples.keys()
+            if sample_id not in user_history
+        }
+
+        # Sort by counting the pool of samples
+        pool_samples = sorted(sample_subset.items(), key=lambda item: item[1])
+
+        # Assert/Fix the number of required samples
+        assert (nb_samples < len(pool_samples)) and (
+            nb_samples > 0
+        ), f"The required number of samples ({nb_samples}) is greater than the available number of samples {len(pool_samples)} or it is 0"
+
+        # Subset to get the desired number of samples and shuffle to guarantee variation in the presentation order
+        pool_samples = pool_samples[:nb_samples]
+        random.shuffle(pool_samples)
+
+        # Select the desired number of samples
+        for sample in pool_samples:
+            self._sample_counters[sample[0]] += 1
+            user_history.add(sample[0])
+
+        return [dict_samples[sample[0]] for sample in pool_samples]
+
+
+    def select_samples(self, user_id: str, nb_systems: int, nb_samples: int) -> Dict[str, List[SampleModel]]:
+        """Method to select a given number of samples for a given number of systems for a specific user
+
+        The selection strategy is twofold:
+           1. select the desired number of least systems
+           2. for each selected system, select the least seen samples (the desired number of samples for each system)
+
+        Parameters
+        ----------
+        user_id: str
+            The identifier of the participant
+        nb_systems: int
+            The desired number of systems
+        nb_samples: int
+            The desired number of samples
+
+        Returns
+        -------
+        Dict[str, List[SampleModel]]
+            The dictionary providing for a system name the associated sample embedded in a list
+        """
+
+        if user_id not in self._user_history:
+            self._user_history[user_id] = dict([(cur_system, set()) for cur_system in self._systems.keys()])
+            print(self._user_history[user_id])
+
+        # Select the systems
+        self._logger.debug(f"Select systems for user {user_id}")
+        pool_systems = self.select_user_systems(self._user_history[user_id], nb_systems)
+
+        # Select the samples
+        self._logger.debug(f"Select samples for user {user_id}")
+        dict_samples = dict()
+        for system_name in pool_systems:
+            dict_samples[system_name] = self.user_select_samples(
+                self._user_history[user_id][system_name],
+                system_name, nb_samples
+            )
+
+        self._logger.info(f"This is what we will give to {user_id}: {dict_samples}")
+
         return dict_samples
