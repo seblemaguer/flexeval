@@ -153,6 +153,7 @@ class TestManager(metaclass=AppSingleton):
 
         return self.register[name]
 
+
 class TransactionalObject:
     def __init__(self):
         self.transactions = {}
@@ -212,6 +213,7 @@ class TransactionalObject:
 
         # Returns the ID of the row
         return ID
+
 
 class Test(TransactionalObject):
     def __init__(self, name: str, config) -> None:
@@ -295,15 +297,42 @@ class Test(TransactionalObject):
 
 
     def nb_steps_complete_by(self, user: UserModel) -> int:
+        """Get the number of steps completed by a given user
 
+        Parameters
+        ----------
+        user: UserModel
+           The scrutinized user
+
+        Returns
+        -------
+        int
+            The number of steps completed by the user
+        """
         return len(getattr(user, self.model.__name__))
 
 
-    def get_step(self, id_step: int, user: UserModel, nb_systems: int, is_intro_step:bool=False):
+    def get_step(self, id_step: int, user: UserModel, nb_systems: int, is_intro_step:bool=False) -> Dict[str, SampleModelTemplate]:
         """Get the samples needed for one step of the test
+
+        Parameters
+        ----------
+        id_step: int
+            The index of the step
+        user: UserModel
+            The model of the participant to the step
+        nb_systems: int
+            The number of system wanted for the current step
+        is_intro_step: bool
+            Flag to indicate if the current step is an introduction step or not
+
+        Returns
+        -------
+        Dict[str, SampleModelTemplate]
+            The dictionnary associating which each system (name) the sample used
         """
 
-        choice_for_systems = {}
+        choice_for_systems = dict()
 
         if self.has_transaction(user):
             return self.get_in_transaction(user, "choice_for_systems")
