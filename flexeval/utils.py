@@ -5,6 +5,7 @@
 import os
 import shutil
 import sys
+from pathlib import Path
 
 # Flask related
 from flask import current_app
@@ -81,6 +82,18 @@ def del_file(FILE):
         os.remove(FILE)
 
 
+def make_absolute_path(relative_path):
+    """Generate an absolute path based on a relative path and the absolute path of the FlexEval instance
+
+    Args:
+        relative_path (string): Relative path to a file
+    """
+    relative_path_object = Path(relative_path)
+    if not relative_path_object.exists():
+        return str(Path(current_app.config["FLEXEVAL_INSTANCE_DIR"]).joinpath(relative_path_object))
+    else:
+        return relative_path
+
 def make_global_url(local_url):
     """Generate global URL from a local URL
 
@@ -93,7 +106,6 @@ def make_global_url(local_url):
     -------
     string => the global (complete) URL
     """
-
     return current_app.config["FLEXEVAL_INSTANCE_URL"] + local_url
 
 

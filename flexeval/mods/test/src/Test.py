@@ -82,14 +82,16 @@ class SampleModelTemplate:
                         if cur_sample_path not in self._cache:
                             mime, _ = mimetypes.guess_type(cur_sample_path)
                             mime = mime.split("/")[0]
+                            
+                            extension = cur_sample_path.suffix
 
                             hashing = hashlib.md5()
                             hashing.update(str(cur_sample_path).encode())
-                            value = self.CACHE_DIR/(str(hashing.hexdigest()) + ".wav")
+                            value = self.CACHE_DIR/(str(hashing.hexdigest()) + extension)
                             shutil.copy(cur_sample_path, value)
 
-                            value = value.relative_to(current_app.config["FLEXEVAL_INSTANCE_DIR"])
-                            value = current_app.config["FLEXEVAL_INSTANCE_URL"] + "/" + str(value)
+                            value = str(value.relative_to(current_app.config["FLEXEVAL_INSTANCE_DIR"]))
+                            # value = current_app.config["FLEXEVAL_INSTANCE_URL"] + "/" + str(value)
                             self._cache[cur_sample_path] = (value, mime)
 
                         return self._cache[cur_sample_path]

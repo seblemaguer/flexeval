@@ -113,7 +113,7 @@ class LeastSeenSelection:
         pool_samples = sorted(sample_subset.items(), key=lambda item: item[1])
 
         # Assert/Fix the number of required samples
-        assert (nb_samples < len(pool_samples)) and (
+        assert (nb_samples <= len(pool_samples)) and (
             nb_samples != 0
         ), f"The required number of samples ({nb_samples}) is greater than the available number of samples {len(pool_samples)} or it is 0"
 

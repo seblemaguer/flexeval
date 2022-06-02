@@ -5,15 +5,16 @@ import logging
 
 import abc
 
+import json
+
 from flask import Blueprint, current_app, abort
 from flask import render_template as flask_render_template
-
 
 from flexeval.core import ProviderFactory
 from .Config import Config
 from flexeval.core.providers.auth import AuthProvider, UserModel, VirtualAuthProvider
 
-from flexeval.utils import make_global_url
+from flexeval.utils import make_global_url, make_absolute_path
 from flexeval.database import Model
 
 
@@ -271,6 +272,17 @@ class Module(Blueprint, abc.ABC):
 
         variables.update(Config().data()["variables"])
 
+
+        def read_file(filename):
+            with open(make_absolute_path(filename)) as f:
+                return f.read()
+
+
+        def read_json(filename):
+            with open(make_absolute_path(filename)) as f:
+                return json.load(f)
+                
+
         def get_variable(key, *args, **kwargs):
 
             if "default_value" in kwargs:
@@ -296,6 +308,8 @@ class Module(Blueprint, abc.ABC):
         def get_asset(name, rep=None):
             return make_global_url(ProviderFactory().get("assets").local_url(name, rep))
 
+        args["read_file"] = read_file
+        args["read_json"] = read_json
         args["get_variable"] = get_variable
         args["get_asset"] = get_asset
         args["get_template"] = ProviderFactory().get("templates").get
