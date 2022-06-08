@@ -97,15 +97,15 @@ class SampleModelTemplate:
                         return self._cache[cur_sample_path]
                 else:
                     mime, _ = mimetypes.guess_type(cur_sample_path)
-            except FileNotFoundError:
+            except Exception as e:
                 pass
 
 
-                with open(cur_sample_path, "rb") as f:
-                    data64 = base64.b64encode(f.read()).decode("utf-8")
-                    value = "data:%s;base64,%s" % (mime, data64)
+                # with open(cur_sample_path, "rb") as f:
+                #     data64 = base64.b64encode(f.read()).decode("utf-8")
+                #     value = "data:%s;base64,%s" % (mime, data64)
 
-                mime = mime.split("/")[0]
+                # mime = mime.split("/")[0]
             return (value, mime)
 
     def __str__(self):
