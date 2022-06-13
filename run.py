@@ -107,6 +107,7 @@ def define_argument_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("-i", "--ip", type=str, default="127.0.0.1", help="IP's server")
     parser.add_argument("-p", "--port", type=int, default="8080", help="port")
+    parser.add_argument("-t", "--threaded", action="store_true", default=False, help="Enable threads.")
     parser.add_argument("-u", "--url", type=str, help="URL of the server (needed for flask redirections!) if different from http://<ip>:<port>/")
 
     # Logging options
@@ -135,7 +136,7 @@ if __name__ == "__main__":
     all_files = glob.glob(instance_abs_path + "/**/*", recursive=True)
     extra_files = []
     for f in all_files:
-        if (f.find("/.tmp/") == -1) and (not f.endswith(".db")):
+        if (f.find("/.tmp/") == -1) and (f.find("/assets/tmp_eval/") == -1) and (not f.endswith(".db")):
             extra_files.append(f)
 
     # Finally create and run app
@@ -152,6 +153,7 @@ if __name__ == "__main__":
             use_reloader=True,
             debug=args.debug,
             extra_files=extra_files,
+            threaded=args.threaded
         )
     else:
-        run_simple(hostname=args.ip, port=args.port, application=app, threaded=False, use_reloader=True)
+        run_simple(hostname=args.ip, port=args.port, application=app, threaded=args.threaded, use_reloader=True)

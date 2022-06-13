@@ -147,6 +147,7 @@ with StageModule(__name__) as sm:
 
         sem_test.acquire()
         # If there is no transaction, a timeout happened somewhere
+        
         if not test.has_transaction(user):
             sem_test.release()
             abort(408)

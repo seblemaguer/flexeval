@@ -59,7 +59,6 @@ class SampleModelTemplate:
         return self._ID
 
     def get(self, name=None, num=None):
-        print("Get", name)
         if num is not None:
             name = self._system.cols_name[num]
 
@@ -98,7 +97,8 @@ class SampleModelTemplate:
                 else:
                     mime, _ = mimetypes.guess_type(cur_sample_path)
             except Exception as e:
-                pass
+                self._logger.warning("Exception was raised while reading sample attribute %s" % name)
+                self._logger.warning(e)
 
 
                 # with open(cur_sample_path, "rb") as f:
@@ -335,7 +335,6 @@ class Test(TransactionalObject):
         """
 
         choice_for_systems = dict()
-
         if self.has_transaction(user):
             return self.get_in_transaction(user, "choice_for_systems")
         else:
