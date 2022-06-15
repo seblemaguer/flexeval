@@ -88,15 +88,26 @@ with StageModule(__name__) as sm:
 
                 return systems
 
-            def save_field_name(name, syssamples=get_syssamples()):
+            def save_field_name(name, syssamples=get_syssamples(), record_name=None):
                 name = name.replace(":", "_")
-                ID = ""
 
-                for syssample in syssamples:
-                    ID = ID + ":" + syssample.ID
-
-                ID = "save:" + name + ID
+                # Make sure the record exist and get a real name if record name is None
+                user = sm.authProvider.user
+                record_name = test.get_record(user, record_name)
+                
+                # ID of the field
+                ID = ":".join(["save",record_name,name]+[syssample.ID for syssample in syssamples])
+                
+                # Associate field to record
+                test.add_field_to_record(user, ID, record_name)
+                
                 return ID
+            
+            def prepare_new_record(name=None):
+                # Record new record for current step and current user
+                user = sm.authProvider.user
+                test.create_new_record(user, name)
+                return name
 
             sm.logger.debug(f"Sample selected for this step is {get_syssamples()[0]}")
 
@@ -115,6 +126,7 @@ with StageModule(__name__) as sm:
                 intro_step=intro_step,
                 syssamples=get_syssamples,
                 field_name=save_field_name,
+                new_record=prepare_new_record
             )
         else:
             return redirect(stage.local_url_next)
@@ -152,58 +164,70 @@ with StageModule(__name__) as sm:
             sem_test.release()
             abort(408)
 
-        resp = test.model.create(
-            user_id=user.id, intro=intro_step, step_idx=cur_step+1, commit=False
-        )
-        try:
-            for field_type, field_list in [
-                ("string", request.form),
-                ("file", request.files),
-            ]:
-                for field_key in field_list.keys():
-                    field_value = field_list[field_key]
-                    if field_key[:5] == "save:":
-                        field_key = field_key[5:]
-                        (name_field, *idsyssamples) = field_key.split(":")
+        all_records = test.get_all_records(user)
+        print(request.form)
+        for (record_name, all_field_names) in all_records.items():
+            resp = test.model.create(
+                user_id=user.id, intro=intro_step, step_idx=cur_step+1, commit=False
+            )
+            try:
+                for field_type, field_list in [
+                    ("string", request.form),
+                    ("file", request.files),
+                ]:
+                    for field_key in field_list.keys():
+                        print("FIELD_KEY", field_key)
+                        if field_key in all_field_names:
+                            # Several values can be returned for one key (MultiDict) -> use d.get_list(key) instad d[key]
+                            if len(field_list.getlist(field_key)) > 1:
+                                field_value = str(field_list.getlist(field_key))
+                            else:
+                                field_value = field_list[field_key]
 
-                        name_col = name_field
-                        tmp_system_names = []
+                            if field_key[:5] == "save:":
+                                field_key = field_key[5:]
+                                (record_name, field_name, *idsyssamples) = field_key.split(":")
 
-                        for idsyssample in idsyssamples:
-                            (system_name, syssample_id) = test.get_in_transaction(
-                                user, idsyssample
-                            )
-                            tmp_system_names.append(system_name)
-                            sys = {system_name: syssample_id}
+                                name_col = field_name
+                                tmp_system_names = []
 
-                            resp.update(commit=False, **sys)
+                                for idsyssample in idsyssamples:
+                                    (system_name, syssample_id) = test.get_in_transaction(
+                                        user, idsyssample
+                                    )
+                                    tmp_system_names.append(system_name)
+                                    sys = {system_name: syssample_id}
 
-                        tmp_system_names.sort()
-                        for name_system in tmp_system_names:
-                            name_col = name_col + "_" + name_system
-                    else:
-                        name_col = field_key
+                                    resp.update(commit=False, **sys)
 
-                    if field_type == "string":
-                        test.model.addColumn(name_col, db.String)
-                        # On check si field_value n'est pas un lien vers un sysSample.
-                        sysval = test.get_in_transaction(user, field_value)
+                                tmp_system_names.sort()
+                                ###### GWENOLE: REMOVED BECAUSE I DON'T UNDERSTAND WHY IT IS USEFUL OR NEEDED
+                                # for name_system in tmp_system_names:
+                                    # name_col = name_col + "_" + name_system
+                            else:
+                                name_col = field_key
 
-                        if sysval is None:
-                            resp.update(commit=False, **{name_col: field_value})
-                        else:
-                            (system_name, syssample_id) = sysval
-                            resp.update(**{name_col: system_name})
-                    else:
-                        test.model.addColumn(name_col, db.BLOB)
+                            if field_type == "string":
+                                test.model.addColumn(name_col, db.String)
+                                # On check si field_value n'est pas un lien vers un sysSample.
+                                sysval = test.get_in_transaction(user, field_value)
 
-                        with field_value.stream as f:
-                            resp.update(commit=False, **{name_col: f.read()})
+                                if sysval is None:
+                                    resp.update(commit=False, **{name_col: field_value})
+                                else:
+                                    (system_name, syssample_id) = sysval
+                                    resp.update(**{name_col: system_name})
+                            else:
+                                test.model.addColumn(name_col, db.BLOB)
 
-        except Exception as e:
-            test.delete_transaction(user)
-            sem_test.release()
-            return redirect(sm.url_for(sm.get_endpoint_for_local_rule("/")))
+                                with field_value.stream as f:
+                                    resp.update(commit=False, **{name_col: f.read()})
+
+            except Exception as e:
+                raise(e)
+                test.delete_transaction(user)
+                sem_test.release()
+                return redirect(sm.url_for(sm.get_endpoint_for_local_rule("/")))
 
         # Commit the results and clean the transations of the user
         commit_all()

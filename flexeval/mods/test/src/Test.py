@@ -22,6 +22,7 @@ import random
 from datetime import datetime, timedelta
 import hashlib
 import shutil
+from collections import OrderedDict
 
 # Flask
 from flask import current_app
@@ -196,6 +197,11 @@ class TransactionalObject:
 
     def get_transaction(self, user):
         return self.transactions[user.id]
+    
+    def get_or_create_transaction(self, user):
+        if not self.has_transaction(user):
+            self.create_transaction(user)
+        return self.get_transaction(user)
 
     def set_in_transaction(self, user, name, obj):
         self.transactions[user.id][name] = obj
@@ -205,6 +211,87 @@ class TransactionalObject:
             return None
         else:
             return self.transactions[user.id][name]
+        
+        
+    def create_new_record(self, user, name=None):
+        """Prepare a new record in the database (new line in the database after the user submits the form)
+
+        Args:
+            user: User to associate with the record
+            name: Name for this record (useful when creating a field for a specific record). This ID will not be saved in the database.
+        """
+        # Dictionary "record name" -> list of field names
+        user_transaction = self.get_or_create_transaction(user)
+        all_records = user_transaction.setdefault("records", OrderedDict())
+        if name == None:
+            name = "record"+str(abs(hash("record"+str(len(all_records))))%int(1e9))
+        name = name.replace(":","_") # Escape ":" as this is reserved for parsing identifiers
+        current_fields = all_records.setdefault(name, list())
+        return name
+
+    def add_field_to_record(self, user, field_name, record_name=None):
+        """Add a field to a current record
+
+        Args:
+            user: User to associate with the record
+            field_name: Name of the field to add. If already existing, this is not added (duplicates are forbidden).
+            record_name: Name of the record that will include the new field. If not defined, the field will be in the last record created. If no record does not exist, it is created.
+        """
+        user_transaction = self.get_or_create_transaction(user)
+        all_records = user_transaction.setdefault("records", dict())
+        # Create a record if no one exists yet
+        if len(all_records) == 0:
+            record_name = self.create_new_record(user, name=record_name)
+        # Get the last record if at least one record exists and no record name has been given
+        elif record_name == None:
+            record_name = next(reversed(all_records))
+        record_name = record_name.replace(":","_") # Escape ":" as this is reserved for parsing identifiers
+        current_fields = self.get_fields_for_record(user, record_name)
+        if field_name not in current_fields:
+            current_fields.append(field_name)
+            
+        return record_name
+            
+    def get_all_records(self, user):
+        user_transaction = self.get_or_create_transaction(user)
+        all_records = user_transaction.setdefault("records", OrderedDict())
+        return all_records
+    
+    def get_record(self, user, name=None):
+        """Return the name of a record that exists
+
+        Args:
+            user: User to associate with the record
+            name: Name for the target record. If it does not exists, it is created. If name is None, the last record is returned if any exists, a new record with an invinted name otherwise.
+        """
+        all_records = self.get_all_records(user)
+        
+        if name in all_records:
+            return name
+        else:
+            if len(all_records) == 0 and name == None:
+                return self.create_new_record(user)
+            elif len(all_records) == 0 and name != None:
+                return self.create_new_record(user, name=name)
+            elif len(all_records) > 0 and name == None:
+                return next(reversed(all_records))
+            # elif len(all_records) > 0 and name != None:
+            # Reminder: we already made sure that name is not present is all_records
+            else:
+                return self.create_new_record(user, name=name)
+            
+    def get_fields_for_record(self, user, record_name):
+        """Return all fields associated to a given record
+
+        Args:
+            user: User for this record
+            record_name: Name of the record. The record is created if not existing and empty list is returned (ie, no field associated).
+        """
+        user_transaction = self.get_or_create_transaction(user)
+        all_records = user_transaction.setdefault("records", OrderedDict())
+        current_fields = all_records.setdefault(record_name, list())
+        return current_fields
+        
 
     def create_row_in_transaction(self, user):
         ID = "".join((random.choice(string.ascii_lowercase) for _ in range(20)))
