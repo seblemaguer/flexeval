@@ -165,7 +165,6 @@ with StageModule(__name__) as sm:
             abort(408)
 
         all_records = test.get_all_records(user)
-        print(request.form)
         for (record_name, all_field_names) in all_records.items():
             resp = test.model.create(
                 user_id=user.id, intro=intro_step, step_idx=cur_step+1, commit=False
@@ -176,7 +175,6 @@ with StageModule(__name__) as sm:
                     ("file", request.files),
                 ]:
                     for field_key in field_list.keys():
-                        print("FIELD_KEY", field_key)
                         if field_key in all_field_names:
                             # Several values can be returned for one key (MultiDict) -> use d.get_list(key) instad d[key]
                             if len(field_list.getlist(field_key)) > 1:

@@ -398,7 +398,11 @@ class Test(TransactionalObject):
         int
             The number of steps completed by the user
         """
-        return len(getattr(user, self.model.__name__))
+        all_steps = set()
+        for record in getattr(user, self.model.__name__):
+            all_steps.add(record.step_idx)
+        return len(all_steps)
+        # return len(getattr(user, self.model.__name__))
 
 
     def get_step(self, id_step: int, user: UserModel, nb_systems: int, is_intro_step:bool=False) -> Dict[str, SampleModelTemplate]:
