@@ -6,7 +6,18 @@ import logging
 from .System import System
 from flexeval.mods.test.model import SampleModel
 
-class LeastSeenSelection:
+class SelectionBase:
+    def __init__(self, systems: Dict[str, System], references: List[str]=[], include_references: bool=False) -> None:
+        self._systems = systems
+        self._references= references
+        self._include_reference = include_references
+        self._logger = logging.getLogger(self.__class__.__name__)
+
+    def select_samples(self, user_id: str, nb_systems: int, nb_samples: int) -> Dict[str, List[SampleModel]]:
+        raise NotImplementedError(f"The class \"{self.__class__.__name__}\" should override the method \"select_samples\"")
+
+
+class LeastSeenSelection(SelectionBase):
     """Class implementing the selection strategy based on the "least seen" paradigm:
         1. list the least seen system(s)
         2. for the the least system(s), select the least seen sample(s)
@@ -20,10 +31,9 @@ class LeastSeenSelection:
         systems: Dict[str, System]
             The dictionnary of systems indexed by their names
         """
-        self._logger = logging.getLogger(self.__class__.__name__)
+        super().__init__(systems)
 
         # Initialize content elements
-        self._systems = systems
         samples = [
             sample.id
             for _, cur_system in systems.items()
@@ -301,7 +311,7 @@ class LatinSquareSystemLeastSeenSampleSelection(LeastSeenSelection):
         return dict_samples
 
 
-class RandomizedBalancedSelection:
+class RandomizedBalancedSelection(SelectionBase):
     """Class implementing the selection strategy using a permutation matrix allowing
 
     For now, this selection strategy is only desined for MOS/CMOS/DMOS or any test only presenting one sample to evaluate per step!
@@ -316,10 +326,9 @@ class RandomizedBalancedSelection:
             The dictionnary of systems indexed by their names
         """
 
-        self._logger = logging.getLogger(self.__class__.__name__)
+        super().__init__(systems)
 
         # Initialize content elements
-        self._systems = systems
         self._system_names = list(systems.keys())
 
         # Be sure that the number of samples per systems equal the number of systems
@@ -423,7 +432,6 @@ class RandomizedBalancedSelection:
         return dict_samples
 
 
-
 class LeastSeenPerUserSelection(LeastSeenSelection):
     """Class implementing the selection strategy based on the "least seen" (user focused) paradigm:
         1. list the least seen system(s)
@@ -439,7 +447,6 @@ class LeastSeenPerUserSelection(LeastSeenSelection):
             The dictionnary of systems indexed by their names
         """
         super().__init__(systems)
-        self._logger = logging.getLogger(self.__class__.__name__)
 
         self._user_history = dict()
 
@@ -456,7 +463,6 @@ class LeastSeenPerUserSelection(LeastSeenSelection):
             if cur_elt[1] != start_count:
                 break
 
-        print(cut_idx)
         # Subset and shuffle
         if cut_idx < nb_systems:
             pool_systems = system_count_list[:nb_systems]
@@ -498,7 +504,8 @@ class LeastSeenPerUserSelection(LeastSeenSelection):
         pool_samples = sorted(sample_subset.items(), key=lambda item: item[1])
 
         # Assert/Fix the number of required samples
-        assert (nb_samples < len(pool_samples)) and (
+        self._logger.debug(f"Number of samples {nb_samples} from a pool of {len(pool_samples)} samples is required")
+        assert (nb_samples <= len(pool_samples)) and (
             nb_samples > 0
         ), f"The required number of samples ({nb_samples}) is greater than the available number of samples {len(pool_samples)} or it is 0"
 
