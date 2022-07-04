@@ -52,7 +52,8 @@ class SampleModelTemplate:
         self._cached = True # TODO: add as a configuration parameter
 
         if self._cached:
-            self.CACHE_DIR=Path(current_app.config["FLEXEVAL_INSTANCE_DIR"] + "/assets/tmp_eval")
+            # NOTE: under assets as the directory is, by default, visible
+            self.CACHE_DIR=Path(current_app.config["FLEXEVAL_INSTANCE_DIR"] + "/assets/sample_cache/")
             self.CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
     @property
@@ -82,7 +83,7 @@ class SampleModelTemplate:
                         if cur_sample_path not in self._cache:
                             mime, _ = mimetypes.guess_type(cur_sample_path)
                             mime = mime.split("/")[0]
-                            
+
                             extension = cur_sample_path.suffix
 
                             hashing = hashlib.md5()
@@ -90,8 +91,8 @@ class SampleModelTemplate:
                             value = self.CACHE_DIR/(str(hashing.hexdigest()) + extension)
                             shutil.copy(cur_sample_path, value)
 
-                            value = str(value.relative_to(current_app.config["FLEXEVAL_INSTANCE_DIR"]))
-                            # value = current_app.config["FLEXEVAL_INSTANCE_URL"] + "/" + str(value)
+                            # NOTE: heading "/" is required to avoid pointing to the wrong directory during URL resolution
+                            value = "/" + str(value.relative_to(current_app.config["FLEXEVAL_INSTANCE_DIR"]))
                             self._cache[cur_sample_path] = (value, mime)
 
                         return self._cache[cur_sample_path]
@@ -101,12 +102,6 @@ class SampleModelTemplate:
                 self._logger.warning("Exception was raised while reading sample attribute %s" % name)
                 self._logger.warning(e)
 
-
-                # with open(cur_sample_path, "rb") as f:
-                #     data64 = base64.b64encode(f.read()).decode("utf-8")
-                #     value = "data:%s;base64,%s" % (mime, data64)
-
-                # mime = mime.split("/")[0]
             return (value, mime)
 
     def __str__(self):
@@ -197,7 +192,7 @@ class TransactionalObject:
 
     def get_transaction(self, user):
         return self.transactions[user.id]
-    
+
     def get_or_create_transaction(self, user):
         if not self.has_transaction(user):
             self.create_transaction(user)
@@ -211,8 +206,8 @@ class TransactionalObject:
             return None
         else:
             return self.transactions[user.id][name]
-        
-        
+
+
     def create_new_record(self, user, name=None):
         """Prepare a new record in the database (new line in the database after the user submits the form)
 
@@ -249,14 +244,14 @@ class TransactionalObject:
         current_fields = self.get_fields_for_record(user, record_name)
         if field_name not in current_fields:
             current_fields.append(field_name)
-            
+
         return record_name
-            
+
     def get_all_records(self, user):
         user_transaction = self.get_or_create_transaction(user)
         all_records = user_transaction.setdefault("records", OrderedDict())
         return all_records
-    
+
     def get_record(self, user, name=None):
         """Return the name of a record that exists
 
@@ -265,7 +260,7 @@ class TransactionalObject:
             name: Name for the target record. If it does not exists, it is created. If name is None, the last record is returned if any exists, a new record with an invinted name otherwise.
         """
         all_records = self.get_all_records(user)
-        
+
         if name in all_records:
             return name
         else:
@@ -279,7 +274,7 @@ class TransactionalObject:
             # Reminder: we already made sure that name is not present is all_records
             else:
                 return self.create_new_record(user, name=name)
-            
+
     def get_fields_for_record(self, user, record_name):
         """Return all fields associated to a given record
 
@@ -291,7 +286,7 @@ class TransactionalObject:
         all_records = user_transaction.setdefault("records", OrderedDict())
         current_fields = all_records.setdefault(record_name, list())
         return current_fields
-        
+
 
     def create_row_in_transaction(self, user):
         ID = "".join((random.choice(string.ascii_lowercase) for _ in range(20)))
