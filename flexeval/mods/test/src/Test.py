@@ -91,8 +91,7 @@ class SampleModelTemplate:
                             value = self.CACHE_DIR/(str(hashing.hexdigest()) + extension)
                             shutil.copy(cur_sample_path, value)
 
-                            # NOTE: heading "/" is required to avoid pointing to the wrong directory during URL resolution
-                            value = "/" + str(value.relative_to(current_app.config["FLEXEVAL_INSTANCE_DIR"]))
+                            value = current_app.config["FLEXEVAL_INSTANCE_URL"] + "/" + str(value.relative_to(current_app.config["FLEXEVAL_INSTANCE_DIR"]))
                             self._cache[cur_sample_path] = (value, mime)
 
                         return self._cache[cur_sample_path]
