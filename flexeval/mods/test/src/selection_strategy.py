@@ -510,8 +510,19 @@ class LeastSeenPerUserSelection(LeastSeenSelection):
         ), f"The required number of samples ({nb_samples}) is greater than the available number of samples {len(pool_samples)} or it is 0"
 
         # Subset to get the desired number of samples and shuffle to guarantee variation in the presentation order
-        pool_samples = pool_samples[:nb_samples]
-        random.shuffle(pool_samples)
+        # NOTE: to ensure variability, we first need to take into account the pool of samples seens the same amount of time
+        nb_id_samples = 0
+        for nb_id_samples in range(1, len(pool_samples)):
+            if pool_samples[nb_id_samples - 1][1] != pool_samples[nb_id_samples][1]:
+                break
+
+        if nb_id_samples > nb_samples:
+            pool_samples = pool_samples[:nb_id_samples]
+            random.shuffle(pool_samples)
+            pool_samples = pool_samples[:nb_samples]
+        else:
+            pool_samples = pool_samples[:nb_samples]
+            random.shuffle(pool_samples)
 
         # Select the desired number of samples
         for sample in pool_samples:
