@@ -29,6 +29,13 @@ with StageModule(__name__) as sm:
     @sm.valid_connection_required
     def main():
         """Entry point for the Test
+
+        This function prepare the template and defines some key helper
+        internal functions to generate the information required during
+        the save stage. These functions are:
+          - get_syssamples which provides the *randomized* list of selected samples per *given system*
+          - save_field_name which *has to be called* to get the field value (score, preference selection...) during the save
+
         """
 
         # Get the current Stage
@@ -94,15 +101,27 @@ with StageModule(__name__) as sm:
                 # Make sure the record exist and get a real name if record name is None
                 user = sm.authProvider.user
                 record_name = test.get_record(user, record_name)
-                
+
                 # ID of the field
-                ID = ":".join(["save",record_name,name]+[syssample.ID for syssample in syssamples])
-                
+                ID = ":".join(["save", record_name, name] + [syssample.ID for syssample in syssamples])
+
                 # Associate field to record
                 test.add_field_to_record(user, ID, record_name)
-                
+
                 return ID
-            
+
+            def propagate_samples(name, syssamples=get_syssamples()):
+                user = sm.authProvider.user
+                record_name = test.get_record(user, record_name)
+
+                # ID of the field
+                ID = ":".join(["save", record_name, name] + [syssample.ID for syssample in syssamples])
+
+                # Associate field to record
+                test.add_field_to_record(user, ID, record_name)
+
+                return ID
+
             def prepare_new_record(name=None):
                 # Record new record for current step and current user
                 user = sm.authProvider.user
@@ -117,7 +136,7 @@ with StageModule(__name__) as sm:
                 cur_step += 1
             else:
                 max_steps = max_steps - nb_step_intro
-                cur_step = cur_step +  1 - nb_step_intro
+                cur_step = cur_step + 1 - nb_step_intro
 
             return sm.render_template(
                 template=stage.template,
@@ -126,7 +145,7 @@ with StageModule(__name__) as sm:
                 intro_step=intro_step,
                 syssamples=get_syssamples,
                 field_name=save_field_name,
-                new_record=prepare_new_record
+                new_record=prepare_new_record,
             )
         else:
             return redirect(stage.local_url_next)
@@ -135,13 +154,26 @@ with StageModule(__name__) as sm:
     @sm.valid_connection_required
     def save():
         """Saving routine of the test
+
+        This method is called after the submission of the form
+        implemented in the template associated to the step of the
+        test.
+        This method does:
+          0. requiring a exclusive access to the db to avoid concurrency issue
+          1. parsing the values of each *field* recorded by the method =save_field_name*
+          2. filling the database *and creating new columns if necessary!*
+
         """
         stage = sm.current_stage
         test = TestManager().get(stage.name)
         user = sm.authProvider.user
         skip_after_n_step = stage.get("skip_after_n_step")
 
+        # Log the request form for debugging purposes
+        sm.logger.debug("#### The request form ####")
         sm.logger.debug(request.form)
+        sm.logger.debug("#### <END>The request form ####")
+
         # Initialize the number of intro steps
         nb_step_intro = stage.get("nb_step_intro")
         if nb_step_intro is None:
@@ -157,19 +189,30 @@ with StageModule(__name__) as sm:
         if nb_step_intro > cur_step:
             intro_step = True
 
+        # Lock DB so we can update it
         sem_test.acquire()
-        # If there is no transaction, a timeout happened somewhere
-        
         if not test.has_transaction(user):
             sem_test.release()
             abort(408)
 
+        # Save
         all_records = test.get_all_records(user)
-        for (record_name, all_field_names) in all_records.items():
-            resp = test.model.create(
-                user_id=user.id, intro=intro_step, step_idx=cur_step+1, commit=False
-            )
+        for record_name, all_field_names in all_records.items():
+            resp = test.model.create(user_id=user.id, intro=intro_step, step_idx=cur_step + 1, commit=False)
             try:
+                # Save presented samples
+                tmp_system_names = []
+                for system_name, sample in test.transactions[user.id]["choice_for_systems"].items():
+                    (
+                        _,
+                        syssample_id,
+                    ) = test.get_in_transaction(user, sample.ID)
+                    tmp_system_names.append(system_name)
+                    sys = {system_name: syssample_id}
+                    resp.update(commit=False, **sys)
+                tmp_system_names.sort()
+
+                # Save responses from the user
                 for field_type, field_list in [
                     ("string", request.form),
                     ("file", request.files),
@@ -184,24 +227,13 @@ with StageModule(__name__) as sm:
 
                             if field_key[:5] == "save:":
                                 field_key = field_key[5:]
-                                (record_name, field_name, *idsyssamples) = field_key.split(":")
+                                (
+                                    record_name,
+                                    field_name,
+                                    *idsyssamples,
+                                ) = field_key.split(":")
 
                                 name_col = field_name
-                                tmp_system_names = []
-
-                                for idsyssample in idsyssamples:
-                                    (system_name, syssample_id) = test.get_in_transaction(
-                                        user, idsyssample
-                                    )
-                                    tmp_system_names.append(system_name)
-                                    sys = {system_name: syssample_id}
-
-                                    resp.update(commit=False, **sys)
-
-                                tmp_system_names.sort()
-                                ###### GWENOLE: REMOVED BECAUSE I DON'T UNDERSTAND WHY IT IS USEFUL OR NEEDED
-                                # for name_system in tmp_system_names:
-                                    # name_col = name_col + "_" + name_system
                             else:
                                 name_col = field_key
 
@@ -222,7 +254,7 @@ with StageModule(__name__) as sm:
                                     resp.update(commit=False, **{name_col: f.read()})
 
             except Exception as e:
-                raise(e)
+                raise (e)
                 test.delete_transaction(user)
                 sem_test.release()
                 return redirect(sm.url_for(sm.get_endpoint_for_local_rule("/")))
