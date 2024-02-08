@@ -1,8 +1,8 @@
-# FlexEval #
+# FlexEval
 
 FlexEval is a software that aim to help you create a web-based evaluation platform.
 
-# How to install
+## How to install
 Installation require pip3.
 You can find the procedure to install it here: https://docs.python.org/fr/3.6/installing/index.html
 
@@ -10,9 +10,9 @@ You can find the procedure to install it here: https://docs.python.org/fr/3.6/in
 pip3 install .
 ```
 
-# Launching the webserver
+## Launching the webserver
 
-## Launching a local instance
+### Launching a local instance
 ```
 python3 run.py absolute_path_to_instance
 ```
@@ -30,14 +30,19 @@ python3 run.py C:\Users\User\Documents\FlexEval\examples\test_dev
 ```
 
 
-## Application Factory
+### Application Factory
 
 You are not satisfy with run.py ?
 A FlexEval's application is built using the application factory pattern.
 More information concerning application factory [here](https://flask.palletsprojects.com/en/1.1.x/patterns/appfactories/).
 
+## Contributing
 
-# How to cite
+Please don't forget to install `pre-commit` to ensure your commits will respect the constraints of the toolkit:
+  1. install the package `pre-commit`: `pip install pre-commit`
+  2. install the git hooks: `pre-commit install`
+
+## How to cite
 
 ```bibtex
 @inproceedings{fayet:hal-02768500,
