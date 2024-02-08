@@ -36,13 +36,12 @@ class UserModel:
                 self.conditions += str(value)
 
     def __str__(self):
-        the_str = "User \"%s\":\n" % self.id
+        the_str = 'User "%s":\n' % self.id
         the_str += "\t- validated_conditions: %s" % self.conditions
         return the_str
 
 
 class AuthProvider(metaclass=abc.ABCMeta):
-
     checkers = dict()
 
     def __init__(self, name, local_url_homepage, userModel):
@@ -54,9 +53,7 @@ class AuthProvider(metaclass=abc.ABCMeta):
         self.userModel = userModel
 
         try:
-            current_app.add_url_rule(
-                "/deco/<name>", "deco", self.__class__.disconnect_action
-            )
+            current_app.add_url_rule("/deco/<name>", "deco", self.__class__.disconnect_action)
         except AssertionError as e:
             pass
 
@@ -93,13 +90,11 @@ class AuthProvider(metaclass=abc.ABCMeta):
         if self.userModel.__abstract__:
             return self.session["user"]
         else:
-            return self.userModel.query.filter(
-                self.userModel.id == self.session["user"]
-            ).first()
+            return self.userModel.query.filter(self.userModel.id == self.session["user"]).first()
 
     def validates_connection(self, condition=None):
         if condition is not None:
-            if (condition != "connected"):
+            if condition != "connected":
                 return (AuthProvider.checkers[condition](self.user), condition)
             else:
                 return ("user" in self.session, "connected")
@@ -114,7 +109,6 @@ class AuthProvider(metaclass=abc.ABCMeta):
                     break
 
             return validated
-
 
     @property
     def url_deco(self):

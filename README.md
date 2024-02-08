@@ -29,8 +29,6 @@ Please consider the following example:
 python3 run.py C:\Users\User\Documents\FlexEval\examples\test_dev
 ```
 
-In order to build your instance you need to create an instance respository, you can find help on how to do it by clicking [here](INSTANCE.md).
-
 
 ## Application Factory
 

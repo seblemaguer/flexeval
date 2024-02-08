@@ -87,7 +87,6 @@ class Stage:
         self.mod_name = self.params["type"]
         self.mod_rep = self.params["type"].split(":")[0]
 
-
     def update(self, name, val):
         """Method to update the value of a parameter of the stage
 
@@ -153,13 +152,10 @@ class Stage:
         if "next" not in self.params:
             next_module = "/"
         else:
-
             if isinstance(self.params["next"], dict):
                 next_module = {}
                 for next_module_name in self.params["next"].keys():
-                    next_module[next_module_name] = Stage(
-                        self.params["next"][next_module_name]
-                    ).local_url
+                    next_module[next_module_name] = Stage(self.params["next"][next_module_name]).local_url
             else:
                 next_module = Stage(self.params["next"]).local_url
 
@@ -228,9 +224,7 @@ class Stage:
 
         if "session_variable" in self.session:
             for session_variable_name in self.session["session_variable"].keys():
-                variables[session_variable_name] = self.session["session_variable"][
-                    session_variable_name
-                ]
+                variables[session_variable_name] = self.session["session_variable"][session_variable_name]
 
         return variables
 
@@ -355,9 +349,7 @@ class StageModule(Module):
         -------
         string: the rule to access the current module
         """
-        return (
-            "/" + self.__class__.name_type + "/" + self.get_mod_name() + "/<stage_name>"
-        )
+        return "/" + self.__class__.name_type + "/" + self.get_mod_name() + "/<stage_name>"
 
     @property
     def current_stage(self):
@@ -486,9 +478,7 @@ class StageModule(Module):
 
                 return func(*args, **kwargs)
 
-            self.add_url_rule(
-                rule, "local_url@" + str(rule.replace(".", "_")), wrapper, **options
-            )
+            self.add_url_rule(rule, "local_url@" + str(rule.replace(".", "_")), wrapper, **options)
 
             return wrapper
 

@@ -59,7 +59,6 @@ with StageModule(__name__) as sm:
 
 
 with AdminModule(__name__) as am:
-
     # Routes
     @am.route("/")
     @am.valid_connection_required
@@ -74,14 +73,9 @@ with AdminModule(__name__) as am:
     @am.route("/send_invitation/send", methods=["POST"])
     @am.valid_connection_required
     def send_invitation():
-
         try:
             emails = request.form["emails"].split(",")
-            message = (
-                "<html><body><p>"
-                + request.form["message"].replace("\n", "</p><p>")
-                + "</p>"
-            )
+            message = "<html><body><p>" + request.form["message"].replace("\n", "</p><p>") + "</p>"
             title_message = request.form["title_message"]
             for email in emails:
                 bdd_mistake = False
@@ -108,19 +102,13 @@ with AdminModule(__name__) as am:
                         if user is not None:
                             user.delete()
                         return redirect(
-                            am.url_for(am.get_endpoint_for_local_rule("/configuration"))
-                            + "?falseCredential"
+                            am.url_for(am.get_endpoint_for_local_rule("/configuration")) + "?falseCredential"
                         )
 
-            return redirect(
-                am.url_for(am.get_endpoint_for_local_rule("/pending_invitation"))
-            )
+            return redirect(am.url_for(am.get_endpoint_for_local_rule("/pending_invitation")))
 
         except Exception as e:
-            return redirect(
-                am.url_for(am.get_endpoint_for_local_rule("/configuration"))
-                + "?falseCredential"
-            )
+            return redirect(am.url_for(am.get_endpoint_for_local_rule("/configuration")) + "?falseCredential")
 
     @am.route("/pending_invitation")
     @am.valid_connection_required
@@ -143,9 +131,7 @@ with AdminModule(__name__) as am:
         config["MAIL_USERNAME"] = current_app.config["MAIL_USERNAME"]
         config["MAIL_PASSWORD"] = current_app.config["MAIL_PASSWORD"]
 
-        return am.render_template(
-            "/admin/config.tpl", falseCredential=falseCredential, **config
-        )
+        return am.render_template("/admin/config.tpl", falseCredential=falseCredential, **config)
 
     @am.route("/configuration/update", methods=["POST"])
     @am.valid_connection_required

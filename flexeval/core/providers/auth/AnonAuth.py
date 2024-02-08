@@ -11,22 +11,16 @@ class AnonUser(UserModel):
 
 
 class AnonAuthProvider(AuthProvider):
-
     __userBase__ = AnonUser
 
     def connect(self):
-        super().connect(
-            self.userModel.create(
-                id="anon@" + str(random.randint(1, 999999999999999))
-            )
-        )
+        super().connect(self.userModel.create(id="anon@" + str(random.randint(1, 999999999999999))))
 
     def validates_connection(self, condition=None):
         if not (super().validates_connection("connected")[0]):
             self.connect()
 
         return super().validates_connection(condition)
-
 
     def disconnect(self):
         pass

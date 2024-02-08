@@ -33,6 +33,7 @@ class ModuleError(Exception):
 
 class MalformationError(ModuleError):
     """Exception raised when something is malformed"""
+
     pass
 
 
@@ -73,9 +74,7 @@ class UserModelAttributesMeta(type(Model)):
         if hasattr(self, "__lock__"):
             if self.__lock__ and not (name == "__lock__"):
                 if hasattr(self, name):
-                    raise OverwritingClassAttributesForbidden(
-                        "Class Attributes:" + name + " already existing."
-                    )
+                    raise OverwritingClassAttributesForbidden("Class Attributes:" + name + " already existing.")
 
         super().__setattr__(name, val)
 
@@ -92,9 +91,7 @@ class Module(Blueprint, abc.ABC):
         self.mod_rep = self.namespace[2]
         self.checker_handlers = dict()
 
-        super().__init__(
-            self.__class__.name_type + ":" + self.get_mod_name(), namespace
-        )
+        super().__init__(self.__class__.name_type + ":" + self.get_mod_name(), namespace)
 
         if not (ProviderFactory().exists("auth_mod_" + self.__class__.name_type)):
             self.__class__.set_authProvider(VirtualAuthProvider)
@@ -138,7 +135,6 @@ class Module(Blueprint, abc.ABC):
 
     @classmethod
     def init_UserModel(cls, cls_auth):
-
         __userBase__ = cls_auth.__userBase__
         table_name = cls.__name__ + "User"
         table_type = cls.name_type + "User"
@@ -155,25 +151,19 @@ class Module(Blueprint, abc.ABC):
             setattr(cls.userModel, "__lock__", True)
 
         if __userBase__ is not None:
-
             bases = __userBase__.__bases__
             try:
                 assert len(bases) == 1
                 assert UserModel in bases
             except Exception as e:
-                raise NotAUserModel(
-                    __userBase__ + " is not only or not a subClass of UserModel"
-                )
+                raise NotAUserModel(__userBase__ + " is not only or not a subClass of UserModel")
 
             if hasattr(cls, "userModel_init"):
                 if __userBase__ in list(cls.userModel.__bases__):
                     pass
                 else:
-                    raise MalformationError(
-                        "Two differents auth provider defined for " + cls.__name__ + "."
-                    )
+                    raise MalformationError("Two differents auth provider defined for " + cls.__name__ + ".")
             else:
-
                 cls.userModel.__lock__ = False
                 cls.userModel = UserModelAttributesMeta(
                     table_type,
@@ -197,19 +187,12 @@ class Module(Blueprint, abc.ABC):
         return self
 
     def __exit__(self, *args):
-
         try:
             current_app.register_blueprint(self, url_prefix=self.local_rule())
-            self.logger.info(
-                "%s is loaded and bound to: %s"
-                % (self.get_mod_name(), self.local_rule())
-            )
+            self.logger.info("%s is loaded and bound to: %s" % (self.get_mod_name(), self.local_rule()))
         except Exception as e:
             raise MalformationError(
-                "There are already a "
-                + self.__class__.__name__
-                + " module named: "
-                + self.get_mod_name()
+                "There are already a " + self.__class__.__name__ + " module named: " + self.get_mod_name()
             )
 
     def local_rule(self):
@@ -229,11 +212,11 @@ class Module(Blueprint, abc.ABC):
                 if (condition is None) or (condition == "connected"):
                     abort(401)
                 elif condition in self.checker_handlers:
-                    return self.checker_handlers[condition](self) # TODO: Arguments
+                    return self.checker_handlers[condition](self)  # TODO: Arguments
                 elif condition in self.__class__.default_checker_handlers:
-                    return self.__class__.default_checker_handlers[condition](self) # TODO: Arguments
+                    return self.__class__.default_checker_handlers[condition](self)  # TODO: Arguments
                 else:
-                    raise Exception("No handler to deal with invalid condition \"%s\"" % condition)
+                    raise Exception('No handler to deal with invalid condition "%s"' % condition)
 
             return f(*args, **kwargs)
 
@@ -272,19 +255,15 @@ class Module(Blueprint, abc.ABC):
 
         variables.update(Config().data()["variables"])
 
-
         def read_file(filename):
             with open(make_absolute_path(filename)) as f:
                 return f.read()
 
-
         def read_json(filename):
             with open(make_absolute_path(filename)) as f:
                 return json.load(f)
-                
 
         def get_variable(key, *args, **kwargs):
-
             if "default_value" in kwargs:
                 default_value = kwargs["default_value"]
             else:

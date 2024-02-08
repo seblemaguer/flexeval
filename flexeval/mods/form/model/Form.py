@@ -9,7 +9,6 @@ userModel = StageModule.get_UserModel()
 
 
 class Form(Model):
-
     __abstract__ = True
 
     id = Column(db.Integer, primary_key=True)

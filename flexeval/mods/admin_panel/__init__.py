@@ -4,7 +4,7 @@
 from flask import current_app, request
 
 from flexeval.core import AdminModule
-from flexeval.utils import redirect,make_global_url
+from flexeval.utils import redirect, make_global_url
 
 from .provider import UniqueAuth
 
@@ -12,7 +12,7 @@ AdminModule.set_authProvider(UniqueAuth)
 
 with AdminModule(__name__) as am:
 
-    @am.route("/", methods = ['GET'])
+    @am.route("/", methods=["GET"])
     def main():
         authProvider = am.authProvider
 
@@ -21,12 +21,11 @@ with AdminModule(__name__) as am:
         else:
             return redirect(am.url_for(am.get_endpoint_for_local_rule("/auth")))
 
-
-    @am.route("/auth", methods = ['GET'])
+    @am.route("/auth", methods=["GET"])
     def auth():
         return am.render_template(template="auth.tpl")
 
-    @am.route("/login", methods = ['POST'])
+    @am.route("/login", methods=["POST"])
     def login():
         password = request.form["admin_password"]
         master_password = am.get_config()["password"]
@@ -37,19 +36,16 @@ with AdminModule(__name__) as am:
         else:
             return redirect(am.url_for(am.get_endpoint_for_local_rule("/")))
 
-
-    @am.route("/panel", methods = ['GET'])
+    @am.route("/panel", methods=["GET"])
     @am.valid_connection_required
     def panel():
-
-        admin_modules=[]
+        admin_modules = []
 
         for mod in AdminModule.get_all_admin_modules():
-            if not(am.get_mod_name() == mod["mod"]):
+            if not (am.get_mod_name() == mod["mod"]):
                 title = mod["mod"]
                 description = ""
                 if "variables" in mod:
-
                     if "subtitle" in mod["variables"]:
                         title = mod["variables"]["subtitle"]
 
@@ -57,11 +53,11 @@ with AdminModule(__name__) as am:
                         description = mod["variables"]["subdescription"]
 
                 admin_module = {
-                                    "title":title,
-                                    "description":description,
-                                    "url":make_global_url(AdminModule.get_local_url_for(mod["mod"]))
-                                }
+                    "title": title,
+                    "description": description,
+                    "url": make_global_url(AdminModule.get_local_url_for(mod["mod"])),
+                }
 
                 admin_modules.append(admin_module)
 
-        return am.render_template(template="panel.tpl",admin_modules=admin_modules)
+        return am.render_template(template="panel.tpl", admin_modules=admin_modules)

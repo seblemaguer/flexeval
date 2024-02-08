@@ -6,11 +6,11 @@ import random
 from flexeval.core.providers.auth import AuthProvider
 from flexeval.mods.direct_auth.model import EmailUser
 
-class EmailAuth(AuthProvider):
 
+class EmailAuth(AuthProvider):
     __userBase__ = EmailUser
 
-    def connect(self,email):
+    def connect(self, email):
         user = self.userModel.query.filter(self.userModel.id == email).first()
 
         if user is None:

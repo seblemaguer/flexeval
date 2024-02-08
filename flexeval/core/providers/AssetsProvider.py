@@ -27,12 +27,7 @@ def decode(path):
         assert not (file == "." or file == ".." or file == "~" or file == "__pycache__")
 
         for repository in repositories:
-            assert not (
-                repository == "."
-                or repository == ".."
-                or repository == "~"
-                or repository == "__pycache__"
-            )
+            assert not (repository == "." or repository == ".." or repository == "~" or repository == "__pycache__")
 
         return repositories, file
 
@@ -41,7 +36,6 @@ def decode(path):
 
 
 def generate_path(repositories):
-
     path = ""
     for repository in repositories:
         path = path + "/" + repository
@@ -67,7 +61,6 @@ class AssetsProvider:
         self._logger.info("Loaded and bound to " + self.url_prefix)
 
     def local_url(self, path, _from=None):
-
         if not (path[0] == "/"):
             path = "/" + path
 
@@ -90,24 +83,19 @@ class AssetsProvider:
         return self.url_prefix + path
 
     def get_content(self, path):
-
         repositories, file = decode(path)
 
         try:
             try:
                 return send_from_directory(
-                    current_app.config["FLEXEVAL_INSTANCE_DIR"]
-                    + "/assets/"
-                    + generate_path(repositories),
+                    current_app.config["FLEXEVAL_INSTANCE_DIR"] + "/assets/" + generate_path(repositories),
                     file,
                 )
             except Exception as e:
                 if repositories[0] == "flexeval":
                     try:
                         return send_from_directory(
-                            current_app.config["FLEXEVAL_DIR"]
-                            + "/assets/"
-                            + generate_path(repositories[1:]),
+                            current_app.config["FLEXEVAL_DIR"] + "/assets/" + generate_path(repositories[1:]),
                             file,
                         )
                     except Exception as e:

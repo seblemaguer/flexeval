@@ -32,24 +32,16 @@ class SystemManager(metaclass=AppSingleton):
 
 class System:
     def __init__(self, name, delimiter=",", max_samples=-1):
-
         if name[0] == "/":
             name = name[1:]
 
         self.name = name
-        source_file = (
-            current_app.config["FLEXEVAL_INSTANCE_DIR"]
-            + "/systems/"
-            + self.name
-            + ".csv"
-        )
+        source_file = current_app.config["FLEXEVAL_INSTANCE_DIR"] + "/systems/" + self.name + ".csv"
 
         try:
             reader = csv.DictReader(open(source_file, encoding="utf-8"), delimiter=delimiter)
         except Exception as e:
-            raise SystemFileNotFound(
-                source_file + " doesn't exist. Fix test.json or add the system's file."
-            )
+            raise SystemFileNotFound(source_file + " doesn't exist. Fix test.json or add the system's file.")
 
         self.cols_name = reader.fieldnames
 
@@ -63,9 +55,7 @@ class System:
             max_samples = len(list(csv.DictReader(open(source_file, encoding="utf-8"), delimiter=delimiter)))
 
         if len(self.system_samples) == 0:
-
             for line_id, line in enumerate(reader):
-
                 if line_id >= max_samples:
                     break
 
@@ -78,20 +68,10 @@ class System:
                     SampleModel.create(commit=False, **vars)
 
                 except Exception as e:
-                    raise SystemError(
-                        "Issue to read the line "
-                        + str(line_id)
-                        + " of the file:"
-                        + source_file
-                    )
+                    raise SystemError("Issue to read the line " + str(line_id) + " of the file:" + source_file)
 
             commit_all()
 
     @property
     def system_samples(self):
-
-        return (
-            SampleModel.query.filter(SampleModel.system == self.name)
-            .order_by(SampleModel.line_id.asc())
-            .all()
-        )
+        return SampleModel.query.filter(SampleModel.system == self.name).order_by(SampleModel.line_id.asc()).all()

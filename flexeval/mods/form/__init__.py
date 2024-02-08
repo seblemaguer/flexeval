@@ -57,7 +57,6 @@ with StageModule(__name__) as sm:
         stage = sm.current_stage
         userModel = sm.authProvider.userModel
 
-
         sem_form.acquire()
         if not ModelFactory().has(stage.name, Form):
             form_stage = ModelFactory().create(stage.name, Form)
@@ -92,7 +91,6 @@ with StageModule(__name__, subname="autogen") as sm_autogen:
     @sm_autogen.route("/", methods=["GET"])
     @sm_autogen.valid_connection_required
     def main():
-
         stage = sm_autogen.current_stage
 
         # On récup le json
@@ -104,10 +102,7 @@ with StageModule(__name__, subname="autogen") as sm_autogen:
                 form_json_data = json.load(form_json_data)
         except Exception as e:
             raise FileNotFound(
-                "Issue when loading: "
-                + current_app.config["FLEXEVAL_INSTANCE_DIR"]
-                + "/"
-                + stage.get("data")
+                "Issue when loading: " + current_app.config["FLEXEVAL_INSTANCE_DIR"] + "/" + stage.get("data")
             )
 
         names = []
@@ -122,15 +117,11 @@ with StageModule(__name__, subname="autogen") as sm_autogen:
 
             if not (component["id"].replace("_", "").isalnum()):
                 raise MalformationError(
-                    "ID: "
-                    + component["id"]
-                    + " is incorrect. Only alphanumeric's and '_' symbol caracteres are allow."
+                    "ID: " + component["id"] + " is incorrect. Only alphanumeric's and '_' symbol caracteres are allow."
                 )
 
             if component["id"] in names:
-                raise MalformationError(
-                    "ID: " + component["id"] + " is already defined."
-                )
+                raise MalformationError("ID: " + component["id"] + " is already defined.")
 
             names.append(component["id"])
 

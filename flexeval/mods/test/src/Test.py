@@ -42,7 +42,6 @@ TEST_CONFIGURATION_BASENAME = "tests"
 DEFAULT_CSV_DELIMITER = ","
 
 
-
 class SampleModelTemplate:
     def __init__(self, id, system_name, systemsample):
         self._system = SystemManager().get(systemsample.system)

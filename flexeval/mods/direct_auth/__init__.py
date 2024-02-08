@@ -14,18 +14,17 @@ StageModule.set_authProvider(EmailAuth)
 
 with StageModule(__name__) as sm:
 
-    @sm.route("/", methods = ['GET'])
+    @sm.route("/", methods=["GET"])
     def main():
         stage = sm.current_stage
 
-        if (sm.authProvider.validates_connection("connected")[0]):
+        if sm.authProvider.validates_connection("connected")[0]:
             return redirect(stage.local_url_next)
         else:
             return sm.render_template(template="login.tpl")
 
-    @sm.route("/register",methods = ['POST'])
+    @sm.route("/register", methods=["POST"])
     def register():
-
         stage = sm.current_stage
         email = request.form["email"]
 

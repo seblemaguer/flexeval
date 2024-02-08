@@ -11,6 +11,7 @@ from pathlib import Path
 from flask import current_app
 from flask import redirect as flask_redirect
 
+
 def copytree(src, dst, dirs_exist_ok=True, ignore=None):
     """Alternative copytree to the shutils.copytree which is only available in python >= 3.8
 
@@ -31,6 +32,7 @@ def copytree(src, dst, dirs_exist_ok=True, ignore=None):
             copytree(s, d, dirs_exist_ok=dirs_exist_ok, ignore=ignore)
         else:
             from pathlib import Path
+
             os.makedirs(Path(d).parent, exist_ok=dirs_exist_ok)
             shutil.copyfile(s, d)
 
@@ -94,6 +96,7 @@ def make_absolute_path(relative_path):
     else:
         return relative_path
 
+
 def make_global_url(local_url):
     """Generate global URL from a local URL
 
@@ -126,13 +129,10 @@ def redirect(local_url):
 
 class AppSingleton(type):
     def __call__(cls, *args, **kwargs):
-
         if not (hasattr(current_app, "_appsingleton_instances")):
             current_app._appsingleton_instances = {}
 
         if cls not in current_app._appsingleton_instances:
-            current_app._appsingleton_instances[cls] = super(
-                AppSingleton, cls
-            ).__call__(*args, **kwargs)
+            current_app._appsingleton_instances[cls] = super(AppSingleton, cls).__call__(*args, **kwargs)
 
         return current_app._appsingleton_instances[cls]

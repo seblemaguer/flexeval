@@ -25,6 +25,7 @@ from flexeval import create_app
 ###############################################################################
 LEVEL = [logging.WARNING, logging.INFO, logging.DEBUG]
 
+
 ###############################################################################
 # Functions
 ###############################################################################
@@ -97,24 +98,23 @@ def define_argument_parser() -> argparse.ArgumentParser:
 
     # On récup les args liés à l'instance a créer
     parser = argparse.ArgumentParser(description="FlexEval")
-    parser.add_argument(
-        "instance", metavar="INSTANCE_DIRECTORY", type=str, help="Instance's directory"
-    )
+    parser.add_argument("instance", metavar="INSTANCE_DIRECTORY", type=str, help="Instance's directory")
 
     # Connection options
-    parser.add_argument(
-        "-d", "--debug", action="store_true", help="Start the server in debugging mode"
-    )
+    parser.add_argument("-d", "--debug", action="store_true", help="Start the server in debugging mode")
     parser.add_argument("-i", "--ip", type=str, default="127.0.0.1", help="IP's server")
     parser.add_argument("-p", "--port", type=int, default="8080", help="port")
     parser.add_argument("-t", "--threaded", action="store_true", default=False, help="Enable threads.")
-    parser.add_argument("-u", "--url", type=str, help="URL of the server (needed for flask redirections!) if different from http://<ip>:<port>/")
+    parser.add_argument(
+        "-u",
+        "--url",
+        type=str,
+        help="URL of the server (needed for flask redirections!) if different from http://<ip>:<port>/",
+    )
 
     # Logging options
     parser.add_argument("-l", "--log_file", default=None, help="Logger file")
-    parser.add_argument(
-        "-v", "--verbosity", action="count", default=0, help="increase output verbosity"
-    )
+    parser.add_argument("-v", "--verbosity", action="count", default=0, help="increase output verbosity")
 
     # Return parser
     return parser
@@ -143,8 +143,9 @@ if __name__ == "__main__":
     if args.url:
         app = create_app(instance_abs_path, args.url, debug=args.debug, log_level=log_level)
     else:
-        app = create_app(instance_abs_path, "http://%s:%d" % (args.ip, args.port), debug=args.debug, log_level=log_level)
-
+        app = create_app(
+            instance_abs_path, "http://%s:%d" % (args.ip, args.port), debug=args.debug, log_level=log_level
+        )
 
     if args.debug:
         app.run(
@@ -153,7 +154,7 @@ if __name__ == "__main__":
             use_reloader=True,
             debug=args.debug,
             extra_files=extra_files,
-            threaded=args.threaded
+            threaded=args.threaded,
         )
     else:
         run_simple(hostname=args.ip, port=args.port, application=app, threaded=args.threaded, use_reloader=True)

@@ -3,14 +3,14 @@
 
 from flexeval.core.providers.auth import AuthProvider
 
-class AdminUser():
 
+class AdminUser:
     @property
     def id(self):
         return "admin"
 
-class UniqueAuth(AuthProvider):
 
+class UniqueAuth(AuthProvider):
     __userBase__ = None
 
     def connect(self):

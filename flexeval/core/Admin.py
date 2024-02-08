@@ -15,7 +15,6 @@ from flexeval.utils import AppSingleton
 
 
 class AdminModule(Module):
-
     name_type = "admin"
     homepage = "/admin"
 
@@ -41,7 +40,6 @@ class AdminModule(Module):
         return "/" + self.__class__.name_type + "/" + self.get_mod_name() + "/"
 
     def render_template(self, template, next=None, **parameters):
-
         args = {}
         args["THIS_MODULE"] = "mod:" + str(self.mod_rep)
 
@@ -51,10 +49,8 @@ class AdminModule(Module):
         except Exception as e:
             pass
 
-        template = ProviderFactory().get("templates").get(template) # "mod:" + str(self.mod_rep)
-        return super().render_template(
-            template, args=args, parameters=parameters, variables=variables
-        )
+        template = ProviderFactory().get("templates").get(template)  # "mod:" + str(self.mod_rep)
+        return super().render_template(template, args=args, parameters=parameters, variables=variables)
 
     def get_endpoint_for_local_rule(self, rule):
         return self.name + "." + "local_url@" + str(rule)
@@ -70,9 +66,7 @@ class AdminModule(Module):
             def wrapper(*args, **kwargs):
                 return func(*args, **kwargs)
 
-            self.add_url_rule(
-                rule, "local_url@" + str(rule.replace(".", "_")), wrapper, **options
-            )
+            self.add_url_rule(rule, "local_url@" + str(rule.replace(".", "_")), wrapper, **options)
 
             return wrapper
 

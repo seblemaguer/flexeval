@@ -75,12 +75,12 @@ with StageModule(__name__) as sm:
             intro_step = False
 
         if cur_step < max_steps:
-
             # Get the step
             sem_test.acquire()
-            syssamples_for_this_step = test.get_step(cur_step, user, nb_systems=nb_systems_per_step, is_intro_step=intro_step)
+            syssamples_for_this_step = test.get_step(
+                cur_step, user, nb_systems=nb_systems_per_step, is_intro_step=intro_step
+            )
             sem_test.release()
-
 
             def get_syssamples(*system_names):
                 systems = []

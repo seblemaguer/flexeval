@@ -52,6 +52,7 @@ class LoadModuleError(ConfigError):
     def __init__(self, message):
         self.message = message
 
+
 class Config(metaclass=AppSingleton):
     def __init__(self):
         # Define logger
@@ -80,9 +81,9 @@ class Config(metaclass=AppSingleton):
         current_app.add_url_rule("/", "entrypoint", self.entrypoint)
         current_app.add_url_rule("/admin/", "entrypoint_admin", self.entrypoint_admin)
 
-        self._logger.info("WebService configuration made; using "
-            + os.path.join(current_app.config["FLEXEVAL_INSTANCE_DIR"],
-                           "%s.yaml." % STRUCTURE_CONFIGURATION_BASENAME)
+        self._logger.info(
+            "WebService configuration made; using "
+            + os.path.join(current_app.config["FLEXEVAL_INSTANCE_DIR"], "%s.yaml." % STRUCTURE_CONFIGURATION_BASENAME)
         )
 
     def get_stages(self, module_name):
@@ -97,12 +98,9 @@ class Config(metaclass=AppSingleton):
                 try:
                     self.load_module(mods["mod"])
                 except Exception as e:
-                    raise MalformationError(
-                        "Issue in structure.json for " + str(mods)
-                    )
+                    raise MalformationError("Issue in structure.json for " + str(mods))
         else:
             self.data()["mods"] = []
-
 
     def setup_admin_mods(self):
         if "admin" in self.data():
@@ -112,9 +110,7 @@ class Config(metaclass=AppSingleton):
                     try:
                         self.load_module(mods["mod"])
                     except Exception as e:
-                        raise MalformationError(
-                            "Issue in structure.json for " + str(mods)
-                        )
+                        raise MalformationError("Issue in structure.json for " + str(mods))
             else:
                 self.data()["admin"]["mods"] = []
 
@@ -134,10 +130,7 @@ class Config(metaclass=AppSingleton):
             args_GET = args_GET + args_key + "=" + request.args[args_key] + "&"
 
         try:
-            return redirect(
-                AdminModule.get_local_url_for(self.data()["admin"]["entrypoint"]["mod"])
-                + args_GET
-            )
+            return redirect(AdminModule.get_local_url_for(self.data()["admin"]["entrypoint"]["mod"]) + args_GET)
         except Exception as e:
             raise MalformationError("No entrypoint for admin set-up.")
 
@@ -170,7 +163,6 @@ class Config(metaclass=AppSingleton):
             )
 
     def load_stage(self, current_stage_name):
-
         current_stage = self.config["stages"][current_stage_name]
 
         try:
@@ -186,9 +178,7 @@ class Config(metaclass=AppSingleton):
         try:
             module_name = current_stage["type"]
         except Exception as e:
-            raise MalformationError(
-                "Field: type is missing from the stage: " + current_stage_name
-            )
+            raise MalformationError("Field: type is missing from the stage: " + current_stage_name)
 
         self.load_module(module_name)
 
@@ -212,7 +202,6 @@ class Config(metaclass=AppSingleton):
                     raise NextStageNotFoundError(current_stage_name, next_stage_name)
 
     def stages(self):
-
         try:
             assert "entrypoint" in self.config
             assert "stages" in self.config
@@ -232,19 +221,14 @@ class Config(metaclass=AppSingleton):
         name = name.split(":")
         name = name[0]
 
-        self._logger.info("Loading moodule \"%s\"" % name)
+        self._logger.info('Loading moodule "%s"' % name)
 
         if name not in self.modules:
-
             try:
                 lib_imported = importlib.import_module("flexeval.mods." + name)
                 self.modules.append(name)
             except Exception as e:
-                raise LoadModuleError(
-                    "Module: "
-                    + name
-                    + " doesn't exist or can't be initialized properly."
-                )
+                raise LoadModuleError("Module: " + name + " doesn't exist or can't be initialized properly.")
 
     def default_authProvider_for_StageModule(self):
         from .Stage import StageModule

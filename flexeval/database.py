@@ -20,11 +20,11 @@ db = SQLAlchemy()
 sem = threading.Semaphore()
 
 
-
 # Alias common SQLAlchemy names
 Column = db.Column
 ForeignKey = db.ForeignKey
 relationship = db.relationship
+
 
 # Helper's function
 def commit_all():
@@ -39,6 +39,7 @@ class DataBaseError(Exception):
       message: string
         The error message
     """
+
     def __init__(self, message):
         """Constructor which simply set the message of the exception
 
@@ -53,14 +54,14 @@ class DataBaseError(Exception):
 
 
 class ConstraintsError(DataBaseError):
-    """Exception raised when a SQL constraint is violated
-    """
+    """Exception raised when a SQL constraint is violated"""
+
     pass
 
 
 class MalformationError(DataBaseError):
-    """Exception raised when a SQL query is malformed
-    """
+    """Exception raised when a SQL query is malformed"""
+
     pass
 
 
@@ -68,6 +69,7 @@ class ForbiddenColumnName(DataBaseError):
     """Exception raised when the name given to the column to be created is
     forbidden (i.e. reserved SQL keywords)
     """
+
     pass
 
 
@@ -128,33 +130,24 @@ class Model(CRUDMixin, db.Model):
 
             if not (name.replace("_", "").isalnum()):
                 raise MalformationError(
-                    "Col name:"
-                    + name
-                    + " is incorrect. Only alphanumeric's and '_' symbol caracteres are allow. "
+                    "Col name:" + name + " is incorrect. Only alphanumeric's and '_' symbol caracteres are allow. "
                 )
-
 
             if inspect(db.engine).has_table(cls.__tablename__):
                 name_columns_in_table = [
-                    col_in_table["name"]
-                    for col_in_table in inspect(db.engine).get_columns(
-                        cls.__tablename__
-                    )
+                    col_in_table["name"] for col_in_table in inspect(db.engine).get_columns(cls.__tablename__)
                 ]
                 if name not in name_columns_in_table:
-
                     column_type = column.type.compile(db.engine.dialect)
                     with db.engine.begin() as conn:
-                        conn.execute(
-                            text(f"ALTER TABLE '{cls.__tablename__}' ADD COLUMN {name} {column_type}")
-                        )
+                        conn.execute(text(f"ALTER TABLE '{cls.__tablename__}' ADD COLUMN {name} {column_type}"))
 
                     if len(constraints) > 0:
                         raise ConstraintsError(
                             f"Table {cls.__tablename__} already existing. Due to SQLite limitation, you can't add a constraint via ALTER TABLE ___ ADD COLUMN ___ ."
                         )
         else:
-            column =  getattr(cls, name)
+            column = getattr(cls, name)
 
         sem.release()
         return column
@@ -251,8 +244,7 @@ class ModelFactory(metaclass=AppSingleton):
         return table
 
     def commit(self, model_cls):
-        """Commit the model to the database
-        """
+        """Commit the model to the database"""
 
         sem.acquire()
         if not (inspect(db.engine).has_table(model_cls.__tablename__)):

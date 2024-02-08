@@ -6,21 +6,24 @@ import logging
 from .System import System
 from flexeval.mods.test.model import SampleModel
 
+
 class SelectionBase:
-    def __init__(self, systems: Dict[str, System], references: List[str]=[], include_references: bool=False) -> None:
+    def __init__(
+        self, systems: Dict[str, System], references: List[str] = [], include_references: bool = False
+    ) -> None:
         self._systems = systems
-        self._references= references
+        self._references = references
         self._include_reference = include_references
         self._logger = logging.getLogger(self.__class__.__name__)
 
     def select_samples(self, user_id: str, nb_systems: int, nb_samples: int) -> Dict[str, List[SampleModel]]:
-        raise NotImplementedError(f"The class \"{self.__class__.__name__}\" should override the method \"select_samples\"")
+        raise NotImplementedError(f'The class "{self.__class__.__name__}" should override the method "select_samples"')
 
 
 class LeastSeenSelection(SelectionBase):
     """Class implementing the selection strategy based on the "least seen" paradigm:
-        1. list the least seen system(s)
-        2. for the the least system(s), select the least seen sample(s)
+    1. list the least seen system(s)
+    2. for the the least system(s), select the least seen sample(s)
     """
 
     def __init__(self, systems: Dict[str, System]) -> None:
@@ -34,11 +37,7 @@ class LeastSeenSelection(SelectionBase):
         super().__init__(systems)
 
         # Initialize content elements
-        samples = [
-            sample.id
-            for _, cur_system in systems.items()
-            for sample in cur_system[0].system_samples
-        ]
+        samples = [sample.id for _, cur_system in systems.items() for sample in cur_system[0].system_samples]
 
         # Initialize counters
         self._system_counters = dict([(cur_system, 0) for cur_system in systems.keys()])
@@ -108,16 +107,8 @@ class LeastSeenSelection(SelectionBase):
             The list of selected samples
         """
         # Subset the list of samples
-        dict_samples = dict(
-            [
-                (sample.id, sample)
-                for sample in self._systems[system_name][0].system_samples
-            ]
-        )
-        sample_subset = {
-            sample_id: self._sample_counters[sample_id]
-            for sample_id in dict_samples.keys()
-        }
+        dict_samples = dict([(sample.id, sample) for sample in self._systems[system_name][0].system_samples])
+        sample_subset = {sample_id: self._sample_counters[sample_id] for sample_id in dict_samples.keys()}
 
         # Sort by counting the pool of samples
         pool_samples = sorted(sample_subset.items(), key=lambda item: item[1])
@@ -183,9 +174,7 @@ class LeastSeenSelection(SelectionBase):
         self._logger.debug(f"Select samples for user {user_id}")
         dict_samples = dict()
         for system_name in pool_systems:
-            dict_samples[system_name] = self.internal_select_samples(
-                system_name, nb_samples
-            )
+            dict_samples[system_name] = self.internal_select_samples(system_name, nb_samples)
 
         self._logger.info(f"This is what we will give to {user_id}: {dict_samples}")
 
@@ -194,8 +183,8 @@ class LeastSeenSelection(SelectionBase):
 
 class LatinSquareSystemLeastSeenSampleSelection(LeastSeenSelection):
     """Class implementing the following selection strategy:
-        1. Select the systems using the latin square paradigm
-        2. for the the selected system(s), select the least seen sample(s)
+    1. Select the systems using the latin square paradigm
+    2. for the the selected system(s), select the least seen sample(s)
     """
 
     def __init__(self, systems: Dict[str, System]) -> None:
@@ -214,9 +203,7 @@ class LatinSquareSystemLeastSeenSampleSelection(LeastSeenSelection):
 
         # Generate system permuations based on a latin square
         nb_systems = len(systems.keys())
-        permutation_system = [
-            ((i + j) % nb_systems) for i in range(nb_systems) for j in range(nb_systems)
-        ]
+        permutation_system = [((i + j) % nb_systems) for i in range(nb_systems) for j in range(nb_systems)]
 
         # Initialize flatten system list based on permutation
         list_system_names = list(systems.keys())
@@ -241,23 +228,17 @@ class LatinSquareSystemLeastSeenSampleSelection(LeastSeenSelection):
         # Create user if not really
         if user_id not in self._user_infos:
             self._user_infos[user_id] = [self._current_permutation_idx, 0]
-            self._logger.debug(
-                f"{user_id} has been associated to permutation {self._current_permutation_idx}"
-            )
+            self._logger.debug(f"{user_id} has been associated to permutation {self._current_permutation_idx}")
             self._current_permutation_idx += 1
 
         # Resume position
-        cur_position = (
-            self._user_infos[user_id][0] * len(self._systems)
-        ) + self._user_infos[user_id][1]
+        cur_position = (self._user_infos[user_id][0] * len(self._systems)) + self._user_infos[user_id][1]
 
         # Select samples
         pool_systems = []
         shift = 0
         for _ in range(nb_systems):
-            system_name = self._permutation_system_names[
-                cur_position % len(self._permutation_system_names)
-            ]
+            system_name = self._permutation_system_names[cur_position % len(self._permutation_system_names)]
             pool_systems.append(system_name)
 
             self._logger.warning(
@@ -302,9 +283,7 @@ class LatinSquareSystemLeastSeenSampleSelection(LeastSeenSelection):
         self._logger.debug(f"Select samples for user {user_id}")
         dict_samples = dict()
         for system_name in pool_systems:
-            dict_samples[system_name] = self.internal_select_samples(
-                system_name, nb_samples
-            )
+            dict_samples[system_name] = self.internal_select_samples(system_name, nb_samples)
 
         self._logger.info(f"This is what we will give to {user_id}: {dict_samples}")
 
@@ -340,7 +319,7 @@ class RandomizedBalancedSelection(SelectionBase):
 
         # Initialize user/permutation info
         self._user_infos = dict()
-        self._start_idx = 5 # NOTE: hardcoded (aber warum?!)
+        self._start_idx = 5  # NOTE: hardcoded (aber warum?!)
 
         # Generate permutation matrix
         self._init_permutations = []
@@ -348,7 +327,7 @@ class RandomizedBalancedSelection(SelectionBase):
             for i_utt in range(nb_systems):
                 self._init_permutations.append((i_sys, i_utt))
 
-    def select_samples(self, user_id: str, nb_systems: int=1, nb_samples: int=1) -> Dict[str, List[SampleModel]]:
+    def select_samples(self, user_id: str, nb_systems: int = 1, nb_samples: int = 1) -> Dict[str, List[SampleModel]]:
         """Method to select a sample for a system (the parmeters should be set to 1 for both the number of systems and the number of samples)
 
         This method relies on an internal (prefilled) permutation matrix which provides the sequence of samples seen by the participant.
@@ -380,13 +359,10 @@ class RandomizedBalancedSelection(SelectionBase):
             nb_systems == 1
         ), f"RandomizedBalanced selection strategy imposes that the number of systems required per step is 1 . The requested number of systems is {nb_systems}."
 
-        assert (
-            nb_samples == 1
-        ), f"RandomizedBalanced selection that the number of requested samples to be 1."
+        assert nb_samples == 1, f"RandomizedBalanced selection that the number of requested samples to be 1."
 
         # Create user if not ready
         if user_id not in self._user_infos:
-
             # Select permutations
             total_nb_systems = len(self._systems)
             cur_permutation = []
@@ -434,8 +410,8 @@ class RandomizedBalancedSelection(SelectionBase):
 
 class LeastSeenPerUserSelection(LeastSeenSelection):
     """Class implementing the selection strategy based on the "least seen" (user focused) paradigm:
-        1. list the least seen system(s)
-        2. for the the least system(s), select the least seen sample(s)
+    1. list the least seen system(s)
+    2. for the the least system(s), select the least seen sample(s)
     """
 
     def __init__(self, systems: Dict[str, System]) -> None:
@@ -449,7 +425,6 @@ class LeastSeenPerUserSelection(LeastSeenSelection):
         super().__init__(systems)
 
         self._user_history = dict()
-
 
     def select_user_systems(self, user_history: Dict[str, Set[str]], nb_systems: int) -> List[str]:
         # Get the list of available systems sorted in ascending order
@@ -488,12 +463,7 @@ class LeastSeenPerUserSelection(LeastSeenSelection):
             The list of selected samples
         """
         # Subset the list of samples
-        dict_samples = dict(
-            [
-                (sample.id, sample)
-                for sample in self._systems[system_name][0].system_samples
-            ]
-        )
+        dict_samples = dict([(sample.id, sample) for sample in self._systems[system_name][0].system_samples])
         sample_subset = {
             sample_id: self._sample_counters[sample_id]
             for sample_id in dict_samples.keys()
@@ -531,7 +501,6 @@ class LeastSeenPerUserSelection(LeastSeenSelection):
 
         return [dict_samples[sample[0]] for sample in pool_samples]
 
-
     def select_samples(self, user_id: str, nb_systems: int, nb_samples: int) -> Dict[str, List[SampleModel]]:
         """Method to select a given number of samples for a given number of systems for a specific user
 
@@ -566,8 +535,7 @@ class LeastSeenPerUserSelection(LeastSeenSelection):
         dict_samples = dict()
         for system_name in pool_systems:
             dict_samples[system_name] = self.user_select_samples(
-                self._user_history[user_id][system_name],
-                system_name, nb_samples
+                self._user_history[user_id][system_name], system_name, nb_samples
             )
 
         self._logger.info(f"This is what we will give to {user_id}: {dict_samples}")
