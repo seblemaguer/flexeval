@@ -9,6 +9,7 @@ Its implementation is mainly based on the cookiebuffer-flask repository and espe
 # coding: utf8
 from .utils import AppSingleton
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import text
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.inspection import inspect
 import threading
@@ -143,16 +144,14 @@ class Model(CRUDMixin, db.Model):
                 if name not in name_columns_in_table:
 
                     column_type = column.type.compile(db.engine.dialect)
-                    db.engine.execute(
-                        "ALTER TABLE '%s' ADD COLUMN %s %s"
-                        % (cls.__tablename__, name, column_type)
-                    )
+                    with db.engine.begin() as conn:
+                        conn.execute(
+                            text(f"ALTER TABLE '{cls.__tablename__}' ADD COLUMN {name} {column_type}")
+                        )
 
                     if len(constraints) > 0:
                         raise ConstraintsError(
-                            "Table "
-                            + cls.__tablename__
-                            + " already existing. Due to SQLite limitation, you can't add a constraint via ALTER TABLE ___ ADD COLUMN ___ ."
+                            f"Table {cls.__tablename__} already existing. Due to SQLite limitation, you can't add a constraint via ALTER TABLE ___ ADD COLUMN ___ ."
                         )
         else:
             column =  getattr(cls, name)
@@ -173,6 +172,7 @@ class ModelFactory(metaclass=AppSingleton):
 
     def has(self, name_table, base):
         table_name = base.__name__ + "_" + name_table
+
         # Register already knows the table
         if table_name in self.register:
             return True

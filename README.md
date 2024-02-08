@@ -7,7 +7,7 @@ Installation require pip3.
 You can find the procedure to install it here: https://docs.python.org/fr/3.6/installing/index.html
 
 ```
-pip3 install -r requirements.txt
+pip3 install .
 ```
 
 # Launching the webserver
