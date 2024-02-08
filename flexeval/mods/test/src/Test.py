@@ -10,6 +10,7 @@ import logging
 
 # Yaml
 from yaml import load
+
 try:
     from yaml import CLoader as Loader
 except ImportError:
@@ -49,11 +50,11 @@ class SampleModelTemplate:
         self.system_name = system_name
         self._ID = id
         self._cache = dict()
-        self._cached = True # TODO: add as a configuration parameter
+        self._cached = True  # TODO: add as a configuration parameter
 
         if self._cached:
             # NOTE: under assets as the directory is, by default, visible
-            self.CACHE_DIR=Path(current_app.config["FLEXEVAL_INSTANCE_DIR"] + "/assets/sample_cache/")
+            self.CACHE_DIR = Path(current_app.config["FLEXEVAL_INSTANCE_DIR"] + "/assets/sample_cache/")
             self.CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
     @property
@@ -67,7 +68,6 @@ class SampleModelTemplate:
         if name is None:
             return (None, None)
         else:
-
             mime = "text"
             value = getattr(self._systemsample, name)
 
@@ -88,10 +88,14 @@ class SampleModelTemplate:
 
                             hashing = hashlib.md5()
                             hashing.update(str(cur_sample_path).encode())
-                            value = self.CACHE_DIR/(str(hashing.hexdigest()) + extension)
+                            value = self.CACHE_DIR / (str(hashing.hexdigest()) + extension)
                             shutil.copy(cur_sample_path, value)
 
-                            value = current_app.config["FLEXEVAL_INSTANCE_URL"] + "/" + str(value.relative_to(current_app.config["FLEXEVAL_INSTANCE_DIR"]))
+                            value = (
+                                current_app.config["FLEXEVAL_INSTANCE_URL"]
+                                + "/"
+                                + str(value.relative_to(current_app.config["FLEXEVAL_INSTANCE_DIR"]))
+                            )
                             self._cache[cur_sample_path] = (value, mime)
 
                         return self._cache[cur_sample_path]
@@ -104,16 +108,8 @@ class SampleModelTemplate:
             return (value, mime)
 
     def __str__(self):
+        return f"(Sys={self.system_name}, Sample=(ID: {self.ID}, object={self._systemsample})"
 
-        # return f"(Sys={self.system_name}, Sample={self._systemsample.audio})"
-        return f"(Sys={self.system_name}, Sample={self._systemsample.__dict__})"
-        # self._system = SystemManager().get(systemsample.system)
-        # self._systemsample = systemsample
-        # self.system_name = system_name
-        # self._ID = id
-        # self._cache = dict()
-        # self._cached = True # TODO: add as a configuration parameter
-        # pass
 
 class TestError(Exception):
     def __init__(self, message):
@@ -141,11 +137,7 @@ class TestManager(metaclass=AppSingleton):
             try:
                 config = self.config[name]
             except Exception as e:
-                raise MalformationError(
-                    "Test "
-                    + name
-                    + " not found in %s.yaml." % TEST_CONFIGURATION_BASENAME
-                )
+                raise MalformationError("Test " + name + " not found in %s.yaml." % TEST_CONFIGURATION_BASENAME)
             self.register[name] = Test(name, config)
 
         return self.register[name]
@@ -166,17 +158,14 @@ class TransactionalObject:
         self.transactions[user.id] = {"date": datetime.now()}
 
     def get_transactions(self):
-
         transactions = []
         to_del = []
 
         for key_transaction in self.transactions.keys():
             transaction = self.transactions[key_transaction]
 
-            if (self.time_out_seconds is not None) and (
-                transaction["date"] + timedelta(seconds=self.time_out_seconds)
-                < datetime.now()
-            ):
+            trans_date = transaction["date"] + timedelta(seconds=self.time_out_seconds)
+            if (self.time_out_seconds is not None) and (trans_date < datetime.now()):
                 to_del.append(key_transaction)
             else:
                 transactions.append(transaction)
@@ -206,7 +195,6 @@ class TransactionalObject:
         else:
             return self.transactions[user.id][name]
 
-
     def create_new_record(self, user, name=None):
         """Prepare a new record in the database (new line in the database after the user submits the form)
 
@@ -218,8 +206,8 @@ class TransactionalObject:
         user_transaction = self.get_or_create_transaction(user)
         all_records = user_transaction.setdefault("records", OrderedDict())
         if name == None:
-            name = "record"+str(abs(hash("record"+str(len(all_records))))%int(1e9))
-        name = name.replace(":","_") # Escape ":" as this is reserved for parsing identifiers
+            name = "record" + str(abs(hash("record" + str(len(all_records)))) % int(1e9))
+        name = name.replace(":", "_")  # Escape ":" as this is reserved for parsing identifiers
         current_fields = all_records.setdefault(name, list())
         return name
 
@@ -239,7 +227,7 @@ class TransactionalObject:
         # Get the last record if at least one record exists and no record name has been given
         elif record_name == None:
             record_name = next(reversed(all_records))
-        record_name = record_name.replace(":","_") # Escape ":" as this is reserved for parsing identifiers
+        record_name = record_name.replace(":", "_")  # Escape ":" as this is reserved for parsing identifiers
         current_fields = self.get_fields_for_record(user, record_name)
         if field_name not in current_fields:
             current_fields.append(field_name)
@@ -262,17 +250,17 @@ class TransactionalObject:
 
         if name in all_records:
             return name
+
+        if len(all_records) == 0 and name == None:
+            return self.create_new_record(user)
+        elif len(all_records) == 0 and name != None:
+            return self.create_new_record(user, name=name)
+        elif len(all_records) > 0 and name == None:
+            return next(reversed(all_records))
+        # elif len(all_records) > 0 and name != None:
+        # Reminder: we already made sure that name is not present is all_records
         else:
-            if len(all_records) == 0 and name == None:
-                return self.create_new_record(user)
-            elif len(all_records) == 0 and name != None:
-                return self.create_new_record(user, name=name)
-            elif len(all_records) > 0 and name == None:
-                return next(reversed(all_records))
-            # elif len(all_records) > 0 and name != None:
-            # Reminder: we already made sure that name is not present is all_records
-            else:
-                return self.create_new_record(user, name=name)
+            return self.create_new_record(user, name=name)
 
     def get_fields_for_record(self, user, record_name):
         """Return all fields associated to a given record
@@ -285,7 +273,6 @@ class TransactionalObject:
         all_records = user_transaction.setdefault("records", OrderedDict())
         current_fields = all_records.setdefault(record_name, list())
         return current_fields
-
 
     def create_row_in_transaction(self, user):
         ID = "".join((random.choice(string.ascii_lowercase) for _ in range(20)))
@@ -332,9 +319,7 @@ class Test(TransactionalObject):
 
         # Create Test table in the database
         # NOTE: commit is delayed in order to enable to set later the foreign key constraint on needed columns
-        self.model = ModelFactory().create(
-            self.name, TestModel, commit=False
-        )
+        self.model = ModelFactory().create(self.name, TestModel, commit=False)
 
         # Set the foreign key constraints
         foreign_key_for_each_system = []
@@ -354,7 +339,7 @@ class Test(TransactionalObject):
         ModelFactory().commit(self.model)
 
         # Set relations between used samples and the current test
-        for (system_name, foreign_key) in foreign_key_for_each_system:
+        for system_name, foreign_key in foreign_key_for_each_system:
             SampleModel.addRelationship(
                 self.model.__name__ + "_" + system_name,
                 self.model,
@@ -364,20 +349,17 @@ class Test(TransactionalObject):
             )
 
         # Set relations to associate multiple steps to a user
-        StageModule.get_UserModel().addRelationship(
-            self.model.__name__, self.model, uselist=True
-        )
+        StageModule.get_UserModel().addRelationship(self.model.__name__, self.model, uselist=True)
 
         # Initialize the sample selection strategy
         if "selection_strategy" in config:
             selection_strategy_name = config["selection_strategy"]
-            self._logger.info(f"The selection strategy is user defined to \"{selection_strategy_name}\"")
+            self._logger.info(f'The selection strategy is user defined to "{selection_strategy_name}"')
             constructor = globals()[selection_strategy_name]
             self._selection_strategy = constructor(self.systems)
         else:
-            self._logger.info(f"The selection strategy is defaulted to \"LeastSeenSelection\"")
+            self._logger.info(f'The selection strategy is defaulted to "LeastSeenSelection"')
             self._selection_strategy = LeastSeenSelection(self.systems)
-
 
     def nb_steps_complete_by(self, user: UserModel) -> int:
         """Get the number of steps completed by a given user
@@ -398,8 +380,9 @@ class Test(TransactionalObject):
         return len(all_steps)
         # return len(getattr(user, self.model.__name__))
 
-
-    def get_step(self, id_step: int, user: UserModel, nb_systems: int, is_intro_step:bool=False) -> Dict[str, SampleModelTemplate]:
+    def get_step(
+        self, id_step: int, user: UserModel, nb_systems: int, is_intro_step: bool = False
+    ) -> Dict[str, SampleModelTemplate]:
         """Get the samples needed for one step of the test
 
         Parameters
@@ -423,9 +406,8 @@ class Test(TransactionalObject):
         if self.has_transaction(user):
             return self.get_in_transaction(user, "choice_for_systems")
         else:
-
             # Select samples (NOTE: 1 is hardcoded here)
-            selected_samples = self._selection_strategy.select_samples(user.id, nb_systems, 1) #
+            selected_samples = self._selection_strategy.select_samples(user.id, nb_systems, 1)  #
             for system_name, samples in selected_samples.items():
                 choice_for_systems[system_name] = samples[0]
 
@@ -436,12 +418,8 @@ class Test(TransactionalObject):
             for system_name in choice_for_systems.keys():
                 syssample = choice_for_systems[system_name]
                 id_in_transaction = self.create_row_in_transaction(user)
-                self.set_in_transaction(
-                    user, id_in_transaction, (system_name, syssample.id)
-                )
-                choice_for_systems[system_name] = SampleModelTemplate(
-                    id_in_transaction, system_name, syssample
-                )
+                self.set_in_transaction(user, id_in_transaction, (system_name, syssample.id))
+                choice_for_systems[system_name] = SampleModelTemplate(id_in_transaction, system_name, syssample)
 
             # Define if it is an introduction step
             self.set_in_transaction(user, "intro_step", is_intro_step)

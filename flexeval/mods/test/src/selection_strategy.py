@@ -50,7 +50,7 @@ class LeastSeenSelection(SelectionBase):
         Parameters
         ----------
         nb_systems: int
-            The desired number of systems
+            The desired number of systems for one step
 
         Returns
         -------
@@ -556,7 +556,6 @@ class LeastSeenPerUserSelection(LeastSeenSelection):
 
         if user_id not in self._user_history:
             self._user_history[user_id] = dict([(cur_system, set()) for cur_system in self._systems.keys()])
-            print(self._user_history[user_id])
 
         # Select the systems
         self._logger.debug(f"Select systems for user {user_id}")

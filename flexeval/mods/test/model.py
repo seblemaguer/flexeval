@@ -17,6 +17,8 @@ class SampleModel(Model):
     system = Column(db.String, nullable=False)
     line_id = Column(db.Integer,nullable=False)
 
+    def __str__(self) -> str:
+        return str(self.__dict__)
 
 class TestModel(Model):
     """Model which represents a test.
