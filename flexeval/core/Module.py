@@ -1,19 +1,21 @@
 # coding: utf8
 # license : CeCILL-C
 
-import logging
-
+# Python
+from typing import Any
+import inspect
 import abc
-
+import logging
 import json
 
+# Flask
 from flask import Blueprint, current_app, abort
 from flask import render_template as flask_render_template
 
+# FlexEval
 from flexeval.core import ProviderFactory
-from .Config import Config
+from flexeval.core.Config import Config
 from flexeval.core.providers.auth import AuthProvider, UserModel, VirtualAuthProvider
-
 from flexeval.utils import make_global_url, make_absolute_path
 from flexeval.database import Model
 
@@ -27,8 +29,12 @@ class ModuleError(Exception):
         The error message
     """
 
-    def __init__(self, message):
+    def __init__(self, message, ex):
         self.message = message
+        self.ex = ex
+
+    def __str__(self):
+        return f"{self.message}: {self.ex}"
 
 
 class MalformationError(ModuleError):
@@ -46,8 +52,8 @@ class MalformationTemplateError(MalformationError):
        The template file
     """
 
-    def __init__(self, tpl_file):
-        super().__init__('The template "%s" is malformed' % tpl_file)
+    def __init__(self, tpl_file, ex):
+        super().__init__('The template "%s" is malformed' % tpl_file, ex)
         self.file = tpl_file
 
 
@@ -155,7 +161,7 @@ class Module(Blueprint, abc.ABC):
             try:
                 assert len(bases) == 1
                 assert UserModel in bases
-            except Exception as e:
+            except Exception:
                 raise NotAUserModel(__userBase__ + " is not only or not a subClass of UserModel")
 
             if hasattr(cls, "userModel_init"):
@@ -190,7 +196,7 @@ class Module(Blueprint, abc.ABC):
         try:
             current_app.register_blueprint(self, url_prefix=self.local_rule())
             self.logger.info("%s is loaded and bound to: %s" % (self.get_mod_name(), self.local_rule()))
-        except Exception as e:
+        except Exception:
             raise MalformationError(
                 "There are already a " + self.__class__.__name__ + " module named: " + self.get_mod_name()
             )
@@ -247,7 +253,7 @@ class Module(Blueprint, abc.ABC):
         try:
             args["auth"] = ProviderFactory().get("auth_mod_" + cls.name_type)
             args["homepage"] = make_global_url(cls.homepage)
-        except Exception as e:
+        except Exception:
             args["auth"] = VirtualAuthProvider()
             args["homepage"] = make_global_url("/")
 
@@ -263,26 +269,38 @@ class Module(Blueprint, abc.ABC):
             with open(make_absolute_path(filename)) as f:
                 return json.load(f)
 
-        def get_variable(key, *args, **kwargs):
+        def get_variable(key: str, *args, **kwargs) -> Any:
+            """Helper to replace a variable value in the template
+
+            The variable can be a callable which will be ran and its
+            returned value will be used
+
+            Parameters
+            ----------
+            key : str
+                the variable name/key
+
+            Returns
+            -------
+            Any
+                the obtained/computed value
+            """
+
+            default_value = None
             if "default_value" in kwargs:
                 default_value = kwargs["default_value"]
-            else:
-                default_value = None
 
             if key in parameters:
-                try:
-                    try:
-                        return parameters[key](*args, **kwargs)
-                    except Exception as e:
-                        del kwargs["default_value"]
-                        return parameters[key](*args, **kwargs)
-                except Exception as e:
-                    return parameters[key]
-            else:
-                if key in variables:
-                    return variables[key]
+                if callable(parameters[key]):
+                    if "default_value" in inspect.getfullargspec(parameters[key])[0]:
+                        kwargs["default_value"] = default_value
+                    return parameters[key](*args, **kwargs)
                 else:
-                    return default_value
+                    return parameters[key]
+            elif key in variables:
+                return variables[key]
+            else:
+                return default_value
 
         def get_asset(name, rep=None):
             return make_global_url(ProviderFactory().get("assets").local_url(name, rep))
@@ -296,5 +314,5 @@ class Module(Blueprint, abc.ABC):
 
         try:
             return flask_render_template(path_template, **args)
-        except Exception as e:
-            raise MalformationTemplateError(path_template)
+        except Exception as ex:
+            raise MalformationTemplateError(path_template, ex)
