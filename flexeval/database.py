@@ -14,13 +14,26 @@ from .utils import AppSingleton
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text
 from sqlalchemy.inspection import inspect
+from sqlalchemy.ext.declarative import declared_attr
 import threading
+
+__all__ = [
+    "declared_attr",
+    "Column",
+    "ForeignKey",
+    "relationship",
+    "commit_all",
+    "DataBaseError",
+    "MalformationError",
+    "ForbiddenColumnName",
+    "Model",
+    "ModelFactory",
+]
 
 # Instanciate database
 db = SQLAlchemy()
 
 sem = threading.Semaphore()
-
 
 # Alias common SQLAlchemy names
 Column = db.Column

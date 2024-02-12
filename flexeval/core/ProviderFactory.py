@@ -67,7 +67,7 @@ class ProviderFactory(metaclass=AppSingleton):
         """
         try:
             return self.providers[name]
-        except Exception as e:
+        except Exception:
             raise UndefinedError(name)
 
     def exists(self, name):
@@ -103,10 +103,9 @@ class ProviderFactory(metaclass=AppSingleton):
         """
         if ProviderFactory().exists(name):
             oldprovider = ProviderFactory().get(name)
-
-            self._logger.warning(
-                '%s is overwritten by %s for provider named "%s".'
-                % (oldprovider.__class__.__name__, provider.__class__.__name__, name)
+            old_name = oldprovider.__class__.__name__
+            self._logger.debug(
+                f'{old_name} is overwritten by {provider.__class__.__name__} for provider named "{name}".'
             )
 
         self.providers[name] = provider
