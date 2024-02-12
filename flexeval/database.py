@@ -1,16 +1,18 @@
-"""
-flexeval.database
+"""flexeval.database
 =================
 
-This modules provides the necessary classes to encapsulate the interaction with the database.
-Its implementation is mainly based on the cookiebuffer-flask repository and especially from the following class: https://github.com/cookiecutter-flask/cookiecutter-flask/blob/master/%7B%7Bcookiecutter.app_name%7D%7D/%7B%7Bcookiecutter.app_name%7D%7D/database.py
+This modules provides the necessary classes to encapsulate the
+interaction with the database.  Its implementation is mainly based on
+the cookiebuffer-flask repository and especially from the following
+class:
+https://github.com/cookiecutter-flask/cookiecutter-flask/blob/master/%7B%7Bcookiecutter.app_name%7D%7D/%7B%7Bcookiecutter.app_name%7D%7D/database.py
 
 """
+
 # coding: utf8
 from .utils import AppSingleton
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text
-from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.inspection import inspect
 import threading
 
@@ -144,7 +146,9 @@ class Model(CRUDMixin, db.Model):
 
                     if len(constraints) > 0:
                         raise ConstraintsError(
-                            f"Table {cls.__tablename__} already existing. Due to SQLite limitation, you can't add a constraint via ALTER TABLE ___ ADD COLUMN ___ ."
+                            f"Table {cls.__tablename__} already existing. "
+                            + "Due to SQLite limitation, you can't add a constraint via "
+                            + "ALTER TABLE ___ ADD COLUMN ___ ."
                         )
         else:
             column = getattr(cls, name)
@@ -160,7 +164,7 @@ class ModelFactory(metaclass=AppSingleton):
     def get(self, name_table, base):
         try:
             return self.register[base.__name__ + "_" + name_table]
-        except Exception as e:
+        except Exception:
             return None
 
     def has(self, name_table, base):
@@ -183,7 +187,7 @@ class ModelFactory(metaclass=AppSingleton):
                     "__tablename__": table_name,
                     "__table_args__": {
                         "extend_existing": True,
-                        "autoload": True,
+                        # "autoload": True,
                         "autoload_with": db.engine,
                     },
                 },
@@ -213,7 +217,7 @@ class ModelFactory(metaclass=AppSingleton):
                         "__tablename__": table_name,
                         "__table_args__": {
                             "extend_existing": True,
-                            "autoload": True,
+                            # "autoload": True,
                             "autoload_with": db.engine,
                         },
                     },
