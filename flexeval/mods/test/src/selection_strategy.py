@@ -1,5 +1,6 @@
 from typing import Dict, List, Set
 
+import math
 import random
 import logging
 
@@ -61,9 +62,10 @@ class LeastSeenSelection(SelectionBase):
         pool_systems = sorted(self._system_counters.items(), key=lambda item: item[1])
 
         # Assert/Fix the number of required systems
-        assert (nb_systems <= len(pool_systems)) and (
-            nb_systems != 0
-        ), f"The required number of systems ({nb_systems}) is greater than the available number of systems ({len(pool_systems)}) or it is 0"
+        assert (nb_systems <= len(pool_systems)) and (nb_systems != 0), (
+            f"The required number of systems ({nb_systems}) is greater than the available number of systems "
+            + f"({len(pool_systems)}) or it is 0"
+        )
 
         # Preparing pool of systems
         if nb_systems > 0:
@@ -114,13 +116,14 @@ class LeastSeenSelection(SelectionBase):
         pool_samples = sorted(sample_subset.items(), key=lambda item: item[1])
 
         # Assert/Fix the number of required samples
-        assert (nb_samples <= len(pool_samples)) and (
-            nb_samples != 0
-        ), f"The required number of samples ({nb_samples}) is greater than the available number of samples {len(pool_samples)} or it is 0"
+        assert (nb_samples <= len(pool_samples)) and (nb_samples != 0), (
+            f"The required number of samples ({nb_samples}) is greater than the available number of samples "
+            + f"({len(pool_samples)}) or it is 0"
+        )
 
         # Preparing pool of samples
         if nb_samples > 0:
-            min_count = 9999999  # NOTE: Infinite is hardcoded here!
+            min_count = math.inf  # NOTE: Infinite is hardcoded here!
             tmp_pool = []
             for sample, count in pool_samples:
                 if count > min_count:
@@ -242,7 +245,8 @@ class LatinSquareSystemLeastSeenSampleSelection(LeastSeenSelection):
             pool_systems.append(system_name)
 
             self._logger.warning(
-                f"{user_id} (with permutation [{self._user_infos[user_id][0]}]) has been selecting couple (cur_pos = {cur_position}, sys={system_name})"
+                f"{user_id} (with permutation [{self._user_infos[user_id][0]}]) has been selecting couple "
+                + f"(cur_pos = {cur_position}, sys={system_name})"
             )
 
             cur_position += 1
@@ -293,7 +297,9 @@ class LatinSquareSystemLeastSeenSampleSelection(LeastSeenSelection):
 class RandomizedBalancedSelection(SelectionBase):
     """Class implementing the selection strategy using a permutation matrix allowing
 
-    For now, this selection strategy is only desined for MOS/CMOS/DMOS or any test only presenting one sample to evaluate per step!
+    For now, this selection strategy is only desined for MOS/CMOS/DMOS
+    or any test only presenting one sample to evaluate per step!
+
     """
 
     def __init__(self, systems: Dict[str, System]) -> None:
@@ -313,9 +319,10 @@ class RandomizedBalancedSelection(SelectionBase):
         # Be sure that the number of samples per systems equal the number of systems
         nb_systems = len(systems.keys())
         for sys_name, cur_system in systems.items():
-            assert (
-                len(cur_system[0].system_samples) == nb_systems
-            ), f'The number of samples ({len(cur_system[0].system_samples)}) for the system "{sys_name}" is different from the number of available systems ({nb_systems})'
+            assert len(cur_system[0].system_samples) == nb_systems, (
+                f'The number of samples ({len(cur_system[0].system_samples)}) for the system "{sys_name}" is different '
+                + f"from the number of available systems ({nb_systems})"
+            )
 
         # Initialize user/permutation info
         self._user_infos = dict()
@@ -328,9 +335,12 @@ class RandomizedBalancedSelection(SelectionBase):
                 self._init_permutations.append((i_sys, i_utt))
 
     def select_samples(self, user_id: str, nb_systems: int = 1, nb_samples: int = 1) -> Dict[str, List[SampleModel]]:
-        """Method to select a sample for a system (the parmeters should be set to 1 for both the number of systems and the number of samples)
+        """Method to select a sample for a system (the parmeters should be set to 1 for both the number of systems
+        and the number of samples)
 
-        This method relies on an internal (prefilled) permutation matrix which provides the sequence of samples seen by the participant.
+        This method relies on an internal (prefilled) permutation matrix which provides the sequence of samples
+        seen by the participant.
+
         When a new participant is found, the strategy is as follows:
           1. select, based on an incremented index, which permutation to use
           2. shuffle the permutation ()
@@ -355,11 +365,15 @@ class RandomizedBalancedSelection(SelectionBase):
             The dictionary providing for a system name the associated sample embedded in a list
         """
 
-        assert (
-            nb_systems == 1
-        ), f"RandomizedBalanced selection strategy imposes that the number of systems required per step is 1 . The requested number of systems is {nb_systems}."
+        assert nb_systems == 1, (
+            "RandomizedBalanced selection strategy imposes that the number of systems required per step is 1. "
+            + f"The requested number of systems is {nb_systems}."
+        )
 
-        assert nb_samples == 1, f"RandomizedBalanced selection that the number of requested samples to be 1."
+        assert nb_samples == 1, (
+            "RandomizedBalanced selection that the number of requested samples to be 1."
+            + f"The requested number of samples is {nb_samples}."
+        )
 
         # Create user if not ready
         if user_id not in self._user_infos:
@@ -373,7 +387,8 @@ class RandomizedBalancedSelection(SelectionBase):
                 cur_permutation.append(self._init_permutations[cur_idx])
                 offset += 1
                 self._logger.debug(
-                    f"boundary = {(cur_idx + 1) % total_nb_systems}, cur_idx = {cur_idx}, total_nb_systems={total_nb_systems}, len={len(self._init_permutations)}"
+                    f"boundary = {(cur_idx + 1) % total_nb_systems}, cur_idx = {cur_idx}, "
+                    + f"total_nb_systems={total_nb_systems}, len={len(self._init_permutations)}"
                 )
 
                 if ((cur_idx + 1) % total_nb_systems) == 0:
@@ -387,7 +402,8 @@ class RandomizedBalancedSelection(SelectionBase):
 
             self._user_infos[user_id] = [cur_permutation, 0]
             self._logger.debug(
-                f"{user_id} has been associated to permutation {self._start_idx} with the following permutation (sys_idx, samp_idx): {cur_permutation}"
+                f"{user_id} has been associated to permutation {self._start_idx} with the following "
+                + f"permutation (sys_idx, samp_idx): {cur_permutation}"
             )
             self._start_idx += 1
             self._start_idx = self._start_idx % total_nb_systems
@@ -475,12 +491,14 @@ class LeastSeenPerUserSelection(LeastSeenSelection):
 
         # Assert/Fix the number of required samples
         self._logger.debug(f"Number of samples {nb_samples} from a pool of {len(pool_samples)} samples is required")
-        assert (nb_samples <= len(pool_samples)) and (
-            nb_samples > 0
-        ), f"The required number of samples ({nb_samples}) is greater than the available number of samples {len(pool_samples)} or it is 0"
+        assert (nb_samples <= len(pool_samples)) and (nb_samples > 0), (
+            f"The required number of samples ({nb_samples}) is greater "
+            + f"than the available number of samples {len(pool_samples)} or it is 0"
+        )
 
         # Subset to get the desired number of samples and shuffle to guarantee variation in the presentation order
-        # NOTE: to ensure variability, we first need to take into account the pool of samples seens the same amount of time
+        # NOTE: to ensure variability, we first need to take into account the pool of samples seens
+        #       the same amount of time
         nb_id_samples = 0
         for nb_id_samples in range(1, len(pool_samples)):
             if pool_samples[nb_id_samples - 1][1] != pool_samples[nb_id_samples][1]:
