@@ -1,6 +1,6 @@
 # coding: utf8
 
-from typing import Dict, List
+from typing import Dict, List, Optional, Any, Union
 
 # Global/system
 import os
@@ -17,7 +17,6 @@ except ImportError:
     from yaml import Loader
 
 # Data type
-import base64
 import mimetypes
 import random
 from datetime import datetime, timedelta
@@ -36,7 +35,8 @@ from flexeval.mods.test.model import TestModel, SampleModel
 
 # Current package
 from .System import SystemManager
-from .selection_strategy import *
+from .selection_strategy import LeastSeenSelection
+
 
 TEST_CONFIGURATION_BASENAME = "tests"
 DEFAULT_CSV_DELIMITER = ","
@@ -107,7 +107,8 @@ class SampleModelTemplate:
             return (value, mime)
 
     def __str__(self):
-        return f"(Sys={self.system_name}, Sample=(ID: {self.ID}, object={self._systemsample})"
+        # return f"(Sys={self.system_name}, Sample=(ID: {self.ID})" #  , object={self._systemsample}
+        return self.system_name
 
 
 class TestError(Exception):
@@ -136,152 +137,207 @@ class TestManager(metaclass=AppSingleton):
             try:
                 config = self.config[name]
             except Exception as e:
-                raise MalformationError("Test " + name + " not found in %s.yaml." % TEST_CONFIGURATION_BASENAME)
+                raise MalformationError(f"Test {name} not found in {TEST_CONFIGURATION_BASENAME}.yaml: {e}")
             self.register[name] = Test(name, config)
 
         return self.register[name]
 
 
 class TransactionalObject:
-    def __init__(self):
-        self.transactions = {}
-        self.time_out_seconds = 3600
+    """Wrapper class to deal with transactions to fill the database
 
-    def set_timeout_for_transaction(self, timeout):
-        self.time_out_seconds = timeout
+    A transaction aims to store temporary information, associated to a given user, which is not yet complete and
+    therefore can't be stored in the database. It is therefore used to ensure the passing of data between modules but
+    also allows a better handling of recovering sessions.
 
-    def delete_transaction(self, user):
-        del self.transactions[user.id]
 
-    def create_transaction(self, user):
-        self.transactions[user.id] = {"date": datetime.now()}
+    As part of a transaction, we also distinguish a "record". A record a specific property which requires a value filled
+    as part of the test (i.e., by the participant, not the designer!)
 
-    def get_transactions(self):
+    """
+
+    RECORD_SEP = ":"
+
+    def __init__(self, timeout_seconds: int = 3600):
+        """Initialisation
+
+        Parameters
+        ----------
+        time_out_seconds : int
+            The timeout in seconds (default: 3600s)
+        """
+        self._transactions = {}
+        self._timeout_seconds = timeout_seconds
+
+    def set_timeout_for_transaction(self, timeout: int) -> None:
+        """Setter of the timeout
+
+        Parameters
+        ----------
+        timeout : int
+            The timeout in seconds
+        """
+
+        self._timeout_seconds = timeout
+
+    def delete_transaction(self, user: UserModel) -> None:
+        """Helper to delete the transactions of a given user
+
+        Parameters
+        ----------
+        user : UserModel
+            The given user
+        """
+        del self._transactions[user.id]
+
+    def create_transaction(self, user: UserModel) -> None:
+        """Helper to create a transaction space for a given user
+
+        Parameters
+        ----------
+        user : UserModel
+            The given user
+        """
+        self._transactions[user.id] = {"date": datetime.now()}
+
+    def get_transactions(self) -> List[Dict[str, Any]]:
+        """Retrieve the list of available transactions
+
+        Available transactions are the ones which haven't been
+        processed AND not yet timed out
+
+        Returns
+        -------
+        List[Dict[str, Any]]
+            The list of transactions
+        """
+
         transactions = []
         to_del = []
 
-        for key_transaction in self.transactions.keys():
-            transaction = self.transactions[key_transaction]
+        # Retrieve all the transactions
+        for user_id in self._transactions.keys():
+            transaction = self._transactions[user_id]
 
-            trans_date = transaction["date"] + timedelta(seconds=self.time_out_seconds)
-            if (self.time_out_seconds is not None) and (trans_date < datetime.now()):
-                to_del.append(key_transaction)
+            trans_date = transaction["date"] + timedelta(seconds=self._timeout_seconds)
+            if (self._timeout_seconds is not None) and (trans_date < datetime.now()):
+                to_del.append(user_id)
             else:
                 transactions.append(transaction)
 
+        # Drop the timed out transactions
         for transaction_key_to_del in to_del:
-            del self.transactions[transaction_key_to_del]
+            del self._transactions[transaction_key_to_del]
 
         return transactions
 
-    def has_transaction(self, user):
-        return user.id in self.transactions
+    def has_transaction(self, user: UserModel) -> bool:
+        """Helper to know if a given user has some transactions waiting to be processed
 
-    def get_transaction(self, user):
-        return self.transactions[user.id]
+        Parameters
+        ----------
+        user : UserModel
+            The given user
 
-    def get_or_create_transaction(self, user):
+        Returns
+        -------
+        bool
+            True if the user has some transactions to be processed, False else
+        """
+        return user.id in self._transactions
+
+    def get_transaction(self, user: UserModel) -> Dict[str, Any]:
+        """Retrieve the transactions of a given user
+
+        Should be called after checking if the user has some transactions to be processed
+
+        Parameters
+        ----------
+        user : UserModel
+            the given user
+
+        Returns
+        -------
+        Dict[str, Any]
+            the transactions of the given user
+        """
+        return self._transactions[user.id]
+
+    def get_or_create_transaction(self, user: UserModel) -> Dict[str, Any]:
         if not self.has_transaction(user):
             self.create_transaction(user)
         return self.get_transaction(user)
 
-    def set_in_transaction(self, user, name, obj):
-        self.transactions[user.id][name] = obj
+    def set_in_transaction(self, user: UserModel, name: str, obj: Any) -> None:
+        self._transactions[user.id][name] = obj
 
-    def get_in_transaction(self, user, name):
-        if name not in self.transactions[user.id]:
+    def get_in_transaction(self, user: UserModel, name: str) -> Any:
+        if name not in self._transactions[user.id]:
             return None
         else:
-            return self.transactions[user.id][name]
+            return self._transactions[user.id][name]
 
-    def create_new_record(self, user, name=None):
-        """Prepare a new record in the database (new line in the database after the user submits the form)
+    def create_row_in_transaction(self, user: UserModel) -> str:
+        ID = "".join((random.choice(string.ascii_lowercase) for _ in range(20)))
 
-        Args:
-            user: User to associate with the record
-            name: Name for this record (useful when creating a field for a specific record). This ID will not be saved in the database.
-        """
+        # Row not created, just create it
+        if not (ID in self._transactions[user.id].keys()):
+            self._transactions[user.id][ID] = None
+
+        # Returns the ID of the row
+        return ID
+
+    def create_new_record(self, user: UserModel, name: Optional[str] = None) -> str:
         # Dictionary "record name" -> list of field names
         user_transaction = self.get_or_create_transaction(user)
         all_records = user_transaction.setdefault("records", OrderedDict())
-        if name == None:
+
+        if name is None:
             name = "record" + str(abs(hash("record" + str(len(all_records)))) % int(1e9))
-        name = name.replace(":", "_")  # Escape ":" as this is reserved for parsing identifiers
-        current_fields = all_records.setdefault(name, list())
+
+        # Ensure valid record_name
+        name = name.replace(TransactionalObject.RECORD_SEP, "_")
         return name
 
-    def add_field_to_record(self, user, field_name, record_name=None):
-        """Add a field to a current record
-
-        Args:
-            user: User to associate with the record
-            field_name: Name of the field to add. If already existing, this is not added (duplicates are forbidden).
-            record_name: Name of the record that will include the new field. If not defined, the field will be in the last record created. If no record does not exist, it is created.
-        """
+    def add_field_to_record(self, user: UserModel, field_name: str, record_name: Optional[str] = None) -> str:
+        # Retrieve the record (create it if necessary)
         user_transaction = self.get_or_create_transaction(user)
         all_records = user_transaction.setdefault("records", dict())
-        # Create a record if no one exists yet
         if len(all_records) == 0:
             record_name = self.create_new_record(user, name=record_name)
-        # Get the last record if at least one record exists and no record name has been given
-        elif record_name == None:
+        elif record_name is None:
             record_name = next(reversed(all_records))
-        record_name = record_name.replace(":", "_")  # Escape ":" as this is reserved for parsing identifiers
+
+        # Ensure record name to be usable (FIXME: underscore may not be the best idea...)
+        record_name = record_name.replace(TransactionalObject.RECORD_SEP, "_")
         current_fields = self.get_fields_for_record(user, record_name)
         if field_name not in current_fields:
             current_fields.append(field_name)
 
         return record_name
 
-    def get_all_records(self, user):
+    def get_all_records(self, user: UserModel):
         user_transaction = self.get_or_create_transaction(user)
         all_records = user_transaction.setdefault("records", OrderedDict())
         return all_records
 
-    def get_record(self, user, name=None):
-        """Return the name of a record that exists
-
-        Args:
-            user: User to associate with the record
-            name: Name for the target record. If it does not exists, it is created. If name is None, the last record is returned if any exists, a new record with an invinted name otherwise.
-        """
+    def get_record(self, user: UserModel, name: Optional[str] = None) -> Union[str | Any]:
         all_records = self.get_all_records(user)
-
         if name in all_records:
             return name
 
-        if len(all_records) == 0 and name == None:
-            return self.create_new_record(user)
-        elif len(all_records) == 0 and name != None:
+        if len(all_records) == 0:
             return self.create_new_record(user, name=name)
-        elif len(all_records) > 0 and name == None:
+        elif (len(all_records) > 0) and (name is None):
             return next(reversed(all_records))
-        # elif len(all_records) > 0 and name != None:
-        # Reminder: we already made sure that name is not present is all_records
         else:
             return self.create_new_record(user, name=name)
 
-    def get_fields_for_record(self, user, record_name):
-        """Return all fields associated to a given record
-
-        Args:
-            user: User for this record
-            record_name: Name of the record. The record is created if not existing and empty list is returned (ie, no field associated).
-        """
+    def get_fields_for_record(self, user: UserModel, record_name: str):
         user_transaction = self.get_or_create_transaction(user)
         all_records = user_transaction.setdefault("records", OrderedDict())
         current_fields = all_records.setdefault(record_name, list())
         return current_fields
-
-    def create_row_in_transaction(self, user):
-        ID = "".join((random.choice(string.ascii_lowercase) for _ in range(20)))
-
-        # Row not created, just create it
-        if not (ID in self.transactions[user.id].keys()):
-            self.transactions[user.id][ID] = None
-
-        # Returns the ID of the row
-        return ID
 
 
 class Test(TransactionalObject):
@@ -353,11 +409,17 @@ class Test(TransactionalObject):
         # Initialize the sample selection strategy
         if "selection_strategy" in config:
             selection_strategy_name = config["selection_strategy"]
+            kwargs = dict()
+            if not isinstance(selection_strategy_name, str):
+                kwargs = selection_strategy_name["kwargs"]
+                selection_strategy_name = selection_strategy_name["name"]
+
+            # in case we describe
             self._logger.info(f'The selection strategy is user defined to "{selection_strategy_name}"')
             constructor = globals()[selection_strategy_name]
-            self._selection_strategy = constructor(self.systems)
+            self._selection_strategy = constructor(self.systems, **kwargs)
         else:
-            self._logger.info(f'The selection strategy is defaulted to "LeastSeenSelection"')
+            self._logger.info('The selection strategy is defaulted to "LeastSeenSelection"')
             self._selection_strategy = LeastSeenSelection(self.systems)
 
     def nb_steps_complete_by(self, user: UserModel) -> int:
@@ -377,7 +439,6 @@ class Test(TransactionalObject):
         for record in getattr(user, self.model.__name__):
             all_steps.add(record.step_idx)
         return len(all_steps)
-        # return len(getattr(user, self.model.__name__))
 
     def get_step(
         self, id_step: int, user: UserModel, nb_systems: int, is_intro_step: bool = False
@@ -401,30 +462,31 @@ class Test(TransactionalObject):
             The dictionnary associating which each system (name) the sample used
         """
 
+        # Resume the test, if a transaction hasn't been finalised
         choice_for_systems = dict()
         if self.has_transaction(user):
             return self.get_in_transaction(user, "choice_for_systems")
-        else:
-            # Select samples (NOTE: 1 is hardcoded here)
-            selected_samples = self._selection_strategy.select_samples(user.id, nb_systems, 1)  #
-            for system_name, samples in selected_samples.items():
-                choice_for_systems[system_name] = samples[0]
 
-            # Now we are ready to create the transaction
-            self.create_transaction(user)
+        # Select samples (FIXME: 1 is hardcoded here)
+        selected_samples = self._selection_strategy.select_samples(user.id, nb_systems, 1)
+        for system_name, samples in selected_samples.items():
+            choice_for_systems[system_name] = samples[0]
 
-            # For each system, select the samples
-            for system_name in choice_for_systems.keys():
-                syssample = choice_for_systems[system_name]
-                id_in_transaction = self.create_row_in_transaction(user)
-                self.set_in_transaction(user, id_in_transaction, (system_name, syssample.id))
-                choice_for_systems[system_name] = SampleModelTemplate(id_in_transaction, system_name, syssample)
+        # Now we are ready to create the transaction
+        self.create_transaction(user)
 
-            # Define if it is an introduction step
-            self.set_in_transaction(user, "intro_step", is_intro_step)
+        # For each system, select the samples
+        for system_name in choice_for_systems.keys():
+            syssample = choice_for_systems[system_name]
+            id_in_transaction = self.create_row_in_transaction(user)
+            self.set_in_transaction(user, id_in_transaction, (system_name, syssample.id))
+            choice_for_systems[system_name] = SampleModelTemplate(id_in_transaction, system_name, syssample)
 
-            # Set the systems/samples information
-            self.set_in_transaction(user, "choice_for_systems", choice_for_systems)
+        # Define if it is an introduction step
+        self.set_in_transaction(user, "intro_step", is_intro_step)
 
-            # Validate everything
-            return choice_for_systems
+        # Set the systems/samples information
+        self.set_in_transaction(user, "choice_for_systems", choice_for_systems)
+
+        # Validate everything
+        return choice_for_systems

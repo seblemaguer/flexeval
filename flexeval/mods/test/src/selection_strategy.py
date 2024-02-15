@@ -1,4 +1,5 @@
 from typing import Dict, List, Set
+import itertools
 from collections import defaultdict
 import math
 import random
@@ -611,4 +612,179 @@ class LeastSeenPerUserSelection(LeastSeenSelection):
 
         self._logger.info(f"This is what we will give to {user_id}: {dict_samples}")
 
+        return dict_samples
+
+
+class LeastSeenCombinationSelection(SelectionBase):
+    """Class implementing the selection strategy based on the "least seen" paradigm:
+    1. list the least seen system(s)
+    2. for the the least system(s), select the least seen sample(s)
+    """
+
+    SYS_COMB_SEP = ":"
+
+    def __init__(self, systems: Dict[str, System], nb_systems: int) -> None:
+        """Constructor
+
+        Parameters
+        ----------
+        systems: Dict[str, System]
+            The dictionnary of systems indexed by their names
+        """
+        super().__init__(systems)
+
+        self._nb_systems = nb_systems
+
+        # Initialize content elements
+        samples = [sample.id for _, cur_system in systems.items() for sample in cur_system[0].system_samples]
+
+        # Initialize counters
+        self._system_counters = dict(
+            [
+                (LeastSeenCombinationSelection.SYS_COMB_SEP.join(cur_system), 0)
+                for cur_system in itertools.combinations(systems, nb_systems)
+            ]
+        )
+        self._sample_counters = dict([(cur_sample, 0) for cur_sample in samples])
+
+    def select_systems(self, nb_systems: int) -> List[str]:
+        """Select a certain amount systems among the least seen ones
+
+        Parameters
+        ----------
+        nb_systems: int
+            The desired number of systems for one step
+
+        Returns
+        -------
+        List[str]
+            the list of names of the selected systems
+        """
+        assert (
+            nb_systems == self._nb_systems
+        ), "For the combination selection strategy, the number of systems should be the same for all the test"
+
+        # Sort systems by descending order of usage
+        pool_systems = sorted(self._system_counters.items(), key=lambda item: item[1])
+
+        # Assert/Fix the number of required systems
+        assert (nb_systems <= len(pool_systems)) and (nb_systems != 0), (
+            f"The required number of systems ({nb_systems}) is greater than the available number of systems "
+            + f"({len(pool_systems)}) or it is 0"
+        )
+
+        # Preparing pool of systems
+        if nb_systems > 0:
+            min_count = math.inf
+            tmp_pool = []
+            for system, count in pool_systems:
+                if count > min_count:
+                    break
+
+                tmp_pool.append((system, count))
+                min_count = count
+
+            pool_systems = tmp_pool
+
+        # Ignore the counting from now, we are only interested with the systems themselves
+        pool_systems = [system[0] for system in pool_systems]
+
+        # Shuffle the systems to guarantee variation in the presentation order
+        random.shuffle(pool_systems)
+
+        # Select the desired number of systems
+        pool_systems = pool_systems[0]
+        self._system_counters[pool_systems] += 1
+        return pool_systems.split(LeastSeenCombinationSelection.SYS_COMB_SEP)
+
+    def internal_select_samples(self, system_name: str, nb_samples: int) -> List[SampleModel]:
+        """Select a given number of samples of a given system
+
+        Parameters
+        ----------
+        system_name: str
+           The name of the system
+        nb_samples: int
+           The desired number of sample
+
+        Returns
+        -------
+        List[SampleModel]
+            The list of selected samples
+        """
+        # Subset the list of samples
+        dict_samples = dict([(sample.id, sample) for sample in self._systems[system_name][0].system_samples])
+        sample_subset = {sample_id: self._sample_counters[sample_id] for sample_id in dict_samples.keys()}
+
+        # Sort by counting the pool of samples
+        pool_samples = sorted(sample_subset.items(), key=lambda item: item[1])
+
+        # Assert/Fix the number of required samples
+        assert (nb_samples <= len(pool_samples)) and (nb_samples != 0), (
+            f"The required number of samples ({nb_samples}) is greater than the available number of samples "
+            + f"({len(pool_samples)}) or it is 0"
+        )
+
+        # Preparing pool of samples
+        if nb_samples > 0:
+            min_count = math.inf  # NOTE: Infinite is hardcoded here!
+            tmp_pool = []
+            for sample, count in pool_samples:
+                if count > min_count:
+                    break
+
+                tmp_pool.append((sample, count))
+                min_count = count
+
+            pool_samples = tmp_pool
+
+        # Ignore the counting from now, we are only interested with the samples themselves
+        pool_samples = [sample[0] for sample in pool_samples]
+
+        # Shuffle the samples to guarantee variation in the presentation order
+        random.shuffle(pool_samples)
+
+        # Select the desired number of samples
+        pool_samples = pool_samples[:nb_samples]
+        for p in pool_samples:
+            self._sample_counters[p] += 1
+
+        return [dict_samples[sample_id] for sample_id in pool_samples]
+
+    def _select_samples(self, user_id: str, nb_systems: int, nb_samples: int) -> Dict[str, List[SampleModel]]:
+        """Method to select a given number of samples for a given number of systems for a specific user
+
+        The selection strategy is twofold:
+           1. select the desired number of least systems
+           2. for each selected system, select the least seen samples (the desired number of samples for each system)
+
+        Parameters
+        ----------
+        user_id: str
+            The identifier of the participant
+        nb_systems: int
+            The desired number of systems
+        nb_samples: int
+            The desired number of samples
+
+        Returns
+        -------
+        Dict[str, List[SampleModel]]
+            The dictionary providing for a system name the associated sample embedded in a list
+        """
+
+        # Select the systems
+        self._logger.debug(f"Select systems for user {user_id}")
+        pool_systems = self.select_systems(nb_systems)
+        self._logger.debug(self._system_counters)
+
+        # Select the samples
+        self._logger.debug(f"Select samples for user {user_id}")
+        dict_samples = dict()
+        for system_name in pool_systems:
+            dict_samples[system_name] = self.internal_select_samples(system_name, nb_samples)
+
+        self._logger.info(f"This is what we will give to {user_id}: {dict_samples}")
+
+        print(self._system_counters)
         return dict_samples

@@ -1,17 +1,14 @@
 # coding: utf8
 import random
-from math import ceil
 from flask import request, abort
 
-import threading
-
-from flexeval.core import StageModule, Stage, Config
+# Flexeval
+from flexeval.core import StageModule
 from flexeval.utils import redirect
 from flexeval.database import db, commit_all
 
-from .src import TestManager
-
-sem_test = threading.Semaphore()
+# Current package
+from .src import TestManager, TransactionalObject
 
 
 class TestsAlternateError(Exception):
@@ -34,7 +31,8 @@ with StageModule(__name__) as sm:
         internal functions to generate the information required during
         the save stage. These functions are:
           - get_syssamples which provides the *randomized* list of selected samples per *given system*
-          - save_field_name which *has to be called* to get the field value (score, preference selection...) during the save
+          - save_field_name which *has to be called* to get the field value (score, preference selection...)
+            during the saving
 
         """
 
@@ -62,25 +60,25 @@ with StageModule(__name__) as sm:
         if transaction_timeout_seconds is not None:
             test.set_timeout_for_transaction(int(transaction_timeout_seconds))
 
+        # Get the user
         user = sm.authProvider.user
 
+        # Get the current step
         cur_step = test.nb_steps_complete_by(user)
         if cur_step is None:
             cur_step = 0
 
+        # Find out the current step is an introduction or not
         intro_step = False
-        if nb_step_intro > cur_step:
+        if cur_step < nb_step_intro:
             intro_step = True
         else:
             intro_step = False
 
         if cur_step < max_steps:
-            # Get the step
-            sem_test.acquire()
             syssamples_for_this_step = test.get_step(
                 cur_step, user, nb_systems=nb_systems_per_step, is_intro_step=intro_step
             )
-            sem_test.release()
 
             def get_syssamples(*system_names):
                 systems = []
@@ -96,14 +94,16 @@ with StageModule(__name__) as sm:
                 return systems
 
             def save_field_name(name, syssamples=get_syssamples(), record_name=None):
-                name = name.replace(":", "_")
+                name = name.replace(TransactionalObject.RECORD_SEP, "_")
 
                 # Make sure the record exist and get a real name if record name is None
                 user = sm.authProvider.user
                 record_name = test.get_record(user, record_name)
 
                 # ID of the field
-                ID = ":".join(["save", record_name, name] + [syssample.ID for syssample in syssamples])
+                ID = TransactionalObject.RECORD_SEP.join(
+                    ["save", record_name, name] + [syssample.ID for syssample in syssamples]
+                )
 
                 # Associate field to record
                 test.add_field_to_record(user, ID, record_name)
@@ -112,10 +112,12 @@ with StageModule(__name__) as sm:
 
             def propagate_samples(name, syssamples=get_syssamples()):
                 user = sm.authProvider.user
-                record_name = test.get_record(user, record_name)
+                record_name = test.get_record(user, name)
 
                 # ID of the field
-                ID = ":".join(["save", record_name, name] + [syssample.ID for syssample in syssamples])
+                ID = TransactionalObject.RECORD_SEP.join(
+                    ["save", record_name, name] + [syssample.ID for syssample in syssamples]
+                )
 
                 # Associate field to record
                 test.add_field_to_record(user, ID, record_name)
@@ -189,10 +191,8 @@ with StageModule(__name__) as sm:
         if nb_step_intro > cur_step:
             intro_step = True
 
-        # Lock DB so we can update it
-        sem_test.acquire()
+        # Lock DB so we can update it (NOTE SLM: not sure that's what this does!)
         if not test.has_transaction(user):
-            sem_test.release()
             abort(408)
 
         # Save
@@ -202,7 +202,8 @@ with StageModule(__name__) as sm:
             try:
                 # Save presented samples
                 tmp_system_names = []
-                for system_name, sample in test.transactions[user.id]["choice_for_systems"].items():
+                transactions = test.get_transaction(user)
+                for system_name, sample in transactions["choice_for_systems"].items():
                     (
                         _,
                         syssample_id,
@@ -219,7 +220,8 @@ with StageModule(__name__) as sm:
                 ]:
                     for field_key in field_list.keys():
                         if field_key in all_field_names:
-                            # Several values can be returned for one key (MultiDict) -> use d.get_list(key) instad d[key]
+                            # Several values can be returned for one key (MultiDict)
+                            #    -> use d.get_list(key) instead d[key]
                             if len(field_list.getlist(field_key)) > 1:
                                 field_value = str(field_list.getlist(field_key))
                             else:
@@ -231,17 +233,14 @@ with StageModule(__name__) as sm:
                                     record_name,
                                     field_name,
                                     *idsyssamples,
-                                ) = field_key.split(":")
-
+                                ) = field_key.split(TransactionalObject.RECORD_SEP)
                                 name_col = field_name
                             else:
                                 name_col = field_key
 
                             if field_type == "string":
                                 test.model.addColumn(name_col, db.String)
-                                # On check si field_value n'est pas un lien vers un sysSample.
                                 sysval = test.get_in_transaction(user, field_value)
-
                                 if sysval is None:
                                     resp.update(commit=False, **{name_col: field_value})
                                 else:
@@ -256,13 +255,11 @@ with StageModule(__name__) as sm:
             except Exception as e:
                 raise (e)
                 test.delete_transaction(user)
-                sem_test.release()
                 return redirect(sm.url_for(sm.get_endpoint_for_local_rule("/")))
 
         # Commit the results and clean the transations of the user
         commit_all()
         test.delete_transaction(user)
-        sem_test.release()
 
         if skip_after_n_step is not None:
             if (cur_step + 1) % skip_after_n_step == 0:
