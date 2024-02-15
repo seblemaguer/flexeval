@@ -2,7 +2,6 @@
 import csv
 
 from flask import current_app
-from sqlalchemy import asc
 
 from flexeval.utils import AppSingleton
 from flexeval.database import db, commit_all
@@ -23,25 +22,26 @@ class SystemManager(metaclass=AppSingleton):
     def __init__(self):
         self.register = {}
 
-    def get(self, name, delimiter=",", max_samples=-1):
-        if not (name in self.register):
-            self.register[name] = System(name, delimiter, max_samples)
+    def insert(self, name, data, delimiter=",", max_samples=-1):
+        self.register[name] = System(name, data, delimiter, max_samples)
+        return self.register[name]
 
+    def get(self, name):
         return self.register[name]
 
 
 class System:
-    def __init__(self, name, delimiter=",", max_samples=-1):
+    def __init__(self, name, data, delimiter=",", max_samples=-1):
         if name[0] == "/":
             name = name[1:]
 
         self.name = name
-        source_file = current_app.config["FLEXEVAL_INSTANCE_DIR"] + "/systems/" + self.name + ".csv"
+        source_file = current_app.config["FLEXEVAL_INSTANCE_DIR"] + "/systems/" + data
 
         try:
             reader = csv.DictReader(open(source_file, encoding="utf-8"), delimiter=delimiter)
         except Exception as e:
-            raise SystemFileNotFound(source_file + " doesn't exist. Fix test.json or add the system's file.")
+            raise SystemFileNotFound(f"{source_file} doesn't exist. Fix test.json or add the system's file: {e}")
 
         self.cols_name = reader.fieldnames
 
@@ -68,7 +68,7 @@ class System:
                     SampleModel.create(commit=False, **vars)
 
                 except Exception as e:
-                    raise SystemError("Issue to read the line " + str(line_id) + " of the file:" + source_file)
+                    raise SystemError(f'Issue to read the line {line_id} of the file "{source_file}": {e}')
 
             commit_all()
 

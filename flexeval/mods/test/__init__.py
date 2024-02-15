@@ -245,7 +245,7 @@ with StageModule(__name__) as sm:
                                     resp.update(commit=False, **{name_col: field_value})
                                 else:
                                     (system_name, syssample_id) = sysval
-                                    resp.update(**{name_col: system_name})
+                                    resp.update(**{name_col: syssample_id})
                             else:
                                 test.model.addColumn(name_col, db.BLOB)
 

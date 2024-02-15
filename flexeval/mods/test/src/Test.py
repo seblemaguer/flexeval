@@ -111,8 +111,7 @@ class SampleModelTemplate:
             return (value, mime)
 
     def __str__(self):
-        # return f"(Sys={self.system_name}, Sample=(ID: {self.ID})" #  , object={self._systemsample}
-        return self.system_name
+        return self.ID
 
 
 class TestError(Exception):
@@ -373,7 +372,7 @@ class Test(TransactionalObject):
                 max_samples = cur_system["max_samples"]
 
             self.systems[cur_system["name"]] = (
-                SystemManager().get(cur_system["data"].replace(".csv", ""), delimiter, max_samples),
+                SystemManager().insert(cur_system["name"], cur_system["data"], delimiter, max_samples),
             )
 
         # Create Test table in the database
