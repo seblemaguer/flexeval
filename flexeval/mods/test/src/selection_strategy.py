@@ -1,24 +1,75 @@
 from typing import Dict, List, Set
-
+from collections import defaultdict
 import math
 import random
+import threading
 import logging
 
 from .System import System
 from flexeval.mods.test.model import SampleModel
 
+MUTEX_SELECTION = threading.Semaphore()
+
 
 class SelectionBase:
     def __init__(
-        self, systems: Dict[str, System], references: List[str] = [], include_references: bool = False
-    ) -> None:
+        self,
+        systems: Dict[str, System],
+        references: List[str] = [],
+        include_references: bool = False,
+    ):
         self._systems = systems
         self._references = references
         self._include_reference = include_references
         self._logger = logging.getLogger(self.__class__.__name__)
 
     def select_samples(self, user_id: str, nb_systems: int, nb_samples: int) -> Dict[str, List[SampleModel]]:
-        raise NotImplementedError(f'The class "{self.__class__.__name__}" should override the method "select_samples"')
+        """Select sample method
+
+        This method is a wrapper on _select_samples to ensure an exclusive access to the critical section
+
+        Parameters
+        ----------
+        user_id : str
+            the user ID
+        nb_systems : int
+            the number of systems
+        nb_samples : int
+            the number of samples
+
+        Returns
+        -------
+        Dict[str, List[SampleModel]]
+            A dictionnary associating the sample to its ID
+
+        """
+        MUTEX_SELECTION.acquire()
+        to_return = self._select_samples(user_id, nb_systems, nb_samples)
+        MUTEX_SELECTION.release()
+
+        return to_return
+
+    def _select_samples(self, user_id: str, nb_systems: int, nb_samples: int) -> Dict[str, List[SampleModel]]:
+        """Select sample method
+
+        This method should be overriden by the subclasses
+
+        Parameters
+        ----------
+        user_id : str
+            the user ID
+        nb_systems : int
+            the number of systems
+        nb_samples : int
+            the number of samples
+
+        Returns
+        -------
+        Dict[str, List[SampleModel]]
+            A dictionnary associating the sample to its ID
+
+        """
+        raise NotImplementedError(f'The class "{self.__class__.__name__}" should override the method "_select_samples"')
 
 
 class LeastSeenSelection(SelectionBase):
@@ -38,11 +89,11 @@ class LeastSeenSelection(SelectionBase):
         super().__init__(systems)
 
         # Initialize content elements
-        samples = [sample.id for _, cur_system in systems.items() for sample in cur_system[0].system_samples]
+        self._samples = [sample.id for _, cur_system in systems.items() for sample in cur_system[0].system_samples]
 
         # Initialize counters
-        self._system_counters = dict([(cur_system, 0) for cur_system in systems.keys()])
-        self._sample_counters = dict([(cur_sample, 0) for cur_sample in samples])
+        self._system_counters = defaultdict(0)
+        self._sample_counters = defaultdict(0)
 
     def select_systems(self, nb_systems: int) -> List[str]:
         """Select a certain amount systems among the least seen ones
@@ -69,7 +120,7 @@ class LeastSeenSelection(SelectionBase):
 
         # Preparing pool of systems
         if nb_systems > 0:
-            min_count = 9999999  # NOTE: Infinite is hardcoded here!
+            min_count = math.inf
             tmp_pool = []
             for system, count in pool_systems:
                 if count > min_count:
@@ -147,7 +198,7 @@ class LeastSeenSelection(SelectionBase):
 
         return [dict_samples[sample_id] for sample_id in pool_samples]
 
-    def select_samples(self, user_id: str, nb_systems: int, nb_samples: int) -> Dict[str, List[SampleModel]]:
+    def _select_samples(self, user_id: str, nb_systems: int, nb_samples: int) -> Dict[str, List[SampleModel]]:
         """Method to select a given number of samples for a given number of systems for a specific user
 
         The selection strategy is twofold:
@@ -172,6 +223,8 @@ class LeastSeenSelection(SelectionBase):
         # Select the systems
         self._logger.debug(f"Select systems for user {user_id}")
         pool_systems = self.select_systems(nb_systems)
+
+        self._logger.debug(self._system_counters)
 
         # Select the samples
         self._logger.debug(f"Select samples for user {user_id}")
@@ -257,7 +310,7 @@ class LatinSquareSystemLeastSeenSampleSelection(LeastSeenSelection):
 
         return pool_systems
 
-    def select_samples(self, user_id: str, nb_systems: int, nb_samples: int) -> Dict[str, List[SampleModel]]:
+    def _select_samples(self, user_id: str, nb_systems: int, nb_samples: int) -> Dict[str, List[SampleModel]]:
         """Method to select a given number of samples for a given number of systems for a specific user
 
         The selection strategy is twofold:
@@ -334,7 +387,7 @@ class RandomizedBalancedSelection(SelectionBase):
             for i_utt in range(nb_systems):
                 self._init_permutations.append((i_sys, i_utt))
 
-    def select_samples(self, user_id: str, nb_systems: int = 1, nb_samples: int = 1) -> Dict[str, List[SampleModel]]:
+    def _select_samples(self, user_id: str, nb_systems: int = 1, nb_samples: int = 1) -> Dict[str, List[SampleModel]]:
         """Method to select a sample for a system (the parmeters should be set to 1 for both the number of systems
         and the number of samples)
 
@@ -519,7 +572,7 @@ class LeastSeenPerUserSelection(LeastSeenSelection):
 
         return [dict_samples[sample[0]] for sample in pool_samples]
 
-    def select_samples(self, user_id: str, nb_systems: int, nb_samples: int) -> Dict[str, List[SampleModel]]:
+    def _select_samples(self, user_id: str, nb_systems: int, nb_samples: int) -> Dict[str, List[SampleModel]]:
         """Method to select a given number of samples for a given number of systems for a specific user
 
         The selection strategy is twofold:
