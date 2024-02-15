@@ -1,6 +1,5 @@
 from typing import Dict, List, Set
 import itertools
-from collections import defaultdict
 import math
 import random
 import threading
@@ -93,8 +92,8 @@ class LeastSeenSelection(SelectionBase):
         self._samples = [sample.id for _, cur_system in systems.items() for sample in cur_system[0].system_samples]
 
         # Initialize counters
-        self._system_counters = defaultdict(0)
-        self._sample_counters = defaultdict(0)
+        self._system_counters = dict([(cur_system, 0) for cur_system in systems.keys()])
+        self._sample_counters = dict([(cur_sample, 0) for cur_sample in self._samples])
 
     def select_systems(self, nb_systems: int) -> List[str]:
         """Select a certain amount systems among the least seen ones
