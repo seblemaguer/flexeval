@@ -786,5 +786,4 @@ class LeastSeenCombinationSelection(SelectionBase):
 
         self._logger.info(f"This is what we will give to {user_id}: {dict_samples}")
 
-        print(self._system_counters)
         return dict_samples
