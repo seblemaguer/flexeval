@@ -2,18 +2,17 @@
 # license : CeCILL-C
 
 # Import Libraries
-import json
-import os
 import string
 import random
 import shutil
 
-from flask import current_app, request, send_file
-from sqlalchemy import MetaData, Table
+from flask import current_app, send_file
+from sqlalchemy import inspect
+import pandas as pd
 
 from flexeval.core import AdminModule
-from flexeval.utils import redirect, make_global_url, safe_make_rep
-from flexeval.database import Model, db
+from flexeval.utils import safe_make_rep
+from flexeval.database import db
 
 with AdminModule(__name__) as am:
     safe_make_rep(current_app.config["FLEXEVAL_INSTANCE_TMP_DIR"] + "/export_bdd")
@@ -42,50 +41,17 @@ with AdminModule(__name__) as am:
         repository_name = "".join((random.choice(string.ascii_lowercase) for i in range(15)))
         root_base_file = current_app.config["FLEXEVAL_INSTANCE_TMP_DIR"] + "/export_bdd/" + repository_name
 
+        # Connect to the database
         safe_make_rep(root_base_file + ".bdd")
 
-        for name_table in db.engine.table_names():
-            table = Table(name_table, MetaData(), autoload=True, autoload_with=db.engine)
+        inspection = inspect(db.engine)
+        for name_table in inspection.get_table_names():
+            # Generate the dataframe corresponding to the table
+            df = pd.read_sql_query(f"SELECT * FROM {name_table}", db.engine)
 
-            # Generate header
-            headers = ""
-            cols = []
-            primary_key = None
-            for col in table.columns:
-                if col.primary_key:
-                    primary_key = col.name
-                cols.append(col)
-                headers = headers + ";" + col.name
-
-            content = ""
-            content = headers[1:] + "\n"
-
-            # Fill the content
-            q = db.session.query(table)
-            for r in q.all():
-                row = ""
-                for col in cols:
-                    if isinstance(col.type, db.BLOB):
-                        try:
-                            file_content = getattr(r, col.name)
-                            assert not (len(file_content) == 0)
-
-                            table_fn = (
-                                f"{root_base_file}.bdd/@table_{name_table}@{col.name}_{getattr(r,primary_key)}.blob"
-                            )
-                            with open(table_fn, "wb") as f:
-                                f.write(file_content)
-                            row += f";@table_{name_table}@{col.name}_{getattr(r,primary_key)}.blob"
-                        except Exception as e:
-                            row += ";"
-                    else:
-                        row = row + ";" + str(getattr(r, col.name))
-                content = content + row[1:] + "\n"
-            content = content[: len(content) - 1]
-
-            table_fn = f"{root_base_file}.bdd/{name_table}.csv"
-            with open(table_fn, "w") as f:
-                f.write(content)
+            # Save the TSV file
+            table_fn = f"{root_base_file}.bdd/{name_table}.tsv"
+            df.to_csv(table_fn, sep="\t", index=False)
 
         # Generate the archive and return it!
         shutil.make_archive("flexeval", "zip", f"{root_base_file}.bdd")
