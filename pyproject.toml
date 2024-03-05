@@ -47,6 +47,8 @@ SQLAlchemy = ">=2.0.27"
 pandas = ">=2.2.1"
 Werkzeug = ">=2.1.2"
 zipp = ">=3.8.0"
+gevent = "*"
+gunicorn ="*"
 
 # Dev
 pre-commit = { version = "*", optional = true }
