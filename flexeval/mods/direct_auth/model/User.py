@@ -29,13 +29,9 @@ class ProlificUser(UserModel):
     study_id = Column(db.String, default="")
     session_id = Column(db.String, default="")
 
-    def __init__(self, email, study_id, session_id):
-        # Validate email
-        if not re.fullmatch(EMAIL_REGEX, email):
-            raise NotAnEmail(email)
-
+    def __init__(self, user_id, study_id, session_id):
         # Set the email as the ID
-        self.id = email
+        self.id = user_id
 
         # Get other fields
         self.study_id = study_id
