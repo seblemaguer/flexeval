@@ -209,7 +209,7 @@ with StageModule(__name__) as sm:
                         syssample_id,
                     ) = test.get_in_transaction(user, sample.ID)
                     tmp_system_names.append(system_name)
-                    sys = {system_name: syssample_id}
+                    sys = {system_name: int(syssample_id)}
                     resp.update(commit=False, **sys)
                 tmp_system_names.sort()
 
