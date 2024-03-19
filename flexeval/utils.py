@@ -2,6 +2,7 @@
 # license : CeCILL-C
 
 # Global
+from typing import Callable
 import os
 import shutil
 from pathlib import Path
@@ -11,7 +12,9 @@ from flask import current_app, Response
 from flask import redirect as flask_redirect
 
 
-def copytree(src: str, dst: str, dirs_exist_ok: bool = True, ignore=None):
+def copytree(
+    src: str, dst: str, dirs_exist_ok: bool = True, ignore: Callable[[str, list[str]], set[str]] | None = None
+) -> None:
     """Alternative copytree to the shutils.copytree which is only available in python >= 3.8
 
     Parameters
@@ -34,7 +37,7 @@ def copytree(src: str, dst: str, dirs_exist_ok: bool = True, ignore=None):
             from pathlib import Path
 
             os.makedirs(Path(d).parent, exist_ok=dirs_exist_ok)
-            shutil.copyfile(s, d)
+            _ = shutil.copyfile(s, d)
 
 
 def safe_make_dir(directory: str):
@@ -127,15 +130,16 @@ def redirect(local_url: str) -> Response:
     Response
         the flask Response object which if called redirects the client to the target location
     """
-    return flask_redirect(make_global_url(local_url))
+    return flask_redirect(make_global_url(local_url))  # type: ignore
 
 
 class AppSingleton(type):
-    def __call__(cls, *args, **kwargs):
+    def __call__(cls, *args, **kwargs):  # type: ignore
         if not (hasattr(current_app, "_appsingleton_instances")):
-            current_app._appsingleton_instances = {}
+            current_app._appsingleton_instances = dict()
 
-        if cls not in current_app._appsingleton_instances:
-            current_app._appsingleton_instances[cls] = super(AppSingleton, cls).__call__(*args, **kwargs)
-
-        return current_app._appsingleton_instances[cls]
+        if cls not in current_app._appsingleton_instances:  # type: ignore
+            current_app._appsingleton_instances[cls] = super(AppSingleton, cls).__call__(  # type: ignore
+                *args, **kwargs
+            )
+        return current_app._appsingleton_instances[cls]  # type: ignore

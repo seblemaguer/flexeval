@@ -2,14 +2,15 @@
 """
 
 # Python
-from typing import Tuple, Optional, Callable, Dict, Any
+from typing_extensions import override
+from typing import Callable, Any
 import random
 import abc
 
 # Flask
-from flask import Response
 from flask import session as flask_session
 from flask import current_app, redirect
+from werkzeug.wrappers import Response
 
 # Flexeval
 from flexeval.database import Column, db
@@ -74,6 +75,7 @@ class UserModel:
             else:
                 self.conditions += str(condition)
 
+    @override
     def __str__(self):
         the_str = f'User "{self.id}":\n'
         the_str += f"\t- validated_conditions: {self.conditions}"
@@ -83,9 +85,9 @@ class UserModel:
 class AuthProvider(Provider, metaclass=abc.ABCMeta):
     """Default authentication provider"""
 
-    checkers = dict()
+    checkers: dict[str, Callable[[UserModel], bool]] = dict()
 
-    def __init__(self, name: str, local_url_homepage: str, user_model: UserModel):
+    def __init__(self, name: str, local_url_homepage: str | None, user_model: UserModel | None):
         """Initialisation method
 
         Parameters
@@ -124,7 +126,7 @@ class AuthProvider(Provider, metaclass=abc.ABCMeta):
             The user to connect
         """
 
-        if self.user_model.__abstract__:
+        if self.user_model.__abstract__:  # type: ignore
             self.session["user"] = user
         else:
             self.session["user"] = user.id
@@ -136,7 +138,7 @@ class AuthProvider(Provider, metaclass=abc.ABCMeta):
         """
         del self.session["user"]
 
-    def validates_connection(self, condition: Optional[str] = None) -> Tuple[bool, str]:
+    def validates_connection(self, condition: str | None = None) -> tuple[bool, str]:
         """Check if the user already validated the given condition
 
         Parameters
@@ -169,7 +171,7 @@ class AuthProvider(Provider, metaclass=abc.ABCMeta):
             return validated
 
     @classmethod
-    def connect_checker(cls, checker_name: str, checker: Callable):
+    def connect_checker(cls, checker_name: str, checker: Callable[[UserModel], bool]):
         """Add a checking routine providing a dynamic condition to validate during the connection
 
         Parameters
@@ -197,14 +199,12 @@ class AuthProvider(Provider, metaclass=abc.ABCMeta):
             The flask Response object redirecting the client to the
             proper page after the disconnect
         """
-        provider = provider_factory.get(name)
+        provider: Provider = provider_factory.get(name)
+        if not isinstance(provider, AuthProvider):
+            raise Exception(f"{name} is not an authentication provider (type = {provider.__class__})")
 
-        try:
-            provider.disconnect()
-        except Exception:
-            pass
-
-        return redirect(provider.local_url_homepage)
+        provider.disconnect()
+        return redirect(provider.local_url_homepage)  # type: ignore
 
     @property
     def user(self) -> UserModel:
@@ -215,10 +215,10 @@ class AuthProvider(Provider, metaclass=abc.ABCMeta):
         UserModel
             The model of the user
         """
-        if self.user_model.__abstract__:
+        if self.user_model.__abstract__:  # type: ignore
             return self.session["user"]
         else:
-            return self.user_model.query.filter(self.user_model.id == self.session["user"]).first()
+            return self.user_model.query.filter(self.user_model.id == self.session["user"]).first()  # type: ignore
 
     @property
     def url_deco(self) -> str:
@@ -232,7 +232,7 @@ class AuthProvider(Provider, metaclass=abc.ABCMeta):
         return make_global_url("/deco/" + self.name)
 
     @property
-    def session(self) -> Dict[str, Any]:
+    def session(self) -> dict[str, Any]:
         """Provides a convenient wrapper to the flask session for the provider
 
         Returns
@@ -251,14 +251,17 @@ class AnonAuthProvider(AuthProvider):
 
     __userBase__ = UserModel
 
-    def connect(self):
+    @override
+    def connect(self):  # type: ignore
         """Connect a user
 
         The user ID will respect the pattern <anon@XXX> where XXX is a random number
         """
-        super().connect(self.user_model.create(id="anon@" + str(random.randint(1, 999999999999999))))
+        user_id = "anon@" + str(random.randint(1, 999999999999999))
+        super().connect(self.user_model.create(id=user_id))  # type: ignore
 
-    def validates_connection(self, condition: Optional[str] = None) -> Tuple[bool, str]:
+    @override
+    def validates_connection(self, condition: str | None = None) -> tuple[bool, str]:
         """Check if the user already validated the given condition
 
         Parameters
@@ -278,6 +281,7 @@ class AnonAuthProvider(AuthProvider):
 
         return super().validates_connection(condition)
 
+    @override
     def disconnect(self):
         pass
 
@@ -293,9 +297,9 @@ class VirtualAuthProvider(AuthProvider):
 
     def __init__(
         self,
-        name: Optional[str] = None,
-        local_url_homepage: Optional[str] = None,
-        userModel: Optional[UserModel] = None,
+        name: str | None = None,
+        local_url_homepage: str | None = None,
+        userModel: UserModel | None = None,
     ):
         """Initialisation method
 
@@ -313,7 +317,8 @@ class VirtualAuthProvider(AuthProvider):
         else:
             super(VirtualAuthProvider, self).__init__(name, local_url_homepage, userModel)
 
-    def connect(self, *args):
+    @override
+    def connect(self, user: UserModel):
         """A virtual user can't connect,
 
         Raises
@@ -323,7 +328,8 @@ class VirtualAuthProvider(AuthProvider):
         """
         raise NotConnectedError()
 
-    def validates_connection(self, condition: Optional[str] = None) -> Tuple[bool, str]:
+    @override
+    def validates_connection(self, condition: str | None = None) -> tuple[bool, str]:
         """Always returns (False, "connected")
 
         Parameters

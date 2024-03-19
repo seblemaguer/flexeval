@@ -5,7 +5,6 @@ flexeval.core.providers.base
 Module which provides the mechanics to deal with content (template, authentication, assets, ...) providers.
 """
 
-from typing import Dict
 import logging
 
 
@@ -25,13 +24,14 @@ class UndefinedError(ProviderError):
     """
 
     def __init__(self, name_provider: str):
+        super().__init__()
         self.name_provider = name_provider
 
 
 class Provider:
     """Abstract provider class"""
 
-    def __init__(self):
+    def __init__(self):  # type: ignore
         self._logger: logging.Logger = logging.getLogger(self.__class__.__name__)
 
 
@@ -46,12 +46,12 @@ class ProviderFactory:  # metaclass=AppSingleton):
         The dictionnary associating the provider name to its instance
     """
 
-    def __init__(self):
+    def __init__(self):  # type: ignore
         """Constructor"""
 
         # Define logger
         self._logger: logging.Logger = logging.getLogger(self.__class__.__name__)
-        self._providers: Dict[str, Provider] = dict()
+        self._providers: dict[str, Provider] = dict()
 
     def get(self, name: str) -> Provider:
         """Help to return a provider given its name

@@ -4,7 +4,6 @@ By content providers, we mean providers which are related to files to be either 
 or sent as is (assets).
 """
 
-from typing import List, Optional
 import sys
 import os
 import errno
@@ -36,6 +35,7 @@ class UnknowSourceError(Exception):
         _from : str
             the source type of the asset
         """
+        super().__init__()
         self.message = f'Unknown source "{path}/{_from}"'
 
 
@@ -69,7 +69,7 @@ class AssetsProvider(Provider):
         # Indicate to the factory that current object is the asset provider
         self._logger.info("Loaded and bound to " + self._url_prefix)
 
-    def local_url(self, path: str, _from: Optional[str] = None) -> str:
+    def local_url(self, path: str, _from: str | None = None) -> str:
         """Local URL generation
 
         Parameters
@@ -124,7 +124,7 @@ class AssetsProvider(Provider):
 
         # Extract components from the path
         cur_path: Path = Path(path)
-        repositories: List[str] = str(cur_path.parent).split("/")  # NOTE: I don't like this, it is dirty
+        repositories: list[str] = str(cur_path.parent).split("/")  # NOTE: I don't like this, it is dirty
         file: str = cur_path.name
 
         # Ensure the filename is valid
@@ -196,9 +196,9 @@ class TemplateProvider(Provider):
         """
         super().__init__()
 
-        self._instance_files: List[str] = []
+        self._instance_files: list[str] = []
         self._folder: Path = Path(folder)
-        current_app.template_folder = self._folder
+        current_app.template_folder = folder
 
         try:
             self._register_flexeval()
@@ -265,7 +265,7 @@ class TemplateProvider(Provider):
             "[Core] Copy templates from %s to %s" % (current_app.config["FLEXEVAL_DIR"] + "/templates", self._folder)
         )
 
-        copytree(current_app.config["FLEXEVAL_DIR"] + "/templates", self._folder, dirs_exist_ok=True)
+        copytree(current_app.config["FLEXEVAL_DIR"] + "/templates", self._folder, dirs_exist_ok=True)  # type: ignore
 
     def register_instance(self):
         """Register the instance templates"""
@@ -276,13 +276,9 @@ class TemplateProvider(Provider):
         )
 
         # Save instance templates path to not replace them when registering mods
-        tpl_dir = current_app.config["FLEXEVAL_INSTANCE_DIR"] + "/templates"
+        tpl_dir: str = current_app.config["FLEXEVAL_INSTANCE_DIR"] + "/templates"
         self._instance_files = [f.replace(tpl_dir + "/", "") for f in glob.glob(tpl_dir + "/**/*", recursive=True)]
-        copytree(
-            tpl_dir,
-            self._folder,
-            dirs_exist_ok=True,
-        )
+        copytree(tpl_dir, self._folder, dirs_exist_ok=True)  # type: ignore
 
     def _register_module(self, name: str):
         """Register the templates of a given module
@@ -293,7 +289,7 @@ class TemplateProvider(Provider):
             the name of the module
         """
 
-        def ignore_instance(src, names: List[str]):
+        def ignore_instance(_: str, names: list[str]):
             return set(names).intersection(set(self._instance_files))
 
         self._logger.debug(
@@ -302,10 +298,10 @@ class TemplateProvider(Provider):
         )
         copytree(
             current_app.config["FLEXEVAL_DIR"] + "/mods/" + name + "/templates",
-            self._folder,
+            str(self._folder),
             dirs_exist_ok=True,
             ignore=ignore_instance,
-        )
+        )  # type: ignore
 
     def template_loaded(self, rep: str, path: str) -> bool:
         """Determine the template of a given path is already loaded by flask
@@ -326,8 +322,8 @@ class TemplateProvider(Provider):
         if not (hasattr(g, "loaded_template")):
             g.loaded_template = []
 
-        if rep + ":" + path in g.loaded_template:
+        if rep + ":" + path in g.loaded_template:  # type: ignore
             return True
         else:
-            g.loaded_template.append(rep + ":" + path)
+            g.loaded_template.append(rep + ":" + path)  # type: ignore
             return False
