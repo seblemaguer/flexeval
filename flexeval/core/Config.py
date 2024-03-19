@@ -7,7 +7,7 @@ import importlib
 import logging
 
 # Yaml
-from yaml import load, dump
+from yaml import load
 
 try:
     from yaml import CLoader as Loader
@@ -18,7 +18,7 @@ except ImportError:
 from flask import current_app, request
 
 # Utils
-from flexeval.core import ProviderFactory
+from .providers import provider_factory
 from flexeval.utils import AppSingleton, redirect
 
 
@@ -76,7 +76,7 @@ class Config(metaclass=AppSingleton):
         self.default_authProvider_for_StageModule()
 
         # Finalize templating
-        ProviderFactory().get("templates").register_instance()
+        provider_factory.get("templates").register_instance()
 
         current_app.add_url_rule("/", "entrypoint", self.entrypoint)
         current_app.add_url_rule("/admin/", "entrypoint_admin", self.entrypoint_admin)
@@ -97,7 +97,7 @@ class Config(metaclass=AppSingleton):
             for mods in self.data()["mods"]:
                 try:
                     self.load_module(mods["mod"])
-                except Exception as e:
+                except Exception:
                     raise MalformationError("Issue in structure.json for " + str(mods))
         else:
             self.data()["mods"] = []
@@ -109,7 +109,7 @@ class Config(metaclass=AppSingleton):
                     self.admin_modules.append(mods)
                     try:
                         self.load_module(mods["mod"])
-                    except Exception as e:
+                    except Exception:
                         raise MalformationError("Issue in structure.json for " + str(mods))
             else:
                 self.data()["admin"]["mods"] = []
@@ -119,7 +119,7 @@ class Config(metaclass=AppSingleton):
 
             try:
                 self.load_module(entrypoint_admin_mod["mod"])
-            except Exception as e:
+            except Exception:
                 raise MalformationError("Issue in " + STRUCTURE_CONFIGURATION_BASENAME + ".yaml for " + str(mods))
 
     def entrypoint_admin(self):
@@ -131,7 +131,7 @@ class Config(metaclass=AppSingleton):
 
         try:
             return redirect(AdminModule.get_local_url_for(self.data()["admin"]["entrypoint"]["mod"]) + args_GET)
-        except Exception as e:
+        except Exception:
             raise MalformationError("No entrypoint for admin set-up.")
 
     def entrypoint(self):
@@ -153,7 +153,7 @@ class Config(metaclass=AppSingleton):
                 encoding="utf-8",
             ) as config_stream:
                 self.config = load(config_stream, Loader=Loader)
-        except Exception as e:
+        except Exception:
             raise ConfigError(
                 "Issue when loading structure.json.",
                 os.path.join(
@@ -167,7 +167,7 @@ class Config(metaclass=AppSingleton):
 
         try:
             assert current_stage_name.replace("_", "").isalnum()
-        except Exception as e:
+        except Exception:
             raise MalformationError(
                 "Stage name:"
                 + current_stage_name
@@ -177,7 +177,7 @@ class Config(metaclass=AppSingleton):
         # Activate module (attr type)
         try:
             module_name = current_stage["type"]
-        except Exception as e:
+        except Exception:
             raise MalformationError("Field: type is missing from the stage: " + current_stage_name)
 
         self.load_module(module_name)
@@ -196,7 +196,7 @@ class Config(metaclass=AppSingleton):
 
             for next_stage_name in next_stage_names:
                 if next_stage_name in self.config["stages"]:
-                    next_stage = self.config["stages"][next_stage_name]
+                    _ = self.config["stages"][next_stage_name]
                     self.load_stage(next_stage_name)
                 else:
                     raise NextStageNotFoundError(current_stage_name, next_stage_name)
@@ -205,14 +205,14 @@ class Config(metaclass=AppSingleton):
         try:
             assert "entrypoint" in self.config
             assert "stages" in self.config
-        except Exception as e:
+        except Exception:
             raise MalformationError("Field: entrypoint or/and stages are missing. ")
 
         try:
             current_stage_name = "entrypoint"
             next_stage_name = self.config[current_stage_name]
-            next_stage = self.config["stages"][next_stage_name]
-        except Exception as e:
+            _ = self.config["stages"][next_stage_name]
+        except Exception:
             raise NextStageNotFoundError("entrypoint", self.config["entrypoint"])
 
         self.load_stage(next_stage_name)
@@ -225,9 +225,9 @@ class Config(metaclass=AppSingleton):
 
         if name not in self.modules:
             try:
-                lib_imported = importlib.import_module("flexeval.mods." + name)
+                _ = importlib.import_module("flexeval.mods." + name)
                 self.modules.append(name)
-            except Exception as e:
+            except Exception:
                 raise LoadModuleError("Module: " + name + " doesn't exist or can't be initialized properly.")
 
     def default_authProvider_for_StageModule(self):

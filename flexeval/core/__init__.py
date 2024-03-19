@@ -1,7 +1,6 @@
 # coding: utf8
 # license : CeCILL-C
 
-from .ProviderFactory import ProviderFactory, UndefinedError
 
 from .ErrorHandler import ErrorHandler
 from .Config import Config
@@ -11,3 +10,15 @@ from .Stage import StageModule, Stage
 from .Admin import AdminModule
 
 from .providers.auth import AuthProvider, UserModel, VirtualAuthProvider
+
+__all__ = [
+    "ErrorHandler",
+    "Config",
+    "Module",
+    "StageModule",
+    "Stage",
+    "AdminModule",
+    "AuthProvider",
+    "UserModel",
+    "VirtualAuthProvider",
+]

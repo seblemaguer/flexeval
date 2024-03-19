@@ -7,7 +7,7 @@ import traceback
 from flask import current_app
 from werkzeug.exceptions import HTTPException
 
-from flexeval.core import ProviderFactory
+from flexeval.core.providers import provider_factory
 from flexeval.utils import AppSingleton
 
 from .Module import Module
@@ -55,7 +55,8 @@ class ErrorHandler(metaclass=AppSingleton):
     def error(self, e):
         """The error handler routine entry point.
 
-        It is also in charge of executin the alternative handler, if one is defined for the type of error given in parameters.
+        It is also in charge of execution the alternative handler, if one is defined for the type of error
+        given in parameters.
 
         Parameters
         ----------
@@ -77,6 +78,6 @@ class ErrorHandler(metaclass=AppSingleton):
 
         # Render the error page
         return Module.render_template(
-            ProviderFactory().get("templates").get("/error.tpl"),
+            provider_factory.get("templates").get("error.tpl"),
             parameters={"code": code},
         )

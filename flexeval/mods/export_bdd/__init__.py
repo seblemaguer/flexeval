@@ -11,11 +11,11 @@ from sqlalchemy import inspect
 import pandas as pd
 
 from flexeval.core import AdminModule
-from flexeval.utils import safe_make_rep
+from flexeval.utils import safe_make_dir
 from flexeval.database import db
 
 with AdminModule(__name__) as am:
-    safe_make_rep(current_app.config["FLEXEVAL_INSTANCE_TMP_DIR"] + "/export_bdd")
+    safe_make_dir(current_app.config["FLEXEVAL_INSTANCE_TMP_DIR"] + "/export_bdd")
 
     # Routes
     @am.route("/")
@@ -42,7 +42,7 @@ with AdminModule(__name__) as am:
         root_base_file = current_app.config["FLEXEVAL_INSTANCE_TMP_DIR"] + "/export_bdd/" + repository_name
 
         # Connect to the database
-        safe_make_rep(root_base_file + ".bdd")
+        safe_make_dir(root_base_file + ".bdd")
 
         inspection = inspect(db.engine)
         for name_table in inspection.get_table_names():

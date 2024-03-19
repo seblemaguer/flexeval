@@ -4,7 +4,7 @@ from datetime import datetime
 from flexeval.database import Model, Column, ForeignKey, db, declared_attr
 from flexeval.core import StageModule
 
-usermodel = StageModule.get_UserModel()
+usermodel = StageModule.get_user_model()
 
 
 class SampleModel(Model):

@@ -1,17 +1,13 @@
 # coding: utf8
 # license : CeCILL-C
 
-from flask import g, abort
+from flask import abort
 from flask import url_for as flask_url_for
-
-from flexeval.utils import make_global_url
 
 from .Module import Module
 from .Config import Config
 
-from flexeval.core import ProviderFactory
-
-from flexeval.utils import AppSingleton
+from .providers import provider_factory
 
 
 class AdminModule(Module):
@@ -46,14 +42,11 @@ class AdminModule(Module):
         variables = {}
         try:
             variables = self.get_config()["variables"]
-        except Exception as e:
+        except Exception:
             pass
 
-        template = ProviderFactory().get("templates").get(template)  # "mod:" + str(self.mod_rep)
+        template = provider_factory.get("templates").get(template)  # "mod:" + str(self.mod_rep)
         return super().render_template(template, args=args, parameters=parameters, variables=variables)
-
-    def get_endpoint_for_local_rule(self, rule):
-        return self.name + "." + "local_url@" + str(rule)
 
     def url_for(self, endpoint, **kwargs):
         return flask_url_for(endpoint, **kwargs)

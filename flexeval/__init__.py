@@ -12,9 +12,9 @@ import logging
 from flask import Flask
 
 # FlexEval
-from .utils import safe_make_rep
+from .utils import safe_make_dir
 from .core import Config, ErrorHandler
-from .core.providers import TemplateProvider, AssetsProvider
+from .core.providers import TemplateProvider, AssetsProvider, provider_factory
 from .database import db
 from .extensions import session_manager
 
@@ -33,7 +33,7 @@ def create_app(INSTANCE_PATH, INSTANCE_URL, debug=False, log_level=logging.INFO)
     app.config.setdefault("FLEXEVAL_DIR", os.path.dirname(os.path.abspath(__file__)))
     app.config.setdefault("FLEXEVAL_INSTANCE_DIR", INSTANCE_PATH)
     app.config.setdefault("FLEXEVAL_INSTANCE_URL", INSTANCE_URL)
-    app.config.setdefault("FLEXEVAL_INSTANCE_TMP_DIR", safe_make_rep(INSTANCE_PATH + "/.tmp"))
+    app.config.setdefault("FLEXEVAL_INSTANCE_TMP_DIR", safe_make_dir(INSTANCE_PATH + "/.tmp"))
 
     # Config Session
     app.config.setdefault("SESSION_TYPE", "filesystem")
@@ -41,7 +41,7 @@ def create_app(INSTANCE_PATH, INSTANCE_URL, debug=False, log_level=logging.INFO)
     app.config.setdefault(
         "SECRET_KEY", "".join((random.choice(string.ascii_lowercase) for _ in range(20))).encode("ascii")
     )
-    app.config.setdefault("SESSION_FILE_DIR", safe_make_rep(INSTANCE_PATH + "/.tmp/.sessions"))
+    app.config.setdefault("SESSION_FILE_DIR", safe_make_dir(INSTANCE_PATH + "/.tmp/.sessions"))
 
     # Config SqlAlchemy
     app.config.setdefault("SQLALCHEMY_FILE", INSTANCE_PATH + "/flexeval.db")
@@ -57,8 +57,8 @@ def create_app(INSTANCE_PATH, INSTANCE_URL, debug=False, log_level=logging.INFO)
     # Init
     with app.app_context():
         # Instantiating the default providers
-        AssetsProvider("/assets")
-        TemplateProvider(app.config["FLEXEVAL_INSTANCE_TMP_DIR"] + "/templates")
+        provider_factory.set("assets", AssetsProvider("/assets"))
+        provider_factory.set("templates", TemplateProvider(app.config["FLEXEVAL_INSTANCE_TMP_DIR"] + "/templates"))
 
         # Config app based on structure.json
         Config()

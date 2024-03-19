@@ -407,7 +407,7 @@ class Test(TransactionalObject):
             )
 
         # Set relations to associate multiple steps to a user
-        StageModule.get_UserModel().addRelationship(self.model.__name__, self.model, uselist=True)
+        StageModule.get_user_model().addRelationship(self.model.__name__, self.model, uselist=True)
 
         # Initialize the sample selection strategy
         if "selection_strategy" in config:

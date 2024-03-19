@@ -1,13 +1,12 @@
 """
-flexeval.core.ProviderFactory
+flexeval.core.providers.base
 =============================
 
-Mpdule which provides baseline classes to manage providers
+Module which provides the mechanics to deal with content (template, authentication, assets, ...) providers.
 """
 
+from typing import Dict
 import logging
-
-from flexeval.utils import AppSingleton
 
 
 class ProviderError(Exception):
@@ -25,11 +24,18 @@ class UndefinedError(ProviderError):
         The name to which no provider is corresponding to.
     """
 
-    def __init__(self, name_provider):
+    def __init__(self, name_provider: str):
         self.name_provider = name_provider
 
 
-class ProviderFactory(metaclass=AppSingleton):
+class Provider:
+    """Abstract provider class"""
+
+    def __init__(self):
+        self._logger: logging.Logger = logging.getLogger(self.__class__.__name__)
+
+
+class ProviderFactory:  # metaclass=AppSingleton):
     """Factory class to generate providers
 
     Attributes
@@ -44,63 +50,63 @@ class ProviderFactory(metaclass=AppSingleton):
         """Constructor"""
 
         # Define logger
-        self._logger = logging.getLogger(self.__class__.__name__)
-        self.providers = {}
+        self._logger: logging.Logger = logging.getLogger(self.__class__.__name__)
+        self._providers: Dict[str, Provider] = dict()
 
-    def get(self, name):
-        """Method to get the provider given its name.
+    def get(self, name: str) -> Provider:
+        """Help to return a provider given its name
 
         Parameters
         ----------
-        self: ProviderFactory
-            The current object
-        name: string
-            The name of the wanted provider
+        name : str
+            the name of the provider
 
         Returns
         -------
-        ????: the provider
+        Provider
+            the provider
 
         Raises
         ------
-        UndefinedError: if there is no providers corresponding to the given name
+        UndefinedError
+            if no provider corresponds to the given name
         """
+
         try:
-            return self.providers[name]
+            return self._providers[name]
         except Exception:
             raise UndefinedError(name)
 
-    def exists(self, name):
-        """Method to check if there is a provider corresponding to a given
-        name.
+    def exists(self, name: str) -> bool:
+        """Determine if a provider associated to a given name exists
 
         Parameters
         ----------
-        self: ProviderFactory
-            The current object
-        name: string
+        name : str
             The name of the provider
 
         Returns
         -------
-        bool: true if a provider exists, false else
+        bool
+            True if the provider exists, False else
         """
-        return name in self.providers.keys()
 
-    def set(self, name, provider):
+        return name in self._providers.keys()
+
+    def set(self, name: str, provider: Provider) -> None:
         """Method to associate a given provider to a given name.
 
         If the given name already has a provider associated to it, this provider will be replaced.
 
+
         Parameters
         ----------
-        self: ProviderFactory
-            The current object
-        name: string
-            The name of the provider
-        provider: ???
-            The provider
+        name : str
+            the name of the provider
+        provider : Provider
+            the provider to associate to the given name
         """
+
         if ProviderFactory().exists(name):
             oldprovider = ProviderFactory().get(name)
             old_name = oldprovider.__class__.__name__
@@ -108,4 +114,8 @@ class ProviderFactory(metaclass=AppSingleton):
                 f'{old_name} is overwritten by {provider.__class__.__name__} for provider named "{name}".'
             )
 
-        self.providers[name] = provider
+        self._providers[name] = provider
+
+
+# NOTE: create a single provider factory
+provider_factory = ProviderFactory()

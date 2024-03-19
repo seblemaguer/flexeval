@@ -5,9 +5,6 @@ flexeval.core.Stage
 Module which defines all utilities to represent a stage in the pipeline
 
 """
-
-import logging
-
 from flask import g, abort
 from flask import url_for as flask_url_for
 from flask import session as flask_session
@@ -16,7 +13,7 @@ from flexeval.utils import make_global_url
 
 from .Module import Module
 from .Config import Config
-from flexeval.core import ProviderFactory
+from .providers import provider_factory
 
 
 class StageError(Exception):
@@ -81,7 +78,7 @@ class Stage:
 
         try:
             self.params = Config().data()["stages"][name]
-        except Exception as e:
+        except Exception:
             raise StageNotFound()
 
         self.mod_name = self.params["type"]
@@ -195,7 +192,7 @@ class Stage:
             return None
 
         template = self.params["template"]
-        template_path = ProviderFactory().get("templates").get(template)
+        template_path = provider_factory.get("templates").get(template)
 
         return ResolvedStageTemplate(template_path)
 
@@ -392,7 +389,7 @@ class StageModule(Module):
         if isinstance(template, ResolvedStageTemplate):
             template = template.path
         else:
-            template = ProviderFactory().get("templates").get(template)
+            template = provider_factory.get("templates").get(template)
 
         # Achieve the rendering
         return super().render_template(
@@ -473,7 +470,7 @@ class StageModule(Module):
                     self.logger.debug(" - %s: %s" % (k, flask_session[k]))
                 try:
                     g.stage = Stage(stage_name)
-                except Exception as e:
+                except Exception:
                     abort(404)
 
                 return func(*args, **kwargs)

@@ -4,26 +4,26 @@
 # Global
 import os
 import shutil
-import sys
 from pathlib import Path
 
 # Flask related
-from flask import current_app
+from flask import current_app, Response
 from flask import redirect as flask_redirect
 
 
-def copytree(src, dst, dirs_exist_ok=True, ignore=None):
+def copytree(src: str, dst: str, dirs_exist_ok: bool = True, ignore=None):
     """Alternative copytree to the shutils.copytree which is only available in python >= 3.8
 
     Parameters
     ----------
-    src: file
+    src: str
         the source directory
-    dst: file
+    dst: str
         The target directory
-    dirs_exist_ok: Boolean
-        Always TRUE, else ignored!
-
+    dirs_exist_ok: bool
+        Always True, else ignored!
+    ignore:
+        This parameter is ignored!
     """
     for item in os.listdir(src):
         s = os.path.join(src, item)
@@ -37,54 +37,55 @@ def copytree(src, dst, dirs_exist_ok=True, ignore=None):
             shutil.copyfile(s, d)
 
 
-def safe_make_rep(REP):
+def safe_make_dir(directory: str):
     """Make a fresh empty directory
 
     Parameters
     ----------
-    REP: file
+    directory: file
         The directory to (re)-create
 
     Returns
     -------
-    File -> the directory path
+    str
+        The directory path
     """
 
-    if os.path.exists(REP):
-        shutil.rmtree(REP)
+    if os.path.exists(directory):
+        shutil.rmtree(directory)
 
-    os.makedirs(REP)
+    os.makedirs(directory)
 
-    return REP
+    return directory
 
 
-def create_file(FILE):
+def create_file(file: str):
     """Create an empty file
 
     Parameters
     ----------
-    FILE: file
+    file: str
         The file to create
     """
 
-    with open(FILE, "w"):
+    with open(file, "w"):
         pass
 
 
-def del_file(FILE):
+def del_file(file: str):
     """Delete a file but don't crash if the file doesn't exist
 
     Parameters
     ----------
-    FILE: file
+    file: str
         The file to delete
     """
 
-    if os.path.isfile(FILE):
-        os.remove(FILE)
+    if os.path.isfile(file):
+        os.remove(file)
 
 
-def make_absolute_path(relative_path):
+def make_absolute_path(relative_path: str) -> str:
     """Generate an absolute path based on a relative path and the absolute path of the FlexEval instance
 
     Args:
@@ -97,32 +98,34 @@ def make_absolute_path(relative_path):
         return relative_path
 
 
-def make_global_url(local_url):
+def make_global_url(local_url: str) -> str:
     """Generate global URL from a local URL
 
     Parameters
     ----------
-    local_url: string
+    local_url: str
         The local (relative) URL
 
     Returns
     -------
-    string => the global (complete) URL
+    str
+        the global (complete) URL
     """
     return current_app.config["FLEXEVAL_INSTANCE_URL"] + local_url
 
 
-def redirect(local_url):
+def redirect(local_url: str) -> Response:
     """Prepare redirection to the local URL
 
     Parameters
     ----------
-    local_url: string
+    local_url: str
         The local (relative) URL
 
     Returns
     -------
-    Response object => which if called redirects the client to the target location
+    Response
+        the flask Response object which if called redirects the client to the target location
     """
     return flask_redirect(make_global_url(local_url))
 

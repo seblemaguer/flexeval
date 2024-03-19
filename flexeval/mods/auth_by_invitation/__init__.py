@@ -19,7 +19,7 @@ current_app.config.setdefault("MAIL_PASSWORD", "password")
 
 StageModule.set_authProvider(UserAuth)
 mail = Mail()
-userModel = StageModule.get_UserModel()
+userModel = StageModule.get_user_model()
 
 with StageModule(__name__) as sm:
 
@@ -34,13 +34,13 @@ with StageModule(__name__) as sm:
                 token = request.args.get("token")
                 sm.authProvider.connect(token=token)
                 return sm.render_template("legal.tpl", token=token)
-            except BadCredential as e:
+            except BadCredential:
                 pass
 
             return sm.render_template(template="login.tpl")
 
     @sm.route("/register", methods=["POST"])
-    def main():
+    def register():
         stage = sm.current_stage
 
         if sm.authProvider.validates_connection("connected"):
@@ -52,7 +52,7 @@ with StageModule(__name__) as sm:
                 sm.authProvider.user.update(active=True)
 
                 return redirect(stage.local_url_next)
-            except BadCredential as e:
+            except BadCredential:
                 pass
 
             return sm.render_template(template="login.tpl")
@@ -90,7 +90,7 @@ with AdminModule(__name__) as am:
                         + make_global_url("/?token=....")
                         + "</a></p></body></html>"
                     )
-                except Exception as e:
+                except Exception:
                     bdd_mistake = True
 
                 if not (bdd_mistake):
@@ -98,7 +98,7 @@ with AdminModule(__name__) as am:
                         msg = Message(title_message, recipients=[email])
                         msg.html = message
                         mail.send(msg)
-                    except Exception as e:
+                    except Exception:
                         if user is not None:
                             user.delete()
                         return redirect(
@@ -107,7 +107,7 @@ with AdminModule(__name__) as am:
 
             return redirect(am.url_for(am.get_endpoint_for_local_rule("/pending_invitation")))
 
-        except Exception as e:
+        except Exception:
             return redirect(am.url_for(am.get_endpoint_for_local_rule("/configuration")) + "?falseCredential")
 
     @am.route("/pending_invitation")

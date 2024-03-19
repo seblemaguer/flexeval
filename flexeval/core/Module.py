@@ -13,7 +13,7 @@ from flask import Blueprint, current_app, abort
 from flask import render_template as flask_render_template
 
 # FlexEval
-from flexeval.core import ProviderFactory
+from flexeval.core.providers import provider_factory
 from flexeval.core.Config import Config
 from flexeval.core.providers.auth import AuthProvider, UserModel, VirtualAuthProvider
 from flexeval.utils import make_global_url, make_absolute_path
@@ -99,7 +99,7 @@ class Module(Blueprint, abc.ABC):
 
         super().__init__(self.__class__.name_type + ":" + self.get_mod_name(), namespace)
 
-        if not (ProviderFactory().exists("auth_mod_" + self.__class__.name_type)):
+        if not (provider_factory.exists("auth_mod_" + self.__class__.name_type)):
             self.__class__.set_authProvider(VirtualAuthProvider)
 
     @property
@@ -122,10 +122,10 @@ class Module(Blueprint, abc.ABC):
 
     @classmethod
     def get_authProvider(cls):
-        if not (ProviderFactory().exists("auth_mod_" + cls.name_type)):
+        if not (provider_factory.exists("auth_mod_" + cls.name_type)):
             cls.set_authProvider(VirtualAuthProvider)
 
-        return ProviderFactory().get("auth_mod_" + cls.name_type)
+        return provider_factory.get("auth_mod_" + cls.name_type)
 
     @classmethod
     def set_authProvider(cls, cls_auth):
@@ -133,7 +133,7 @@ class Module(Blueprint, abc.ABC):
 
         if not (
             isinstance(
-                cls_auth("auth_mod_" + cls.name_type, cls.homepage, cls.userModel),
+                cls_auth("auth_mod_" + cls.name_type, cls.homepage, cls.user_model),
                 AuthProvider,
             )
         ):
@@ -145,8 +145,8 @@ class Module(Blueprint, abc.ABC):
         table_name = cls.__name__ + "User"
         table_type = cls.name_type + "User"
 
-        if not (hasattr(cls, "userModel")):
-            cls.userModel = UserModelAttributesMeta(
+        if not (hasattr(cls, "user_model")):
+            cls.user_model = UserModelAttributesMeta(
                 table_type,
                 (
                     UserModel,
@@ -154,7 +154,7 @@ class Module(Blueprint, abc.ABC):
                 ),
                 {"__abstract__": True, "__tablename__": table_name},
             )
-            setattr(cls.userModel, "__lock__", True)
+            setattr(cls.user_model, "__lock__", True)
 
         if __userBase__ is not None:
             bases = __userBase__.__bases__
@@ -164,32 +164,32 @@ class Module(Blueprint, abc.ABC):
             except Exception:
                 raise NotAUserModel(__userBase__ + " is not only or not a subClass of UserModel")
 
-            if hasattr(cls, "userModel_init"):
-                if __userBase__ in list(cls.userModel.__bases__):
+            if hasattr(cls, "user_model_init"):
+                if __userBase__ in list(cls.user_model.__bases__):
                     pass
                 else:
                     raise MalformationError("Two differents auth provider defined for " + cls.__name__ + ".")
             else:
-                cls.userModel.__lock__ = False
-                cls.userModel = UserModelAttributesMeta(
+                cls.user_model.__lock__ = False
+                cls.user_model = UserModelAttributesMeta(
                     table_type,
-                    (cls.userModel, __userBase__),
+                    (cls.user_model, __userBase__),
                     {"__abstract__": False, "__tablename__": table_name},
                 )
-                setattr(cls.userModel, "__lock__", True)
-                cls.userModel_init = True
+                setattr(cls.user_model, "__lock__", True)
+                cls.user_model_init = True
 
     @abc.abstractmethod
     def url_for(self, endpoint, **kwargs):
         pass
 
     @classmethod
-    def get_UserModel(cls):
-        return cls.get_authProvider().userModel
+    def get_user_model(cls):
+        return cls.get_authProvider().user_model
 
     def __enter__(self):
         self.logger.info("Registering module: %s" % self.mod_rep)
-        ProviderFactory().get("templates").register(self.mod_rep)
+        provider_factory.get("templates").register(self.mod_rep)
         return self
 
     def __exit__(self, *args):
@@ -251,7 +251,7 @@ class Module(Blueprint, abc.ABC):
         """
 
         try:
-            args["auth"] = ProviderFactory().get("auth_mod_" + cls.name_type)
+            args["auth"] = provider_factory.get("auth_mod_" + cls.name_type)
             args["homepage"] = make_global_url(cls.homepage)
         except Exception:
             args["auth"] = VirtualAuthProvider()
@@ -303,13 +303,13 @@ class Module(Blueprint, abc.ABC):
                 return default_value
 
         def get_asset(name, rep=None):
-            return make_global_url(ProviderFactory().get("assets").local_url(name, rep))
+            return make_global_url(provider_factory.get("assets").local_url(name, rep))
 
         args["read_file"] = read_file
         args["read_json"] = read_json
         args["get_variable"] = get_variable
         args["get_asset"] = get_asset
-        args["get_template"] = ProviderFactory().get("templates").get
+        args["get_template"] = provider_factory.get("templates").get
         args["make_url"] = make_global_url
 
         try:

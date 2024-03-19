@@ -1,6 +1,5 @@
-# coding: utf8
-# license : CeCILL-C
+from .base import provider_factory, Provider
+from .content import AssetsProvider, TemplateProvider
 
-from .AssetsProvider import AssetsProvider
-from .TemplateProvider import TemplateProvider
-from . import auth
+
+__all__ = ["provider_factory", "Provider", "AssetsProvider", "TemplateProvider"]

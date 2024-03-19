@@ -3,9 +3,9 @@
 
 # Import Libraries
 from flexeval.core import StageModule
-from flexeval.database import Model, relationship, Column, ForeignKey, db, declared_attr
+from flexeval.database import Model, Column, ForeignKey, db, declared_attr
 
-userModel = StageModule.get_UserModel()
+userModel = StageModule.get_user_model()
 
 
 class Form(Model):
