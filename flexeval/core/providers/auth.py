@@ -85,9 +85,10 @@ class UserModel:
 class AuthProvider(Provider, metaclass=abc.ABCMeta):
     """Default authentication provider"""
 
+    __userBase__: type[UserModel] | None = None
     checkers: dict[str, Callable[[UserModel], bool]] = dict()
 
-    def __init__(self, name: str, local_url_homepage: str | None, user_model: UserModel | None):
+    def __init__(self, name: str, local_url_homepage: str, user_model: UserModel | None):
         """Initialisation method
 
         Parameters
@@ -101,9 +102,9 @@ class AuthProvider(Provider, metaclass=abc.ABCMeta):
         """
 
         super().__init__()
-        self.local_url_homepage = local_url_homepage
-        self.name = name
-        self.user_model = user_model
+        self.local_url_homepage: str = local_url_homepage
+        self.name: str = name
+        self.user_model: UserModel | None = user_model
         self._logger.debug(f"Initialisation with (name = {name}, local_url_homepage = {local_url_homepage})")
 
         try:
@@ -204,7 +205,7 @@ class AuthProvider(Provider, metaclass=abc.ABCMeta):
             raise Exception(f"{name} is not an authentication provider (type = {provider.__class__})")
 
         provider.disconnect()
-        return redirect(provider.local_url_homepage)  # type: ignore
+        return redirect(provider.local_url_homepage)
 
     @property
     def user(self) -> UserModel:
@@ -249,7 +250,7 @@ class AuthProvider(Provider, metaclass=abc.ABCMeta):
 class AnonAuthProvider(AuthProvider):
     """A default anonymous user authentification provider"""
 
-    __userBase__ = UserModel
+    __userBase__: type[UserModel] | None = UserModel
 
     @override
     def connect(self):  # type: ignore
@@ -293,12 +294,12 @@ class VirtualAuthProvider(AuthProvider):
     actual authentication provider.
     """
 
-    __userBase__ = None
+    __userBase__: type[UserModel] | None = None
 
     def __init__(
         self,
         name: str | None = None,
-        local_url_homepage: str | None = None,
+        local_url_homepage: str = "/",
         userModel: UserModel | None = None,
     ):
         """Initialisation method

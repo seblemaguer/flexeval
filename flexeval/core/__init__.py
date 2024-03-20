@@ -2,17 +2,16 @@
 # license : CeCILL-C
 
 
-from .ErrorHandler import ErrorHandler
+from .error import error_handler
 from .Config import Config
-from .Module import Module
+from .module import Module
 
 from .Stage import StageModule, Stage
-from .Admin import AdminModule
+from .admin import AdminModule
 
 from .providers.auth import AuthProvider, UserModel, VirtualAuthProvider
 
 __all__ = [
-    "ErrorHandler",
     "Config",
     "Module",
     "StageModule",
@@ -21,4 +20,5 @@ __all__ = [
     "AuthProvider",
     "UserModel",
     "VirtualAuthProvider",
+    "error_handler",
 ]

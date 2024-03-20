@@ -27,12 +27,12 @@ with StageModule(__name__) as sm:
     def main():
         stage = sm.current_stage
 
-        if sm.authProvider.validates_connection("connected"):
+        if sm.auth_provider.validates_connection("connected"):
             return redirect(stage.local_url_next)
         else:
             try:
                 token = request.args.get("token")
-                sm.authProvider.connect(token=token)
+                sm.auth_provider.connect(token=token)
                 return sm.render_template("legal.tpl", token=token)
             except BadCredential:
                 pass
@@ -43,13 +43,13 @@ with StageModule(__name__) as sm:
     def register():
         stage = sm.current_stage
 
-        if sm.authProvider.validates_connection("connected"):
+        if sm.auth_provider.validates_connection("connected"):
             return redirect(stage.local_url_next)
         else:
             try:
                 token = request.args.get("token")
-                sm.authProvider.connect(token=token)
-                sm.authProvider.user.update(active=True)
+                sm.auth_provider.connect(token=token)
+                sm.auth_provider.user.update(active=True)
 
                 return redirect(stage.local_url_next)
             except BadCredential:

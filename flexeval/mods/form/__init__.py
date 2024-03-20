@@ -4,18 +4,17 @@
 # Import Libraries
 import json
 
+import threading
+
 from flask import current_app, request
 
 from flexeval.core import StageModule
-from flexeval.database import ModelFactory, Column, ForeignKey, db, relationship
+from flexeval.database import ModelFactory, db
 from flexeval.utils import redirect
 
-import threading
+from .model import Form
 
 sem_form = threading.Semaphore()
-
-
-from .model import Form
 
 
 class FormError(Exception):
@@ -35,14 +34,14 @@ with StageModule(__name__) as sm:
 
     @sm.route("/", methods=["GET"])
     @sm.valid_connection_required
-    def main():
+    def main_default():
         # Get the current stage and the user
         stage = sm.current_stage
 
         # Create Form table and link the user to this form
         if ModelFactory().has(stage.name, Form):
             form_stage = ModelFactory().get(stage.name, Form)
-            user = sm.authProvider.user
+            user = sm.auth_provider.user
             res = form_stage.query.filter_by(user_id=user.id)
             if res.first() is None:
                 return sm.render_template(template=stage.template)
@@ -55,7 +54,7 @@ with StageModule(__name__) as sm:
     @sm.valid_connection_required
     def save():
         stage = sm.current_stage
-        userModel = sm.authProvider.userModel
+        userModel = sm.auth_provider.userModel
 
         sem_form.acquire()
         if not ModelFactory().has(stage.name, Form):
@@ -64,7 +63,7 @@ with StageModule(__name__) as sm:
             form_stage = ModelFactory().get(stage.name, Form)
         userModel.addRelationship(form_stage.__name__, form_stage, uselist=False)
 
-        user = sm.authProvider.user
+        user = sm.auth_provider.user
         user_form_for_this_stage = getattr(user, form_stage.__name__)
 
         if user_form_for_this_stage is None:
@@ -79,7 +78,7 @@ with StageModule(__name__) as sm:
                     with request.files[field_key].stream as f:
                         resp.update(**{field_key: f.read()})
 
-            except Exception as e:
+            except Exception:
                 resp.delete()
 
         sem_form.release()
@@ -90,7 +89,7 @@ with StageModule(__name__, subname="autogen") as sm_autogen:
 
     @sm_autogen.route("/", methods=["GET"])
     @sm_autogen.valid_connection_required
-    def main():
+    def main_autogen():
         stage = sm_autogen.current_stage
 
         # On récup le json
@@ -100,7 +99,7 @@ with StageModule(__name__, subname="autogen") as sm_autogen:
                 encoding="utf-8",
             ) as form_json_data:
                 form_json_data = json.load(form_json_data)
-        except Exception as e:
+        except Exception:
             raise FileNotFound(
                 "Issue when loading: " + current_app.config["FLEXEVAL_INSTANCE_DIR"] + "/" + stage.get("data")
             )

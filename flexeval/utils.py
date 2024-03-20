@@ -1,7 +1,4 @@
-# coding: utf8
-# license : CeCILL-C
-
-# Global
+# Python
 from typing import Callable
 import os
 import shutil

@@ -123,7 +123,7 @@ class Config(metaclass=AppSingleton):
                 raise MalformationError("Issue in " + STRUCTURE_CONFIGURATION_BASENAME + ".yaml for " + str(mods))
 
     def entrypoint_admin(self):
-        from .Admin import AdminModule
+        from .admin import AdminModule
 
         args_GET = "?"
         for args_key in request.args.keys():
@@ -234,5 +234,5 @@ class Config(metaclass=AppSingleton):
         from .Stage import StageModule
         from flexeval.core.providers.auth import VirtualAuthProvider, AnonAuthProvider
 
-        if isinstance(StageModule.get_authProvider(), VirtualAuthProvider):
+        if isinstance(StageModule.get_auth_provider(), VirtualAuthProvider):
             StageModule.set_authProvider(AnonAuthProvider)

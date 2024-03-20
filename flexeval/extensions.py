@@ -4,4 +4,4 @@
 
 from flask_session import Session
 
-session_manager = Session()
+session_manager: Session = Session()

@@ -45,6 +45,7 @@ class AssetsProvider(Provider):
     Assets are files which will be send as is to the client.
     """
 
+    NAME: str = "assets"
     FORBIDDEN_PATHES = set(["~", "..", ".", "__pycache__"])
 
     def __init__(self, url_prefix: str):
@@ -178,6 +179,8 @@ class TemplateProvider(Provider):
 
     Templates are jinja2 files processed to become HTML file to be then sent to the client.
     """
+
+    NAME: str = "templates"
 
     def __init__(self, folder: str):
         """Initialisation method

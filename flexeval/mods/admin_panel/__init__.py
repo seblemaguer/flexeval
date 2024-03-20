@@ -1,20 +1,20 @@
 # coding: utf8
 # license : CeCILL-C
 
-from flask import current_app, request
+from flask import request
 
 from flexeval.core import AdminModule
 from flexeval.utils import redirect, make_global_url
 
 from .provider import UniqueAuth
 
-AdminModule.set_authProvider(UniqueAuth)
+AdminModule.set_auth_provider(UniqueAuth)
 
 with AdminModule(__name__) as am:
 
     @am.route("/", methods=["GET"])
     def main():
-        authProvider = am.authProvider
+        authProvider = am.auth_provider
 
         if authProvider.validates_connection("connected")[0]:
             return redirect(am.url_for(am.get_endpoint_for_local_rule("/panel")))
@@ -23,7 +23,7 @@ with AdminModule(__name__) as am:
 
     @am.route("/auth", methods=["GET"])
     def auth():
-        return am.render_template(template="auth.tpl")
+        return am.render_template(path_template="auth.tpl")
 
     @am.route("/login", methods=["POST"])
     def login():
@@ -31,7 +31,7 @@ with AdminModule(__name__) as am:
         master_password = am.get_config()["password"]
 
         if password == master_password:
-            am.authProvider.connect()
+            am.auth_provider.connect()
             return redirect(am.url_for(am.get_endpoint_for_local_rule("/panel")))
         else:
             return redirect(am.url_for(am.get_endpoint_for_local_rule("/")))
@@ -60,4 +60,4 @@ with AdminModule(__name__) as am:
 
                 admin_modules.append(admin_module)
 
-        return am.render_template(template="panel.tpl", admin_modules=admin_modules)
+        return am.render_template(path_template="panel.tpl", admin_modules=admin_modules)

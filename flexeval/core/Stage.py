@@ -5,14 +5,16 @@ flexeval.core.Stage
 Module which defines all utilities to represent a stage in the pipeline
 
 """
+from typing_extensions import override
+
 from flask import g, abort
 from flask import url_for as flask_url_for
 from flask import session as flask_session
 
 from flexeval.utils import make_global_url
 
-from .Module import Module
 from .Config import Config
+from .module import Module
 from .providers import provider_factory
 
 
@@ -41,7 +43,7 @@ class ResolvedStageTemplate:
 
     """
 
-    def __init__(self, template_path):
+    def __init__(self, template_path: str):  # type: ignore
         self.path = template_path
 
 
@@ -62,7 +64,7 @@ class Stage:
 
     """
 
-    def __init__(self, name, data=None):
+    def __init__(self, name: str):
         """Constructor
 
         Parameters
@@ -77,14 +79,14 @@ class Stage:
         self.name = name
 
         try:
-            self.params = Config().data()["stages"][name]
+            self._params: str = Config().data()["stages"][name]
         except Exception:
             raise StageNotFound()
 
-        self.mod_name = self.params["type"]
-        self.mod_rep = self.params["type"].split(":")[0]
+        self._mod_name: str = self._params["type"]
+        self._mod_rep: str = self._params["type"].split(":")[0]
 
-    def update(self, name, val):
+    def update(self, name: str, val: object):
         """Method to update the value of a parameter of the stage
 
         Parameters
@@ -130,31 +132,17 @@ class Stage:
         return flask_session["stage:" + self.name]
 
     @property
-    def local_url_next(self):
-        """Method to retrieve the information associated with the current
-        stage from the current session.
+    def local_url_next(self) -> str:
+        """Generates the local URL of the next stage (treated a property)"""
 
-        This method is treated as a property.
-
-        Parameters
-        ----------
-        self: self
-            The current object
-
-        Returns
-        -------
-        dict: the session dictionnary
-        """
-
-        if "next" not in self.params:
-            next_module = "/"
-        else:
-            if isinstance(self.params["next"], dict):
+        next_module = "/"
+        if "next" in self._params:
+            if isinstance(self._params["next"], dict):
                 next_module = {}
-                for next_module_name in self.params["next"].keys():
-                    next_module[next_module_name] = Stage(self.params["next"][next_module_name]).local_url
+                for next_module_name in self._params["next"].keys():
+                    next_module[next_module_name] = Stage(self._params["next"][next_module_name]).local_url
             else:
-                next_module = Stage(self.params["next"]).local_url
+                next_module = Stage(self._params["next"]).local_url
 
         return next_module
 
@@ -170,7 +158,7 @@ class Stage:
         -------
         bool: true if the module has a next module, false else
         """
-        return "next" in self.params
+        return "next" in self._params
 
     @property
     def template(self):
@@ -188,10 +176,10 @@ class Stage:
         ResolvedStageTemplate: the resolved template
 
         """
-        if "template" not in self.params:
+        if "template" not in self._params:
             return None
 
-        template = self.params["template"]
+        template = self._params["template"]
         template_path = provider_factory.get("templates").get(template)
 
         return ResolvedStageTemplate(template_path)
@@ -216,8 +204,8 @@ class Stage:
         """
         variables = {}
 
-        if "variables" in self.params:
-            variables = self.params["variables"]
+        if "variables" in self._params:
+            variables = self._params["variables"]
 
         if "session_variable" in self.session:
             for session_variable_name in self.session["session_variable"].keys():
@@ -225,7 +213,7 @@ class Stage:
 
         return variables
 
-    def get_variable(self, name, default_value):
+    def get_variable(self, name: str, default_value: object):
         """Method to get the value of a variable. If the variable is not
         available, the provided default value is returned.
 
@@ -248,7 +236,7 @@ class Stage:
 
         return self.variables[name]
 
-    def set_variable(self, name, value):
+    def set_variable(self, name: str, value: object):
         """Method to set the value of a variable identified by its name.
 
         If the variable doesn't exist, a new SESSION variable will be created.
@@ -282,9 +270,9 @@ class Stage:
         -------
         string: the URL of the current stage
         """
-        return "/" + StageModule.name_type + "/" + self.mod_name + "/" + self.name + "/"
+        return "/" + StageModule.name_type + "/" + self._mod_name + "/" + self.name + "/"
 
-    def get(self, name):
+    def get(self, name: str) -> str | None:
         """Method to get the value of a parameter
 
         Parameters
@@ -298,12 +286,12 @@ class Stage:
         -------
         object: The value of the parameter or None if the parameter doesn't exist
         """
-        if name in self.params:
-            return self.params[name]
+        if name in self._params:
+            return self._params[name]
         else:
             return None
 
-    def has(self, name):
+    def has(self, name: str) -> bool:
         """Method to check if the value of a parameter is set
 
         Parameters
@@ -317,7 +305,7 @@ class Stage:
         -------
         boolean: True if the parameter exists and has a value, False else
         """
-        return name in self.params
+        return name in self._params
 
 
 class StageModule(Module):
@@ -334,7 +322,8 @@ class StageModule(Module):
     name_type = "stage"
     homepage = "/"
 
-    def local_rule(self):
+    @override
+    def local_rule(self) -> str:
         """Method which defines the rule to access the current module
 
         Parameters
@@ -365,6 +354,7 @@ class StageModule(Module):
         """
         return g.stage
 
+    @override
     def render_template(self, template, next=None, **parameters):
         """Method which renders the given template.
 
@@ -387,9 +377,9 @@ class StageModule(Module):
 
         # Get the template
         if isinstance(template, ResolvedStageTemplate):
-            template = template.path
+            template: str = template.path
         else:
-            template = provider_factory.get("templates").get(template)
+            template: str = provider_factory.get("templates").get(template)
 
         # Achieve the rendering
         return super().render_template(
@@ -399,7 +389,7 @@ class StageModule(Module):
             variables=self.current_stage.variables,
         )
 
-    def url_for(self, endpoint, stage_name=None, **kwargs):
+    def url_for(self, endpoint: str, stage_name: str | None = None, **kwargs) -> str:
         """Method to generate a dynamic URL given a specific endpoint and
         potential stage name. If the stage name is None, the current
         stage name is used.
@@ -425,7 +415,7 @@ class StageModule(Module):
 
         return flask_url_for(endpoint, stage_name=stage_name, **kwargs)
 
-    def get_endpoint_for_local_rule(self, rule):
+    def get_endpoint_for_local_rule(self, rule: str) -> str:
         """Method to generate the end point for the given local rule
 
         Parameters
@@ -441,7 +431,7 @@ class StageModule(Module):
         """
         return self.name + "." + "local_url@" + str(rule.replace(".", "_"))
 
-    def route(self, rule, **options):
+    def route(self, rule: str, **options):
         """Method to define the route decorator which will be in charge of
         redericting the client to the given rule.
 
@@ -464,10 +454,11 @@ class StageModule(Module):
                 stage_name = kwargs["stage_name"]
                 del kwargs["stage_name"]
 
-                self.logger.debug("Goto ==> %s" % stage_name)
-                self.logger.debug("Current session:")
+                self._logger.debug("Goto ==> %s" % stage_name)
+                self._logger.debug("Current session:")
                 for k in flask_session.keys():
-                    self.logger.debug(" - %s: %s" % (k, flask_session[k]))
+                    self._logger.debug(" - %s: %s" % (k, flask_session[k]))
+
                 try:
                     g.stage = Stage(stage_name)
                 except Exception:
@@ -480,3 +471,7 @@ class StageModule(Module):
             return wrapper
 
         return decorated
+
+    @property
+    def logger(self):
+        return self._logger

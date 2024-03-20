@@ -2,7 +2,7 @@
 # license : CeCILL-C
 
 # Import Libraries
-from flask import current_app, request
+from flask import request
 
 from flexeval.core import StageModule
 from flexeval.utils import redirect
@@ -10,7 +10,7 @@ from flexeval.utils import redirect
 from .provider import EmailAuth
 from .model import NotAnEmail
 
-StageModule.set_authProvider(EmailAuth)
+StageModule.set_auth_provider(EmailAuth)
 
 with StageModule(__name__) as sm:
 
@@ -18,7 +18,7 @@ with StageModule(__name__) as sm:
     def main():
         stage = sm.current_stage
 
-        if sm.authProvider.validates_connection("connected")[0]:
+        if sm.auth_provider.validates_connection("connected")[0]:
             return redirect(stage.local_url_next)
         else:
             return sm.render_template(template="login.tpl")
@@ -29,7 +29,7 @@ with StageModule(__name__) as sm:
         email = request.form["email"]
 
         try:
-            sm.authProvider.connect(email)
+            sm.auth_provider.connect(email)
         except NotAnEmail as e:
             sm.logger.error(f"Problem with the email: {e}")
             return redirect(sm.url_for(sm.get_endpoint_for_local_rule("/")))

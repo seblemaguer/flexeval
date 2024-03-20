@@ -13,17 +13,34 @@ from flask import Flask
 
 # FlexEval
 from .utils import safe_make_dir
-from .core import Config, ErrorHandler
+from .core import Config, error
 from .core.providers import TemplateProvider, AssetsProvider, provider_factory
 from .database import db
 from .extensions import session_manager
 
 
-def create_app(INSTANCE_PATH, INSTANCE_URL, debug=False, log_level=logging.INFO):
-    """Application-factory pattern"""
+def create_app(instance_path: str, instance_url: str, debug: bool = False, log_level: int = logging.INFO) -> Flask:
+    """Create the Flask Application
+
+    Parameters
+    ----------
+    instance_path : str
+        The path of the instance to run
+    instance_url : str
+        The URL of the instance to run
+    debug : bool
+        Shall we activate the debug mode?
+    log_level : int
+        the default logging level
+
+    Returns
+    -------
+    Flask
+        The created Flask application associated to the instance
+    """
 
     # Create Flask application
-    app = Flask(__name__, template_folder=None, static_url_path=None)
+    app: Flask = Flask(__name__, template_folder="", static_url_path=None)
 
     # Set logging level
     log = logging.getLogger("werkzeug")
@@ -31,9 +48,9 @@ def create_app(INSTANCE_PATH, INSTANCE_URL, debug=False, log_level=logging.INFO)
 
     # Config FLEXEVAL
     app.config.setdefault("FLEXEVAL_DIR", os.path.dirname(os.path.abspath(__file__)))
-    app.config.setdefault("FLEXEVAL_INSTANCE_DIR", INSTANCE_PATH)
-    app.config.setdefault("FLEXEVAL_INSTANCE_URL", INSTANCE_URL)
-    app.config.setdefault("FLEXEVAL_INSTANCE_TMP_DIR", safe_make_dir(INSTANCE_PATH + "/.tmp"))
+    app.config.setdefault("FLEXEVAL_INSTANCE_DIR", instance_path)
+    app.config.setdefault("FLEXEVAL_INSTANCE_URL", instance_url)
+    app.config.setdefault("FLEXEVAL_INSTANCE_TMP_DIR", safe_make_dir(instance_path + "/.tmp"))
 
     # Config Session
     app.config.setdefault("SESSION_TYPE", "filesystem")
@@ -41,10 +58,10 @@ def create_app(INSTANCE_PATH, INSTANCE_URL, debug=False, log_level=logging.INFO)
     app.config.setdefault(
         "SECRET_KEY", "".join((random.choice(string.ascii_lowercase) for _ in range(20))).encode("ascii")
     )
-    app.config.setdefault("SESSION_FILE_DIR", safe_make_dir(INSTANCE_PATH + "/.tmp/.sessions"))
+    app.config.setdefault("SESSION_FILE_DIR", safe_make_dir(instance_path + "/.tmp/.sessions"))
 
     # Config SqlAlchemy
-    app.config.setdefault("SQLALCHEMY_FILE", INSTANCE_PATH + "/flexeval.db")
+    app.config.setdefault("SQLALCHEMY_FILE", instance_path + "/flexeval.db")
     app.config.setdefault("SQLALCHEMY_DATABASE_URI", "sqlite:///" + app.config["SQLALCHEMY_FILE"])
     app.config.setdefault("SQLALCHEMY_TRACK_MODIFICATIONS", False)
 
@@ -57,16 +74,18 @@ def create_app(INSTANCE_PATH, INSTANCE_URL, debug=False, log_level=logging.INFO)
     # Init
     with app.app_context():
         # Instantiating the default providers
-        provider_factory.set("assets", AssetsProvider("/assets"))
-        provider_factory.set("templates", TemplateProvider(app.config["FLEXEVAL_INSTANCE_TMP_DIR"] + "/templates"))
+        provider_factory.set(AssetsProvider.NAME, AssetsProvider("/assets"))
+        provider_factory.set(
+            TemplateProvider.NAME, TemplateProvider(app.config["FLEXEVAL_INSTANCE_TMP_DIR"] + "/templates")
+        )
 
         # Config app based on structure.json
-        Config()
+        _ = Config()
 
         # Module loaded => create the database
         db.create_all()
 
         # Error management
-        ErrorHandler()
+        error.error_handler = error.ErrorHandler(app)
 
     return app

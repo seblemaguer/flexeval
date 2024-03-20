@@ -61,7 +61,7 @@ with StageModule(__name__) as sm:
             test.set_timeout_for_transaction(int(transaction_timeout_seconds))
 
         # Get the user
-        user = sm.authProvider.user
+        user = sm.auth_provider.user
 
         # Get the current step
         cur_step = test.nb_steps_complete_by(user)
@@ -97,7 +97,7 @@ with StageModule(__name__) as sm:
                 name = name.replace(TransactionalObject.RECORD_SEP, "_")
 
                 # Make sure the record exist and get a real name if record name is None
-                user = sm.authProvider.user
+                user = sm.auth_provider.user
                 record_name = test.get_record(user, record_name)
 
                 # ID of the field
@@ -111,7 +111,7 @@ with StageModule(__name__) as sm:
                 return ID
 
             def propagate_samples(name, syssamples=get_syssamples()):
-                user = sm.authProvider.user
+                user = sm.auth_provider.user
                 record_name = test.get_record(user, name)
 
                 # ID of the field
@@ -126,7 +126,7 @@ with StageModule(__name__) as sm:
 
             def prepare_new_record(name=None):
                 # Record new record for current step and current user
-                user = sm.authProvider.user
+                user = sm.auth_provider.user
                 test.create_new_record(user, name)
                 return name
 
@@ -168,7 +168,7 @@ with StageModule(__name__) as sm:
         """
         stage = sm.current_stage
         test = TestManager().get(stage.name)
-        user = sm.authProvider.user
+        user = sm.auth_provider.user
         skip_after_n_step = stage.get("skip_after_n_step")
 
         # Log the request form for debugging purposes
