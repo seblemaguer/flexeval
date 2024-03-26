@@ -1,6 +1,5 @@
-# coding: utf8
-
-from typing import Dict, List, Optional, Any, Union
+from typing import Any
+from typing_extensions import override
 
 # Global/system
 import os
@@ -34,25 +33,22 @@ from flexeval.database import ForeignKey, ModelFactory, db
 from flexeval.mods.test.model import TestModel, SampleModel
 
 # Current package
-from .System import SystemManager
+from .System import SystemManager, System
 from .selection_strategy import LeastSeenSelection
-from .selection_strategy import LatinSquareSystemLeastSeenSampleSelection  # noqa: F401
-from .selection_strategy import RandomizedBalancedSelection  # noqa: F401
-from .selection_strategy import LeastSeenPerUserSelection  # noqa: F401
-from .selection_strategy import LeastSeenCombinationSelection  # noqa: F401
 
 
-TEST_CONFIGURATION_BASENAME = "tests"
-DEFAULT_CSV_DELIMITER = ","
+TEST_CONFIGURATION_BASENAME: str = "tests"
+DEFAULT_CSV_DELIMITER: str = ","
 
 
 class SampleModelTemplate:
     def __init__(self, id, system_name, systemsample):
-        self._system = SystemManager().get(systemsample.system)
+        self._logger: logging.Logger = logging.getLogger(self.__class__.__name__)
+        self._system: System = SystemManager().get(systemsample.system)
         self._systemsample = systemsample
         self.system_name = system_name
         self._ID = id
-        self._cache = dict()
+        self._cache: dict[Path, tuple[str, str]] = dict()
         self._cached = True  # TODO: add as a configuration parameter
 
         if self._cached:
@@ -64,9 +60,9 @@ class SampleModelTemplate:
     def ID(self):
         return self._ID
 
-    def get(self, name=None, num=None):
+    def get(self, name: str | None = None, num: int | None = None):
         if num is not None:
-            name = self._system.cols_name[num]
+            name = self._system._col_names[num]
 
         if name is None:
             return (None, None)
@@ -110,40 +106,18 @@ class SampleModelTemplate:
 
             return (value, mime)
 
-    def __str__(self):
-        return self.ID
+    @override
+    def __str__(self) -> str:
+        return str(self.ID)
 
 
 class TestError(Exception):
-    def __init__(self, message):
+    def __init__(self, message: str):
         self.message = message
 
 
 class MalformationError(TestError):
     pass
-
-
-class TestManager(metaclass=AppSingleton):
-    def __init__(self):
-        self.register = {}
-        with open(
-            os.path.join(
-                current_app.config["FLEXEVAL_INSTANCE_DIR"],
-                "%s.yaml" % TEST_CONFIGURATION_BASENAME,
-            ),
-            encoding="utf-8",
-        ) as config_stream:
-            self.config = load(config_stream, Loader=Loader)
-
-    def get(self, name):
-        if not (name in self.register):
-            try:
-                config = self.config[name]
-            except Exception as e:
-                raise MalformationError(f"Test {name} not found in {TEST_CONFIGURATION_BASENAME}.yaml: {e}")
-            self.register[name] = Test(name, config)
-
-        return self.register[name]
 
 
 class TransactionalObject:
@@ -159,7 +133,7 @@ class TransactionalObject:
 
     """
 
-    RECORD_SEP = ":"
+    RECORD_SEP: str = ":"
 
     def __init__(self, timeout_seconds: int = 3600):
         """Initialisation
@@ -203,7 +177,7 @@ class TransactionalObject:
         """
         self._transactions[user.id] = {"date": datetime.now()}
 
-    def get_transactions(self) -> List[Dict[str, Any]]:
+    def get_transactions(self) -> list[dict[str, Any]]:
         """Retrieve the list of available transactions
 
         Available transactions are the ones which haven't been
@@ -211,7 +185,7 @@ class TransactionalObject:
 
         Returns
         -------
-        List[Dict[str, Any]]
+        list[dict[str, Any]]
             The list of transactions
         """
 
@@ -249,7 +223,7 @@ class TransactionalObject:
         """
         return user.id in self._transactions
 
-    def get_transaction(self, user: UserModel) -> Dict[str, Any]:
+    def get_transaction(self, user: UserModel) -> dict[str, Any]:
         """Retrieve the transactions of a given user
 
         Should be called after checking if the user has some transactions to be processed
@@ -266,7 +240,7 @@ class TransactionalObject:
         """
         return self._transactions[user.id]
 
-    def get_or_create_transaction(self, user: UserModel) -> Dict[str, Any]:
+    def get_or_create_transaction(self, user: UserModel) -> dict[str, Any]:
         if not self.has_transaction(user):
             self.create_transaction(user)
         return self.get_transaction(user)
@@ -290,7 +264,7 @@ class TransactionalObject:
         # Returns the ID of the row
         return ID
 
-    def create_new_record(self, user: UserModel, name: Optional[str] = None) -> str:
+    def create_new_record(self, user: UserModel, name: str | None = None) -> str:
         # Dictionary "record name" -> list of field names
         user_transaction = self.get_or_create_transaction(user)
         all_records = user_transaction.setdefault("records", OrderedDict())
@@ -302,7 +276,7 @@ class TransactionalObject:
         name = name.replace(TransactionalObject.RECORD_SEP, "_")
         return name
 
-    def add_field_to_record(self, user: UserModel, field_name: str, record_name: Optional[str] = None) -> str:
+    def add_field_to_record(self, user: UserModel, field_name: str, record_name: str | None = None) -> str:
         # Retrieve the record (create it if necessary)
         user_transaction = self.get_or_create_transaction(user)
         all_records = user_transaction.setdefault("records", dict())
@@ -324,7 +298,7 @@ class TransactionalObject:
         all_records = user_transaction.setdefault("records", OrderedDict())
         return all_records
 
-    def get_record(self, user: UserModel, name: Optional[str] = None) -> Union[str | Any]:
+    def get_record(self, user: UserModel, name: str | None = None) -> str | Any:
         all_records = self.get_all_records(user)
         if name in all_records:
             return name
@@ -445,7 +419,7 @@ class Test(TransactionalObject):
 
     def get_step(
         self, id_step: int, user: UserModel, nb_systems: int, is_intro_step: bool = False
-    ) -> Dict[str, SampleModelTemplate]:
+    ) -> dict[str, SampleModelTemplate]:
         """Get the samples needed for one step of the test
 
         Parameters
@@ -493,3 +467,26 @@ class Test(TransactionalObject):
 
         # Validate everything
         return choice_for_systems
+
+
+class TestManager(metaclass=AppSingleton):
+    def __init__(self):
+        self._register: dict[str, Test] = dict()
+        with open(
+            os.path.join(
+                current_app.config["FLEXEVAL_INSTANCE_DIR"],
+                "%s.yaml" % TEST_CONFIGURATION_BASENAME,
+            ),
+            encoding="utf-8",
+        ) as config_stream:
+            self.config = load(config_stream, Loader=Loader)
+
+    def get(self, name: str) -> Test:
+        if not (name in self._register):
+            try:
+                config = self.config[name]
+            except Exception as e:
+                raise MalformationError(f"Test {name} not found in {TEST_CONFIGURATION_BASENAME}.yaml: {e}")
+            self._register[name] = Test(name, config)
+
+        return self._register[name]

@@ -3,10 +3,10 @@
 
 
 from .error import error_handler
-from .Config import Config
+from .config import Config
 from .module import Module
-
-from .Stage import StageModule, Stage
+from .core import CampaignInstance, campaign_instance
+from .stage import StageModule, Stage
 from .admin import AdminModule
 
 from .providers.auth import AuthProvider, UserModel, VirtualAuthProvider
@@ -21,4 +21,6 @@ __all__ = [
     "UserModel",
     "VirtualAuthProvider",
     "error_handler",
+    "CampaignInstance",
+    "campaign_instance",
 ]

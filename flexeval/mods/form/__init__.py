@@ -9,6 +9,7 @@ import threading
 from flask import current_app, request
 
 from flexeval.core import StageModule
+from flexeval.core import campaign_instance
 from flexeval.database import ModelFactory, db
 from flexeval.utils import redirect
 
@@ -18,8 +19,9 @@ sem_form = threading.Semaphore()
 
 
 class FormError(Exception):
-    def __init__(self, message):
-        self.message = message
+    def __init__(self, message: str):
+        super().__init__()
+        self.message: str = message
 
 
 class FileNotFound(FormError):
@@ -30,7 +32,7 @@ class MalformationError(FormError):
     pass
 
 
-with StageModule(__name__) as sm:
+with campaign_instance.register_stage_module(__name__) as sm:
 
     @sm.route("/", methods=["GET"])
     @sm.valid_connection_required

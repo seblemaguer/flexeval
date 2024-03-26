@@ -6,15 +6,16 @@ import string
 import random
 import shutil
 
+from werkzeug import Response
 from flask import current_app, send_file
 from sqlalchemy import inspect
 import pandas as pd
 
-from flexeval.core import AdminModule
+from flexeval.core import campaign_instance
 from flexeval.utils import safe_make_dir
 from flexeval.database import db
 
-with AdminModule(__name__) as am:
+with campaign_instance.register_admin_module(__name__) as am:
     safe_make_dir(current_app.config["FLEXEVAL_INSTANCE_TMP_DIR"] + "/export_bdd")
 
     # Routes
@@ -29,7 +30,7 @@ with AdminModule(__name__) as am:
         return send_file(current_app.config["SQLALCHEMY_FILE"])
 
     @am.after_request
-    def set_response_headers(response):
+    def set_response_headers(response: Response) -> Response:
         response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
         response.headers["Pragma"] = "no-cache"
         response.headers["Expires"] = "0"
@@ -38,11 +39,11 @@ with AdminModule(__name__) as am:
     @am.route("/flexeval.zip")
     @am.valid_connection_required
     def csv():
-        repository_name = "".join((random.choice(string.ascii_lowercase) for i in range(15)))
-        root_base_file = current_app.config["FLEXEVAL_INSTANCE_TMP_DIR"] + "/export_bdd/" + repository_name
+        repository_name = "".join((random.choice(string.ascii_lowercase) for _ in range(15)))
+        root_base_file = current_app.config["FLEXEVAL_INSTANCE_TMP_DIR"] + f"/export_bdd/{repository_name}"
 
         # Connect to the database
-        safe_make_dir(root_base_file + ".bdd")
+        _ = safe_make_dir(root_base_file + ".bdd")
 
         inspection = inspect(db.engine)
         for name_table in inspection.get_table_names():

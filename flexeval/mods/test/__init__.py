@@ -1,9 +1,11 @@
 # coding: utf8
 import random
+
+from werkzeug import Response
 from flask import request, abort
 
 # Flexeval
-from flexeval.core import StageModule
+from flexeval.core import campaign_instance
 from flexeval.utils import redirect
 from flexeval.database import db, commit_all
 
@@ -20,7 +22,7 @@ class MalformationError(TestsAlternateError):
         self.message = message
 
 
-with StageModule(__name__) as sm:
+with campaign_instance.register_stage_module(__name__) as sm:
 
     @sm.route("/", methods=["GET"])
     @sm.valid_connection_required
@@ -44,16 +46,14 @@ with StageModule(__name__) as sm:
 
         # Load steps information
         max_steps = int(stage.get("nb_steps"))
-        nb_step_intro = stage.get("nb_step_intro")
-        if nb_step_intro is None:
-            nb_step_intro = 0
+        nb_step_intro: int = int(stage.get("nb_step_intro"))
 
         # Load systems per step information
         nb_systems_per_step = 1
         if stage.has("nb_systems_per_step"):
             nb_systems_per_step = int(stage.get("nb_systems_per_step"))
             if nb_systems_per_step <= 0:
-                nb_systems_per_step = len(test.systems.keys())
+                nb_systems_per_step = len(list(test.systems.keys()))
 
         # Load transaction information
         transaction_timeout_seconds = stage.get("transaction_timeout_seconds")
@@ -65,8 +65,6 @@ with StageModule(__name__) as sm:
 
         # Get the current step
         cur_step = test.nb_steps_complete_by(user)
-        if cur_step is None:
-            cur_step = 0
 
         # Find out the current step is an introduction or not
         intro_step = False
@@ -93,7 +91,7 @@ with StageModule(__name__) as sm:
 
                 return systems
 
-            def save_field_name(name, syssamples=get_syssamples(), record_name=None):
+            def save_field_name(name: str, syssamples=get_syssamples(), record_name: str | None = None):
                 name = name.replace(TransactionalObject.RECORD_SEP, "_")
 
                 # Make sure the record exist and get a real name if record name is None
@@ -106,28 +104,14 @@ with StageModule(__name__) as sm:
                 )
 
                 # Associate field to record
-                test.add_field_to_record(user, ID, record_name)
+                _ = test.add_field_to_record(user, ID, record_name)
 
                 return ID
 
-            def propagate_samples(name, syssamples=get_syssamples()):
-                user = sm.auth_provider.user
-                record_name = test.get_record(user, name)
-
-                # ID of the field
-                ID = TransactionalObject.RECORD_SEP.join(
-                    ["save", record_name, name] + [syssample.ID for syssample in syssamples]
-                )
-
-                # Associate field to record
-                test.add_field_to_record(user, ID, record_name)
-
-                return ID
-
-            def prepare_new_record(name=None):
+            def prepare_new_record(name: str):
                 # Record new record for current step and current user
                 user = sm.auth_provider.user
-                test.create_new_record(user, name)
+                _ = test.create_new_record(user, name)
                 return name
 
             sm.logger.debug(f"Sample selected for this step is {get_syssamples()[0]}")
@@ -150,11 +134,15 @@ with StageModule(__name__) as sm:
                 new_record=prepare_new_record,
             )
         else:
-            return redirect(stage.local_url_next)
+            next_urls: dict[str, str] = stage.next_local_urls
+            if len(next_urls.keys()) > 1:
+                raise Exception("")
+            stage_name = list(next_urls.keys())[0]
+            return redirect(next_urls[stage_name])
 
     @sm.route("/save", methods=["POST"])
     @sm.valid_connection_required
-    def save():
+    def save() -> Response:
         """Saving routine of the test
 
         This method is called after the submission of the form
@@ -177,14 +165,8 @@ with StageModule(__name__) as sm:
         sm.logger.debug("#### <END>The request form ####")
 
         # Initialize the number of intro steps
-        nb_step_intro = stage.get("nb_step_intro")
-        if nb_step_intro is None:
-            nb_step_intro = 0
-
-        # Get the current step
-        cur_step = test.nb_steps_complete_by(user)
-        if cur_step is None:
-            cur_step = 0
+        nb_step_intro = int(stage.get("nb_step_intro"))
+        cur_step: int = test.nb_steps_complete_by(user)
 
         # Validate is the current step is an introduction step
         intro_step = False
@@ -197,7 +179,7 @@ with StageModule(__name__) as sm:
 
         # Save
         all_records = test.get_all_records(user)
-        for record_name, all_field_names in all_records.items():
+        for _, all_field_names in all_records.items():
             resp = test.model.create(user_id=user.id, intro=intro_step, step_idx=cur_step + 1, commit=False)
             try:
                 # Save presented samples
@@ -263,6 +245,10 @@ with StageModule(__name__) as sm:
 
         if skip_after_n_step is not None:
             if (cur_step + 1) % skip_after_n_step == 0:
-                return redirect(stage.local_url_next)
+                next_urls: dict[str, str] = stage.next_local_urls
+                if len(next_urls.keys()) > 1:
+                    raise Exception("")
+                stage_name = list(next_urls.keys())[0]
+                return redirect(next_urls[stage_name])
 
         return redirect(sm.url_for(sm.get_endpoint_for_local_rule("/")))

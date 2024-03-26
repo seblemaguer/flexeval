@@ -5,7 +5,8 @@ import shutil
 from pathlib import Path
 
 # Flask related
-from flask import current_app, Response
+from werkzeug import Response
+from flask import current_app
 from flask import redirect as flask_redirect
 
 
@@ -127,7 +128,7 @@ def redirect(local_url: str) -> Response:
     Response
         the flask Response object which if called redirects the client to the target location
     """
-    return flask_redirect(make_global_url(local_url))  # type: ignore
+    return flask_redirect(make_global_url(local_url))
 
 
 class AppSingleton(type):

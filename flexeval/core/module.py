@@ -1,8 +1,6 @@
-# coding: utf8
-# license : CeCILL-C
-
 # Python
 from typing import Any, Callable, ParamSpec
+from types import TracebackType
 from typing_extensions import override
 import inspect
 import abc
@@ -18,7 +16,6 @@ from flexeval.core.providers.content import AssetsProvider
 from flexeval.utils import make_global_url, make_absolute_path
 from flexeval.database import Model
 
-from .Config import Config
 from .providers import provider_factory, Provider, TemplateProvider
 from .providers.auth import AuthProvider, UserModel, VirtualAuthProvider
 
@@ -115,16 +112,26 @@ class Module(Blueprint, abc.ABC):
         self._logger = logging.getLogger(
             f"{self.__class__.__name__} ({namespace}{Module.NAMESPACE_SEPARATOR}{subname})"
         )
-
-        self._namespace = namespace.split(".")
+        self._config: dict[str, Any] = dict()
+        self._namespace = namespace  # .split(".")
         self._subname = subname
-        self.mod_rep = self._namespace[2]
+        self.mod_rep = self._namespace  # [2]
         self._checker_handlers: dict[str, Callable[[UserModel | None], bool]] = dict()
 
         super().__init__(self.__class__.name_type + Module.NAMESPACE_SEPARATOR + self.get_mod_name(), namespace)
 
         if not (provider_factory.exists("auth_mod_" + self.__class__.name_type)):
             self.__class__.set_auth_provider(VirtualAuthProvider)
+
+    def set_config(self, data: dict[str, Any]):
+        self._config = data
+
+    def update_config(self, data: dict[str, Any]):
+        for key, val in data.items():
+            self._config[key] = val
+
+    def get_config(self) -> dict[str, Any] | None:
+        return self._config
 
     def connect_checker_handler(self, name: str, handler: Callable[[UserModel | None], bool]):
         """Add a connection checking handler
@@ -137,7 +144,6 @@ class Module(Blueprint, abc.ABC):
             The handler to validate/unvalidate the condition necessary
             for the connection
         """
-
         self._checker_handlers[name] = handler
 
     def disconnect_checker_handler(self, name: str):
@@ -149,11 +155,10 @@ class Module(Blueprint, abc.ABC):
             The name of the condition to remove
 
         """
-
         _ = self._checker_handlers.pop(name, None)
 
     @abc.abstractmethod
-    def url_for(self, end_point: str, **kwargs) -> str:  # type: ignore
+    def url_for(self, end_point: str, **kwargs: Any) -> str:
         """Generates the URL for the module
 
         This is an abstract method here
@@ -178,7 +183,7 @@ class Module(Blueprint, abc.ABC):
             template_provider.register(self.mod_rep)
         return self
 
-    def __exit__(self, *args):  # type: ignore
+    def __exit__(self, exctype: type[BaseException] | None, excinst: BaseException | None, exctb: TracebackType | None):
         """This mainly consists of registering the blueprint
 
         Raises
@@ -430,7 +435,7 @@ class Module(Blueprint, abc.ABC):
 
         args["module_class"] = self.__class__.__name__
 
-        variables.update(Config().data()["variables"])
+        variables.update(self._config["variables"])
 
         def _read_file(filename: str) -> str:
             with open(make_absolute_path(filename)) as f:

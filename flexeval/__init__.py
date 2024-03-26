@@ -2,7 +2,7 @@
 # license : CeCILL-C
 
 # Python
-import os
+import pathlib
 import random
 import string
 import datetime
@@ -13,13 +13,18 @@ from flask import Flask
 
 # FlexEval
 from .utils import safe_make_dir
-from .core import Config, error
+from .core import error, campaign_instance
+from .core import Config
 from .core.providers import TemplateProvider, AssetsProvider, provider_factory
 from .database import db
 from .extensions import session_manager
 
+INSTANCE_CONFIGURATION_BASENAME: str = "structure.yaml"
 
-def create_app(instance_path: str, instance_url: str, debug: bool = False, log_level: int = logging.INFO) -> Flask:
+
+def create_app(
+    instance_entrypoint: pathlib.Path, instance_url: str, debug: bool = False, log_level: int = logging.INFO
+) -> Flask:
     """Create the Flask Application
 
     Parameters
@@ -39,6 +44,8 @@ def create_app(instance_path: str, instance_url: str, debug: bool = False, log_l
         The created Flask application associated to the instance
     """
 
+    instance_dir: pathlib.Path = instance_entrypoint.parent.resolve()
+
     # Create Flask application
     app: Flask = Flask(__name__, template_folder="", static_url_path=None)
 
@@ -47,10 +54,10 @@ def create_app(instance_path: str, instance_url: str, debug: bool = False, log_l
     log.setLevel(log_level)
 
     # Config FLEXEVAL
-    app.config.setdefault("FLEXEVAL_DIR", os.path.dirname(os.path.abspath(__file__)))
-    app.config.setdefault("FLEXEVAL_INSTANCE_DIR", instance_path)
+    app.config.setdefault("FLEXEVAL_DIR", str(pathlib.Path(__file__).parent))
+    app.config.setdefault("FLEXEVAL_INSTANCE_DIR", str(instance_dir))
     app.config.setdefault("FLEXEVAL_INSTANCE_URL", instance_url)
-    app.config.setdefault("FLEXEVAL_INSTANCE_TMP_DIR", safe_make_dir(instance_path + "/.tmp"))
+    app.config.setdefault("FLEXEVAL_INSTANCE_TMP_DIR", safe_make_dir(str(instance_dir / ".tmp")))
 
     # Config Session
     app.config.setdefault("SESSION_TYPE", "filesystem")
@@ -58,10 +65,10 @@ def create_app(instance_path: str, instance_url: str, debug: bool = False, log_l
     app.config.setdefault(
         "SECRET_KEY", "".join((random.choice(string.ascii_lowercase) for _ in range(20))).encode("ascii")
     )
-    app.config.setdefault("SESSION_FILE_DIR", safe_make_dir(instance_path + "/.tmp/.sessions"))
+    app.config.setdefault("SESSION_FILE_DIR", safe_make_dir(str(instance_dir / ".tmp/.sessions")))
 
     # Config SqlAlchemy
-    app.config.setdefault("SQLALCHEMY_FILE", instance_path + "/flexeval.db")
+    app.config.setdefault("SQLALCHEMY_FILE", str(instance_dir / "flexeval.db"))
     app.config.setdefault("SQLALCHEMY_DATABASE_URI", "sqlite:///" + app.config["SQLALCHEMY_FILE"])
     app.config.setdefault("SQLALCHEMY_TRACK_MODIFICATIONS", False)
 
@@ -80,12 +87,13 @@ def create_app(instance_path: str, instance_url: str, debug: bool = False, log_l
         )
 
         # Config app based on structure.json
-        _ = Config()
+        config = Config(instance_entrypoint)
+        campaign_instance.load_config(config)
 
         # Module loaded => create the database
         db.create_all()
 
         # Error management
-        error.error_handler = error.ErrorHandler(app)
+        error.error_handler = error.ErrorHandler(app, config)  # type: ignore
 
     return app

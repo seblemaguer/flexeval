@@ -14,7 +14,6 @@ from flexeval.utils import make_global_url
 
 from .providers import provider_factory, TemplateProvider, AssetsProvider
 from .providers.auth import VirtualAuthProvider
-from .Config import Config
 
 P = ParamSpec("P")
 
@@ -22,7 +21,7 @@ P = ParamSpec("P")
 class ErrorHandler:
     """Class which defines how errors are handled."""
 
-    def __init__(self, app: Flask):
+    def __init__(self, app: Flask, config: dict[str, Any]):
         """Constructor
 
         Parameters
@@ -31,6 +30,7 @@ class ErrorHandler:
             The current object
         """
         self._logger = logging.getLogger(self.__class__.__name__)
+        self._config: dict[str, Any] = config
 
         # Define the default handler to be the method "error"
         app.register_error_handler(Exception, self.error)
@@ -50,16 +50,20 @@ class ErrorHandler:
         """
 
         # Deal with critical server errors
-        code = 500
-        if not (isinstance(e, HTTPException)):
-            self._logger.critical('Error "%s"' % str(e))
-            self._logger.critical("Traceback: ")
-            for eline in traceback.format_exc().splitlines():
-                self._logger.critical(eline)
-        else:
-            code: int | None = e.code
+        code: int = 500
+        error_stacktrace = ""
+        for eline in traceback.format_exc().splitlines():
+            error_stacktrace += f"{eline}\n"
 
-        variables: dict[str, Any] = Config().data()["variables"]  # type: ignore
+        if (isinstance(e, HTTPException)) and (e.code is not None):
+            code = e.code
+        self._logger.critical('Error "%s"' % str(e))
+        self._logger.critical("Traceback: ")
+        self._logger.critical(error_stacktrace)
+
+        variables: dict[str, Any] = self._config["variables"]
+        variables["error_message"] = str(e)
+        variables["error_stacktrace"] = error_stacktrace
 
         def _get_variable(key: str, *args: P.args, **kwargs: P.kwargs) -> Any:
             """Helper to replace a variable value in the template

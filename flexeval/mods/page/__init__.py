@@ -1,6 +1,6 @@
-from flexeval.core import StageModule
+from flexeval.core import campaign_instance
 
-with StageModule(__name__, subname="visitor") as sm:
+with campaign_instance.register_stage_module(__name__, subname="visitor") as sm:
 
     @sm.route("/", methods=["GET"])
     def main_visitor():
@@ -21,7 +21,7 @@ with StageModule(__name__, subname="visitor") as sm:
             return sm.render_template(template=stage.template)
 
 
-with StageModule(__name__, subname="user") as sm_user:
+with campaign_instance.register_stage_module(__name__, subname="user") as sm_user:
 
     @sm_user.route("/", methods=["GET"])
     @sm_user.valid_connection_required

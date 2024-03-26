@@ -1,11 +1,7 @@
 #!/usr/bin/env python3
-# coding: utf8
-# license : CeCILL-C
 
 # Python
-from typing import Tuple
-
-# Arguments
+import pathlib
 import argparse
 
 # Messaging/logging
@@ -14,7 +10,6 @@ from logging.config import dictConfig
 
 # Globbing
 import glob
-import os
 
 # FlexEval entry points
 from gunicorn.app.base import BaseApplication
@@ -46,7 +41,7 @@ class GunicornApp(BaseApplication):
 ###############################################################################
 # Functions
 ###############################################################################
-def configure_logger(args) -> Tuple[logging.Logger, int]:
+def configure_logger(args) -> tuple[logging.Logger, int]:
     """Setup the global logging configurations and instanciate a specific logger for the current script
 
     Parameters
@@ -115,14 +110,14 @@ def define_argument_parser() -> argparse.ArgumentParser:
 
     # On récup les args liés à l'instance a créer
     parser = argparse.ArgumentParser(description="FlexEval")
-    parser.add_argument("instance", metavar="INSTANCE_DIRECTORY", type=str, help="Instance's directory")
+    _ = parser.add_argument("instance_entryfile", metavar="INSTANCE_DIRECTORY", type=str, help="Instance's directory")
 
     # Connection options
-    parser.add_argument("-d", "--debug", action="store_true", help="Start the server in debugging mode")
-    parser.add_argument("-i", "--ip", type=str, default="127.0.0.1", help="IP's server")
-    parser.add_argument("-p", "--port", type=int, default="8080", help="port")
-    parser.add_argument("-t", "--threaded", action="store_true", default=False, help="Enable threads.")
-    parser.add_argument(
+    _ = parser.add_argument("-d", "--debug", action="store_true", help="Start the server in debugging mode")
+    _ = parser.add_argument("-i", "--ip", type=str, default="127.0.0.1", help="IP's server")
+    _ = parser.add_argument("-p", "--port", type=int, default="8080", help="port")
+    _ = parser.add_argument("-t", "--threaded", action="store_true", default=False, help="Enable threads.")
+    _ = parser.add_argument(
         "-u",
         "--url",
         type=str,
@@ -130,8 +125,8 @@ def define_argument_parser() -> argparse.ArgumentParser:
     )
 
     # Logging options
-    parser.add_argument("-l", "--log_file", default=None, help="Logger file")
-    parser.add_argument("-v", "--verbosity", action="count", default=0, help="increase output verbosity")
+    _ = parser.add_argument("-l", "--log_file", default=None, help="Logger file")
+    _ = parser.add_argument("-v", "--verbosity", action="count", default=0, help="increase output verbosity")
 
     # Return parser
     return parser
@@ -147,21 +142,22 @@ if __name__ == "__main__":
     logger, log_level = configure_logger(args)
 
     # Get the instance absolute path
-    instance_abs_path = os.path.abspath(args.instance)
+    instance_entrypoint: pathlib.Path = pathlib.Path(args.instance_entryfile)
+    instance_dir: pathlib.Path = instance_entrypoint.parent.resolve()
 
     # List all the instance files to listen
-    all_files = glob.glob(instance_abs_path + "/**/*", recursive=True)
-    extra_files = []
+    all_files: list[str] = glob.glob(str(instance_dir / "**/*"), recursive=True)
+    extra_files: list[str] = []
     for f in all_files:
         if (f.find("/.tmp/") == -1) and (f.find("/assets/tmp_eval/") == -1) and (not f.endswith(".db")):
             extra_files.append(f)
 
     # Finally create and run app
     if args.url:
-        app = create_app(instance_abs_path, args.url, debug=args.debug, log_level=log_level)
+        app = create_app(instance_entrypoint, args.url, debug=args.debug, log_level=log_level)
     else:
         app = create_app(
-            instance_abs_path, "http://%s:%d" % (args.ip, args.port), debug=args.debug, log_level=log_level
+            instance_entrypoint, "http://%s:%d" % (args.ip, args.port), debug=args.debug, log_level=log_level
         )
 
     options = {

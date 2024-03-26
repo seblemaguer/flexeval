@@ -1,4 +1,5 @@
 # coding: utf8
+from typing import Sequence, Any
 import csv
 
 from flask import current_app
@@ -10,7 +11,7 @@ from flexeval.mods.test.model import SampleModel
 
 
 class SystemError(Exception):
-    def __init__(self, message):
+    def __init__(self, message: str):
         self.message = message
 
 
@@ -18,37 +19,26 @@ class SystemFileNotFound(SystemError):
     pass
 
 
-class SystemManager(metaclass=AppSingleton):
-    def __init__(self):
-        self.register = {}
-
-    def insert(self, name, data, delimiter=",", max_samples=-1):
-        self.register[name] = System(name, data, delimiter, max_samples)
-        return self.register[name]
-
-    def get(self, name):
-        return self.register[name]
-
-
 class System:
-    def __init__(self, name, data, delimiter=",", max_samples=-1):
+    def __init__(self, name: str, data: str, delimiter: str = ",", max_samples: int = -1):
         if name[0] == "/":
             name = name[1:]
 
         self.name = name
-        source_file = current_app.config["FLEXEVAL_INSTANCE_DIR"] + "/systems/" + data
+        source_file: str = current_app.config["FLEXEVAL_INSTANCE_DIR"] + "/systems/" + data
 
         try:
             reader = csv.DictReader(open(source_file, encoding="utf-8"), delimiter=delimiter)
         except Exception as e:
             raise SystemFileNotFound(f"{source_file} doesn't exist. Fix test.json or add the system's file: {e}")
 
-        self.cols_name = reader.fieldnames
+        assert reader.fieldnames is not None
+        self._col_names: Sequence[str] = reader.fieldnames
 
         # On crée ou réhydrate la classe SampleModel
         # Il est important de faire cela avant de créer les instances de SampleModel
         # Sinon seulement les columns définies de base dans SampleModel seront disponibles.
-        for col_name in self.cols_name:
+        for col_name in self._col_names:
             SampleModel.addColumn(col_name, db.String)
 
         if max_samples < 0:
@@ -62,7 +52,7 @@ class System:
                 vars = {"system": self.name, "line_id": line_id}
 
                 try:
-                    for col_name in self.cols_name:
+                    for col_name in self._col_names:
                         vars[col_name] = line[col_name]
 
                     SampleModel.create(commit=False, **vars)
@@ -73,5 +63,17 @@ class System:
             commit_all()
 
     @property
-    def system_samples(self):
+    def system_samples(self) -> list[Any]:
         return SampleModel.query.filter(SampleModel.system == self.name).order_by(SampleModel.line_id.asc()).all()
+
+
+class SystemManager(metaclass=AppSingleton):
+    def __init__(self):
+        self.register: dict[str, System] = {}
+
+    def insert(self, name: str, data: str, delimiter: str = ",", max_samples: int = -1):
+        self.register[name] = System(name, data, delimiter, max_samples)
+        return self.register[name]
+
+    def get(self, name: str) -> System:
+        return self.register[name]

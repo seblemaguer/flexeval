@@ -1,8 +1,10 @@
 # coding: utf8
 # license : CeCILL-C
 
+from typing import Any
 from flask import request
 
+from flexeval.core import campaign_instance
 from flexeval.core import AdminModule
 from flexeval.utils import redirect, make_global_url
 
@@ -10,7 +12,7 @@ from .provider import UniqueAuth
 
 AdminModule.set_auth_provider(UniqueAuth)
 
-with AdminModule(__name__) as am:
+with campaign_instance.register_admin_module(__name__) as am:
 
     @am.route("/", methods=["GET"])
     def main():
@@ -41,23 +43,26 @@ with AdminModule(__name__) as am:
     def panel():
         admin_modules = []
 
-        for mod in AdminModule.get_all_admin_modules():
-            if not (am.get_mod_name() == mod["mod"]):
-                title = mod["mod"]
+        for mod_name, mod in campaign_instance.get_admin_modules().items():
+            if am != mod:
+                config_mod = mod.get_config()
+                title = mod_name
                 description = ""
-                if "variables" in mod:
-                    if "subtitle" in mod["variables"]:
-                        title = mod["variables"]["subtitle"]
+                if "variables" in config_mod:
+                    if "subtitle" in config_mod["variables"]:
+                        title = config_mod["variables"]["subtitle"]
 
-                    if "subdescription" in mod["variables"]:
-                        description = mod["variables"]["subdescription"]
+                    if "subdescription" in config_mod["variables"]:
+                        description = config_mod["variables"]["subdescription"]
 
                 admin_module = {
                     "title": title,
                     "description": description,
-                    "url": make_global_url(AdminModule.get_local_url_for(mod["mod"])),
+                    "url": make_global_url("/" + mod.local_url()),
                 }
 
                 admin_modules.append(admin_module)
 
-        return am.render_template(path_template="panel.tpl", admin_modules=admin_modules)
+        variables: dict[str, Any] = dict()
+        variables["admin_modules"] = admin_modules
+        return am.render_template(path_template="panel.tpl", variables=variables)
