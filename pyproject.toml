@@ -1,68 +1,62 @@
 [build-system]
-requires = ["poetry_core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
-
-[tool.poetry]
-name = "FlexEval"
-version = "0.1"
-authors = [
-  "Sébastien Le Maguer <sebastien.lemaguer@helsinki.fi>",
+build-backend = "setuptools.build_meta"
+requires = [
+  "setuptools>=61",
 ]
+
+[project]
+name = "flexeval"
+version = "0.1"
 description = "A dynamic and flexible evaluation toolkit in python"
-readme = "README.md"
-# classifiers = [
-#   'Development Status :: 4 - Beta',
-#   # Audience
-#   'Intended Audience :: Science/Research',
-#   # Topics
-#   'Topic :: Multimedia :: Sound/Audio :: Speech',
-#   'Topic :: Scientific/Engineering :: Information Analysis',
-#   'Topic :: Scientific/Engineering :: Visualization',
-#   # Pick your license as you wish
-#   'License :: OSI Approved :: MIT License',
-#   # Python version (FIXME: fix the list of python version based on travis results)
-#   'Programming Language :: Python :: 3',
-#   'Programming Language :: Python :: 3.7',
-#   'Programming Language :: Python :: 3.8',
-#   'Programming Language :: Python :: 3.9',
-#   'Programming Language :: Python :: 3.10',
-#   'Programming Language :: Python :: 3.11',
-# ]
+readme = {file="README.md", content-type = "text/markdown"}
+authors = [
+   {name="Sébastien Le Maguer", email="sebastien.lemaguer@helsinki.fi"}
+]
+requires-python = ">=3.11"
+classifiers = [
+  'Development Status :: 4 - Beta', # Audience
+  'Intended Audience :: Science/Research', # Topics
+  'License :: OSI Approved :: MIT License',
+  "Programming Language :: Python :: 3 :: Only",
+  'Programming Language :: Python :: 3.11',
+  "Programming Language :: Python :: 3.12",
+  'Topic :: Multimedia :: Sound/Audio :: Speech', # Pick your license as you wish
+]
+dependencies = [
+  "cachelib>=0.7",
+  "click>=8.1.3",
+  "Flask>=2.1.2",
+  "Flask-Session>=0.4",
+  "Flask-SQLAlchemy>=2.5.1",
+  "gevent",
+  "greenlet>=1.1.2",
+  "gunicorn",
+  "importlib-metadata>=4.11.4",
+  "itsdangerous>=2.1.2",
+  "Jinja2>=3.1.2",
+  "MarkupSafe>=2.1.1",
+  "pandas>=2.2.1",
+  "PyYAML>=6",
+  "SQLAlchemy>=2.0.27",
+  "Werkzeug>=2.1.2",
+  "zipp>=3.8",
+]
+[project.optional-dependencies]
+dev = [
+  "pre-commit",
+]
+test = [
+  "selenium",
+]
+[project.urls]
+Homepage = "https://github.com/seblemaguer/flexeval"
+Issues = "https://github.com/seblemaguer/flexeval/issues"
+git = "https://github.com/seblemaguer/flexeval.git"
+[project.scripts]
+flexeval = "flexeval.main:main"
 
-[tool.poetry.dependencies]
-# Python
-python = ">=3.11, <3.12"
-cachelib = ">=0.7.0"
-click = ">=8.1.3"
-Flask = ">=2.1.2"
-Flask-Session = ">=0.4.0"
-Flask-SQLAlchemy = ">=2.5.1"
-greenlet = ">=1.1.2"
-importlib-metadata = ">=4.11.4"
-itsdangerous = ">=2.1.2"
-Jinja2 = ">=3.1.2"
-MarkupSafe = ">=2.1.1"
-PyYAML = ">=6.0"
-SQLAlchemy = ">=2.0.27"
-pandas = ">=2.2.1"
-Werkzeug = ">=2.1.2"
-zipp = ">=3.8.0"
-gevent = "*"
-gunicorn ="*"
-
-# Dev
-pre-commit = { version = "*", optional = true }
-
-# [tool.poetry.scripts]
-# spiny = "spiny.main:main"
-
-# [tool.poetry.extras]
-# plugins = ["praat-parselmouth", "wavelet_prosody_toolkit"]
-# dev = ["pre-commit"]
-
-# [project.urls]
-# "Homepage" = "https://github.com/sigmedia/spiny-toolkit"
-# "Bug Tracker" = "https://github.com/sigmedia/spiny-toolkit/issues"
+[tool.setuptools.package-data]
+flexeval = ["**/assets/**/*.*", "**/templates/**/*.*"]  # FIXME: this is a bit hardcore here
 
 [tool.black]
 line-length = 120
@@ -83,6 +77,4 @@ exclude = '''
 max-line-length = 120
 
 [tool.basedpyright]
-typeCheckingMode = "all"
-reportAny = false
-reportMissingTypeStubs = false
+typeCheckingMode = "standard"
