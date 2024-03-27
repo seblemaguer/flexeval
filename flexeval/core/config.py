@@ -42,8 +42,9 @@ class Config:
             return []
 
         list_modules: list[str] = []
-        for mods in self._data["mods"]:
-            list_modules.append(mods["mod"])
+        for mod in self._data["mods"].keys():
+            list_modules.append(mod)
+
         return list_modules
 
     def list_admin_modules(self) -> list[str]:
