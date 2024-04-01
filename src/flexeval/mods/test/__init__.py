@@ -114,7 +114,7 @@ with campaign_instance.register_stage_module(__name__) as sm:
                 _ = test.create_new_record(user, name)
                 return name
 
-            sm.logger.debug(f"Sample selected for this step is {get_syssamples()[0]}")
+            sm.logger.debug(f"Sample selected for this step are {get_syssamples()}")
 
             # On change les valeurs max_steps et steps pour l'affichage sur la page web
             if intro_step:
