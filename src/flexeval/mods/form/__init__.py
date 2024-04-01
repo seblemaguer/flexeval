@@ -8,7 +8,6 @@ import threading
 
 from flask import current_app, request
 
-from flexeval.core import StageModule
 from flexeval.core import campaign_instance
 from flexeval.database import ModelFactory, db
 from flexeval.utils import redirect
@@ -87,7 +86,7 @@ with campaign_instance.register_stage_module(__name__) as sm:
         return redirect(stage.local_url_next)
 
 
-with StageModule(__name__, subname="autogen") as sm_autogen:
+with campaign_instance.register_stage_module(__name__, subname="autogen") as sm_autogen:
 
     @sm_autogen.route("/", methods=["GET"])
     @sm_autogen.valid_connection_required
