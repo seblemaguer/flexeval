@@ -42,45 +42,46 @@
 <form action="./register" method="post" class="form-example justified">
     <h3>Start or resume the test</h3>
 
-    <input type="hidden" id="prolific_id" name="prolific_id" value="">
-    <input type="hidden" id="study_id" name="study_id" value="">
-    <input type="hidden" id="session_id" name="session_id" value="">
+    <input type="hidden" id="PROLIFIC_ID" name="PROLIFIC_ID" value="">
+    <input type="hidden" id="STUDY_ID" name="STUDY_ID" value="">
+    <input type="hidden" id="SESSION_ID" name="SESSION_ID" value="">
 
     <br />
     <center>
-        <button type="submit" id="submit" class="btn btn-primary">Start/Resume the test</button>
+      <button type="submit" id="submit" class="btn btn-primary">Start/Resume the test</button>
     </center>
-</form>
+  </form>
 
 
-<div class="overlay" id="overlay">
+  <div class="overlay" id="overlay">
     <div class="overlay-content">
-        <div class="overlay-title">⚠️ There is a problem ⚠️</div>
-        <p>You can't participate to this evaluation if you haven't been recruited by Prolific.</p>
+      <div class="overlay-title">⚠️ There is a problem ⚠️</div>
+      <p>You can't participate to this evaluation if you haven't been recruited by Prolific.</p>
     </div>
-</div>
+  </div>
 
 
-<script>
+  <script>
     function showOverlay() {
-        overlay.style.display = "block";
-        document.body.style.pointerEvents = "none";
+      overlay.style.display = "block";
+      document.body.style.pointerEvents = "none";
     }
+
     window.onload = function() {
-       // Extract the variable from the URL
-       var urlParams = new URLSearchParams(window.location.search);
-       var prolific_id = urlParams.get('PROLIFIC_ID');
-       var study_id = urlParams.get('STUDY_ID');
-       var session_id = urlParams.get('SESSION_ID');
+      // Extract the variable from the URL
+      var urlParams = new URLSearchParams(window.location.search);
+      var prolific_id = urlParams.get('PROLIFIC_ID');
+      var study_id = urlParams.get('STUDY_ID');
+      var session_id = urlParams.get('SESSION_ID');
 
-        if ((!study_id) || (!prolific_id) || (!session_id)) {
-            showOverlay();
-        }
+      if ((!study_id) || (!prolific_id) || (!session_id)) {
+        showOverlay();
+      }
 
-       // Populate the hidden input field with the extracted variable value
-       document.getElementById('prolific_id').value = prolific_id;
-       document.getElementById('study_id').value = study_id;
-       document.getElementById('session_id').value = session_id;
-     }
+      // Populate the hidden input field with the extracted variable value
+      document.getElementById('PROLIFIC_ID').value = prolific_id;
+      document.getElementById('STUDY_ID').value = study_id;
+      document.getElementById('SESSION_ID').value = session_id;
+    }
   </script>
 {% endblock %}

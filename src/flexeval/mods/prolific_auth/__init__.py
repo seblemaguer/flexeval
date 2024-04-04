@@ -31,10 +31,10 @@ with campaign_instance.register_stage_module(__name__) as sm:
     @sm.route("/register", methods=["POST"])
     def register():
         # Authenticate
-        user_id: str = request.form["USER_ID"]
+        prolific_id: str = request.form["PROLIFIC_ID"]
         study_id: str = request.form["STUDY_ID"]
         session_id: str = request.form["SESSION_ID"]
-        sm.auth_provider.connect(user_id, study_id, session_id)
+        sm.auth_provider.connect(prolific_id, study_id, session_id)
 
         # Move to the next stage
         stage = sm.current_stage
