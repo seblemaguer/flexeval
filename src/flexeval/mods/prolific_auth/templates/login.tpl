@@ -42,7 +42,7 @@
 <form action="./register" method="post" class="form-example justified">
     <h3>Start or resume the test</h3>
 
-    <input type="hidden" id="PROLIFIC_ID" name="PROLIFIC_ID" value="">
+    <input type="hidden" id="PROLIFIC_PID" name="PROLIFIC_PID" value="">
     <input type="hidden" id="STUDY_ID" name="STUDY_ID" value="">
     <input type="hidden" id="SESSION_ID" name="SESSION_ID" value="">
 
@@ -70,16 +70,16 @@
     window.onload = function() {
       // Extract the variable from the URL
       var urlParams = new URLSearchParams(window.location.search);
-      var prolific_id = urlParams.get('PROLIFIC_ID');
+      var prolific_pid = urlParams.get('PROLIFIC_PID');
       var study_id = urlParams.get('STUDY_ID');
       var session_id = urlParams.get('SESSION_ID');
 
-      if ((!study_id) || (!prolific_id) || (!session_id)) {
+      if ((!study_id) || (!prolific_pid) || (!session_id)) {
         showOverlay();
       }
 
       // Populate the hidden input field with the extracted variable value
-      document.getElementById('PROLIFIC_ID').value = prolific_id;
+      document.getElementById('PROLIFIC_PID').value = prolific_pid;
       document.getElementById('STUDY_ID').value = study_id;
       document.getElementById('SESSION_ID').value = session_id;
     }
