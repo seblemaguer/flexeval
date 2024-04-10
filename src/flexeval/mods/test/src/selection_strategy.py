@@ -291,9 +291,7 @@ class LeastSeenSampleAlignedSelection(LeastSeenSelection):
         self._logger.debug(f"Select samples for user {user_id}")
 
         min_value = min(self._sample_counters)
-        print(self._sample_counters)
         min_indices = [i for i, value in enumerate(self._sample_counters) if value == min_value]
-        print(min_indices)
         random.shuffle(min_indices)
         min_index = min_indices[0]
         self._sample_counters[min_index] += 1
