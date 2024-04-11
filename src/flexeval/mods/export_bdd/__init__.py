@@ -16,7 +16,7 @@ from flexeval.utils import safe_make_dir
 from flexeval.database import db
 
 with campaign_instance.register_admin_module(__name__) as am:
-    safe_make_dir(current_app.config["FLEXEVAL_INSTANCE_TMP_DIR"] + "/export_bdd")
+    safe_make_dir(current_app.config["FLEXEVAL_INSTANCE_TMP_DIR"] + "/export_bdd/")
 
     # Routes
     @am.route("/")
@@ -43,7 +43,7 @@ with campaign_instance.register_admin_module(__name__) as am:
         root_base_file = current_app.config["FLEXEVAL_INSTANCE_TMP_DIR"] + f"/export_bdd/{repository_name}"
 
         # Connect to the database
-        _ = safe_make_dir(root_base_file + ".bdd")
+        _ = safe_make_dir(f"{current_app.config['FLEXEVAL_INSTANCE_TMP_DIR']}/{root_base_file}.bdd")
 
         inspection = inspect(db.engine)
         for name_table in inspection.get_table_names():
@@ -51,11 +51,15 @@ with campaign_instance.register_admin_module(__name__) as am:
             df = pd.read_sql_query(f"SELECT * FROM {name_table}", db.engine)
 
             # Save the TSV file
-            table_fn = f"{root_base_file}.bdd/{name_table}.tsv"
+            table_fn = f"{current_app.config['FLEXEVAL_INSTANCE_TMP_DIR']}/{root_base_file}.bdd/{name_table}.tsv"
             df.to_csv(table_fn, sep="\t", index=False)
 
         # Generate the archive and return it!
-        shutil.make_archive("flexeval", "zip", f"{root_base_file}.bdd")
-        shutil.rmtree(f"{root_base_file}.bdd")
+        shutil.make_archive(
+            base_name=f"{current_app.config['FLEXEVAL_INSTANCE_TMP_DIR']}/flexeval",
+            format="zip",
+            root_dir=f"{current_app.config['FLEXEVAL_INSTANCE_TMP_DIR']}/{root_base_file}.bdd",
+        )
+        shutil.rmtree(f"{current_app.config['FLEXEVAL_INSTANCE_TMP_DIR']}/{root_base_file}.bdd")
 
-        return send_file("../flexeval.zip")  # FIXME: why should I have to go to the parent directory?
+        return send_file(f"{current_app.config['FLEXEVAL_INSTANCE_TMP_DIR']}/flexeval.zip")
