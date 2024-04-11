@@ -191,7 +191,7 @@ class CampaignInstance(object):
             args_GET.append(f"{args_key}={request.args[args_key]}")
 
         admin_module = self.register_admin_module(self._admin_entrypoint)
-        redirect_url: str = f"/{admin_module.local_url()}?{'&'.join(args_GET)}"
+        redirect_url: str = f"/{admin_module.local_url()}/?{'&'.join(args_GET)}"
         return redirect(redirect_url)
 
     def register_stage_module(self, name: str, subname: str | None = None) -> StageModule:

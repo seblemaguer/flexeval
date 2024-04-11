@@ -66,4 +66,4 @@ class AdminModule(Module):
         return wrapper
 
     def local_url(self) -> str:
-        return f"{self.__class__.name_type}/{self.get_mod_name()}"
+        return f"{self.__class__.name_type}/{self.get_mod_name()}/"
