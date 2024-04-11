@@ -1,20 +1,13 @@
-REMINDER
-
-# Compiled python
+# Python
 *.pyc
 python3.lnk
+__pycache__/
+*.egg-info/
 
-# BDD
+# flexeval
 *.db
-
-# Ignore logs
 *.log
+.tmp/
 
-# IDE directories
-\.vscode/
-
-.tmp
-
-__pycache__
-
-TODO
+# IDEs
+.vscode/
