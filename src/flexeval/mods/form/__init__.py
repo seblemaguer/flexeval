@@ -47,7 +47,11 @@ with campaign_instance.register_stage_module(__name__) as sm:
             if res.first() is None:
                 return sm.render_template(template=stage.template)
             else:
-                return redirect(stage.local_url_next)
+                next_urls: dict[str, str] = stage.next_local_urls
+                if len(next_urls.keys()) > 1:
+                    raise Exception("")
+                stage_name = list(next_urls.keys())[0]
+                return redirect(next_urls[stage_name])
         else:
             return sm.render_template(template=stage.template)
 
@@ -55,7 +59,7 @@ with campaign_instance.register_stage_module(__name__) as sm:
     @sm.valid_connection_required
     def save():
         stage = sm.current_stage
-        userModel = sm.auth_provider.userModel
+        userModel = sm.auth_provider.user
 
         sem_form.acquire()
         if not ModelFactory().has(stage.name, Form):
@@ -83,7 +87,12 @@ with campaign_instance.register_stage_module(__name__) as sm:
                 resp.delete()
 
         sem_form.release()
-        return redirect(stage.local_url_next)
+
+        next_urls: dict[str, str] = stage.next_local_urls
+        if len(next_urls.keys()) > 1:
+            raise Exception("")
+        stage_name = list(next_urls.keys())[0]
+        return redirect(next_urls[stage_name])
 
 
 with campaign_instance.register_stage_module(__name__, subname="autogen") as sm_autogen:
