@@ -180,7 +180,8 @@ with campaign_instance.register_stage_module(__name__) as sm:
         # Save
         all_records = test.get_all_records(user)
         for _, all_field_names in all_records.items():
-            resp = test.model.create(user_id=user.id, intro=intro_step, step_idx=cur_step + 1, commit=False)
+            db_record = test.model.create(user_id=user.id, intro=intro_step, step_idx=cur_step + 1, commit=False)
+
             try:
                 # Save presented samples
                 tmp_system_names = []
@@ -192,7 +193,7 @@ with campaign_instance.register_stage_module(__name__) as sm:
                     ) = test.get_in_transaction(user, sample.ID)
                     tmp_system_names.append(system_name)
                     sys = {system_name: int(syssample_id)}
-                    resp.update(commit=False, **sys)
+                    db_record.update(commit=False, **sys)
                 tmp_system_names.sort()
 
                 # Save responses from the user
@@ -212,9 +213,9 @@ with campaign_instance.register_stage_module(__name__) as sm:
                             if field_key[:5] == "save:":
                                 field_key = field_key[5:]
                                 (
-                                    record_name,
+                                    _,
                                     field_name,
-                                    *idsyssamples,
+                                    _,
                                 ) = field_key.split(TransactionalObject.RECORD_SEP)
                                 name_col = field_name
                             else:
@@ -224,15 +225,15 @@ with campaign_instance.register_stage_module(__name__) as sm:
                                 test.model.addColumn(name_col, db.String)
                                 sysval = test.get_in_transaction(user, field_value)
                                 if sysval is None:
-                                    resp.update(commit=False, **{name_col: field_value})
+                                    db_record.update(commit=False, **{name_col: field_value})
                                 else:
                                     (system_name, syssample_id) = sysval
-                                    resp.update(**{name_col: syssample_id})
+                                    db_record.update(**{name_col: syssample_id})
                             else:
                                 test.model.addColumn(name_col, db.BLOB)
 
                                 with field_value.stream as f:
-                                    resp.update(commit=False, **{name_col: f.read()})
+                                    db_record.update(commit=False, **{name_col: f.read()})
 
             except Exception as e:
                 raise (e)

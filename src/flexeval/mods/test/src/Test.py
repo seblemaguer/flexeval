@@ -34,7 +34,9 @@ from flexeval.mods.test.model import TestModel, SampleModel
 
 # Current package
 from .System import SystemManager, System
-from .selection_strategy import LeastSeenSelection, LeastSeenSampleAlignedSelection  # noqa: F401
+from .selection_strategy import LeastSeenSelection
+from .selection_strategy import LeastSeenSampleAlignedSelection  # noqa: F401
+from .selection_strategy import LeastSeenPerUserSelection  # noqa: F401
 
 
 TEST_CONFIGURATION_BASENAME: str = "tests"

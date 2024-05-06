@@ -145,7 +145,7 @@ class Model(CRUDMixin, db.Model):
 
             if not (name.replace("_", "").isalnum()):
                 raise MalformationError(
-                    "Col name:" + name + " is incorrect. Only alphanumeric's and '_' symbol caracteres are allow. "
+                    "Col name:" + name + " is incorrect. Only alphanumeric's and '_' symbol caracteres are allowed."
                 )
 
             if inspect(db.engine).has_table(cls.__tablename__):
