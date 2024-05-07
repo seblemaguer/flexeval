@@ -38,6 +38,9 @@ class TestModel(Model):
     date = db.Column(db.DateTime, nullable=False)
     step_idx = db.Column(db.Integer, nullable=False)
     intro = db.Column(db.Boolean, nullable=False)
+    sample_id = db.Column(db.Integer, ForeignKey(SampleModel.__tablename__ + ".id"), nullable=False)
+    info_type = db.Column(db.String, nullable=False)
+    info_value = db.Column(db.String, nullable=False)
 
     def __init__(self, *args, **kwargs):
         self.intro = False

@@ -29,8 +29,8 @@ from flask import current_app
 # Flexeval
 from flexeval.utils import AppSingleton
 from flexeval.core import StageModule, UserModel
-from flexeval.database import ForeignKey, ModelFactory, db
-from flexeval.mods.test.model import TestModel, SampleModel
+from flexeval.database import ModelFactory
+from flexeval.mods.test.model import TestModel
 
 # Current package
 from .System import SystemManager, System
@@ -352,37 +352,7 @@ class Test(TransactionalObject):
             )
 
         # Create Test table in the database
-        # NOTE: commit is delayed in order to enable to set later the foreign key constraint on needed columns
-        self.model = ModelFactory().create(self.name, TestModel, commit=False)
-
-        # Set the foreign key constraints
-        foreign_key_for_each_system = []
-        for system_name in self.systems.keys():
-            foreign_key_for_each_system.append(
-                (
-                    system_name,
-                    self.model.addColumn(
-                        system_name,
-                        db.Integer,
-                        ForeignKey(SampleModel.__tablename__ + ".id"),
-                    ),
-                )
-            )
-
-        # Commit created table
-        ModelFactory().commit(self.model)
-
-        # Set relations between used samples and the current test
-        for system_name, foreign_key in foreign_key_for_each_system:
-            SampleModel.addRelationship(
-                self.model.__name__ + "_" + system_name,
-                self.model,
-                uselist=True,
-                foreign_keys=[foreign_key],
-                backref="SampleModel_" + system_name,
-            )
-
-        # Set relations to associate multiple steps to a user
+        self.model = ModelFactory().create(self.name, TestModel, commit=True)
         StageModule.get_user_model().addRelationship(self.model.__name__, self.model, uselist=True)
 
         # Initialize the sample selection strategy

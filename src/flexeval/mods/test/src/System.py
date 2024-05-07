@@ -35,9 +35,7 @@ class System:
         assert reader.fieldnames is not None
         self._col_names: Sequence[str] = reader.fieldnames
 
-        # On crée ou réhydrate la classe SampleModel
-        # Il est important de faire cela avant de créer les instances de SampleModel
-        # Sinon seulement les columns définies de base dans SampleModel seront disponibles.
+        # Dynamically create the columns needed to populate all the information related to the current sample
         for col_name in self._col_names:
             SampleModel.addColumn(col_name, db.String)
 

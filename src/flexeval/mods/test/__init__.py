@@ -7,7 +7,7 @@ from flask import request, abort
 # Flexeval
 from flexeval.core import campaign_instance
 from flexeval.utils import redirect
-from flexeval.database import db, commit_all
+from flexeval.database import commit_all
 
 # Current package
 from .src import TestManager, TransactionalObject
@@ -180,22 +180,8 @@ with campaign_instance.register_stage_module(__name__) as sm:
         # Save
         all_records = test.get_all_records(user)
         for _, all_field_names in all_records.items():
-            db_record = test.model.create(user_id=user.id, intro=intro_step, step_idx=cur_step + 1, commit=False)
 
             try:
-                # Save presented samples
-                tmp_system_names = []
-                transactions = test.get_transaction(user)
-                for system_name, sample in transactions["choice_for_systems"].items():
-                    (
-                        _,
-                        syssample_id,
-                    ) = test.get_in_transaction(user, sample.ID)
-                    tmp_system_names.append(system_name)
-                    sys = {system_name: int(syssample_id)}
-                    db_record.update(commit=False, **sys)
-                tmp_system_names.sort()
-
                 # Save responses from the user
                 for field_type, field_list in [
                     ("string", request.form),
@@ -210,30 +196,46 @@ with campaign_instance.register_stage_module(__name__) as sm:
                             else:
                                 field_value = field_list[field_key]
 
+                            # Get the name of the info to save
                             if field_key[:5] == "save:":
                                 field_key = field_key[5:]
                                 (
                                     _,
                                     field_name,
-                                    _,
+                                    obfuscated_sample,
                                 ) = field_key.split(TransactionalObject.RECORD_SEP)
                                 name_col = field_name
                             else:
                                 name_col = field_key
+                                raise Exception("For now this is not supported")
 
+                            # Extract the sample information
+                            _, syssample_id = test.get_in_transaction(user, obfuscated_sample)
+                            sample_id = int(syssample_id)
+
+                            # Get the value of the info
+                            value = ""
                             if field_type == "string":
-                                test.model.addColumn(name_col, db.String)
                                 sysval = test.get_in_transaction(user, field_value)
                                 if sysval is None:
-                                    db_record.update(commit=False, **{name_col: field_value})
+                                    value = field_value
                                 else:
-                                    (system_name, syssample_id) = sysval
-                                    db_record.update(**{name_col: syssample_id})
-                            else:
-                                test.model.addColumn(name_col, db.BLOB)
+                                    _, syssample_id = sysval
+                                    value = syssample_id
 
+                            else:
                                 with field_value.stream as f:
-                                    db_record.update(commit=False, **{name_col: f.read()})
+                                    value = f.read()
+
+                            _ = test.model.create(
+                                user_id=user.id,
+                                intro=intro_step,
+                                step_idx=cur_step + 1,
+                                sample_id=sample_id,
+                                info_type=name_col,
+                                info_value=value,
+                                commit=False,
+                            )
 
             except Exception as e:
                 raise (e)
