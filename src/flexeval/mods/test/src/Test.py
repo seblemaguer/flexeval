@@ -34,9 +34,7 @@ from flexeval.mods.test.model import TestModel
 
 # Current package
 from .System import SystemManager, System
-from .selection_strategy import LeastSeenSelection
-from .selection_strategy import LeastSeenSampleAlignedSelection  # noqa: F401
-from .selection_strategy import LeastSeenPerUserSelection  # noqa: F401
+from .selection_strategy import SelectionBase, get_strategy
 
 
 TEST_CONFIGURATION_BASENAME: str = "tests"
@@ -356,20 +354,20 @@ class Test(TransactionalObject):
         StageModule.get_user_model().addRelationship(self.model.__name__, self.model, uselist=True)
 
         # Initialize the sample selection strategy
+        selection_strategy_name = "LeastSeenSelection"
         if "selection_strategy" in config:
             selection_strategy_name = config["selection_strategy"]
-            kwargs = dict()
+            # kwargs = dict()
             if not isinstance(selection_strategy_name, str):
-                kwargs = selection_strategy_name["kwargs"]
+                # kwargs = selection_strategy_name["kwargs"]
                 selection_strategy_name = selection_strategy_name["name"]
 
             # in case we describe
             self._logger.info(f'The selection strategy is user defined to "{selection_strategy_name}"')
-            constructor = globals()[selection_strategy_name]
-            self._selection_strategy = constructor(self.systems, **kwargs)
         else:
             self._logger.info('The selection strategy is defaulted to "LeastSeenSelection"')
-            self._selection_strategy = LeastSeenSelection(self.systems)
+
+        self._selection_strategy: SelectionBase = get_strategy(selection_strategy_name, self.systems)
 
     def nb_steps_complete_by(self, user: UserModel) -> int:
         """Get the number of steps completed by a given user
