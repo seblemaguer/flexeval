@@ -250,8 +250,77 @@ with campaign_instance.register_stage_module(__name__) as sm:
             if (cur_step + 1) % skip_after_n_step == 0:
                 next_urls: dict[str, str] = stage.next_local_urls
                 if len(next_urls.keys()) > 1:
-                    raise Exception("")
+                    raise Exception("Only, one following step is supported here, configuration seems bogus")
                 stage_name = list(next_urls.keys())[0]
                 return redirect(next_urls[stage_name])
 
         return redirect(sm.url_for(sm.get_endpoint_for_local_rule("/")))
+
+    @sm.route("/monitor", methods=["POST"])
+    @sm.valid_connection_required
+    def monitor() -> Response:
+        """Saving routine of the test
+
+        This method is called after the submission of the form
+        implemented in the template associated to the step of the
+        test.
+        This method does:
+          0. requiring a exclusive access to the db to avoid concurrency issue
+          1. parsing the values of each *field* recorded by the method =save_field_name*
+          2. filling the database *and creating new columns if necessary!*
+
+        """
+        # NOTE: to debug in case some is wrong, just run the following line
+        print(request.data)
+
+        stage = sm.current_stage
+        test = TestManager().get(stage.name)
+        user = sm.auth_provider.user
+
+        # Log the request form for debugging purposes
+        sm.logger.debug("#### The request form ####")
+        sm.logger.debug(request.form)
+        sm.logger.debug("#### <END>The request form ####")
+
+        # Initialize the number of intro steps
+        nb_step_intro = int(stage.get("nb_step_intro"))
+        cur_step: int = test.nb_steps_complete_by(user)
+
+        # Validate is the current step is an introduction step
+        intro_step = False
+        if nb_step_intro > cur_step:
+            intro_step = True
+
+        # Lock DB so we can update it (NOTE SLM: not sure that's what this does!)
+        if not test.has_transaction(user):
+            abort(408)
+
+        # Get the JSON data sent in the POST request
+        # FIXME: deal with multiple samples would be great
+        monitoring_info = request.json
+
+        # Save
+        try:
+
+            # Retrieve the sample information
+            _, syssample_id = test.get_in_transaction(user, monitoring_info.get("sample_id"))
+            sample_id = int(syssample_id)
+
+            # Insert info in the model
+            _ = test.model.create(
+                user_id=user.id,
+                intro=intro_step,
+                step_idx=cur_step + 1,
+                sample_id=sample_id,
+                info_type=monitoring_info.get("info_type"),
+                info_value=monitoring_info.get("info_value"),
+                commit=False,
+            )
+        except Exception as e:
+            sm.logger.error(e)
+            return Response(status=500)
+
+        # Commit the results and clean the transations of the user
+        commit_all()
+
+        return Response(status=204)
