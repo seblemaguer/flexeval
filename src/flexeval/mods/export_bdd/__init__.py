@@ -8,12 +8,10 @@ import shutil
 
 from werkzeug import Response
 from flask import current_app, send_file
-from sqlalchemy import inspect
-import pandas as pd
 
 from flexeval.core import campaign_instance
 from flexeval.utils import safe_make_dir
-from flexeval.database import db
+from flexeval.database import extract_dataframes
 
 with campaign_instance.register_admin_module(__name__) as am:
     safe_make_dir(current_app.config["FLEXEVAL_INSTANCE_TMP_DIR"] + "/export_bdd/")
@@ -45,12 +43,11 @@ with campaign_instance.register_admin_module(__name__) as am:
         # Connect to the database
         _ = safe_make_dir(f"{current_app.config['FLEXEVAL_INSTANCE_TMP_DIR']}/{root_base_file}.bdd")
 
-        inspection = inspect(db.engine)
-        for name_table in inspection.get_table_names():
-            # Generate the dataframe corresponding to the table
-            df = pd.read_sql_query(f"SELECT * FROM {name_table}", db.engine)
+        # Extract the dataframes
+        db_frames = extract_dataframes()
 
-            # Save the TSV file
+        # Save the TSV file
+        for name_table, df in db_frames.items():
             table_fn = f"{current_app.config['FLEXEVAL_INSTANCE_TMP_DIR']}/{root_base_file}.bdd/{name_table}.tsv"
             df.to_csv(table_fn, sep="\t", index=False)
 

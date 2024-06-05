@@ -9,13 +9,13 @@ https://github.com/cookiecutter-flask/cookiecutter-flask/blob/master/%7B%7Bcooki
 
 """
 
-# coding: utf8
-from .utils import AppSingleton
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text
 from sqlalchemy.inspection import inspect
 from sqlalchemy.ext.declarative import declared_attr
+import pandas as pd
 import threading
+from .utils import AppSingleton
 
 __all__ = [
     "declared_attr",
@@ -28,6 +28,7 @@ __all__ = [
     "ForbiddenColumnName",
     "Model",
     "ModelFactory",
+    "extract_dataframes",
 ]
 
 # Instanciate database
@@ -269,3 +270,42 @@ class ModelFactory(metaclass=AppSingleton):
         sem.release()
 
         return model_cls
+
+
+def extract_dataframes(names: list[str] | None = []) -> dict[str, pd.DataFrame]:
+    """Extract the pandas DataFrame for each required (or all the available) tables in the database
+
+    If the list of names is empty or none, all the tables are returned
+
+    Parameters
+    ----------
+    names : list[str]|None
+        the list of table names
+
+    Returns
+    -------
+    dict[str, pd.DataFrame]
+        A dictionnary associated a table name to its dataframe
+
+    Raises
+    ------
+    Exception
+        if at least one requested table does not exist in the database
+    """
+    #
+    inspection = inspect(db.engine)
+    all_table_names = inspection.get_table_names()
+    if (not names) or (names is None):
+        names = all_table_names
+    else:
+        diff_names = [element for element in names if element not in all_table_names]
+        if diff_names:
+            raise Exception(f"The elements {diff_names} are not known tables")
+
+    dict_res = dict()
+    for name_table in names:
+        # Generate the dataframe corresponding to the table
+        df = pd.read_sql_query(f"SELECT * FROM {name_table}", db.engine)
+        dict_res[name_table] = df
+
+    return dict_res
