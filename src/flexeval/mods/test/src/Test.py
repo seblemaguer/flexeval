@@ -385,7 +385,7 @@ class Test(TransactionalObject):
         all_steps = set()
         for record in getattr(user, self.model.__name__):
             all_steps.add(record.step_idx)
-        return len(all_steps)
+        return max(all_steps) if all_steps else 0
 
     def get_step(
         self, id_step: int, user: UserModel, nb_systems: int, is_intro_step: bool = False

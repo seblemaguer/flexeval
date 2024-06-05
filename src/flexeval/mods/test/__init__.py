@@ -310,7 +310,7 @@ with campaign_instance.register_stage_module(__name__) as sm:
             _ = test.model.create(
                 user_id=user.id,
                 intro=intro_step,
-                step_idx=cur_step + 1,
+                step_idx=cur_step,
                 sample_id=sample_id,
                 info_type=monitoring_info.get("info_type"),
                 info_value=monitoring_info.get("info_value"),
