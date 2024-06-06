@@ -295,12 +295,10 @@ with campaign_instance.register_stage_module(__name__) as sm:
         if not test.has_transaction(user):
             abort(408)
 
-        # Get the JSON data sent in the POST request
-        # FIXME: deal with multiple samples would be great
-        monitoring_info = request.json
-
-        # Save
         try:
+            # Get the JSON data sent in the POST request
+            # FIXME: deal with multiple samples would be great
+            monitoring_info = request.json
 
             # Retrieve the sample information
             _, syssample_id = test.get_in_transaction(user, monitoring_info.get("sample_id"))
