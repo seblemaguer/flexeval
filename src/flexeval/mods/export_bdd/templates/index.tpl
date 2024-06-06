@@ -11,7 +11,7 @@
 
       <div class="card" style="margin-bottom:20px;">
         <div class="card-body">
-          <h5 class="card-title">CSV</h5>
+          <h5 class="card-title">ZIP</h5>
           <p class="card-text">Download a zip repository containing the database dumped in csv files and <a href="https://developer.mozilla.org/fr/docs/Web/API/Blob">blob files.</p>
           <a href="flexeval.zip" class="btn btn-primary">Download</a>
         </div>

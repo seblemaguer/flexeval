@@ -36,7 +36,7 @@ with campaign_instance.register_admin_module(__name__) as am:
 
     @am.route("/flexeval.zip")
     @am.valid_connection_required
-    def csv():
+    def zip():
         repository_name = "".join((random.choice(string.ascii_lowercase) for _ in range(15)))
         root_base_file = current_app.config["FLEXEVAL_INSTANCE_TMP_DIR"] + f"/export_bdd/{repository_name}"
 
