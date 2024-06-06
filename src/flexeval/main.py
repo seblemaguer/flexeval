@@ -14,12 +14,12 @@ from flask import Flask
 from werkzeug.serving import run_simple
 
 # FlexEval
-from .utils import safe_make_dir
-from .core import error, campaign_instance
-from .core import Config
-from .core.providers import TemplateProvider, AssetsProvider, provider_factory
-from .database import db
-from .extensions import session_manager
+from flexeval.utils import safe_make_dir
+from flexeval.core import error, campaign_instance
+from flexeval.core import Config
+from flexeval.core.providers import TemplateProvider, AssetsProvider, provider_factory
+from flexeval.database import db
+from flexeval.extensions import session_manager
 
 ###############################################################################
 # global constants
@@ -229,7 +229,7 @@ def main():
         app.run(
             host=args.ip,
             port=args.port,
-            use_reloader=True,
+            use_reloader=False,
             debug=args.debug,
             extra_files=extra_files,
             threaded=args.threaded,
