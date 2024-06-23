@@ -1,5 +1,4 @@
 # coding: utf8
-import random
 
 from werkzeug import Response
 from flask import request, abort
@@ -32,7 +31,7 @@ with campaign_instance.register_stage_module(__name__) as sm:
         This function prepare the template and defines some key helper
         internal functions to generate the information required during
         the save stage. These functions are:
-          - get_syssamples which provides the *randomized* list of selected samples per *given system*
+          - get_syssamples which provides the list of selected samples per *given system*
           - save_field_name which *has to be called* to get the field value (score, preference selection...)
             during the saving
 
@@ -87,11 +86,9 @@ with campaign_instance.register_stage_module(__name__) as sm:
                     for name_system in system_names:
                         systems.append(syssamples_for_this_step[name_system])
 
-                random.shuffle(systems)
-
                 return systems
 
-            def save_field_name(name: str, syssamples=get_syssamples(), record_name: str | None = None):
+            def save_field_name(name: str, syssamples, record_name: str | None = None):
                 name = name.replace(TransactionalObject.RECORD_SEP, "_")
 
                 # Make sure the record exist and get a real name if record name is None
@@ -114,7 +111,7 @@ with campaign_instance.register_stage_module(__name__) as sm:
                 _ = test.create_new_record(user, name)
                 return name
 
-            sm.logger.debug(f"Sample selected for this step are {get_syssamples()}")
+            # sm.logger.debug(f"Sample selected for this step are {get_syssamples()}")
 
             # On change les valeurs max_steps et steps pour l'affichage sur la page web
             if intro_step:
@@ -161,7 +158,7 @@ with campaign_instance.register_stage_module(__name__) as sm:
 
         # Log the request form for debugging purposes
         sm.logger.debug("#### The request form ####")
-        sm.logger.debug(request.form)
+        sm.logger.debug(request.form)  # TODO: prettify!
         sm.logger.debug("#### <END>The request form ####")
 
         # Initialize the number of intro steps
@@ -210,7 +207,7 @@ with campaign_instance.register_stage_module(__name__) as sm:
                                 raise Exception("For now this is not supported")
 
                             # Extract the sample information
-                            _, syssample_id = test.get_in_transaction(user, obfuscated_sample)
+                            system, syssample_id = test.get_in_transaction(user, obfuscated_sample)
                             sample_id = int(syssample_id)
 
                             # Get the value of the info
@@ -227,6 +224,7 @@ with campaign_instance.register_stage_module(__name__) as sm:
                                 with field_value.stream as f:
                                     value = f.read()
 
+                            sm.logger.info(f"([sample={sample_id}, system={system}] - {name_col}: {value})")
                             _ = test.model.create(
                                 user_id=user.id,
                                 intro=intro_step,
@@ -271,15 +269,13 @@ with campaign_instance.register_stage_module(__name__) as sm:
 
         """
         # NOTE: to debug in case some is wrong, just run the following line
-        print(request.data)
-
         stage = sm.current_stage
         test = TestManager().get(stage.name)
         user = sm.auth_provider.user
 
         # Log the request form for debugging purposes
         sm.logger.debug("#### The request form ####")
-        sm.logger.debug(request.form)
+        sm.logger.debug(request.json)  # TODO: prettify
         sm.logger.debug("#### <END>The request form ####")
 
         # Initialize the number of intro steps
@@ -299,19 +295,23 @@ with campaign_instance.register_stage_module(__name__) as sm:
             # Get the JSON data sent in the POST request
             # FIXME: deal with multiple samples would be great
             monitoring_info = request.json
+            obfuscated_sample_id = monitoring_info.get("sample_id")
+            info_type = monitoring_info.get("info_type")
+            info_value = monitoring_info.get("info_value")
 
             # Retrieve the sample information
-            _, syssample_id = test.get_in_transaction(user, monitoring_info.get("sample_id"))
+            system, syssample_id = test.get_in_transaction(user, obfuscated_sample_id)
             sample_id = int(syssample_id)
 
             # Insert info in the model
+            sm.logger.info(f"([sample={sample_id}, system={system}] - {info_type}: {info_value})")
             _ = test.model.create(
                 user_id=user.id,
                 intro=intro_step,
                 step_idx=cur_step,
                 sample_id=sample_id,
-                info_type=monitoring_info.get("info_type"),
-                info_value=monitoring_info.get("info_value"),
+                info_type=info_type,
+                info_value=info_value,
                 commit=False,
             )
         except Exception as e:

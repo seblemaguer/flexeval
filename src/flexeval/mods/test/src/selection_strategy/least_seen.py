@@ -262,7 +262,7 @@ class LeastSeenPerUserSelection(LeastSeenSelection):
 
         self._user_history = dict()
 
-    def select_user_systems(self, user_history: dict[str, set[str]], nb_systems: int) -> list[str]:
+    def select_user_systems(self, user_history: dict[str, list[str]], nb_systems: int) -> list[str]:
         # Get the list of available systems sorted in ascending order
         system_count_list = [(sys_name, len(seen_samples)) for sys_name, seen_samples in user_history.items()]
         system_count_list.sort(key=lambda x: x[1])
@@ -283,7 +283,7 @@ class LeastSeenPerUserSelection(LeastSeenSelection):
 
         return [x[0] for x in pool_systems[:nb_systems]]
 
-    def user_select_samples(self, user_history: set[str], system_name: str, nb_samples: int) -> list[SampleModel]:
+    def user_select_samples(self, user_history: list[str], system_name: str, nb_samples: int) -> list[SampleModel]:
         """Select a given number of samples of a given system
 
         Parameters
@@ -311,10 +311,15 @@ class LeastSeenPerUserSelection(LeastSeenSelection):
 
         # Assert/Fix the number of required samples
         self._logger.debug(f"Number of samples {nb_samples} from a pool of {len(pool_samples)} samples is required")
-        assert (nb_samples <= len(pool_samples)) and (nb_samples > 0), (
-            f"The required number of samples ({nb_samples}) is greater "
-            + f"than the available number of samples {len(pool_samples)} or it is 0"
-        )
+        self._logger.error(f"This should not happen but here is the history for info: {user_history}")
+        if nb_samples > len(pool_samples):
+            self._logger.error(f"This should not happen but here is the history for info: {user_history}")
+            return [dict_samples[sample] for sample in user_history[-nb_samples:]]
+        else:
+            assert (nb_samples <= len(pool_samples)) and (nb_samples > 0), (
+                f"The required number of samples ({nb_samples}) is greater "
+                + f"than the available number of samples {len(pool_samples)} or it is 0"
+            )
 
         # Subset to get the desired number of samples and shuffle to guarantee variation in the presentation order
         # NOTE: to ensure variability, we first need to take into account the pool of samples seens
@@ -335,7 +340,7 @@ class LeastSeenPerUserSelection(LeastSeenSelection):
         # Select the desired number of samples
         for sample in pool_samples:
             self._sample_counters[sample[0]] += 1
-            user_history.add(sample[0])
+            user_history.append(sample[0])
 
         return [dict_samples[sample[0]] for sample in pool_samples]
 
@@ -362,7 +367,7 @@ class LeastSeenPerUserSelection(LeastSeenSelection):
         """
 
         if user_id not in self._user_history:
-            self._user_history[user_id] = dict([(cur_system, set()) for cur_system in self._systems.keys()])
+            self._user_history[user_id] = dict([(cur_system, list()) for cur_system in self._systems.keys()])
 
         # Select the systems
         self._logger.debug(f"Select systems for user {user_id}")
