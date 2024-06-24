@@ -299,6 +299,19 @@ with campaign_instance.register_stage_module(__name__) as sm:
             info_type = monitoring_info.get("info_type")
             info_value = monitoring_info.get("info_value")
 
+            # TODO: should be generalised
+            if isinstance(info_value, str) and info_value.startswith("sampleid:"):
+                _, syssample_id = test.get_in_transaction(user, info_value.replace("sampleid:", ""))
+                info_value = int(syssample_id)
+            elif isinstance(info_value, list):
+                values = []
+                for cur_value in info_value:
+                    if isinstance(cur_value, str) and cur_value.startswith("sampleid:"):
+                        _, syssample_id = test.get_in_transaction(user, cur_value.replace("sampleid:", ""))
+                        cur_value = int(syssample_id)
+                    values.append(cur_value)
+                info_value = values
+
             # Retrieve the sample information
             system, syssample_id = test.get_in_transaction(user, obfuscated_sample_id)
             sample_id = int(syssample_id)
