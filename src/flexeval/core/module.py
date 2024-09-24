@@ -448,8 +448,7 @@ class Module(Blueprint, abc.ABC):
         def _get_variable(key: str, *args: P.args, **kwargs: P.kwargs) -> Any:
             """Helper to replace a variable value in the template
 
-            The variable can be a callable which will be ran and its
-            returned value will be used
+            The variable can be a callable which will be ran and its returned value will be used
 
             Parameters
             ----------
