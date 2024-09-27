@@ -7,6 +7,7 @@ import traceback
 
 from flask import render_template as flask_render_template
 from flask import Flask
+from flask import request
 from werkzeug.exceptions import HTTPException
 
 from flexeval.utils import make_global_url
@@ -62,34 +63,6 @@ class ErrorHandler:
         self._logger.critical(error_stacktrace)
 
         variables: dict[str, Any] = self._config["variables"]
-        variables["error_message"] = str(e)
-        variables["error_stacktrace"] = error_stacktrace
-
-        def _get_variable(key: str, *args: P.args, **kwargs: P.kwargs) -> Any:
-            """Helper to replace a variable value in the template
-
-            The variable can be a callable which will be ran and its
-            returned value will be used
-
-            Parameters
-            ----------
-            key : str
-                the variable name/key
-
-            Returns
-            -------
-            Any
-                the obtained/computed value
-            """
-
-            default_value: Any | None = None
-            if "default_value" in kwargs:
-                default_value = kwargs["default_value"]
-
-            if key in variables:
-                return variables[key]
-            else:
-                return default_value
 
         def _get_asset(name: str, rep: str | None = None) -> str:
             asset_provider: AssetsProvider = provider_factory.get(AssetsProvider.NAME)  # type: ignore
@@ -97,13 +70,15 @@ class ErrorHandler:
 
         # Render the error page
         template_provider: TemplateProvider = provider_factory.get(TemplateProvider.NAME)  # type: ignore
+        variables.update({"code": code, "source_url": request.url, "error_message": str(e)})
+        if (code < 400) or (code >= 500):
+            variables["error_stacktrace"] = error_stacktrace
         return flask_render_template(
             template_name_or_list=template_provider.get("error.tpl"),
-            parameters={"code": code},
             get_template=provider_factory.get(TemplateProvider.NAME).get,  # type: ignore
             get_asset=_get_asset,
-            get_variable=_get_variable,
             auth=VirtualAuthProvider(),
+            **variables,
         )
 
 
