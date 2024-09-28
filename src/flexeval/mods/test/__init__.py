@@ -121,15 +121,15 @@ with campaign_instance.register_stage_module(__name__) as sm:
                 max_steps = max_steps - nb_step_intro
                 cur_step = cur_step + 1 - nb_step_intro
 
-            return sm.render_template(
-                template=stage.template,
-                max_steps=max_steps,
-                step=cur_step,
-                intro_step=intro_step,
-                syssamples=get_syssamples,
-                field_name=save_field_name,
-                new_record=prepare_new_record,
-            )
+            parameters = {
+                "max_steps": max_steps,
+                "step": cur_step,
+                "intro_step": intro_step,
+                "syssamples": get_syssamples,
+                "field_name": save_field_name,
+                "new_record": prepare_new_record,
+            }
+            return sm.render_template(path_template=stage.template, parameters=parameters)
         else:
             next_urls: dict[str, str] = stage.next_local_urls
             if len(next_urls.keys()) > 1:

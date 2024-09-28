@@ -70,9 +70,6 @@
         </div>
 
         <footer class="row" style="margin-top:20px;">
-
-
-
           <div class="col-12 text-center">
             {% block footer %}
         				<a href="http://www.irisa.fr" target="_blank">
@@ -108,6 +105,5 @@ Powered by <a href="https://gitlab.inria.fr/expression/tools/FlexEval">FlexEval<
         </footer>
       </div>
     </div>
-
   </body>
 </html>

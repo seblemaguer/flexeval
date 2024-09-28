@@ -45,7 +45,7 @@ with campaign_instance.register_stage_module(__name__) as sm:
             user = sm.auth_provider.user
             res = form_stage.query.filter_by(user_id=user.id)
             if res.first() is None:
-                return sm.render_template(template=stage.template)
+                return sm.render_template(path_template=stage.template)
             else:
                 next_urls: dict[str, str] = stage.next_local_urls
                 if len(next_urls.keys()) > 1:
@@ -53,7 +53,7 @@ with campaign_instance.register_stage_module(__name__) as sm:
                 stage_name = list(next_urls.keys())[0]
                 return redirect(next_urls[stage_name])
         else:
-            return sm.render_template(template=stage.template)
+            return sm.render_template(path_template=stage.template)
 
     @sm.route("/save", methods=["POST"])
     @sm.valid_connection_required

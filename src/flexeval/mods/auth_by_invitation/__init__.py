@@ -37,7 +37,7 @@ with StageModule(__name__) as sm:
             except BadCredential:
                 pass
 
-            return sm.render_template(template="login.tpl")
+            return sm.render_template(path_template="login.tpl")
 
     @sm.route("/register", methods=["POST"])
     def register():
@@ -55,7 +55,7 @@ with StageModule(__name__) as sm:
             except BadCredential:
                 pass
 
-            return sm.render_template(template="login.tpl")
+            return sm.render_template(path_template="login.tpl")
 
 
 with AdminModule(__name__) as am:

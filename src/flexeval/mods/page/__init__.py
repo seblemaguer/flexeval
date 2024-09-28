@@ -8,7 +8,7 @@ with campaign_instance.register_stage_module(__name__, subname="visitor") as sm:
         authProvider = sm.auth_provider
 
         if authProvider.validates_connection("connected")[0]:
-            return sm.render_template(template=stage.template)
+            return sm.render_template(path_template=stage.template)
 
             # NOTE: the rediction is faulty as virtual leads to automatically to connected anonymous user
             # NOTE: Redirection based on remembering what was the last visited page
@@ -18,7 +18,7 @@ with campaign_instance.register_stage_module(__name__, subname="visitor") as sm:
             # else:
             #     return sm.render_template(template=stage.template)
         else:
-            return sm.render_template(template=stage.template)
+            return sm.render_template(path_template=stage.template)
 
 
 with campaign_instance.register_stage_module(__name__, subname="user") as sm_user:
@@ -27,4 +27,4 @@ with campaign_instance.register_stage_module(__name__, subname="user") as sm_use
     @sm_user.valid_connection_required
     def main_user():
         stage = sm_user.current_stage
-        return sm.render_template(template=stage.template)
+        return sm.render_template(path_template=stage.template)

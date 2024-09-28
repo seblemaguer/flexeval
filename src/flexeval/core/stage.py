@@ -341,29 +341,42 @@ class StageModule(Module):
         """
         return flask_global.stage
 
+    # FIXME: invalid override
     @override
-    def render_template(self, template: str | ResolvedStageTemplate, next=None, **parameters):
+    def render_template(
+        self,
+        path_template: str,
+        args: dict[str, Any] = dict(),
+        variables: dict[str, Any] = dict(),
+        parameters: dict[str, Any] = dict(),
+    ) -> str:
         """Method which renders the given template."""
-        args: dict[str, Any] = dict()
-        args["THIS_MODULE"] = "mod:" + str(self.mod_rep)
+        internal_args: dict[str, Any] = dict()
+        internal_args["THIS_MODULE"] = "mod:" + str(self.mod_rep)
 
         # Save the URL of the next step
         global_url_next: dict[str, str] = dict()
-        for local_url_next_name, local_url_next in self.current_stage.next_local_urls.items():
-            global_url_next[local_url_next_name] = make_global_url(local_url_next)
-        args["url_next"] = global_url_next
+        if len(self.current_stage.next_local_urls.keys()) > 1:
+            for local_url_next_name, local_url_next in self.current_stage.next_local_urls.items():
+                global_url_next[local_url_next_name] = make_global_url(local_url_next)
+
+        elif len(self.current_stage.next_local_urls.keys()) == 1:
+            print(self.current_stage.next_local_urls)
+            local_url_next = next(iter(self.current_stage.next_local_urls.values()))
+            global_url_next["default"] = make_global_url(local_url_next)
+            internal_args["url_next"] = global_url_next
 
         # Get the template
-        if isinstance(template, ResolvedStageTemplate):
-            template = template.path
+        if isinstance(path_template, ResolvedStageTemplate):
+            path_template = path_template.path
         else:
             provider: TemplateProvider = provider_factory.get("templates")  # type: ignore
-            template = provider.get(template)
+            path_template = provider.get(path_template)
 
         # Achieve the rendering
         return super().render_template(
-            template,
-            args=args,
+            path_template,
+            args=internal_args,
             parameters=parameters,
             variables=self._config["variables"],
         )
