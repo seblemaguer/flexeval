@@ -312,7 +312,6 @@ class LeastSeenPerUserSelection(LeastSeenSelection):
 
         # Assert/Fix the number of required samples
         self._logger.debug(f"Number of samples {nb_samples} from a pool of {len(pool_samples)} samples is required")
-        self._logger.error(f"This should not happen but here is the history for info: {user_history}")
         if nb_samples > len(pool_samples):
             self._logger.error(f"This should not happen but here is the history for info: {user_history}")
             return [dict_samples[sample] for sample in user_history[-nb_samples:]]
