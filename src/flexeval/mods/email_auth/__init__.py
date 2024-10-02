@@ -27,7 +27,7 @@ with campaign_instance.register_stage_module(__name__) as sm:
             stage_name = list(next_urls.keys())[0]
             return redirect(next_urls[stage_name])
         else:
-            return sm.render_template(path_template="login.tpl")
+            return sm.render_template()
 
     @sm.route("/register", methods=["POST"])
     def register():

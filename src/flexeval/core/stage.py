@@ -33,23 +33,6 @@ class StageNotFound(StageError):
     pass
 
 
-class ResolvedStageTemplate:
-    """Class which contains the path of the resolved template.
-
-    This class is mainly here to distinguish strings which may need to
-    be resolved to already resolved templates.
-
-    Attributes
-    ----------
-    path: string
-       The path to the faulty template
-
-    """
-
-    def __init__(self, template_path: str):  # type: ignore
-        self.path = template_path
-
-
 class Stage:
     """Definition of a stage submodule. It doesn't derive from the Module
     class but have a lot in common with it.
@@ -163,7 +146,7 @@ class Stage:
         return self._next_stages
 
     @property
-    def template(self):
+    def template(self) -> str | None:
         """Method to get the template associated with the current stage.
 
         This method is treated as a property.
@@ -175,7 +158,7 @@ class Stage:
 
         Returns
         -------
-        ResolvedStageTemplate: the resolved template
+        str | None: the template name/subpath or None
 
         """
         if "template" not in self._config:
@@ -183,7 +166,7 @@ class Stage:
 
         template = self._config["template"]
         template_path = provider_factory.get(TemplateProvider.NAME).get(template)
-        return ResolvedStageTemplate(template_path)
+        return template_path
 
     @property
     def variables(self) -> dict[str, Any]:
@@ -345,7 +328,7 @@ class StageModule(Module):
     @override
     def render_template(
         self,
-        path_template: str,
+        path_template: str | None = None,
         args: dict[str, Any] = dict(),
         variables: dict[str, Any] = dict(),
         parameters: dict[str, Any] = dict(),
@@ -361,17 +344,16 @@ class StageModule(Module):
                 global_url_next[local_url_next_name] = make_global_url(local_url_next)
 
         elif len(self.current_stage.next_local_urls.keys()) == 1:
-            print(self.current_stage.next_local_urls)
             local_url_next = next(iter(self.current_stage.next_local_urls.values()))
             global_url_next["default"] = make_global_url(local_url_next)
             internal_args["url_next"] = global_url_next
 
         # Get the template
-        if isinstance(path_template, ResolvedStageTemplate):
-            path_template = path_template.path
-        else:
-            provider: TemplateProvider = provider_factory.get("templates")  # type: ignore
-            path_template = provider.get(path_template)
+        if path_template is None:
+            path_template = f"{self.mod_rep}.tpl"
+        print(path_template)
+        provider: TemplateProvider = provider_factory.get("templates")  # type: ignore
+        path_template = provider.get(path_template)
 
         # Achieve the rendering
         return super().render_template(

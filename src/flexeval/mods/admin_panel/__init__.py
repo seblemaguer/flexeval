@@ -25,7 +25,7 @@ with campaign_instance.register_admin_module(__name__) as am:
 
     @am.route("/auth", methods=["GET"])
     def auth():
-        return am.render_template(path_template="auth.tpl")
+        return am.render_template()
 
     @am.route("/login", methods=["POST"])
     def login():
@@ -65,4 +65,4 @@ with campaign_instance.register_admin_module(__name__) as am:
 
         variables: dict[str, Any] = dict()
         variables["admin_modules"] = admin_modules
-        return am.render_template(path_template="panel.tpl", variables=variables)
+        return am.render_template(path_template="admin_panel.tpl", variables=variables)

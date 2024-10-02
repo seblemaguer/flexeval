@@ -306,6 +306,11 @@ class TemplateProvider(Provider):
             ignore=ignore_instance,
         )  # type: ignore
 
+        # Fix default
+        default_template = self._folder / "default.tpl"
+        if default_template.exists():
+            default_template.rename(self._folder / f"{name}.tpl")
+
     def template_loaded(self, rep: str, path: str) -> bool:
         """Determine the template of a given path is already loaded by flask
 

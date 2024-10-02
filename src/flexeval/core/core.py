@@ -30,7 +30,7 @@ class LoadModuleError(CampaignInstanceError):
         super().__init__(message)
 
 
-class CampaignInstance(object):
+class CampaignInstance:
     """Entry point of the campaign instance
 
     This class deals with all the instantiations necessary for the evaluation campaign to be functionnal.

@@ -402,7 +402,7 @@ class Module(Blueprint, abc.ABC):
 
     def render_template(
         self,
-        path_template: str,
+        path_template: str | None = None,
         args: dict[str, Any] = dict(),
         variables: dict[str, Any] = dict(),
         parameters: dict[str, Any] = dict(),

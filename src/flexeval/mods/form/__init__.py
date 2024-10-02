@@ -135,7 +135,7 @@ with campaign_instance.register_stage_module(__name__, subname="autogen") as sm_
             names.append(component["id"])
 
         # On ajoute le template à l'étape
-        stage.update("template", "dynamicForm.tpl")
+        stage.update("template", "dynamic_form.tpl")
         stage.set_variable("form_json_data", form_json_data)
 
         return redirect(sm.url_for(sm.get_endpoint_for_local_rule("/")))
