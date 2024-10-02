@@ -17,7 +17,7 @@ from flexeval.utils import make_global_url, make_absolute_path
 from flexeval.database import Model
 
 from .providers import provider_factory, Provider, TemplateProvider
-from .providers.auth import AuthProvider, UserModel, VirtualAuthProvider
+from .providers.auth import AuthProvider, User, VirtualAuthProvider
 
 P = ParamSpec("P")
 
@@ -93,7 +93,7 @@ class Module(Blueprint, abc.ABC):
     """The baseline Module class"""
 
     NAMESPACE_SEPARATOR: str = ":"
-    default_checker_handlers: dict[str, Callable[[UserModel | None], bool]] = dict()
+    default_checker_handlers: dict[str, Callable[[User | None], bool]] = dict()
     name_type: str = "<invalid>"
     homepage: str = "<invalid>"
 
@@ -116,31 +116,57 @@ class Module(Blueprint, abc.ABC):
         self._namespace = namespace  # .split(".")
         self._subname = subname
         self.mod_rep = self._namespace  # [2]
-        self._checker_handlers: dict[str, Callable[[UserModel | None], bool]] = dict()
+        self._checker_handlers: dict[str, Callable[[User | None], bool]] = dict()
 
         super().__init__(self.__class__.name_type + Module.NAMESPACE_SEPARATOR + self.get_mod_name(), namespace)
 
         if not (provider_factory.exists("auth_mod_" + self.__class__.name_type)):
             self.__class__.set_auth_provider(VirtualAuthProvider)
 
-    def set_config(self, data: dict[str, Any]):
-        self._config = data
+    def set_config(self, config: dict[str, Any]):
+        """Set the configuration of the module (clear all previous keys!)
 
-    def update_config(self, data: dict[str, Any]):
-        for key, val in data.items():
+        Parameters
+        ----------
+        data : dict[str, Any]
+            the new configuration of the module
+        """
+
+        self._config = config
+
+    def update_config(self, config: dict[str, Any]):
+        """Update the current configuration of the module using the information of a given configuration dictionary
+
+        Parameters
+        ----------
+        config : dict[str, Any]
+            the given configuration dictionary
+
+        """
+
+        for key, val in config.items():
             self._config[key] = val
 
     def get_config(self) -> dict[str, Any] | None:
+        """Get the configuration of the module
+
+        Returns
+        -------
+        dict[str, Any] | None
+            the configuration of the module
+
+        """
+
         return self._config
 
-    def connect_checker_handler(self, name: str, handler: Callable[[UserModel | None], bool]):
+    def connect_checker_handler(self, name: str, handler: Callable[[User | None], bool]):
         """Add a connection checking handler
 
         Parameters
         ----------
         name : str
             The name of the condition
-        handler : Callable[[UserModel | None], bool]
+        handler : Callable[[User | None], bool]
             The handler to validate/unvalidate the condition necessary
             for the connection
         """
@@ -255,9 +281,9 @@ class Module(Blueprint, abc.ABC):
                 if condition == "connected":
                     abort(401)
                 elif condition in self._checker_handlers:
-                    return self._checker_handlers[condition](Module.get_user_model())
+                    return self._checker_handlers[condition](Module.get_user())
                 elif condition in self.__class__.default_checker_handlers:
-                    return self.__class__.default_checker_handlers[condition](Module.get_user_model())
+                    return self.__class__.default_checker_handlers[condition](Module.get_user())
                 else:
                     raise Exception(f'No handler to deal with invalid condition "{condition}"')
 
@@ -278,14 +304,14 @@ class Module(Blueprint, abc.ABC):
         return self.__class__.get_auth_provider()
 
     @classmethod
-    def connect_default_checker_handler(cls, name: str, handler: Callable[[UserModel | None], bool]):
+    def connect_default_checker_handler(cls, name: str, handler: Callable[[User | None], bool]):
         """Add a new default condition checker
 
         Parameters
         ----------
         name : str
             The name of the condition to check at a module level
-        handler : Callable[[UserModel | None], bool]
+        handler : Callable[[User | None], bool]
             The function which is doing the checking
         """
 
@@ -336,26 +362,26 @@ class Module(Blueprint, abc.ABC):
         cls_auth : type[AuthProvider]
             The authentication provider class
         """
-        cls.init_user_model(cls_auth)
+        cls.init_user(cls_auth)
         if cls_auth == VirtualAuthProvider:
             _ = cls_auth("auth_mod_" + cls.name_type, cls.homepage, None)
         else:
-            _ = cls_auth("auth_mod_" + cls.name_type, cls.homepage, cls.get_user_model())
+            _ = cls_auth("auth_mod_" + cls.name_type, cls.homepage, cls.get_user())
 
     @classmethod
-    def get_user_model(cls) -> UserModel | None:
+    def get_user(cls) -> User | None:
         """Get the user model of the current module
 
         Returns
         -------
-        UserModel | None
+        User | None
             The user model
         """
 
-        return cls.user_model
+        return cls.user
 
     @classmethod
-    def init_user_model(cls, cls_auth: type[AuthProvider]):
+    def init_user(cls, cls_auth: type[AuthProvider]):
         """Initialise the user model associated to the module
 
         Parameters
@@ -369,35 +395,35 @@ class Module(Blueprint, abc.ABC):
             TODO: unclear why this is necessary
         """
 
-        user_base: type[UserModel] | None = cls_auth.__userBase__
-        table_name: str = f"{cls.__name__}User"
+        user_base: type[User] | None = cls_auth.__userBase__
+        table_name: str = f"{cls.__name__.replace('Module', '')}User"
         table_type: str = f"{cls.name_type}User"
 
         if not hasattr(cls, "user_model"):
-            cls.user_model = UserModelAttributesMeta(
+            cls.user = UserModelAttributesMeta(
                 table_type,
                 (
-                    UserModel,
+                    User,
                     Model,
                 ),
                 {"__abstract__": True, "__tablename__": table_name},
             )
-            setattr(cls.user_model, "__lock__", True)
+            setattr(cls.user, "__lock__", True)
 
         if user_base is not None:
             if hasattr(cls, "user_model_init"):
-                if user_base in list(cls.user_model.__bases__):
+                if user_base in list(cls.user.__bases__):
                     pass
                 else:
                     raise MalformationError("Two differents auth provider defined for " + cls.__name__ + ".")
             else:
-                cls.user_model.__lock__ = False
-                cls.user_model = UserModelAttributesMeta(
+                cls.user.__lock__ = False
+                cls.user = UserModelAttributesMeta(
                     table_type,
-                    (cls.user_model, user_base),
+                    (cls.user, user_base),
                     {"__abstract__": False, "__tablename__": table_name},
                 )
-                setattr(cls.user_model, "__lock__", True)
+                setattr(cls.user, "__lock__", True)
                 cls.user_model_init = True
 
     def render_template(

@@ -1,11 +1,11 @@
 # coding: utf8
 # license : CeCILL-C
 
-from flexeval.core.providers.auth import UserModel
+from flexeval.core.providers.auth import User
 from flexeval.database import Column, db
 
 
-class ProlificUser(UserModel):
+class ProlificUser(User):
     study_id = Column(db.String, default="")
     session_id = Column(db.String, default="")
 

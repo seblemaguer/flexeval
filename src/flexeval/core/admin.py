@@ -5,8 +5,6 @@ from flask import abort
 from flask import url_for as flask_url_for
 from .module import Module
 
-from .providers import provider_factory, TemplateProvider
-
 P = ParamSpec("P")
 
 
@@ -19,7 +17,9 @@ class AdminModule(Module):
         return f"/{self.__class__.name_type}/{self.get_mod_name()}/"
 
     @override
-    def render_template(self, path_template: str, args=dict(), parameters=dict(), variables=dict()) -> str:
+    def render_template(
+        self, path_template: str | None = None, args=dict(), variables=dict(), parameters=dict()
+    ) -> str:
         args["THIS_MODULE"] = "mod:" + str(self.mod_rep)
 
         # Add variables
@@ -27,9 +27,9 @@ class AdminModule(Module):
         for key, variable in variables.items():
             filled_variables[key] = variable
 
-        provider: TemplateProvider = provider_factory.get(TemplateProvider.NAME)  # type: ignore
-        path_template: str = provider.get(path_template)  # "mod:" + str(self.mod_rep)
-        return super().render_template(path_template, args=args, parameters=parameters, variables=variables)
+        return super().render_template(
+            path_template=path_template, args=args, parameters=parameters, variables=variables
+        )
 
     @override
     def url_for(self, endpoint: str, **kwargs: Any) -> str:

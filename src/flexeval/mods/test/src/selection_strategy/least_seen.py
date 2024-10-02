@@ -4,7 +4,7 @@ import random
 import threading
 
 from flexeval.mods.test.src.System import System
-from flexeval.mods.test.model import SampleModel
+from flexeval.mods.test.model import Sample
 from .core import SelectionBase
 
 MUTEX_SELECTION = threading.Semaphore()
@@ -84,7 +84,7 @@ class LeastSeenSelection(SelectionBase):
 
         return pool_systems
 
-    def internal_select_samples(self, system_name: str, nb_samples: int) -> list[SampleModel]:
+    def internal_select_samples(self, system_name: str, nb_samples: int) -> list[Sample]:
         """Select a given number of samples of a given system
 
         Parameters
@@ -138,7 +138,7 @@ class LeastSeenSelection(SelectionBase):
 
         return [dict_samples[sample_id] for sample_id in pool_samples]
 
-    def _select_samples(self, user_id: str, nb_systems: int, nb_samples: int) -> dict[str, list[SampleModel]]:
+    def _select_samples(self, user_id: str, nb_systems: int, nb_samples: int) -> dict[str, list[Sample]]:
         """Method to select a given number of samples for a given number of systems for a specific user
 
         The selection strategy is twofold:
@@ -200,7 +200,7 @@ class LeastSeenSampleAlignedSelection(LeastSeenSelection):
         nb_systems = len(self._systems[system_name][0].system_samples)
         self._sample_counters = [0 for _ in range(nb_systems)]
 
-    def _select_samples(self, user_id: str, nb_systems: int, nb_samples: int) -> dict[str, list[SampleModel]]:
+    def _select_samples(self, user_id: str, nb_systems: int, nb_samples: int) -> dict[str, list[Sample]]:
         """Method to select a given number of samples for a given number of systems for a specific user
 
         The selection strategy is twofold:
@@ -284,7 +284,7 @@ class LeastSeenPerUserSelection(LeastSeenSelection):
 
         return [x[0] for x in pool_systems[:nb_systems]]
 
-    def user_select_samples(self, user_history: list[str], system_name: str, nb_samples: int) -> list[SampleModel]:
+    def user_select_samples(self, user_history: list[str], system_name: str, nb_samples: int) -> list[Sample]:
         """Select a given number of samples of a given system
 
         Parameters
@@ -344,7 +344,7 @@ class LeastSeenPerUserSelection(LeastSeenSelection):
 
         return [dict_samples[sample[0]] for sample in pool_samples]
 
-    def _select_samples(self, user_id: str, nb_systems: int, nb_samples: int) -> dict[str, list[SampleModel]]:
+    def _select_samples(self, user_id: str, nb_systems: int, nb_samples: int) -> dict[str, list[Sample]]:
         """Method to select a given number of samples for a given number of systems for a specific user
 
         The selection strategy is twofold:

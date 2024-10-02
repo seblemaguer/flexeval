@@ -2,7 +2,7 @@
 # license : CeCILL-C
 
 from flexeval.core.providers.auth import AuthProvider
-from flexeval.mods.auth_by_invitation.model import User
+from .model import InvitedUser
 
 
 class UserAuthError(Exception):
@@ -14,12 +14,14 @@ class BadCredential(UserAuthError):
 
 
 class UserAuth(AuthProvider):
-    __userBase__ = User
+    __userBase__ = InvitedUser
 
     def connect(self, token):
-        user = self.userModel.query.filter(self.userModel.token == token).first()
+        assert self.user_model is not None
+        assert isinstance(self.user_model, InvitedUser)
+        user: InvitedUser | None = InvitedUser.query.filter(self.user_model.token == token).first()
 
         if user is None:
             raise BadCredential()
         else:
-            super().connect(user)
+            super()._connect(user)

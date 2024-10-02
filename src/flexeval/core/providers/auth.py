@@ -13,7 +13,7 @@ from flask import current_app, redirect
 from werkzeug.wrappers import Response
 
 # Flexeval
-from flexeval.database import Column, db
+from flexeval.database import Column, db, Model
 from flexeval.utils import make_global_url
 from .base import provider_factory, Provider  # FIXME: provider_factory is not great here, it should be removed
 
@@ -30,13 +30,15 @@ class NotConnectedError(Exception):
     pass
 
 
-class UserModel:
+class User(Model):
     """The model of User
 
     A user is at least a participant, but this can be extended if needed.
     This class needs to be extended to cover the needs of your authentication methodology.
     """
 
+    __abstract__ = True
+    __tablename__ = "User"
     id = Column(db.String, primary_key=True)
     conditions = Column(db.String, default="")
 
@@ -67,9 +69,7 @@ class UserModel:
 
         """
 
-        if self.has_validated(condition):
-            pass
-        else:
+        if not self.has_validated(condition):
             if self.conditions:
                 self.conditions += ",%s" % condition
             else:
@@ -85,10 +85,10 @@ class UserModel:
 class AuthProvider(Provider, metaclass=abc.ABCMeta):
     """Default authentication provider"""
 
-    __userBase__: type[UserModel] | None = None
-    checkers: dict[str, Callable[[UserModel], bool]] = dict()
+    __userBase__: type[User] | None = None
+    checkers: dict[str, Callable[[User], bool]] = dict()
 
-    def __init__(self, name: str, local_url_homepage: str, user_model: UserModel | None):
+    def __init__(self, name: str, local_url_homepage: str, user_model: User | None):
         """Initialisation method
 
         Parameters
@@ -97,14 +97,14 @@ class AuthProvider(Provider, metaclass=abc.ABCMeta):
             The name of the authentication module
         local_url_homepage : str
             The local URL of the module requiring the authentication
-        user_model : UserModel
+        user_model : User
             The user model
         """
 
         super().__init__()
         self.local_url_homepage: str = local_url_homepage
         self.name: str = name
-        self.user_model: UserModel | None = user_model
+        self.user_model: User | None = user_model
         self._logger.debug(f"Initialisation with (name = {name}, local_url_homepage = {local_url_homepage})")
 
         try:
@@ -116,18 +116,17 @@ class AuthProvider(Provider, metaclass=abc.ABCMeta):
 
         provider_factory.set(name, self)
 
-    def connect(self, user: UserModel):
+    def _connect(self, user: User) -> None:
         """Connect a user
 
         This is done by simply adding the user to the session dictionnary
 
         Parameters
         ----------
-        user : UserModel
+        user : User
             The user to connect
         """
-
-        if self.user_model.__abstract__:  # type: ignore
+        if self.user_model.__abstract__:
             self.session["user"] = user
         else:
             self.session["user"] = user.id
@@ -172,7 +171,7 @@ class AuthProvider(Provider, metaclass=abc.ABCMeta):
             return validated
 
     @classmethod
-    def connect_checker(cls, checker_name: str, checker: Callable[[UserModel], bool]):
+    def connect_checker(cls, checker_name: str, checker: Callable[[User], bool]):
         """Add a checking routine providing a dynamic condition to validate during the connection
 
         Parameters
@@ -208,12 +207,12 @@ class AuthProvider(Provider, metaclass=abc.ABCMeta):
         return redirect(provider.local_url_homepage)
 
     @property
-    def user(self) -> UserModel:
+    def user(self) -> User:
         """Provide an easy way to access the user information
 
         Returns
         -------
-        UserModel
+        User
             The model of the user
         """
         if self.user_model.__abstract__:  # type: ignore
@@ -250,7 +249,7 @@ class AuthProvider(Provider, metaclass=abc.ABCMeta):
 class AnonAuthProvider(AuthProvider):
     """A default anonymous user authentification provider"""
 
-    __userBase__: type[UserModel] | None = UserModel
+    __userBase__: type[User] | None = User
 
     @override
     def connect(self):  # type: ignore
@@ -259,7 +258,7 @@ class AnonAuthProvider(AuthProvider):
         The user ID will respect the pattern <anon@XXX> where XXX is a random number
         """
         user_id = "anon@" + str(random.randint(1, 999999999999999))
-        super().connect(self.user_model.create(id=user_id))  # type: ignore
+        self._connect(self.user_model.create(id=user_id))  # type: ignore
 
     @override
     def validates_connection(self, condition: str | None = None) -> tuple[bool, str]:
@@ -294,13 +293,13 @@ class VirtualAuthProvider(AuthProvider):
     actual authentication provider.
     """
 
-    __userBase__: type[UserModel] | None = None
+    __userBase__: type[User] | None = None
 
     def __init__(
         self,
         name: str | None = None,
         local_url_homepage: str = "/",
-        userModel: UserModel | None = None,
+        userModel: User | None = None,
     ):
         """Initialisation method
 
@@ -310,7 +309,7 @@ class VirtualAuthProvider(AuthProvider):
             The name of the authentication module
         local_url_homepage : str
             The local URL of the module requiring the authentication
-        user_model : UserModel
+        user_model : User
             The user model
         """
         if name is None:
@@ -318,8 +317,7 @@ class VirtualAuthProvider(AuthProvider):
         else:
             super(VirtualAuthProvider, self).__init__(name, local_url_homepage, userModel)
 
-    @override
-    def connect(self, user: UserModel):
+    def connect(self) -> None:
         """A virtual user can't connect,
 
         Raises
@@ -328,19 +326,3 @@ class VirtualAuthProvider(AuthProvider):
            all the time, as you can't connect a virtual user
         """
         raise NotConnectedError()
-
-    @override
-    def validates_connection(self, condition: str | None = None) -> tuple[bool, str]:
-        """Always returns (False, "connected")
-
-        Parameters
-        ----------
-        condition : Optional[str]
-            this is ignored
-
-        Returns
-        -------
-        Tuple[bool, str]
-            always (False, "connected")
-        """
-        return (False, "connected")

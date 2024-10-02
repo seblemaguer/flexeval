@@ -2,7 +2,7 @@ import threading
 import logging
 
 from flexeval.mods.test.src.System import System
-from flexeval.mods.test.model import SampleModel
+from flexeval.mods.test.model import Sample
 
 MUTEX_SELECTION = threading.Semaphore()
 
@@ -19,7 +19,7 @@ class SelectionBase:
         self._include_reference = include_references
         self._logger = logging.getLogger(self.__class__.__name__)
 
-    def select_samples(self, user_id: str, nb_systems: int, nb_samples: int) -> dict[str, list[SampleModel]]:
+    def select_samples(self, user_id: str, nb_systems: int, nb_samples: int) -> dict[str, list[Sample]]:
         """Select sample method
 
         This method is a wrapper on _select_samples to ensure an exclusive access to the critical section
@@ -45,7 +45,7 @@ class SelectionBase:
 
         return to_return
 
-    def _select_samples(self, user_id: str, nb_systems: int, nb_samples: int) -> dict[str, list[SampleModel]]:
+    def _select_samples(self, user_id: str, nb_systems: int, nb_samples: int) -> dict[str, list[Sample]]:
         """Select sample method
 
         This method should be overriden by the subclasses

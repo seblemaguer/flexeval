@@ -4,10 +4,10 @@ from datetime import datetime
 from flexeval.database import Model, Column, ForeignKey, db, declared_attr
 from flexeval.core import StageModule
 
-usermodel = StageModule.get_user_model()
+usermodel = StageModule.get_user()
 
 
-class SampleModel(Model):
+class Sample(Model):
     """Model which represent a sample
 
     A sample is identified by an \"id\" and is associated to a \"system\"
@@ -38,7 +38,7 @@ class TestModel(Model):
     date = db.Column(db.DateTime, nullable=False)
     step_idx = db.Column(db.Integer, nullable=False)
     intro = db.Column(db.Boolean, nullable=False)
-    sample_id = db.Column(db.Integer, ForeignKey(SampleModel.__tablename__ + ".id"), nullable=False)
+    sample_id = db.Column(db.Integer, ForeignKey(Sample.__tablename__ + ".id"), nullable=False)
     info_type = db.Column(db.String, nullable=False)
     info_value = db.Column(db.String, nullable=False)
 

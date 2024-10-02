@@ -7,7 +7,7 @@ from flask import current_app
 from flexeval.utils import AppSingleton
 from flexeval.database import db, commit_all
 
-from flexeval.mods.test.model import SampleModel
+from flexeval.mods.test.model import Sample
 
 
 class SystemError(Exception):
@@ -37,7 +37,7 @@ class System:
 
         # Dynamically create the columns needed to populate all the information related to the current sample
         for col_name in self._col_names:
-            SampleModel.addColumn(col_name, db.String)
+            Sample.addColumn(col_name, db.String)
 
         if max_samples < 0:
             max_samples = len(list(csv.DictReader(open(source_file, encoding="utf-8"), delimiter=delimiter)))
@@ -53,7 +53,7 @@ class System:
                     for col_name in self._col_names:
                         vars[col_name] = line[col_name]
 
-                    SampleModel.create(commit=False, **vars)
+                    Sample.create(commit=False, **vars)
 
                 except Exception as e:
                     raise SystemError(f'Issue to read the line {line_id} of the file "{source_file}": {e}')
@@ -62,7 +62,7 @@ class System:
 
     @property
     def system_samples(self) -> list[Any]:
-        return SampleModel.query.filter(SampleModel.system == self.name).order_by(SampleModel.line_id.asc()).all()
+        return Sample.query.filter(Sample.system == self.name).order_by(Sample.line_id.asc()).all()
 
 
 class SystemManager(metaclass=AppSingleton):

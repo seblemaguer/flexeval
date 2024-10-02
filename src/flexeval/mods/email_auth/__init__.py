@@ -1,16 +1,12 @@
-# coding: utf8
-# license : CeCILL-C
-
-# Import Libraries
 from flask import request
 
 from flexeval.core import campaign_instance, StageModule
 from flexeval.utils import redirect
 
-from .provider import EmailAuth
+from .provider import EmailAuthProvider
 from .model import NotAnEmail
 
-StageModule.set_auth_provider(EmailAuth)
+StageModule.set_auth_provider(EmailAuthProvider)
 
 
 with campaign_instance.register_stage_module(__name__) as sm:
@@ -35,6 +31,7 @@ with campaign_instance.register_stage_module(__name__) as sm:
         email: str = request.form["email"]
 
         try:
+            assert isinstance(sm.auth_provider, EmailAuthProvider)
             sm.auth_provider.connect(email)
         except NotAnEmail as e:
             sm.logger.error(f"Problem with the email: {e}")

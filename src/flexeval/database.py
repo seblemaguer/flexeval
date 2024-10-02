@@ -8,7 +8,7 @@ class:
 https://github.com/cookiecutter-flask/cookiecutter-flask/blob/master/%7B%7Bcookiecutter.app_name%7D%7D/%7B%7Bcookiecutter.app_name%7D%7D/database.py
 
 """
-
+from typing import Self
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text
 from sqlalchemy.inspection import inspect
@@ -89,46 +89,11 @@ class ForbiddenColumnName(DataBaseError):
     pass
 
 
-class CRUDMixin(object):
-    """Mixin that adds convenience methods for CRUD (create, read, update, delete) operations."""
-
-    @classmethod
-    def create(cls, commit=True, **kwargs):
-        """Create a new record and save it the database."""
-
-        for name_col in kwargs.keys():
-            if name_col == "commit":
-                raise ForbiddenColumnName("Col name: commit is forbidden.")
-
-        instance = cls(**kwargs)
-        return instance.save(commit=commit)
-
-    def update(self, commit=True, **kwargs):
-        """Update specific fields of a record."""
-        for attr, value in kwargs.items():
-            setattr(self, attr, value)
-        return commit and self.save() or self
-
-    def save(self, commit=True):
-        """Save the record."""
-        db.session.add(self)
-        if commit:
-            db.session.commit()
-        return self
-
-    def delete(self, commit=True):
-        """Remove the record from the database."""
-        db.session.delete(self)
-        return commit and db.session.commit()
-
-
-class Model(CRUDMixin, db.Model):
+class Model(db.Model):
     """Base model class that includes CRUD convenience methods."""
 
     __abstract__ = True
-
-    def __init__(self, *args, **kwargs):
-        db.Model.__init__(self, *args, **kwargs)
+    __tablename__: str | None = None
 
     @classmethod
     def addRelationship(cls, name, TargetClass, **kwargs):
@@ -139,6 +104,7 @@ class Model(CRUDMixin, db.Model):
 
     @classmethod
     def addColumn(cls, name, col_type, *constraints):
+        assert cls.__tablename__ is not None
         sem.acquire()
         if not (hasattr(cls, name)):
             column = Column(col_type, *constraints)
@@ -169,6 +135,30 @@ class Model(CRUDMixin, db.Model):
 
         sem.release()
         return column
+
+    def update(self, commit=True, **kwargs):
+        """Update specific fields of a record."""
+        for attr, value in kwargs.items():
+            setattr(self, attr, value)
+        return commit and self.save() or self
+
+    def save(self, commit=True):
+        """Save the record."""
+        db.session.add(self)
+        if commit:
+            db.session.commit()
+        return self
+
+    def delete(self, commit=True):
+        """Remove the record from the database."""
+        db.session.delete(self)
+        return commit and db.session.commit()
+
+    @classmethod
+    def create(cls, commit=True, **kwargs) -> Self:
+        """Create a new record and save it the database."""
+        instance = cls(**kwargs)
+        return instance.save(commit=commit)
 
 
 class ModelFactory(metaclass=AppSingleton):

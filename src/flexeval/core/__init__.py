@@ -9,7 +9,7 @@ from .core import CampaignInstance, campaign_instance
 from .stage import StageModule, Stage
 from .admin import AdminModule
 
-from .providers.auth import AuthProvider, UserModel, VirtualAuthProvider
+from .providers.auth import AuthProvider, User, VirtualAuthProvider
 
 __all__ = [
     "Config",
@@ -18,7 +18,7 @@ __all__ = [
     "Stage",
     "AdminModule",
     "AuthProvider",
-    "UserModel",
+    "User",
     "VirtualAuthProvider",
     "error_handler",
     "CampaignInstance",

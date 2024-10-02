@@ -19,7 +19,7 @@ current_app.config.setdefault("MAIL_PASSWORD", "password")
 
 StageModule.set_authProvider(UserAuth)
 mail = Mail()
-userModel = StageModule.get_user_model()
+userModel = StageModule.get_user()
 
 with StageModule(__name__) as sm:
 
@@ -37,7 +37,7 @@ with StageModule(__name__) as sm:
             except BadCredential:
                 pass
 
-            return sm.render_template(path_template="login.tpl")
+            return sm.render_template()
 
     @sm.route("/register", methods=["POST"])
     def register():
@@ -55,7 +55,7 @@ with StageModule(__name__) as sm:
             except BadCredential:
                 pass
 
-            return sm.render_template(path_template="login.tpl")
+            return sm.render_template()
 
 
 with AdminModule(__name__) as am:

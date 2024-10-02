@@ -1,4 +1,4 @@
-from flexeval.core.providers.auth import UserModel
+from flexeval.core.stage import StageModuleUser
 
 import re
 
@@ -12,7 +12,7 @@ class NotAnEmail(Exception):
 EMAIL_REGEX = re.compile(r"^([\w\.\-]+)@([\w\-]+)((\.([\w-]){2,63}){1,3})$")
 
 
-class EmailUser(UserModel):
+class EmailUser(StageModuleUser):
     def __init__(self, email: str):
         super().__init__()
 

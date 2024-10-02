@@ -5,7 +5,7 @@
 from flexeval.core import StageModule
 from flexeval.database import Model, Column, ForeignKey, db, declared_attr
 
-userModel = StageModule.get_user_model()
+user_model = StageModule.get_user()
 
 
 class Form(Model):
@@ -15,4 +15,4 @@ class Form(Model):
 
     @declared_attr
     def user_id(cls):
-        return Column(db.String, ForeignKey(userModel.__tablename__ + ".id"), nullable=False, unique=True)
+        return Column(db.String, ForeignKey(user_model.__tablename__ + ".id"), nullable=False, unique=True)

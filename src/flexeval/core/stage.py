@@ -17,6 +17,7 @@ from flexeval.utils import make_global_url
 
 from .module import Module
 from .providers import provider_factory, TemplateProvider
+from .providers.auth import User
 
 P = ParamSpec("P")
 
@@ -30,6 +31,11 @@ class StageError(Exception):
 class StageNotFound(StageError):
     """Exception raised if the wanted stage doesn't exist."""
 
+    pass
+
+
+class StageModuleUser(User):
+    __tablename__ = "StageUser"
     pass
 
 

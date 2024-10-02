@@ -28,7 +28,7 @@ from flask import current_app
 
 # Flexeval
 from flexeval.utils import AppSingleton
-from flexeval.core import StageModule, UserModel
+from flexeval.core import StageModule, User
 from flexeval.database import ModelFactory
 from flexeval.mods.test.model import TestModel
 
@@ -157,7 +157,7 @@ class TransactionalObject:
 
         self._timeout_seconds = timeout
 
-    def delete_transaction(self, user: UserModel) -> None:
+    def delete_transaction(self, user: User) -> None:
         """Helper to delete the transactions of a given user
 
         Parameters
@@ -167,7 +167,7 @@ class TransactionalObject:
         """
         del self._transactions[user.id]
 
-    def create_transaction(self, user: UserModel) -> None:
+    def create_transaction(self, user: User) -> None:
         """Helper to create a transaction space for a given user
 
         Parameters
@@ -208,7 +208,7 @@ class TransactionalObject:
 
         return transactions
 
-    def has_transaction(self, user: UserModel) -> bool:
+    def has_transaction(self, user: User) -> bool:
         """Helper to know if a given user has some transactions waiting to be processed
 
         Parameters
@@ -223,7 +223,7 @@ class TransactionalObject:
         """
         return user.id in self._transactions
 
-    def get_transaction(self, user: UserModel) -> dict[str, Any]:
+    def get_transaction(self, user: User) -> dict[str, Any]:
         """Retrieve the transactions of a given user
 
         Should be called after checking if the user has some transactions to be processed
@@ -240,21 +240,21 @@ class TransactionalObject:
         """
         return self._transactions[user.id]
 
-    def get_or_create_transaction(self, user: UserModel) -> dict[str, Any]:
+    def get_or_create_transaction(self, user: User) -> dict[str, Any]:
         if not self.has_transaction(user):
             self.create_transaction(user)
         return self.get_transaction(user)
 
-    def set_in_transaction(self, user: UserModel, name: str, obj: Any) -> None:
+    def set_in_transaction(self, user: User, name: str, obj: Any) -> None:
         self._transactions[user.id][name] = obj
 
-    def get_in_transaction(self, user: UserModel, name: str) -> Any:
+    def get_in_transaction(self, user: User, name: str) -> Any:
         if name not in self._transactions[user.id]:
             return None
         else:
             return self._transactions[user.id][name]
 
-    def create_row_in_transaction(self, user: UserModel) -> str:
+    def create_row_in_transaction(self, user: User) -> str:
         ID = "".join((random.choice(string.ascii_lowercase) for _ in range(20)))
 
         # Row not created, just create it
@@ -264,7 +264,7 @@ class TransactionalObject:
         # Returns the ID of the row
         return ID
 
-    def create_new_record(self, user: UserModel, name: str | None = None) -> str:
+    def create_new_record(self, user: User, name: str | None = None) -> str:
         # Dictionary "record name" -> list of field names
         user_transaction = self.get_or_create_transaction(user)
         all_records = user_transaction.setdefault("records", OrderedDict())
@@ -276,7 +276,7 @@ class TransactionalObject:
         name = name.replace(TransactionalObject.RECORD_SEP, "_")
         return name
 
-    def add_field_to_record(self, user: UserModel, field_name: str, record_name: str | None = None) -> str:
+    def add_field_to_record(self, user: User, field_name: str, record_name: str | None = None) -> str:
         # Retrieve the record (create it if necessary)
         user_transaction = self.get_or_create_transaction(user)
         all_records = user_transaction.setdefault("records", dict())
@@ -293,12 +293,12 @@ class TransactionalObject:
 
         return record_name
 
-    def get_all_records(self, user: UserModel):
+    def get_all_records(self, user: User):
         user_transaction = self.get_or_create_transaction(user)
         all_records = user_transaction.setdefault("records", OrderedDict())
         return all_records
 
-    def get_record(self, user: UserModel, name: str | None = None) -> str | Any:
+    def get_record(self, user: User, name: str | None = None) -> str | Any:
         all_records = self.get_all_records(user)
         if name in all_records:
             return name
@@ -310,7 +310,7 @@ class TransactionalObject:
         else:
             return self.create_new_record(user, name=name)
 
-    def get_fields_for_record(self, user: UserModel, record_name: str):
+    def get_fields_for_record(self, user: User, record_name: str):
         user_transaction = self.get_or_create_transaction(user)
         all_records = user_transaction.setdefault("records", OrderedDict())
         current_fields = all_records.setdefault(record_name, list())
@@ -351,7 +351,7 @@ class Test(TransactionalObject):
 
         # Create Test table in the database
         self.model = ModelFactory().create(self.name, TestModel, commit=True)
-        StageModule.get_user_model().addRelationship(self.model.__name__, self.model, uselist=True)
+        StageModule.get_user().addRelationship(self.model.__name__, self.model, uselist=True)
 
         # Initialize the sample selection strategy
         selection_strategy_name = "LeastSeenSelection"
@@ -369,7 +369,7 @@ class Test(TransactionalObject):
 
         self._selection_strategy: SelectionBase = get_strategy(selection_strategy_name, self.systems)
 
-    def nb_steps_complete_by(self, user: UserModel) -> int:
+    def nb_steps_complete_by(self, user: User) -> int:
         """Get the number of steps completed by a given user
 
         Parameters
@@ -388,7 +388,7 @@ class Test(TransactionalObject):
         return max(all_steps) if all_steps else 0
 
     def get_step(
-        self, id_step: int, user: UserModel, nb_systems: int, is_intro_step: bool = False
+        self, id_step: int, user: User, nb_systems: int, is_intro_step: bool = False
     ) -> dict[str, SampleModelTemplate]:
         """Get the samples needed for one step of the test
 

@@ -59,14 +59,14 @@ with campaign_instance.register_stage_module(__name__) as sm:
     @sm.valid_connection_required
     def save():
         stage = sm.current_stage
-        userModel = sm.auth_provider.user
+        user = sm.auth_provider.user
 
         sem_form.acquire()
         if not ModelFactory().has(stage.name, Form):
             form_stage = ModelFactory().create(stage.name, Form)
         else:
             form_stage = ModelFactory().get(stage.name, Form)
-        userModel.addRelationship(form_stage.__name__, form_stage, uselist=False)
+        user.addRelationship(form_stage.__name__, form_stage, uselist=False)
 
         user = sm.auth_provider.user
         user_form_for_this_stage = getattr(user, form_stage.__name__)
