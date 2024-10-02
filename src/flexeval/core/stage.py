@@ -348,13 +348,6 @@ class StageModule(Module):
             global_url_next["default"] = make_global_url(local_url_next)
             internal_args["url_next"] = global_url_next
 
-        # Get the template
-        if path_template is None:
-            path_template = f"{self.mod_rep}.tpl"
-        print(path_template)
-        provider: TemplateProvider = provider_factory.get("templates")  # type: ignore
-        path_template = provider.get(path_template)
-
         # Achieve the rendering
         return super().render_template(
             path_template,

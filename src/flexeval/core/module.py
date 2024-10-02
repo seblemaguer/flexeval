@@ -488,6 +488,13 @@ class Module(Blueprint, abc.ABC):
         args["get_template"] = provider_factory.get(TemplateProvider.NAME).get  # type: ignore
         args["make_url"] = make_global_url
 
+        # Get the module default template
+        if path_template is None:
+            path_template = f"{self.mod_rep}.tpl"
+
+        provider: TemplateProvider = provider_factory.get("templates")  # type: ignore
+        path_template = provider.get(path_template)
+
         try:
             return flask_render_template(path_template, **args)
         except Exception as ex:
