@@ -77,7 +77,7 @@ with campaign_instance.register_stage_module(__name__) as sm:
                 cur_step, user, nb_systems=nb_systems_per_step, is_intro_step=intro_step
             )
 
-            def get_syssamples(*system_names):
+            def _get_syssamples(*system_names):
                 systems = []
                 if len(system_names) == 0:
                     for syssample in syssamples_for_this_step.values():
@@ -88,7 +88,7 @@ with campaign_instance.register_stage_module(__name__) as sm:
 
                 return systems
 
-            def save_field_name(name: str, syssamples, record_name: str | None = None):
+            def _save_field_name(name: str, syssamples, record_name: str | None = None):
                 name = name.replace(TransactionalObject.RECORD_SEP, "_")
 
                 # Make sure the record exist and get a real name if record name is None
@@ -105,7 +105,7 @@ with campaign_instance.register_stage_module(__name__) as sm:
 
                 return ID
 
-            def prepare_new_record(name: str):
+            def _prepare_new_record(name: str):
                 # Record new record for current step and current user
                 user = sm.auth_provider.user
                 _ = test.create_new_record(user, name)
@@ -113,7 +113,7 @@ with campaign_instance.register_stage_module(__name__) as sm:
 
             # sm.logger.debug(f"Sample selected for this step are {get_syssamples()}")
 
-            # On change les valeurs max_steps et steps pour l'affichage sur la page web
+            # Update information related to the steps
             if intro_step:
                 max_steps = nb_step_intro
                 cur_step += 1
@@ -125,15 +125,21 @@ with campaign_instance.register_stage_module(__name__) as sm:
                 "max_steps": max_steps,
                 "step": cur_step,
                 "intro_step": intro_step,
-                "syssamples": get_syssamples,
-                "field_name": save_field_name,
-                "new_record": prepare_new_record,
+                "syssamples": _get_syssamples,
+                "field_name": _save_field_name,
+                "new_record": _prepare_new_record,
             }
+
+            # Complete the parameters with additional config
+            for k in stage.keys():
+                if (k not in parameters) and (k.lower() != "template"):
+                    parameters[k] = stage.get(k)
+
             return sm.render_template(path_template=stage.template, parameters=parameters)
         else:
             next_urls: dict[str, str] = stage.next_local_urls
             if len(next_urls.keys()) > 1:
-                raise Exception("")
+                raise Exception("More than one folloing URL is not yet supported for a step of a test")
             stage_name = list(next_urls.keys())[0]
             return redirect(next_urls[stage_name])
 
