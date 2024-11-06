@@ -6,3 +6,10 @@
     content:" *";
     color:red;
 }
+
+.display-1 {
+    text-align: center;
+    width: 100%;
+    padding: 5px;
+    font-size: 4rem;
+}
