@@ -1,7 +1,6 @@
 {% extends get_template('base.tpl') %}
 
 {% block content %}
-
   {% if get_variable("intro_step",False) %}
     <div class="alert alert-warning alert-dismissible fade show" role="alert">
       <h4 class="alert-heading">This is the <strong>introduction</strong>.</h4>
@@ -33,6 +32,7 @@
 
     <fieldset class="form-group">
       <legend class="col-form-label">
+        {% block instruction %}
         <p>
           Please try to enter all of the words you hear, but <b>do not enter any comments.</b>
           If you cannot hear any sound coming out of the headphones, please make sure that your browser can handle embedded audio players (all current browsers do), and that you have not turned javascript off.
@@ -41,8 +41,8 @@
         </p>
         <p>
           <b>Listen to the audio file by clicking on the image below, and type what you hear into the text box.&nbsp; </b>
-          <br><br>
         </p>
+        {% endblock %}
       </legend>
 
 

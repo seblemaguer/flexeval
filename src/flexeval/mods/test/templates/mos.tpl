@@ -31,7 +31,7 @@
   <form action="./save" method="post" enctype="multipart/form-data" class="form-example">
     <fieldset class="form-group">
       <legend class="col-form-label">
-        Listen to the example below:
+          Listen to the example below:
       </legend>
 
       {% set syssample = get_variable("syssamples")[0] %}
@@ -62,17 +62,21 @@
         </center>
 
         <legend class="col-form-label">
-          Now choose a score for how <b>natural</b> or <b>unnatural</b> the sentence <b><i>sounded</i></b>.
-          The scale is from <b>1 [Completely Unnatural] to 5 [Completely Natural]</b>.
+          {% block instruction %}
+            Now choose a score for how <b>natural</b> or <b>unnatural</b> the sentence <b><i>sounded</i></b>.
+            The scale is from <b>1 [Completely Unnatural] to 5 [Completely Natural]</b>.
+          {% endblock %}
         </legend>
 
         <select id="mos_score@{{syssample.ID}}" name="{{name_field}}" class="form-control" required>
           <option value="" selected disabled hidden>Choose here</option>
-          <option value="1">1 : Completely Unnatural</option>
-          <option value="2">2 : Mostly Unnatural</option>
-          <option value="3">3 : Equally Natural and Unnatural</option>
-          <option value="4">4 : Mostly Natural</option>
-          <option value="5">5 : Completely Natural</option>
+          {% block score_options %}
+            <option value="1">1 : Completely Unnatural</option>
+            <option value="2">2 : Mostly Unnatural</option>
+            <option value="3">3 : Equally Natural and Unnatural</option>
+            <option value="4">4 : Mostly Natural</option>
+            <option value="5">5 : Completely Natural</option>
+          {% endblock %}
         </select>
       </div>
     </fieldset>
