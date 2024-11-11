@@ -6,19 +6,69 @@
       input[type="range"] {
     writing-mode: vertical-lr;
     direction: rtl;
-          height: 200px;
+          height: 100%;
       }
 
     input[type="range"]:hover {
       background: #4CAF50;
     }
     .slider-container {
-    height:200px;
+    height:300px;
     }
 
     td {
     text-align: center;
     }
+
+  /* Scale container within a table cell */
+  .scale-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 auto;
+  }
+
+  /* Vertical scale bar */
+  .scale-bar {
+    position: relative;
+    height: 300px; /* Adjust height as needed */
+    width: 10px;
+    background-color: #ddd;
+  }
+
+  /* Scale divisions */
+  .scale-step {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    height: 2px;
+    background-color: #333;
+  }
+
+  /* Labels for MUSHRA scale */
+  .label-container {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    top: 0;
+    right: 80px;
+    height: 100%;
+  }
+
+  .label {
+    font-size: 14px;
+    color: #333;
+    transform: translateY(-50%); /* Center each label in its interval */
+    position: absolute;
+  }
+    /* Position each label at the center of each interval */
+    .label:nth-child(1) { top: 10%; }      /* Excellent */
+    .label:nth-child(2) { top: 30%; }      /* Good */
+    .label:nth-child(3) { top: 50%; }      /* Fair */
+    .label:nth-child(4) { top: 70%; }      /* Poor */
+    .label:nth-child(5) { top: 90%; }      /* Bad */
 </style>
 {% endblock %}
 
@@ -94,7 +144,28 @@
                   </tr>
                   <tr>
                     <td><b>Rank</b></td>
-                    <td></td>
+                    <td>
+                      <!-- Vertical scale inside a table cell -->
+                      <div class="scale-container">
+                        <div class="scale-bar">
+                          <div class="scale-step" style="top: 0%;"></div>
+                          <div class="scale-step" style="top: 20%;"></div>
+                          <div class="scale-step" style="top: 40%;"></div>
+                          <div class="scale-step" style="top: 60%;"></div>
+                          <div class="scale-step" style="top: 80%;"></div>
+                          <div class="scale-step" style="top: 100%;"></div>
+
+                          <!-- Label container for descriptive text -->
+                          <div class="label-container">
+                            <div class="label">Excellent</div>
+                            <div class="label">Good</div>
+                            <div class="label">Fair</div>
+                            <div class="label">Poor</div>
+                            <div class="label">Bad</div>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
                     {% for syssample in sample_list %}
                       {% set name_field = get_variable("field_name",name="rank_score_%d" % loop.index, syssamples=[syssample]) %}
                       <td class="slider-container">
