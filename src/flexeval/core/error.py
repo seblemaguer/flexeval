@@ -12,7 +12,7 @@ from werkzeug.exceptions import HTTPException
 
 from flexeval.utils import make_global_url
 
-
+from .core import campaign_instance
 from .providers import provider_factory, TemplateProvider, AssetsProvider
 from .providers.auth import VirtualAuthProvider
 
@@ -73,13 +73,24 @@ class ErrorHandler:
         variables.update({"code": code, "source_url": request.url, "error_message": str(e)})
         if (code < 400) or (code >= 500):
             variables["error_stacktrace"] = error_stacktrace
-        return flask_render_template(
-            template_name_or_list=template_provider.get("error.tpl"),
-            get_template=provider_factory.get(TemplateProvider.NAME).get,  # type: ignore
-            get_asset=_get_asset,
-            auth=VirtualAuthProvider(),
-            **variables,
-        )
+
+        if code == 401:
+            return flask_render_template(
+                template_name_or_list=template_provider.get("auth_failed.tpl"),
+                get_template=provider_factory.get(TemplateProvider.NAME).get,  # type: ignore
+                get_asset=_get_asset,
+                auth=VirtualAuthProvider(),
+                entry_point=campaign_instance.get_entrypoint(),
+                **variables,
+            )
+        else:
+            return flask_render_template(
+                template_name_or_list=template_provider.get("error.tpl"),
+                get_template=provider_factory.get(TemplateProvider.NAME).get,  # type: ignore
+                get_asset=_get_asset,
+                auth=VirtualAuthProvider(),
+                **variables,
+            )
 
 
 error_handler: ErrorHandler | None = None

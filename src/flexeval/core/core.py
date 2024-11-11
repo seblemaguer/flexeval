@@ -175,8 +175,11 @@ class CampaignInstance:
         for args_key in request.args.keys():
             args_GET.append(f"{args_key}={request.args[args_key]}")
 
-        redirect_url: str = f"{self._stage_graph.get_entry_point_local_url()}?{'&'.join(args_GET)}"
+        redirect_url: str = f"{self.get_entrypoint()}?{'&'.join(args_GET)}"
         return redirect(redirect_url)
+
+    def get_entrypoint(self) -> str:
+        return self._stage_graph.get_entry_point_local_url()
 
     def goto_admin_entrypoint(self) -> Response:
         """Generate the HTTP response to go to the admin entry point of the campaign
