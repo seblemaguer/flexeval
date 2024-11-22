@@ -41,23 +41,9 @@
 
         <center>
           <label for="score@{{syssample.ID}}">
-            {% if mimetype == "text" %}
-              {{content}}
-            {% elif mimetype == "image" %}
-              <img class="img-fluid" src="{{content}}" />
-            {% elif mimetype == "audio" %}
-              <audio id="sample" controls readall>
-                <source src="{{content}}">
-                Your browser does not support the <code>audio</code> element.
-              </audio>
-            {% elif mimetype == "video" %}
-              <video controls readall>
-                <source src="{{content}}">
-                Your browser does not support the <code>video</code> element.
-              </video>
-            {% else %}
-              {{content}}
-            {% endif %}
+            {% block player_view scoped %}
+              {% include get_template('players/default/player.html') %}
+            {% endblock %}
           </label>
         </center>
 
@@ -83,4 +69,10 @@
 
     <button type="submit" id="submit" class="btn btn-primary">Submit</button>
   </form>
+
+  <script>
+    {% block player_controls scoped %}
+      {% include get_template('players/default/controls.js') %}
+    {% endblock %}
+  </script>
 {% endblock %}

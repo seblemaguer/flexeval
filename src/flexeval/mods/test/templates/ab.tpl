@@ -43,23 +43,9 @@
           <div class="form-check" style="margin-bottom:10px;">
             <input class="form-check-input" type="radio" name="{{field_name}}" id="ID@{{syssample.ID}}" value="{{syssample.ID}}" required>
             <label class="form-check-label" for="ID@{{syssample.ID}}">
-              {% if mimetype == "text" %}
-                {{content}}
-              {% elif mimetype == "image" %}
-                <img class="img-fluid" src="{{content}}" />
-              {% elif mimetype == "audio" %}
-                <audio controls readall>
-                  <source src="{{content}}">
-                  Your browser does not support the <code>audio</code> element.
-                </audio>
-              {% elif mimetype == "video" %}
-                <video controls readall>
-                  <source src="{{content}}">
-                  Your browser does not support the <code>video</code> element.
-                </video>
-              {% else %}
-                {{content}}
-              {% endif %}
+              {% block player_view scoped %}
+                {% include get_template('players/default/player.html') %}
+              {% endblock %}
             </label>
           </div>
         {% endfor %}
@@ -69,4 +55,10 @@
 
     <button type="submit" class="btn btn-primary">Submit</button>
   </form>
+
+  <script>
+    {% block player_controls scoped %}
+      {% include get_template('players/default/controls.js') %}
+    {% endblock %}
+  </script>
 {% endblock %}

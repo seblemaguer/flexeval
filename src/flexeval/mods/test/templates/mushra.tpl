@@ -111,10 +111,10 @@
 
       <div class="form-group" style="margin-bottom:20px;">
         <center>
-          <audio id="sample" controls>
-            <source id="sample_src" src="">
-            Your browser does not support the <code>audio</code> element.
-          </audio>
+          {% set content,mimetype = ("", "audio")  %}
+          {% block player_view scoped %}
+            {% include get_template('players/default/player.html') %}
+          {% endblock %}
         </center>
       </div>
 
@@ -123,22 +123,22 @@
               <tbody>
                   <tr>
                     <td><b>System</b></td>
-                    <td><b><button type="button" class="btn btn-primary btn-mute" id="audio_{{sample_list|length}}" onclick="selectSample({{sample_list|length}})">Reference</button></b></td>
+                    <td><b><button type="button" class="btn btn-primary btn-mute" id="audio_{{sample_list|length}}" onclick="selectSample({{sample_list|length}}, true)">Reference</button></b></td>
                     {% for syssample in sample_list%}
                       {% set name_field = get_variable("field_name", name="sample_%d" % loop.index, syssamples=[syssample]) %}
                       <td>
-                        <button type="button" class="btn btn-primary btn-mute" id="audio_{{loop.index-1}}" onclick="selectSample({{loop.index - 1}})">Sample {{loop.index}}</button>
+                        <button type="button" class="btn btn-primary btn-mute" id="audio_{{loop.index-1}}" onclick="selectSample({{loop.index - 1}}, true)">Sample {{loop.index}}</button>
                       </td>
                     {% endfor %}
                   </tr>
                   <tr>
                       <td><b>Fully played?</b></td>
                       <td>
-                        <img id="checked_{{sample_list|length}}" src="{{get_asset('img/checked.svg')}}" height="20px" style="display: none;" />
+                        <span id="checked_{{sample_list|length}}" style="display: none; color:green;" />
                       </td>
                       {% for syssample in sample_list %}
                       <td>
-                          <img id="checked_{{loop.index-1}}" src="{{get_asset('img/checked.svg')}}" height="20px" style="display: none;" />
+                        <span id="checked_{{loop.index-1}}" style="display: none; color:green;" />
                       </td>
                       {% endfor %}
                   </tr>
@@ -183,11 +183,15 @@
   </form>
 
   <script>
+    {% block player_controls scoped %}
+      {% include get_template('players/default/controls.js') %}
+    {% endblock %}
+
     {% set sysref_sample = get_variable("syssamples", get_variable("sysref"))[0] %}
     {% set sysref_content, sysref_mimetype = sysref_sample.get(num=0) %}
 
-      const list_audios = [
-          {% for syssample in sample_list %}
+    const list_audios = [
+        {% for syssample in sample_list %}
           {% set content,mimetype = syssample.get(num=0)  %}
           {% if mimetype.startswith("audio") %}
           ["{{syssample}}", "{{content}}"],
@@ -197,93 +201,68 @@
           ["{{sysref_sample}}", "{{sysref_content}}"]
           {% endif %}
 
-      ];
+    ];
 
+    const URL_MONITOR =  window.location.href + "monitor";
+    const monitor_handler = async (action, value, sample_id) => {
+        const body = {
+            "sample_id": sample_id,
+            "info_type": action,
+            "info_value": value
+        }
 
-      var audio = document.getElementById("sample");
-      var audio_source = document.getElementById("sample_src");
-      var cur_sample_index = -1;
-      var cur_selected_audio_btn = null;
-
-      const URL_MONITOR =  window.location.href + "monitor";
-      const monitor_handler = async (action, value, sample_id) => {
-          const body = {
-              "sample_id": sample_id,
-              "info_type": action,
-              "info_value": value
-          }
-          // FIXME: the URL needs to be generalised (both base part & stage part)
-          const response = await fetch(URL_MONITOR, {
-              method: 'POST',
-              body: JSON.stringify(body),
-              headers: {
-                  'Content-Type': 'application/json'
-              }
+        // FIXME: the URL needs to be generalised (both base part & stage part)
+        const response = await fetch(URL_MONITOR, {
+            method: 'POST',
+            body: JSON.stringify(body),
+            headers: {
+               'Content-Type': 'application/json'
+            }
           });
       }
 
-      audio.onpause = function() {
+    var played_audios = new Set();
+    var cur_sample_index = -1;
+    var cur_selected_audio_btn = null;
+
+
+    function selectSample(index, play) {
+        if (cur_sample_index >= 0) {
+          monitor_handler("switch_sample", ["sampleid:" + list_audios[index][0], audio.duration], list_audios[cur_sample_index][0]);
+        }
+
+        audio_source.src = list_audios[index][1];
+        audio.load();
+        cur_sample_index = index;
+
+        // Update button to reflect the new status
+        if (cur_selected_audio_btn) {
+          cur_selected_audio_btn.disabled = false;
+          cur_selected_audio_btn.classList.replace("btn-solo", "btn-mute");
+        }
+
+        cur_selected_audio_btn = document.getElementById("audio_" + index);
+        cur_selected_audio_btn.disabled = true;
+        cur_selected_audio_btn.classList.replace("btn-mute", "btn-solo");
+
+        if (play) {
+          audio.play()
+        }
+    }
+
+    audio.addEventListener("pause", function (){
           if (audio.currentTime < audio.duration) {
               monitor_handler("pause", audio.currentTime, list_audios[cur_sample_index][0]);
           } else {
               monitor_handler("ended", audio.currentTime, list_audios[cur_sample_index][0]);
           }
-      };
+      });
 
-      audio.onplay = function() {
+      audio.addEventListener("play", function (){
           monitor_handler("play", audio.currentTime, list_audios[cur_sample_index][0]);
-      };
+      });
 
-
-      function selectSample(index) {
-          if (cur_sample_index >= 0) {
-              monitor_handler("switch_sample", ["sampleid:" + list_audios[index][0], audio.duration], list_audios[cur_sample_index][0]);
-          }
-
-          audio_source.src = list_audios[index][1];
-          audio.load();
-          cur_sample_index = index;
-
-
-          // Update button to reflect the new status
-          if (cur_selected_audio_btn) {
-              cur_selected_audio_btn.disabled = false;
-              cur_selected_audio_btn.classList.replace("btn-solo", "btn-mute");
-          }
-
-          cur_selected_audio_btn = document.getElementById("audio_" + index);
-          cur_selected_audio_btn.disabled = true;
-          cur_selected_audio_btn.classList.replace("btn-mute", "btn-solo");
-          audio.play()
-      }
-
-
-      function validateForm() {
-          for (let i = 1; i <= 5; i++) {
-              let scoreValue = document.getElementById('score_' + i).value;
-              if (scoreValue == '1') {
-                  return true;
-              }
-          }
-          showOverlay();
-          return false;
-      }
-
-      function showOverlay() {
-          document.getElementById('overlay').style.display = 'block';
-      }
-
-      function closeOverlay() {
-          document.getElementById('overlay').style.display = 'none';
-      }
-
-      document.getElementById('the_form').onsubmit = function() {
-          return validateForm();
-      };
-
-      var played_audios = new Set();
-
-      audio.onended = function() {
+      audio.addEventListener("ended", function(){
           played_audios.add(audio_source.src);
 
           // Enable the submit button if all audios have been played
@@ -291,11 +270,13 @@
               document.getElementById('submit').disabled = false;
           }
 
-          // Show the fact that sample is
           var checked = document.getElementById("checked_" + cur_sample_index);
+          checked.textContent = "✔";
           checked.style.display = "";
-      };
+      });
+
       // Initially disable the submit button
       document.getElementById('submit').disabled = true;
+      selectSample(list_audios.length-1, false);
   </script>
 {% endblock %}
