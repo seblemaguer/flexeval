@@ -3,6 +3,7 @@ from typing import Any
 import logging
 from logging import Logger
 import importlib
+import copy
 
 
 from werkzeug import Response
@@ -193,7 +194,7 @@ class CampaignInstance:
         for args_key in request.args.keys():
             args_GET.append(f"{args_key}={request.args[args_key]}")
 
-        admin_module = self.register_admin_module(self._admin_entrypoint)
+        admin_module = self.get_admin_modules()[self._admin_entrypoint]
         redirect_url: str = f"/{admin_module.local_url()}/?{'&'.join(args_GET)}"
         return redirect(redirect_url)
 
@@ -214,10 +215,28 @@ class CampaignInstance:
 
     def register_admin_module(self, name: str, subname: str | None = None) -> AdminModule:
         assert self._config is not None
-        module = AdminModule(namespace=name.replace("flexeval.mods.", ""), subname=subname)
-        config: dict[str, Any] = self._config.get_admin_config(name)
+        module_name = name.replace("flexeval.mods.", "")
+
+        # Generate config by merging global module config with more specific ones
+        # NOTE: dirty hack in case of dictionnary, only 1 level supported (else everything is overriden)
+        config = self._config.get_module_config(module_name)
+        config = copy.deepcopy(config)
+
+        for k, v in self._config.get_admin_config(module_name).items():
+            if k not in config:
+                config[k] = v
+            elif isinstance(v, dict):
+                for k2, v2 in v.items():
+                    config[k][k2] = v2
+            else:
+                config[k] = v
+
+        self._logger.debug(f"=====> Admin module configuration: {config}")
+
+        # Instanciate module and register it!
+        module = AdminModule(namespace=module_name, subname=subname)
         module.set_config(config)
-        self._admin_modules[name] = module
+        self._admin_modules[module_name] = module
         return module
 
     def get_admin_modules(self) -> dict[str, AdminModule]:

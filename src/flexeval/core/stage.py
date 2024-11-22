@@ -36,7 +36,6 @@ class StageNotFound(StageError):
 
 class StageModuleUser(User):
     __tablename__ = "StageUser"
-    pass
 
 
 class Stage:

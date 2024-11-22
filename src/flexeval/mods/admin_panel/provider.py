@@ -10,7 +10,5 @@ class AdminUser(User):
 
 
 class AdminAuthProvider(AuthProvider):
-    __userBase__ = None
-
     def connect(self):
         super()._connect(AdminUser())

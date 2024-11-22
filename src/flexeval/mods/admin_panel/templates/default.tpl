@@ -6,7 +6,7 @@
 
   <form action="./login" method="post" class="form-example">
     <div class="form-group">
-      <label for="admin_password">Enter password: </label>
+      <label for="admin_password">Enter the admin password: </label>
       <input type="password" name="admin_password" id="admin_password" class="form-control" required>
     </div>
 

@@ -22,13 +22,13 @@ class AdminModule(Module):
     ) -> str:
         args["THIS_MODULE"] = "mod:" + str(self.mod_rep)
 
-        # Add variables
+        # Add experience variables
         filled_variables: dict[str, Any] = self._config["variables"]
         for key, variable in variables.items():
             filled_variables[key] = variable
 
         return super().render_template(
-            path_template=path_template, args=args, parameters=parameters, variables=variables
+            path_template=path_template, args=args, parameters=parameters, variables=filled_variables
         )
 
     @override

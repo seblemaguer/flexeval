@@ -112,7 +112,6 @@ class Config:
         return config
 
     def get_admin_config(self, module_name: str) -> dict[str, Any]:
-        module_name = module_name.replace("flexeval.mods.", "")
         return self._data["admin"]["mods"][module_name]
 
     def get_stage_config(self, stage_name: str) -> dict[str, Any]:

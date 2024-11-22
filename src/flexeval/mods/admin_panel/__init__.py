@@ -1,7 +1,6 @@
 # coding: utf8
 # license : CeCILL-C
 
-from typing import Any
 from flask import request
 
 from flexeval.core import campaign_instance
@@ -67,6 +66,6 @@ with campaign_instance.register_admin_module(__name__) as am:
 
                 admin_modules.append(admin_module)
 
-        variables: dict[str, Any] = dict()
+        variables = dict()
         variables["admin_modules"] = admin_modules
-        return am.render_template(path_template="admin_panel.tpl", variables=variables)
+        return am.render_template(path_template="panels.tpl", variables=variables)
