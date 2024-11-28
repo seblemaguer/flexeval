@@ -10,8 +10,22 @@
       }
 
     input[type="range"]:hover {
-      background: #4CAF50;
+      background: blue;
     }
+
+    .slider-tooltip {
+      position: absolute;
+      top: -35px;
+      left: 0;
+      transform: translateX(-50%);
+      padding: 5px 10px;
+      background-color: #555;
+      color: white;
+      font-size: 12px;
+      border-radius: 5px;
+      white-space: nowrap;
+    }
+
     .slider-container {
     height:300px;
     }
@@ -32,8 +46,8 @@
   .scale-bar {
     position: relative;
     height: 300px; /* Adjust height as needed */
-    width: 10px;
-    background-color: #ddd;
+    width: 15px;
+    background: linear-gradient(#2ecc71, #cccccc, #e74c3c);
   }
 
   /* Scale divisions */
@@ -69,6 +83,13 @@
     .label:nth-child(3) { top: 50%; }      /* Fair */
     .label:nth-child(4) { top: 70%; }      /* Poor */
     .label:nth-child(5) { top: 90%; }      /* Bad */
+
+    .score_value {
+       font-size: 14px;
+       background-color: #ddd;
+       margin-top: 10px;
+       font-weight: bold;
+    }
 </style>
 {% endblock %}
 
@@ -169,7 +190,17 @@
                     {% for syssample in sample_list %}
                       {% set name_field = get_variable("field_name",name="rank_score_%d" % loop.index, syssamples=[syssample]) %}
                       <td class="slider-container">
-                        <input type="range" id="score_{{loop.index}}" name="{{ name_field }}" class="form-control-range" data-trigger="hover" data-vertical="true" data-toggle="popover" data-content="Fair (50)" data-slider-min="0" data-slider-max="100" data-slider-step="1" data-slider-value="50" required />
+                        <input type="range" id="score_{{loop.index}}" name="{{ name_field }}" class="form-control-range" data-trigger="hover" data-vertical="true" data-toggle="popover" data-content="Fair (50)" data-slider-min="0" data-slider-max="100" data-slider-step="1" data-slider-value="50" oninput="onInputSlider(this)" required />
+                      </td>
+                    {% endfor %}
+                  </tr>
+
+                  <tr>
+                    <td></td>
+                    <td></td>
+                    {% for syssample in sample_list %}
+                      <td>
+                        <div id="value_{{loop.index}}" class='score_value'>Not scored</div>
                       </td>
                     {% endfor %}
                   </tr>
@@ -203,6 +234,9 @@
 
     ];
 
+    const labels = ['Bad', 'Poor', 'Fair', 'Good', 'Excellent'];
+    const colors = ['#e74c3c', '#cccccc', '#2ecc71']; // Gradient colors
+
     const URL_MONITOR =  window.location.href + "monitor";
     const monitor_handler = async (action, value, sample_id) => {
         const body = {
@@ -225,10 +259,38 @@
     var cur_sample_index = -1;
     var cur_selected_audio_btn = null;
 
+    function getGradientColor(minColor, midColor, maxColor, value, min, max) {
+        const interpolate = (start, end, factor) => Math.round(start + (end - start) * factor);
+        const parseColor = (hex) => hex.match(/#(..)(..)(..)/).slice(1).map(c => parseInt(c, 16));
+
+        const [minR, minG, minB] = parseColor(minColor);
+        const [midR, midG, midB] = parseColor(midColor);
+        const [maxR, maxG, maxB] = parseColor(maxColor);
+
+        const midPoint = (max + min) / 2;
+
+        if (value <= midPoint) {
+            const factor = (value - min) / (midPoint - min);
+            return `rgb(${interpolate(minR, midR, factor)}, ${interpolate(minG, midG, factor)}, ${interpolate(minB, midB, factor)})`;
+        } else {
+            const factor = (value - midPoint) / (max - midPoint);
+            return `rgb(${interpolate(midR, maxR, factor)}, ${interpolate(midG, maxG, factor)}, ${interpolate(midB, maxB, factor)})`;
+        }
+    }
+
+    function onInputSlider(slider) {
+       const value = parseInt(slider.value);
+       slider.style.setProperty('accent-color', getGradientColor(colors[0], colors[1], colors[2], value, 0, 100));
+       const label = labels[Math.min(Math.floor(value / 20), labels.length-1)];
+       const id = slider.id.split("_")[1];
+       const label_elt = document.getElementById(`value_${id}`);
+       label_elt.innerHTML = `${value} (${label})`;
+    }
+
 
     function selectSample(index, play) {
         if (cur_sample_index >= 0) {
-          monitor_handler("switch_sample", ["sampleid:" + list_audios[index][0], audio.duration], list_audios[cur_sample_index][0]);
+          // monitor_handler("switch_sample", ["sampleid:" + list_audios[index][0], audio.duration], list_audios[cur_sample_index][0]);
         }
 
         audio_source.src = list_audios[index][1];
@@ -251,32 +313,32 @@
     }
 
     audio.addEventListener("pause", function (){
-          if (audio.currentTime < audio.duration) {
-              monitor_handler("pause", audio.currentTime, list_audios[cur_sample_index][0]);
-          } else {
-              monitor_handler("ended", audio.currentTime, list_audios[cur_sample_index][0]);
-          }
-      });
+        if (audio.currentTime < audio.duration) {
+          monitor_handler("pause", audio.currentTime, list_audios[cur_sample_index][0]);
+        } else {
+          monitor_handler("ended", audio.currentTime, list_audios[cur_sample_index][0]);
+        }
+    });
 
-      audio.addEventListener("play", function (){
-          monitor_handler("play", audio.currentTime, list_audios[cur_sample_index][0]);
-      });
+    audio.addEventListener("play", function (){
+        monitor_handler("play", audio.currentTime, list_audios[cur_sample_index][0]);
+    });
 
-      audio.addEventListener("ended", function(){
-          played_audios.add(audio_source.src);
+    audio.addEventListener("ended", function(){
+        played_audios.add(audio_source.src);
 
-          // Enable the submit button if all audios have been played
-          if (played_audios.size === list_audios.length) {
-              document.getElementById('submit').disabled = false;
-          }
+        // Enable the submit button if all audios have been played
+        if (played_audios.size === list_audios.length) {
+            document.getElementById('submit').disabled = false;
+        }
 
-          var checked = document.getElementById("checked_" + cur_sample_index);
-          checked.textContent = "✔";
-          checked.style.display = "";
-      });
+        var checked = document.getElementById("checked_" + cur_sample_index);
+        checked.textContent = "✔";
+        checked.style.display = "";
+    });
 
-      // Initially disable the submit button
-      document.getElementById('submit').disabled = true;
-      selectSample(list_audios.length-1, false);
+    // Initially disable the submit button
+    document.getElementById('submit').disabled = true;
+    selectSample(list_audios.length-1, false);
   </script>
 {% endblock %}

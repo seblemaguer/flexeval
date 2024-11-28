@@ -49,18 +49,19 @@
 
         <legend class="col-form-label">
           {% block instruction %}
-            How would rate the overall quality of the previous sample?
+            Now choose a score for how <b>natural</b> or <b>unnatural</b> the sentence <b><i>sounded</i></b>.
+            The scale is from <b>1 [Completely Unnatural] to 5 [Completely Natural]</b>.
           {% endblock %}
         </legend>
 
         <select id="mos_score@{{syssample.ID}}" name="{{name_field}}" class="form-control" required>
           <option value="" selected disabled hidden>Choose here</option>
           {% block score_options %}
-            <option value="1">1 : Bad</option>
-            <option value="2">2 : Poor</option>
-            <option value="3">3 : Fair</option>
-            <option value="4">4 : Good</option>
-            <option value="5">5 : Excellent</option>
+            <option value="1">1 : Completely Unnatural</option>
+            <option value="2">2 : Mostly Unnatural</option>
+            <option value="3">3 : Equally Natural and Unnatural</option>
+            <option value="4">4 : Mostly Natural</option>
+            <option value="5">5 : Completely Natural</option>
           {% endblock %}
         </select>
       </div>
