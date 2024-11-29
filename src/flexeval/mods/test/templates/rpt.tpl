@@ -23,6 +23,23 @@
     background-color: #f8d7da; /* Pastel red */
     border-color: #f5c2c7;
     }
+    fieldset {
+    border: 1px solid #c0c0c0;
+    margin: 0 2em 0 0;
+    padding: 0.5em;
+    }
+    legend {
+    display: block;
+    width: auto;
+    max-width: 100%;
+    padding: 0 0.5em 0 0.5em;
+    margin-bottom: .5rem;
+    font-size: 1.5rem;
+    line-height: inherit;
+    color: inherit;
+    white-space: normal;
+    }
+
   </style>
 {% endblock %}
 
@@ -51,21 +68,17 @@
 
   <h2 class="bd-content-title">
     <img src="{{get_asset('/img/svg_icon/chevron-right.svg', 'flexeval')}}" alt=">" />
-    {{get_variable("subtitle","Test")}} - step {{get_variable("step")}} over {{get_variable("max_steps")}}
+    Step {{get_variable("step")}} over {{get_variable("max_steps")}}
   </h2>
 
   <form action="./save" method="post" enctype="multipart/form-data" class="form-example">
-    <fieldset class="form-group">
-      <legend class="col-form-label">
-          Listen to the example below:
-      </legend>
 
       {% set syssample = get_variable("syssamples")[0] %}
       <div class="form-group" style="margin-bottom:10px;">
         {% set name_field = get_variable("field_name",name="MOS_score",syssamples=[syssample]) %}
         {% set content, mimetype = syssample.get('audio')  %}
 
-        <div id="player_area">
+        <div id="player_area" style="margin-bottom:10px;">
           <center>
             {% block player_view scoped %}
               {% include get_template('players/default/player.html') %}
@@ -74,35 +87,43 @@
         </div>
 
         {# Rapid Prosody Transcription Part #}
-        <div id="rpt_area">
-          <div id="text-container"></div>
-          <input type="hidden" id="selected-items" name="selected_items" value="">
+        <div id="rpt_area" style="margin-bottom:10px;">
+          <fieldset>
+            <legend>Rapid Prosody Transcription</legend>
+
+            <center>
+              <div id="text-container"></div>
+            </center>
+            <input type="hidden" id="selected-items" name="selected_items" value="">
+          </fieldset>
         </div>
 
         {# MOS Part #}
-        <div id="mos_area">
-          <legend class="col-form-label">
+        <div id="mos_area" style="margin-bottom:10px;">
+          <fieldset>
+            <legend>Mean Opinion Score</legend>
             {% block instruction %}
-              Now choose a score for how <b>natural</b> or <b>unnatural</b> the sentence <b><i>sounded</i></b>.
+              How natural is the speaker’s intonation?
               The scale is from <b>1 [Completely Unnatural] to 5 [Completely Natural]</b>.
             {% endblock %}
-          </legend>
 
-          <select id="mos_score@{{syssample.ID}}" name="{{name_field}}" class="form-control" required>
-            <option value="" selected disabled hidden>Choose here</option>
-            {% block score_options %}
-              <option value="1">1 : Completely Unnatural</option>
-            <option value="2">2 : Mostly Unnatural</option>
-            <option value="3">3 : Equally Natural and Unnatural</option>
-            <option value="4">4 : Mostly Natural</option>
-            <option value="5">5 : Completely Natural</option>
-          {% endblock %}
-          </select>
+            <select id="mos_score@{{syssample.ID}}" name="{{name_field}}" class="form-control" required>
+              <option value="" selected disabled hidden>Choose here</option>
+              {% block score_options %}
+                <option value="1">1 : Completely Unnatural</option>
+              <option value="2">2 : Mostly Unnatural</option>
+              <option value="3">3 : Equally Natural and Unnatural</option>
+              <option value="4">4 : Mostly Natural</option>
+              <option value="5">5 : Completely Natural</option>
+            {% endblock %}
+            </select>
+          </fieldset>
         </div>
       </div>
-    </fieldset>
 
-    <button type="submit" id="submit" class="btn btn-primary">Submit</button>
+      <center>
+        <button type="submit" id="submit" class="btn btn-primary">Submit</button>
+      </center>
   </form>
 
   <script>
