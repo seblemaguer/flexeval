@@ -39,12 +39,15 @@
 {% endblock %}
 
 {% block content %}
-<form action="./register" method="post" class="form-example justified">
-    <h3>Start or resume the test</h3>
+  <form action="./register" method="post" class="form-example justified">
 
     <input type="hidden" id="PROLIFIC_PID" name="PROLIFIC_PID" value="">
     <input type="hidden" id="STUDY_ID" name="STUDY_ID" value="">
     <input type="hidden" id="SESSION_ID" name="SESSION_ID" value="">
+
+    {% block instructions %}
+      <h3>Start or resume the test</h3>
+    {% endblock %}
 
     <br />
     <center>
