@@ -80,7 +80,7 @@ class ErrorHandler:
                 get_template=provider_factory.get(TemplateProvider.NAME).get,  # type: ignore
                 get_asset=_get_asset,
                 auth=VirtualAuthProvider(),
-                entry_point=campaign_instance.get_entrypoint(),
+                entry_point=make_global_url(campaign_instance.get_entrypoint()),
                 **variables,
             )
         else:
