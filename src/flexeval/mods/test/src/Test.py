@@ -2,18 +2,9 @@ from typing import Any
 from typing_extensions import override
 
 # Global/system
-import os
 from pathlib import Path
 import string
 import logging
-
-# Yaml
-from yaml import load
-
-try:
-    from yaml import CLoader as Loader
-except ImportError:
-    from yaml import Loader
 
 # Data type
 import mimetypes
@@ -28,7 +19,7 @@ from flask import current_app
 
 # Flexeval
 from flexeval.utils import AppSingleton
-from flexeval.core import StageModule, User
+from flexeval.core import StageModule, User, Stage
 from flexeval.database import ModelFactory
 from flexeval.mods.test.model import TestModel
 
@@ -440,23 +431,78 @@ class Test(TransactionalObject):
 
 
 class TestManager(metaclass=AppSingleton):
+    """Helper to manage the tests.
+
+    This class is a singleton and should not be accessed directly.
+    The user should use test_manager which is the variable dedicated for the management
+    """
+
     def __init__(self):
+        """Initialisation which simply setup the register"""
+
         self._register: dict[str, Test] = dict()
-        with open(
-            os.path.join(
-                current_app.config["FLEXEVAL_INSTANCE_DIR"],
-                "%s.yaml" % TEST_CONFIGURATION_BASENAME,
-            ),
-            encoding="utf-8",
-        ) as config_stream:
-            self.config = load(config_stream, Loader=Loader)
+
+    def register(self, name: str, stage_config: Stage) -> Test:
+        """Register a test
+
+        This method uses the configuration to instanciate a Test
+        object and then add it to the register dictionary
+
+        Parameters
+        ----------
+        name : str
+            the name of the test
+        stage_config : Stage
+            The Stage object required to instantiate the test
+
+        Returns
+        -------
+        Test
+            The instance of the newly created test
+
+        """
+        self._register[name] = Test(name, stage_config)
+        return self._register[name]
+
+    def has(self, name: str) -> bool:
+        """Check if the test "name" has been registered
+
+        Parameters
+        ----------
+        name : str
+            the name of the test
+
+        Returns
+        -------
+        bool
+            True if it has been registered, False else
+
+        """
+        return name in self._register
 
     def get(self, name: str) -> Test:
-        if not (name in self._register):
-            try:
-                config = self.config[name]
-            except Exception as e:
-                raise MalformationError(f"Test {name} not found in {TEST_CONFIGURATION_BASENAME}.yaml: {e}")
-            self._register[name] = Test(name, config)
+        """Get the test given its name
+
+        Parameters
+        ----------
+        name : str
+            the name of the test
+
+        Returns
+        -------
+        Test
+            the instance of the test
+
+        Raises
+        ------
+        KeyError
+            if the test has not been registered and therefore doesn't
+            exist
+        """
+        if name not in self._register:
+            raise KeyError(f"the test {name} has not been registered, check your configuration file")
 
         return self._register[name]
+
+
+test_manager = TestManager()

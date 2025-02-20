@@ -9,7 +9,7 @@ from flexeval.utils import redirect
 from flexeval.database import commit_all
 
 # Current package
-from .src import TestManager, TransactionalObject
+from .src import test_manager, TransactionalObject
 
 
 class TestsAlternateError(Exception):
@@ -41,21 +41,18 @@ with campaign_instance.register_stage_module(__name__) as sm:
         stage = sm.current_stage
 
         # Get the type of test of the current stage
-        test = TestManager().get(stage.name)
+        test = test_manager.register(stage.name, stage)
 
-        # Load steps information
-        max_steps = int(stage.get("nb_steps"))
-        nb_step_intro: int = int(stage.get("nb_step_intro"))
+        # Define steps information
+        nb_systems_per_step = int(stage["nb_systems_per_step"]) if ("nb_systems_per_step" in stage) else 1
+        if nb_systems_per_step <= 0:
+            nb_systems_per_step = len(list(test.systems.keys()))
 
-        # Load systems per step information
-        nb_systems_per_step = 1
-        if stage.has("nb_systems_per_step"):
-            nb_systems_per_step = int(stage.get("nb_systems_per_step"))
-            if nb_systems_per_step <= 0:
-                nb_systems_per_step = len(list(test.systems.keys()))
+        max_steps = int(stage["nb_steps"])  # TODO: add a default if ("nb_steps" in stage) else 0
+        nb_steps_intro: int = int(stage["nb_steps_intro"]) if ("nb_steps_intro" in stage) else 0
 
         # Load transaction information
-        transaction_timeout_seconds = stage.get("transaction_timeout_seconds")
+        transaction_timeout_seconds = stage["transaction_timeout_seconds"]
         if transaction_timeout_seconds is not None:
             test.set_timeout_for_transaction(int(transaction_timeout_seconds))
 
@@ -67,7 +64,7 @@ with campaign_instance.register_stage_module(__name__) as sm:
 
         # Find out the current step is an introduction or not
         intro_step = False
-        if cur_step < nb_step_intro:
+        if cur_step < nb_steps_intro:
             intro_step = True
         else:
             intro_step = False
@@ -115,11 +112,11 @@ with campaign_instance.register_stage_module(__name__) as sm:
 
             # Update information related to the steps
             if intro_step:
-                max_steps = nb_step_intro
+                max_steps = nb_steps_intro
                 cur_step += 1
             else:
-                max_steps = max_steps - nb_step_intro
-                cur_step = cur_step + 1 - nb_step_intro
+                max_steps = max_steps - nb_steps_intro
+                cur_step = cur_step + 1 - nb_steps_intro
 
             parameters = {
                 "max_steps": max_steps,
@@ -158,7 +155,7 @@ with campaign_instance.register_stage_module(__name__) as sm:
 
         """
         stage = sm.current_stage
-        test = TestManager().get(stage.name)
+        test = test_manager.get(stage.name)  # TestManager(stage).get(stage.name)
         user = sm.auth_provider.user
         skip_after_n_step = stage.get("skip_after_n_step")
 
@@ -168,15 +165,15 @@ with campaign_instance.register_stage_module(__name__) as sm:
         sm.logger.debug("#### <END>The request form ####")
 
         # Initialize the number of intro steps
-        nb_step_intro = int(stage.get("nb_step_intro"))
+        nb_steps_intro: int = int(stage["nb_steps_intro"]) if ("nb_steps_intro" in stage) else 0
         cur_step: int = test.nb_steps_complete_by(user)
 
         # Validate is the current step is an introduction step
         intro_step = False
-        if nb_step_intro > cur_step:
+        if nb_steps_intro > cur_step:
             intro_step = True
 
-        # Lock DB so we can update it (NOTE SLM: not sure that's what this does!)
+        # Fail if there is no transactions associated to the user
         if not test.has_transaction(user):
             abort(408)
 
@@ -276,7 +273,7 @@ with campaign_instance.register_stage_module(__name__) as sm:
         """
         # NOTE: to debug in case some is wrong, just run the following line
         stage = sm.current_stage
-        test = TestManager().get(stage.name)
+        test = test_manager.get(stage.name)  # TestManager(stage).get(stage.name)
         user = sm.auth_provider.user
 
         # Log the request form for debugging purposes
