@@ -247,7 +247,31 @@ class Stage:
         """
         return "/" + StageModule.name_type + "/" + self._mod_name + "/" + self.name + "/"
 
-    def get(self, name: str) -> str | None:
+    def __getitem__(self, name: str) -> object:
+        """Method to get the value of a parameter
+
+        Parameters
+        ----------
+        name: string
+            The name of the parameter of the current stage
+
+        Returns
+        -------
+        object: The value of the parameter
+
+        Raises
+        ------
+        KeyError: if the name of the parameter is not available
+        """
+        if not self.has(name):
+            raise KeyError(f"{name} is not part of the stage configuration")
+
+        return self.get(name)
+
+    def __contains__(self, name) -> bool:
+        return self.has(name)
+
+    def get(self, name: str) -> object | None:
         """Method to get the value of a parameter
 
         Parameters
