@@ -204,7 +204,7 @@ class AuthProvider(Provider, metaclass=abc.ABCMeta):
             raise Exception(f"{name} is not an authentication provider (type = {provider.__class__})")
 
         provider.disconnect()
-        return redirect(provider.local_url_homepage)
+        return redirect(make_global_url(provider.local_url_homepage))
 
     @property
     def user(self) -> User:
