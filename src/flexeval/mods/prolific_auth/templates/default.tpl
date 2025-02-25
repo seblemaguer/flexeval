@@ -51,7 +51,7 @@
 
     <br />
     <center>
-      <button type="submit" id="submit" class="btn btn-primary">Start/Resume the test</button>
+      <button type="submit" id="login_submit" class="btn btn-primary">Start/Resume the test</button>
     </center>
   </form>
 

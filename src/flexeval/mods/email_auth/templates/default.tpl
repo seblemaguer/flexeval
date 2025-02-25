@@ -15,6 +15,6 @@
     <input type="email" name="email" id="email" class="form-control" required>
   </div>
 
-  <button type="submit" class="btn btn-primary">Submit</button>
+  <button type="submit" class="btn btn-primary" id="login_submit">Submit</button>
   </form>
 {% endblock %}
