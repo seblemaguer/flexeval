@@ -37,11 +37,12 @@ with campaign_instance.register_stage_module(__name__) as sm:
 
         """
 
-        # Get the current Stage
+        # Get the current Stage and the corresponding test
         stage = sm.current_stage
-
-        # Get the type of test of the current stage
-        test = test_manager.register(stage.name, stage)
+        if not test_manager.has(stage.name):
+            test = test_manager.register(stage.name, stage)
+        else:
+            test = test_manager.get(stage.name)
 
         # Define steps information
         nb_systems_per_step = int(stage["nb_systems_per_step"]) if ("nb_systems_per_step" in stage) else 1

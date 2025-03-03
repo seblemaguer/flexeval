@@ -442,7 +442,7 @@ class TestManager(metaclass=AppSingleton):
 
         self._register: dict[str, Test] = dict()
 
-    def register(self, name: str, stage_config: Stage) -> Test:
+    def register(self, name: str, stage_config: Stage, force: bool = False) -> Test:
         """Register a test
 
         This method uses the configuration to instanciate a Test
@@ -461,6 +461,9 @@ class TestManager(metaclass=AppSingleton):
             The instance of the newly created test
 
         """
+        if (name in self._register) and (not force):
+            raise Exception(f"Trying to register the test {name} a second time")
+
         self._register[name] = Test(name, stage_config)
         return self._register[name]
 
