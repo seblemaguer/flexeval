@@ -305,6 +305,9 @@ class Stage:
     def keys(self) -> set[str]:
         return set(self._config.keys())
 
+    def get_module_name(self) -> str:
+        return self._mod_name
+
     @override
     def __str__(self) -> str:
         str_rep = f"Stage({self.name}, {self._mod_name})\n"

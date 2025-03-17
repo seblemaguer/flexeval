@@ -242,5 +242,8 @@ class CampaignInstance:
     def get_admin_modules(self) -> dict[str, AdminModule]:
         return self._admin_modules
 
+    def get_stage_graph(self) -> StageGraph:
+        return self._stage_graph
+
 
 campaign_instance: CampaignInstance = CampaignInstance()

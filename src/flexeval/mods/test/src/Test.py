@@ -507,5 +507,10 @@ class TestManager(metaclass=AppSingleton):
 
         return self._register[name]
 
+    def list_tests(
+        self,
+    ) -> list[Test]:
+        return [t for _, t in self._register.items()]
+
 
 test_manager = TestManager()
