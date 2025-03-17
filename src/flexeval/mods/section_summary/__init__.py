@@ -1,8 +1,12 @@
 # coding: utf8
 
+import logging
+
 # Flexeval
 from flexeval.core import campaign_instance
 from flexeval.mods.test import test_manager
+
+logger = logging.getLogger()
 
 with campaign_instance.register_stage_module(__name__) as sm:
 
@@ -51,8 +55,7 @@ with campaign_instance.register_stage_module(__name__) as sm:
                 }
                 list_test_sections.append(stage.name)
             else:
-                print(f"ignore {k} because {stage.get_module_name()}")
-        # progression: dict[str, str] = stage
+                logger.debug(f"ignore {k} because {stage.get_module_name()}")
 
         parameters = {"list_test_sections": list_test_sections, "section_information": section_information}
 
