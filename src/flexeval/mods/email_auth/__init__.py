@@ -16,10 +16,9 @@ with campaign_instance.register_stage_module(__name__) as sm:
         stage = sm.current_stage
 
         if sm.auth_provider.validates_connection("connected")[0]:
-
             next_urls: dict[str, str] = stage.next_local_urls
             if len(next_urls.keys()) > 1:
-                raise Exception("")
+                raise Exception("Multiple next stages from the logging page are not yet supported")
             stage_name = list(next_urls.keys())[0]
             return redirect(next_urls[stage_name])
         else:
@@ -39,6 +38,6 @@ with campaign_instance.register_stage_module(__name__) as sm:
 
         next_urls: dict[str, str] = stage.next_local_urls
         if len(next_urls.keys()) > 1:
-            raise Exception("")
+            raise Exception("Multiple next stages from the logging page are not yet supported")
         stage_name = list(next_urls.keys())[0]
         return redirect(next_urls[stage_name])
