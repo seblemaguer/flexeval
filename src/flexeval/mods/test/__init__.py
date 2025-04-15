@@ -332,7 +332,7 @@ with campaign_instance.register_stage_module(__name__) as sm:
                 commit=False,
             )
         except Exception as e:
-            sm.logger.error(e)
+            sm.logger.error(e, stack_info=True, exc_info=True)
             return Response(status=500)
 
         # Commit the results and clean the transations of the user
