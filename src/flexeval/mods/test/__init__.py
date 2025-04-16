@@ -64,15 +64,13 @@ with campaign_instance.register_stage_module(__name__) as sm:
         cur_step = test.nb_steps_complete_by(user)
 
         # Find out the current step is an introduction or not
-        intro_step = False
-        if cur_step < nb_steps_intro:
-            intro_step = True
-        else:
-            intro_step = False
+        is_intro_step = False
+        if cur_step <= nb_steps_intro:
+            is_intro_step = True
 
         if cur_step < max_steps:
             syssamples_for_this_step = test.get_step(
-                cur_step, user, nb_systems=nb_systems_per_step, is_intro_step=intro_step
+                cur_step, user, nb_systems=nb_systems_per_step, is_intro_step=is_intro_step
             )
 
             def _get_syssamples(*system_names):
@@ -112,7 +110,7 @@ with campaign_instance.register_stage_module(__name__) as sm:
             # sm.logger.debug(f"Sample selected for this step are {get_syssamples()}")
 
             # Update information related to the steps
-            if intro_step:
+            if is_intro_step:
                 max_steps = nb_steps_intro
                 cur_step += 1
             else:
@@ -122,7 +120,7 @@ with campaign_instance.register_stage_module(__name__) as sm:
             parameters = {
                 "max_steps": max_steps,
                 "step": cur_step,
-                "intro_step": intro_step,
+                "intro_step": is_intro_step,
                 "syssamples": _get_syssamples,
                 "field_name": _save_field_name,
                 "new_record": _prepare_new_record,
@@ -171,7 +169,7 @@ with campaign_instance.register_stage_module(__name__) as sm:
 
         # Validate is the current step is an introduction step
         intro_step = False
-        if nb_steps_intro > cur_step:
+        if nb_steps_intro >= cur_step:
             intro_step = True
 
         # Fail if there is no transactions associated to the user
@@ -288,7 +286,7 @@ with campaign_instance.register_stage_module(__name__) as sm:
 
         # Validate is the current step is an introduction step
         intro_step = False
-        if nb_step_intro > cur_step:
+        if nb_step_intro >= cur_step:
             intro_step = True
 
         # Lock DB so we can update it (NOTE SLM: not sure that's what this does!)
@@ -311,10 +309,11 @@ with campaign_instance.register_stage_module(__name__) as sm:
                 values = []
                 for cur_value in info_value:
                     if isinstance(cur_value, str) and cur_value.startswith("sampleid:"):
+                        sm.logger.debug(f"Monitoring current value[list]: {cur_value}")
                         _, syssample_id = test.get_in_transaction(user, cur_value.replace("sampleid:", ""))
                         cur_value = int(syssample_id)
-                    values.append(cur_value)
-                info_value = values
+                    values.append(str(cur_value))
+                info_value = f"[{','.join(values)}]"
 
             # Retrieve the sample information
             system, syssample_id = test.get_in_transaction(user, obfuscated_sample_id)
