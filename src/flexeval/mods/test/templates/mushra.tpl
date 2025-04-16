@@ -94,23 +94,19 @@
 {% endblock %}
 
 {% block content %}
-{# NOTE: one list to rule them all! (else we potentially generate the list) #}
-{% set sample_list = get_variable("syssamples") %}
-
+  {# NOTE: one list to rule them all! (else we potentially generate the list) #}
+  {% set sample_list = get_variable("syssamples") %}
 
   {% if get_variable("intro_step",False) %}
-
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
       <h4 class="alert-heading">This is the <strong>introduction</strong>.</h4>
-      <p>Your answers will <strong>not</strong> be recorded as correct answer.</p>
-
+      <p>Your answers will <strong>not</strong> be recorded.</p>
 
       <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
   {% endif %}
 
   {% if not(get_variable("intro_step",False)) and (get_variable("step") == 1) %}
-
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
       <h4 class="alert-heading">This is now the <strong>real</strong> test, not an introduction step.</h4>
 
@@ -194,7 +190,7 @@
                         {% for syssample in sample_list %}
                         {% set name_field = get_variable("field_name",name="rank_score_%d" % loop.index, syssamples=[syssample]) %}
                         <td class="slider-container">
-                            <input type="range" id="score_{{loop.index}}" name="{{ name_field }}" class="form-control-range" data-trigger="hover" data-vertical="true" data-toggle="popover" data-content="Fair (50)" data-slider-min="0" data-slider-max="100" data-slider-step="1" data-slider-value="50" oninput="onInputSlider(this)" required />
+                            <input type="range" id="score_{{loop.index}}" name="{{ name_field }}" class="form-control-range" data-trigger="hover" data-vertical="true" data-toggle="popover" data-content="Fair (50)" data-slider-min="0" data-slider-max="100" data-slider-step="1" data-slider-value="50" oninput="onInputSlider(this)" onmouseup="onMonitorScoring(this)" required />
                         </td>
                         {% endfor %}
                     </tr>
@@ -246,7 +242,7 @@
         const body = {
             "sample_id": sample_id,
             "info_type": action,
-            "info_value": value.toString()
+            "info_value": value
         }
 
         // FIXME: the URL needs to be generalised (both base part & stage part)
@@ -295,15 +291,19 @@
         // Enable the submit button if all audios have been played
         if ((played_audios.size === list_audios.length) &&
             (scored_audios.size === (list_audios.length - 1))) {
-            console.log(`${scored_audios.size} ?= ${list_audios.length}`)
             document.getElementById('submit').disabled = false;
         }
+
+    }
+    function onMonitorScoring(slider) {
+        console.log(slider.name.split(":").slice(-1)[0]);
+        monitor_handler("score_sample", slider.value, slider.name.split(":").slice(-1)[0]);
     }
 
     function selectSample(index, play) {
-        // if (cur_sample_index >= 0) {
-        // monitor_handler("switch_sample", ["sampleid:" + list_audios[index][0], audio.duration], list_audios[cur_sample_index][0]);
-        // }
+        if (cur_sample_index >= 0) {
+           monitor_handler("switch_sample", [`sampleid:${list_audios[index][0]}`,  audio.currentTime], list_audios[cur_sample_index][0]);
+        }
 
         audio_source.src = list_audios[index][1];
         audio.load();
