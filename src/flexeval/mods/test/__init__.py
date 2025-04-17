@@ -281,12 +281,12 @@ with campaign_instance.register_stage_module(__name__) as sm:
         sm.logger.debug("#### <END>The request form ####")
 
         # Initialize the number of intro steps
-        nb_step_intro = int(stage.get("nb_step_intro"))
+        nb_intro_steps = int(stage.get("nb_intro_steps"))
         cur_step: int = test.nb_steps_complete_by(user)
 
         # Validate is the current step is an introduction step
         intro_step = False
-        if nb_step_intro >= cur_step:
+        if nb_intro_steps >= cur_step:
             intro_step = True
 
         # Lock DB so we can update it (NOTE SLM: not sure that's what this does!)
