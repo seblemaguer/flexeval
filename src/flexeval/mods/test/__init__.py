@@ -50,7 +50,7 @@ with campaign_instance.register_stage_module(__name__) as sm:
             nb_systems_per_step = len(list(test.systems.keys()))
 
         max_steps = int(stage["nb_steps"])  # TODO: add a default if ("nb_steps" in stage) else 0
-        nb_steps_intro: int = int(stage["nb_steps_intro"]) if ("nb_steps_intro" in stage) else 0
+        nb_intro_steps: int = int(stage["nb_intro_steps"]) if ("nb_intro_steps" in stage) else 0
 
         # Load transaction information
         transaction_timeout_seconds = stage["transaction_timeout_seconds"]
@@ -65,7 +65,7 @@ with campaign_instance.register_stage_module(__name__) as sm:
 
         # Find out the current step is an introduction or not
         is_intro_step = False
-        if cur_step <= nb_steps_intro:
+        if cur_step < nb_intro_steps:
             is_intro_step = True
 
         if cur_step < max_steps:
@@ -111,11 +111,11 @@ with campaign_instance.register_stage_module(__name__) as sm:
 
             # Update information related to the steps
             if is_intro_step:
-                max_steps = nb_steps_intro
+                max_steps = nb_intro_steps
                 cur_step += 1
             else:
-                max_steps = max_steps - nb_steps_intro
-                cur_step = cur_step + 1 - nb_steps_intro
+                max_steps = max_steps - nb_intro_steps
+                cur_step = cur_step + 1 - nb_intro_steps
 
             parameters = {
                 "max_steps": max_steps,
@@ -164,12 +164,12 @@ with campaign_instance.register_stage_module(__name__) as sm:
         sm.logger.debug("#### <END>The request form ####")
 
         # Initialize the number of intro steps
-        nb_steps_intro: int = int(stage["nb_steps_intro"]) if ("nb_steps_intro" in stage) else 0
+        nb_intro_steps: int = int(stage["nb_intro_steps"]) if ("nb_intro_steps" in stage) else 0
         cur_step: int = test.nb_steps_complete_by(user)
 
         # Validate is the current step is an introduction step
         intro_step = False
-        if nb_steps_intro >= cur_step:
+        if cur_step < nb_intro_steps:
             intro_step = True
 
         # Fail if there is no transactions associated to the user
