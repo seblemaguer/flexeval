@@ -39,7 +39,7 @@ class User(Model):
 
     __abstract__ = True
     __tablename__ = "User"
-    id = Column(db.String, primary_key=True)
+    id = Column(db.Integer, primary_key=True, autoincrement=True)
     conditions = Column(db.String, default="")
 
     def has_validated(self, condition: str) -> bool:
@@ -58,6 +58,10 @@ class User(Model):
 
         list_conditions = self.conditions.split(",")
         return condition in list_conditions
+
+    @property
+    def user_id(self) -> str:
+        return f"{self.id} [anonymous]"
 
     def validates(self, condition: str):
         """Record that the user validates the given condition

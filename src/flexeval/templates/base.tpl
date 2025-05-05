@@ -42,7 +42,7 @@
         <ul class="navbar-nav mr-auto">
           {% if auth.validates_connection("connected")[0] %}
             <li class="nav-item">
-              Logged in as <b>{{ auth.user.id}}</b>, <a href="{{auth.url_deco}}" class="badge bg-danger">logout</a>.
+              Logged in as <b>{{ auth.user.user_id}}</b>, <a href="{{auth.url_deco}}" class="badge bg-danger">logout</a>.
             </li>
           {% endif %}
           <ul>

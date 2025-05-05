@@ -1,4 +1,5 @@
 from flexeval.core.stage import StageModuleUser
+from flexeval.database import Column, db
 
 import re
 
@@ -13,6 +14,8 @@ EMAIL_REGEX = re.compile(r"^([\w\.\-]+)@([\w\-]+)((\.([\w-]){2,63}){1,3})$")
 
 
 class EmailUser(StageModuleUser):
+    email = Column(db.String, unique=True, nullable=False)
+
     def __init__(self, email: str):
         super().__init__()
 
@@ -21,4 +24,8 @@ class EmailUser(StageModuleUser):
             raise NotAnEmail(email)
 
         # Set the email as the ID
-        self.id = email
+        self.email = email
+
+    @property
+    def user_id(self) -> str:
+        return f"{self.email}"

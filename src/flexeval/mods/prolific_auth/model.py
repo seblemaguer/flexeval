@@ -6,13 +6,14 @@ from flexeval.database import Column, db
 
 
 class ProlificUser(StageModuleUser):
-    study_id = Column(db.String, default="")
-    session_id = Column(db.String, default="")
+    user_id = Column(db.String, unique=True, nullable=False)
+    study_id = Column(db.String, nullable=False)
+    session_id = Column(db.String, nullable=False)
 
     def __init__(self, user_id: str, study_id: str, session_id: str):
         super().__init__()
 
-        self.id = user_id
+        self.user_id = user_id
 
         # Get other fields
         self.study_id = study_id

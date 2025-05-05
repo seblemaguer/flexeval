@@ -6,7 +6,6 @@ class AdminUser(User):
 
     def __init__(self):
         super().__init__()
-        self.id = "admin"
 
 
 class AdminAuthProvider(AuthProvider):

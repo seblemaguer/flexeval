@@ -8,7 +8,7 @@ class EmailAuthProvider(AuthProvider):
 
     def connect(self, email: str):  # type: ignore
         assert self.user_model is not None
-        user: EmailUser | None = EmailUser.query.filter(self.user_model.id == email).first()
+        user: EmailUser | None = EmailUser.query.filter(self.user_model.email == email).first()
 
         if user is None:
             user = EmailUser.create(email=email)
