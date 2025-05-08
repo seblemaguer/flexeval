@@ -2,6 +2,7 @@ from typing import Any
 import math
 import random
 import threading
+from flexeval.core import User
 
 from flexeval.mods.test.src.System import System
 from flexeval.mods.test.model import Sample
@@ -138,7 +139,7 @@ class LeastSeenSelection(SelectionBase):
 
         return [dict_samples[sample_id] for sample_id in pool_samples]
 
-    def _select_samples(self, user_id: str, nb_systems: int, nb_samples: int) -> dict[str, list[Sample]]:
+    def _select_samples(self, user: User, id_step: int, nb_systems: int, nb_samples: int) -> dict[str, list[Sample]]:
         """Method to select a given number of samples for a given number of systems for a specific user
 
         The selection strategy is twofold:
@@ -147,8 +148,10 @@ class LeastSeenSelection(SelectionBase):
 
         Parameters
         ----------
-        user_id: str
-            The identifier of the participant
+        user: User
+            The participant
+        id_step: int
+            The current step for the given participant
         nb_systems: int
             The desired number of systems
         nb_samples: int
@@ -161,17 +164,17 @@ class LeastSeenSelection(SelectionBase):
         """
 
         # Select the systems
-        self._logger.debug(f"Select systems for user {user_id}")
+        self._logger.debug(f"Select systems for user {user.user_id}")
         pool_systems = self.select_systems(nb_systems)
         self._logger.debug(f"Current state of the current system counters: {self._system_counters}")
 
         # Select the samples
-        self._logger.debug(f"Select samples for user {user_id}")
+        self._logger.debug(f"Select samples for user {user.user_id}")
         dict_samples = dict()
         for system_name in pool_systems:
             dict_samples[system_name] = self.internal_select_samples(system_name, nb_samples)
 
-        self._logger.info(f"This is what we will give to {user_id}: {dict_samples}")
+        self._logger.info(f"This is what we will give to {user.id}: {dict_samples}")
 
         return dict_samples
 
@@ -200,7 +203,7 @@ class LeastSeenSampleAlignedSelection(LeastSeenSelection):
         nb_systems = len(self._systems[system_name][0].system_samples)
         self._sample_counters = [0 for _ in range(nb_systems)]
 
-    def _select_samples(self, user_id: str, nb_systems: int, nb_samples: int) -> dict[str, list[Sample]]:
+    def _select_samples(self, user: User, id_step: int, nb_systems: int, nb_samples: int) -> dict[str, list[Sample]]:
         """Method to select a given number of samples for a given number of systems for a specific user
 
         The selection strategy is twofold:
@@ -209,8 +212,10 @@ class LeastSeenSampleAlignedSelection(LeastSeenSelection):
 
         Parameters
         ----------
-        user_id: str
-            The identifier of the participant
+        user: User
+            The participant
+        id_step: int
+            The current step for the given participant
         nb_systems: int
             The desired number of systems
         nb_samples: int
@@ -223,12 +228,12 @@ class LeastSeenSampleAlignedSelection(LeastSeenSelection):
         """
 
         # Select the systems
-        self._logger.debug(f"Select systems for user {user_id}")
+        self._logger.debug(f"Select systems for user {user.user_id}")
         pool_systems = self.select_systems(nb_systems)
         self._logger.debug(f"Current state of the current system counters: {self._system_counters}")
 
         # Select the samples
-        self._logger.debug(f"Select samples for user {user_id}")
+        self._logger.debug(f"Select samples for user {user.user_id}")
 
         min_value = min(self._sample_counters)
         min_indices = [i for i, value in enumerate(self._sample_counters) if value == min_value]
@@ -240,7 +245,7 @@ class LeastSeenSampleAlignedSelection(LeastSeenSelection):
         for system_name in pool_systems:
             dict_samples[system_name] = [self._systems[system_name][0].system_samples[min_index]]
 
-        self._logger.info(f"This is what we will give to {user_id}: {dict_samples}")
+        self._logger.info(f"This is what we will give to {user.user_id}: {dict_samples}")
 
         return dict_samples
 
@@ -344,7 +349,7 @@ class LeastSeenPerUserSelection(LeastSeenSelection):
 
         return [dict_samples[sample[0]] for sample in pool_samples]
 
-    def _select_samples(self, user_id: str, nb_systems: int, nb_samples: int) -> dict[str, list[Sample]]:
+    def _select_samples(self, user: User, id_step: int, nb_systems: int, nb_samples: int) -> dict[str, list[Sample]]:
         """Method to select a given number of samples for a given number of systems for a specific user
 
         The selection strategy is twofold:
@@ -353,8 +358,10 @@ class LeastSeenPerUserSelection(LeastSeenSelection):
 
         Parameters
         ----------
-        user_id: str
-            The identifier of the participant
+        user: User
+            The participant
+        id_step: int
+            The current step for the given participant
         nb_systems: int
             The desired number of systems
         nb_samples: int
@@ -366,22 +373,22 @@ class LeastSeenPerUserSelection(LeastSeenSelection):
             The dictionary providing for a system name the associated sample embedded in a list
         """
 
-        if user_id not in self._user_history:
-            self._user_history[user_id] = dict([(cur_system, list()) for cur_system in self._systems.keys()])
-        self._logger.debug(f"History status of the current user: {self._user_history[user_id]}")
+        if user.id not in self._user_history:
+            self._user_history[user.id] = dict([(cur_system, list()) for cur_system in self._systems.keys()])
+        self._logger.debug(f"History status of the current user: {self._user_history[user.id]}")
 
         # Select the systems
-        self._logger.debug(f"Select systems for user {user_id}")
-        pool_systems = self.select_user_systems(self._user_history[user_id], nb_systems)
+        self._logger.debug(f"Select systems for user {user.user_id}")
+        pool_systems = self.select_user_systems(self._user_history[user.id], nb_systems)
 
         # Select the samples
-        self._logger.debug(f"Select samples for user {user_id}")
+        self._logger.debug(f"Select samples for user {user.user_id}")
         dict_samples = dict()
         for system_name in pool_systems:
             dict_samples[system_name] = self.user_select_samples(
-                self._user_history[user_id][system_name], system_name, nb_samples
+                self._user_history[user.id][system_name], system_name, nb_samples
             )
 
-        self._logger.info(f"This is what we will give to {user_id}: {dict_samples}")
+        self._logger.info(f"This is what we will give to {user.user_id}: {dict_samples}")
 
         return dict_samples

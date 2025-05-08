@@ -406,7 +406,7 @@ class Test(TransactionalObject):
             return self.get_in_transaction(user, "choice_for_systems")
 
         # Select samples (FIXME: 1 is hardcoded here)
-        selected_samples = self._selection_strategy.select_samples(user.id, nb_systems, 1)
+        selected_samples = self._selection_strategy.select_samples(user, id_step, nb_systems, 1)
         for system_name, samples in selected_samples.items():
             choice_for_systems[system_name] = samples[0]
 
