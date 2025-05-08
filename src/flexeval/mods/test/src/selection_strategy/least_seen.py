@@ -1,14 +1,11 @@
 from typing import Any
 import math
 import random
-import threading
 from flexeval.core import User
 
 from flexeval.mods.test.src.System import System
 from flexeval.mods.test.model import Sample
 from .core import SelectionBase
-
-MUTEX_SELECTION = threading.Semaphore()
 
 
 class LeastSeenSelection(SelectionBase):

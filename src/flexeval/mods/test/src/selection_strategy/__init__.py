@@ -2,7 +2,7 @@ from flexeval.mods.test.src.System import System
 from importlib import import_module
 from .core import SelectionBase
 
-AVAILABLE_MODULES = ["least_seen"]  # NOTE: if possible, it would be good to get rid of this!
+AVAILABLE_MODULES = ["least_seen", "latin_square"]  # NOTE: if possible, it would be good to get rid of this!
 
 
 def get_strategy(strategy_name: str, systems: dict[str, System]) -> SelectionBase:
