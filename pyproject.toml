@@ -44,6 +44,8 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
   "pre-commit",
+  "black",
+  "basedpyright"
 ]
 test = [
   "selenium",
