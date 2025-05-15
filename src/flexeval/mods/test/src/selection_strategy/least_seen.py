@@ -94,7 +94,7 @@ class LeastSeenSelection(SelectionBase):
 
         Returns
         -------
-        list[SampleModel]
+        list[Sample]
             The list of selected samples
         """
         # Subset the list of samples
@@ -156,7 +156,7 @@ class LeastSeenSelection(SelectionBase):
 
         Returns
         -------
-        dict[str, list[SampleModel]]
+        dict[str, list[Sample]]
             The dictionary providing for a system name the associated sample embedded in a list
         """
 
@@ -220,7 +220,7 @@ class LeastSeenSampleAlignedSelection(LeastSeenSelection):
 
         Returns
         -------
-        dict[str, list[SampleModel]]
+        dict[str, list[Sample]]
             The dictionary providing for a system name the associated sample embedded in a list
         """
 
@@ -298,7 +298,7 @@ class LeastSeenPerUserSelection(LeastSeenSelection):
 
         Returns
         -------
-        list[SampleModel]
+        list[Sample]
             The list of selected samples
         """
         # Subset the list of samples
@@ -366,7 +366,7 @@ class LeastSeenPerUserSelection(LeastSeenSelection):
 
         Returns
         -------
-        dict[str, list[SampleModel]]
+        dict[str, list[Sample]]
             The dictionary providing for a system name the associated sample embedded in a list
         """
 

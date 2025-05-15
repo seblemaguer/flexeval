@@ -8,6 +8,23 @@ from .core import SelectionBase
 
 
 def williams_latin_square(n: int) -> np.array:
+    """Helper to generate a latin square using the William's design strategy
+
+    Parameters
+    ----------
+    n : int
+        the size of the square
+
+    Returns
+    -------
+    np.array
+        the generated latin square
+
+    Raises
+    ------
+    ValueError
+        if n is below 2 which makes no sense
+    """
     if n < 2:
         raise ValueError("n must be at least 2")
 
@@ -65,11 +82,9 @@ class LatinSquareSelection(SelectionBase):
             self._logger.debug(f"Randomization required, new square:\n{self._groups}")
 
     def _select_samples(self, user: User, id_step: int, nb_systems: int, nb_samples: int) -> dict[str, list[Sample]]:
-        """Method to select a given number of samples for a given number of systems for a specific user
+        """Method to select the samples using the Latin Square strategy.
 
-        The selection strategy is twofold:
-           1. select the desired number of least systems
-           2. for each selected system, select the least seen samples (the desired number of samples for each system)
+        For now, only one system & one sample is supported
 
         Parameters
         ----------
@@ -86,6 +101,11 @@ class LatinSquareSelection(SelectionBase):
         -------
         dict[str, list[SampleModel]]
             The dictionary providing for a system name the associated sample embedded in a list
+
+        Raises
+        ------
+        AssertError
+             if nb_systems or nb_samples are different from 1
         """
 
         assert nb_systems == 1, f"For the latin-square algorithm, we can only select one system, {nb_systems} are asked"
