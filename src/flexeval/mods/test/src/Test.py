@@ -28,12 +28,22 @@ from .System import SystemManager, System
 from .selection_strategy import SelectionBase, get_strategy
 
 
-TEST_CONFIGURATION_BASENAME: str = "tests"
 DEFAULT_CSV_DELIMITER: str = ","
 
 
-class SampleModelTemplate:
-    def __init__(self, id, system_name, systemsample):
+class SampleModelInTransaction:
+    def __init__(self, id: int, system_name: str, systemsample: object):
+        """Initialisation
+
+        Parameters
+        ----------
+        id : int
+            the ID of the sample
+        system_name : str
+            The name of the system of the sample
+        systemsample : object (FIXME: what is it exactly)
+            No idea
+        """
         self._logger: logging.Logger = logging.getLogger(self.__class__.__name__)
         self._system: System = SystemManager().get(systemsample.system)
         self._systemsample = systemsample
@@ -49,53 +59,77 @@ class SampleModelTemplate:
 
     @property
     def ID(self):
+        """Get the ID of the sample
+
+        Returns
+        -------
+        int
+            the ID of the sample
+
+        """
         return self._ID
 
-    def get(self, name: str | None = None, num: int | None = None):
-        if num is not None:
-            name = self._system._col_names[num]
+    def get(self, name: str) -> tuple[str | Path, str]:
+        """Retrieve the value (file or string) and the mime type of the given column from the sample
 
-        if name is None:
-            return (None, None)
-        else:
-            mime = "text"
-            value = getattr(self._systemsample, name)
+        Parameters
+        ----------
+        name : str
+            Name of the column (see the CSV/TSV file of the system)
 
-            file_path = value
+        Returns
+        -------
+        tuple[str | Path, str]
+            the value (file or string) and the corresponding mime type
 
-            if not (file_path[0] == "/"):
-                file_path = "/" + file_path
+        Raises
+        ------
+        Exception
+            The column doesn't exist
+        """
 
-            cur_sample_path = Path(current_app.config["FLEXEVAL_INSTANCE_DIR"] + "/systems" + file_path)
-            try:
-                if cur_sample_path.is_file():
-                    if self._cached:
-                        if cur_sample_path not in self._cache:
-                            mime, _ = mimetypes.guess_type(cur_sample_path)
-                            mime = mime.split("/")[0]
+        # Retrieve the value and check the value exists
+        mime = "text"
+        value = getattr(self._systemsample, name)
+        if value is None:
+            raise Exception(f'The column "{name}" doesn\'t exist')
 
-                            extension = cur_sample_path.suffix
+        self._logger.debug(f"{type(self._systemsample)} [{name}] -> {value} not in ({self._systemsample})")
 
-                            hashing = hashlib.md5()
-                            hashing.update(str(cur_sample_path).encode())
-                            value = self.CACHE_DIR / (str(hashing.hexdigest()) + extension)
-                            shutil.copy(cur_sample_path, value)
+        # Infer a possible file path, and if not a file, just return the value
+        file_path = value
+        if not (file_path[0] == "/"):
+            file_path = "/" + file_path
+        cur_sample_path = Path(current_app.config["FLEXEVAL_INSTANCE_DIR"] + "/systems" + file_path)
 
-                            value = (
-                                current_app.config["FLEXEVAL_INSTANCE_URL"]
-                                + "/"
-                                + str(value.relative_to(current_app.config["FLEXEVAL_INSTANCE_DIR"]))
-                            )
-                            self._cache[cur_sample_path] = (value, mime)
+        if not cur_sample_path.is_file():
+            return (value, str(mime))
 
-                        return self._cache[cur_sample_path]
-                else:
-                    mime, _ = mimetypes.guess_type(cur_sample_path)
-            except Exception as e:
-                self._logger.warning("Exception was raised while reading sample attribute %s" % name)
-                self._logger.warning(e)
+        # Load the cached file if available
+        mime, _ = mimetypes.guess_type(cur_sample_path)
+        if self._cached:
+            if cur_sample_path not in self._cache:
+                mime, _ = mimetypes.guess_type(cur_sample_path)
+                mime = str(mime).split("/")[0]
 
-            return (value, mime)
+                extension = cur_sample_path.suffix
+
+                hashing = hashlib.md5()
+                hashing.update(str(cur_sample_path).encode())
+                cache_path = self.CACHE_DIR / (str(hashing.hexdigest()) + extension)
+                shutil.copy(cur_sample_path, cache_path)
+
+                cache_path = (
+                    current_app.config["FLEXEVAL_INSTANCE_URL"]
+                    + "/"
+                    + str(cache_path.relative_to(current_app.config["FLEXEVAL_INSTANCE_DIR"]))
+                )
+                self._cache[cur_sample_path] = (cache_path, mime)
+                cur_sample_path = cache_path
+            else:
+                cur_sample_path, mime = self._cache[cur_sample_path]
+
+        return cur_sample_path, mime
 
     @override
     def __str__(self) -> str:
@@ -380,7 +414,7 @@ class Test(TransactionalObject):
 
     def get_step(
         self, id_step: int, user: User, nb_systems: int, is_intro_step: bool = False
-    ) -> dict[str, SampleModelTemplate]:
+    ) -> dict[str, SampleModelInTransaction]:
         """Get the samples needed for one step of the test
 
         Parameters
@@ -418,7 +452,7 @@ class Test(TransactionalObject):
             syssample = choice_for_systems[system_name]
             id_in_transaction = self.create_row_in_transaction(user)
             self.set_in_transaction(user, id_in_transaction, (system_name, syssample.id))
-            choice_for_systems[system_name] = SampleModelTemplate(id_in_transaction, system_name, syssample)
+            choice_for_systems[system_name] = SampleModelInTransaction(id_in_transaction, system_name, syssample)
 
         # Define if it is an introduction step
         self.set_in_transaction(user, "intro_step", is_intro_step)

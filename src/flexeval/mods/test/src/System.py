@@ -1,5 +1,4 @@
 # coding: utf8
-from typing import Sequence, Any
 import csv
 
 from flask import current_app
@@ -33,7 +32,7 @@ class System:
             raise SystemFileNotFound(f"{source_file} doesn't exist. Fix test.json or add the system's file: {e}")
 
         assert reader.fieldnames is not None
-        self._col_names: Sequence[str] = reader.fieldnames
+        self._col_names: list[str] = list(reader.fieldnames)
 
         # Dynamically create the columns needed to populate all the information related to the current sample
         for col_name in self._col_names:
@@ -52,7 +51,6 @@ class System:
                 try:
                     for col_name in self._col_names:
                         vars[col_name] = line[col_name]
-
                     Sample.create(commit=False, **vars)
 
                 except Exception as e:
@@ -61,8 +59,36 @@ class System:
             commit_all()
 
     @property
-    def system_samples(self) -> list[Any]:
-        return Sample.query.filter(Sample.system == self.name).order_by(Sample.line_id.asc()).all()
+    def system_samples(self) -> list[Sample]:
+        """Get the samples corresponding to the given system
+
+        Returns
+        -------
+        list[Sample]
+            the list of samples
+
+        """
+        # FIXME: this is a dirty hack as for now the Sample.__dict__ doesn't contain all the columns
+        #        for now, it only returns <class 'sqlalchemy.engine.row.Row'> but not <Sample> object
+        samples = (
+            Sample.query.add_columns(Sample.__table__.columns)
+            .filter(Sample.system == self.name)
+            .order_by(Sample.line_id.asc())
+            .all()
+        )
+        # samples = Sample.query.filter(Sample.system == self.name).order_by(Sample.line_id.asc()).all()
+        return samples
+
+    @property
+    def col_names(self) -> list[str]:
+        """Get the names of the columns that the system propose
+
+        Returns
+        -------
+        list[str]
+            the list of columns
+        """
+        return self._col_names.copy()
 
 
 class SystemManager(metaclass=AppSingleton):
