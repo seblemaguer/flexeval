@@ -1,5 +1,4 @@
-"""Module providing elementary helpers to authenticate in FlexEval
-"""
+"""Module providing elementary helpers to authenticate in FlexEval"""
 
 # Python
 from typing_extensions import override

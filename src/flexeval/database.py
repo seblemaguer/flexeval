@@ -8,6 +8,7 @@ class:
 https://github.com/cookiecutter-flask/cookiecutter-flask/blob/master/%7B%7Bcookiecutter.app_name%7D%7D/%7B%7Bcookiecutter.app_name%7D%7D/database.py
 
 """
+
 from typing import Self
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text
