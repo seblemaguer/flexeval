@@ -70,7 +70,7 @@
             {% if error_stacktrace %}
               <h2>Stack Trace:</h2>
               <div class="stacktrace">
-                {{ error_stacktrace }}
+{{ error_stacktrace }}
               </div>
             {% endif %}
         </div>
