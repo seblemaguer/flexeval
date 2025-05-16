@@ -1,5 +1,6 @@
 from typing import Any
 import numpy as np
+from numpy.typing import NDArray
 import math
 import random
 
@@ -418,6 +419,7 @@ class LeastSeenMixedSelection(LeastSeenSelection):
             else:
                 self._nb_utts = len(sys.samples)
 
+        self._utt_counters = np.zeros((self._nb_utts)).astype(int)
         self._user_utt_history = dict()
         self._user_history = dict()
 
@@ -483,7 +485,7 @@ class LeastSeenMixedSelection(LeastSeenSelection):
         return pool_systems
 
     def user_select_samples(
-        self, user_history: list[str], user_utt_history: np.array, system_name: str, nb_samples: int
+        self, user_history: list[str], user_utt_history: NDArray[np.int64], system_name: str, nb_samples: int
     ) -> list[Sample]:
         """Select the samples of a given system which have been the least selected
 
@@ -496,10 +498,12 @@ class LeastSeenMixedSelection(LeastSeenSelection):
         ----------
         user_history : dict[str, list[str]]
             The current user history
+        user_utt_history: NDArray[np.int64]
+            The utterance history for the current user
         system_name: str
-           The name of the current system
+            The name of the current system
         nb_samples: int
-           The desired number of sample (for now = 1)
+            The desired number of sample (for now = 1)
 
         Returns
         -------
@@ -512,6 +516,12 @@ class LeastSeenMixedSelection(LeastSeenSelection):
         # List utterance candidates (the ones which has been the least seen)
         utt_candidates_idx = np.where(user_utt_history == user_utt_history.min())[0]
         np.random.shuffle(utt_candidates_idx)
+
+        if utt_candidates_idx.shape[0] > 1:
+            min_utt_counter = self._utt_counters[utt_candidates_idx].min()
+            utt_candidates_idx = utt_candidates_idx[self._utt_counters[utt_candidates_idx] == min_utt_counter]
+            np.random.shuffle(utt_candidates_idx)
+
         candidates = [(self.systems[system_name].samples[i], user_utt_history[i], i) for i in utt_candidates_idx]
 
         # If more than one sample, check the overall least seen samples
@@ -533,6 +543,7 @@ class LeastSeenMixedSelection(LeastSeenSelection):
 
         pool_samples = [candidates[0][0]]
         user_utt_history[candidates[0][2]] += 1
+        self._utt_counters[candidates[0][2]] += 1
 
         # Update overall sample history
         for sample in pool_samples:  # FIXME: this is a loop but in reality this only one value!
@@ -571,9 +582,10 @@ class LeastSeenMixedSelection(LeastSeenSelection):
 
         if user.id not in self._user_history:
             self._user_history[user.id] = dict([(cur_system, list()) for cur_system in self.systems.keys()])
-            self._user_utt_history[user.id] = np.zeros((self._nb_utts))
-        self._logger.warning(f"[{user.id}] History status: {self._user_history[user.id]}")
+            self._user_utt_history[user.id] = np.zeros((self._nb_utts)).astype(int)
+        # self._logger.warning(f"[{user.id}] History status: {self._user_history[user.id]}")
         self._logger.warning(f"[{user.id}] Utt history status: {self._user_utt_history[user.id]}")
+        self._logger.warning(f"[=] Utt history status: {self._utt_counters}")
 
         # Select the systems
         self._logger.debug(f"Select systems for user {user.user_id}")
