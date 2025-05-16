@@ -1,8 +1,8 @@
 from typing import Any
 import math
 import random
-from flexeval.core import User
 
+from flexeval.core import User
 from flexeval.mods.test.src.System import System
 from flexeval.mods.test.model import Sample
 from .core import SelectionBase
@@ -27,10 +27,10 @@ class LeastSeenSelection(SelectionBase):
         super().__init__(systems)
 
         # Initialize content elements
-        self._samples = [sample.id for _, cur_system in systems.items() for sample in cur_system[0].system_samples]
+        self._samples = [sample.id for _, cur_system in systems.items() for sample in cur_system.samples]
 
         # Initialize counters
-        self._system_counters: dict[Any, int] = dict([(cur_system, 0) for cur_system in systems.keys()])
+        self._system_counters: dict[str, int] = dict([(cur_system, 0) for cur_system in systems.keys()])
         self._sample_counters: dict[Any, int] = dict([(cur_sample, 0) for cur_sample in self._samples])
 
     def select_systems(self, nb_systems: int) -> list[str]:
@@ -98,7 +98,7 @@ class LeastSeenSelection(SelectionBase):
             The list of selected samples
         """
         # Subset the list of samples
-        dict_samples = dict([(sample.id, sample) for sample in self._systems[system_name][0].system_samples])
+        dict_samples = dict([(sample.id, sample) for sample in self.systems[system_name].samples])
         sample_subset = {sample_id: self._sample_counters[sample_id] for sample_id in dict_samples.keys()}
 
         # Sort by counting the pool of samples
@@ -197,7 +197,7 @@ class LeastSeenSampleAlignedSelection(LeastSeenSelection):
         super().__init__(systems)
 
         system_name = list(systems.keys())[0]
-        nb_systems = len(self._systems[system_name][0].system_samples)
+        nb_systems = len(self.systems[system_name].samples)
         self._sample_counters = [0 for _ in range(nb_systems)]
 
     def _select_samples(self, user: User, id_step: int, nb_systems: int, nb_samples: int) -> dict[str, list[Sample]]:
@@ -240,7 +240,7 @@ class LeastSeenSampleAlignedSelection(LeastSeenSelection):
 
         dict_samples = dict()
         for system_name in pool_systems:
-            dict_samples[system_name] = [self._systems[system_name][0].system_samples[min_index]]
+            dict_samples[system_name] = [self.systems[system_name].samples[min_index]]
 
         self._logger.info(f"This is what we will give to {user.user_id}: {dict_samples}")
 
@@ -284,7 +284,7 @@ class LeastSeenPerUserSelection(LeastSeenSelection):
             pool_systems = system_count_list[:cut_idx]
         random.shuffle(pool_systems)
 
-        return [x[0] for x in pool_systems[:nb_systems]]
+        return pool_systems[:nb_systems]
 
     def user_select_samples(self, user_history: list[str], system_name: str, nb_samples: int) -> list[Sample]:
         """Select a given number of samples of a given system
@@ -302,7 +302,7 @@ class LeastSeenPerUserSelection(LeastSeenSelection):
             The list of selected samples
         """
         # Subset the list of samples
-        dict_samples = dict([(sample.id, sample) for sample in self._systems[system_name][0].system_samples])
+        dict_samples = dict([(sample.id, sample) for sample in self.systems[system_name].samples])
         sample_subset = {
             sample_id: self._sample_counters[sample_id]
             for sample_id in dict_samples.keys()
@@ -371,7 +371,7 @@ class LeastSeenPerUserSelection(LeastSeenSelection):
         """
 
         if user.id not in self._user_history:
-            self._user_history[user.id] = dict([(cur_system, list()) for cur_system in self._systems.keys()])
+            self._user_history[user.id] = dict([(cur_system, list()) for cur_system in self.systems.keys()])
         self._logger.debug(f"History status of the current user: {self._user_history[user.id]}")
 
         # Select the systems

@@ -14,6 +14,7 @@ def get_strategy(strategy_name: str, systems: dict[str, System]) -> SelectionBas
             strategy_cls = getattr(module, strategy_name)
             strategy = strategy_cls(systems)
         except (ImportError, AttributeError):
+            # FIXME: really check if it exists here, all other exceptions should be reported
             continue
 
     # Least Seen module

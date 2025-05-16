@@ -20,6 +20,7 @@ class SystemFileNotFound(SystemError):
 
 class System:
     def __init__(self, name: str, data: str, delimiter: str = ",", max_samples: int = -1):
+        self._samples: list[Sample] = []
         if name[0] == "/":
             name = name[1:]
 
@@ -41,7 +42,7 @@ class System:
         if max_samples < 0:
             max_samples = len(list(csv.DictReader(open(source_file, encoding="utf-8"), delimiter=delimiter)))
 
-        if len(self.system_samples) == 0:
+        if len(self.samples) == 0:
             for line_id, line in enumerate(reader):
                 if line_id >= max_samples:
                     break
@@ -59,7 +60,7 @@ class System:
             commit_all()
 
     @property
-    def system_samples(self) -> list[Sample]:
+    def samples(self) -> list[Sample]:
         """Get the samples corresponding to the given system
 
         Returns
@@ -68,16 +69,19 @@ class System:
             the list of samples
 
         """
+
         # FIXME: this is a dirty hack as for now the Sample.__dict__ doesn't contain all the columns
         #        for now, it only returns <class 'sqlalchemy.engine.row.Row'> but not <Sample> object
-        samples = (
-            Sample.query.add_columns(Sample.__table__.columns)
-            .filter(Sample.system == self.name)
-            .order_by(Sample.line_id.asc())
-            .all()
-        )
-        # samples = Sample.query.filter(Sample.system == self.name).order_by(Sample.line_id.asc()).all()
-        return samples
+        if len(self._samples) == 0:
+            self._samples = (
+                Sample.query.add_columns(Sample.__table__.columns)
+                .filter(Sample.system == self.name)
+                .order_by(Sample.line_id.asc())
+                .all()
+            )
+            # samples = Sample.query.filter(Sample.system == self.name).order_by(Sample.line_id.asc()).all()
+
+        return self._samples
 
     @property
     def col_names(self) -> list[str]:

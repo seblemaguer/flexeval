@@ -71,3 +71,7 @@ class SelectionBase:
 
         """
         raise NotImplementedError(f'The class "{self.__class__.__name__}" should override the method "_select_samples"')
+
+    @property
+    def systems(self):
+        return self._systems

@@ -370,8 +370,8 @@ class Test(TransactionalObject):
             if "max_samples" in cur_system:
                 max_samples = cur_system["max_samples"]
 
-            self.systems[cur_system["name"]] = (
-                SystemManager().insert(cur_system["name"], cur_system["data"], delimiter, max_samples),
+            self.systems[cur_system["name"]] = SystemManager().insert(
+                cur_system["name"], cur_system["data"], delimiter, max_samples
             )
 
         # Create Test table in the database

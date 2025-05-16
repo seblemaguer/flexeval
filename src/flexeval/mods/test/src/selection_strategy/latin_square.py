@@ -1,6 +1,5 @@
 import numpy as np
 
-
 from flexeval.core import User
 from flexeval.mods.test.src.System import System
 from flexeval.mods.test.model import Sample
@@ -64,12 +63,17 @@ class LatinSquareSelection(SelectionBase):
 
         # Compute the latin square using the William's design
         square = williams_latin_square(len(list_systems))
+        self._logger.debug(f"Generating latin square of shape {square.shape}")
 
         # Generate the groups
         self._groups = np.zeros(square.shape).astype(int)
         for seq_idx in range(square.shape[0]):
             for sample_idx in range(square.shape[1]):
                 system_idx = square[seq_idx][sample_idx]
+                self._logger.debug(
+                    f"Number of samples for system {systems[list_systems[system_idx]][0]} => "
+                    + f"{len(systems[list_systems[system_idx]][0].system_samples)} [{len(self._samples)}]"
+                )
                 sample = systems[list_systems[system_idx]][0].system_samples[sample_idx]
                 self._groups[seq_idx][sample_idx] = sample.id - 1
                 self._samples[sample.id - 1] = sample
