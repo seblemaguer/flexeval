@@ -1,6 +1,5 @@
 from typing import Any
 import numpy as np
-from numpy.typing import NDArray
 import math
 import random
 
@@ -419,138 +418,10 @@ class LeastSeenMixedSelection(LeastSeenSelection):
             else:
                 self._nb_utts = len(sys.samples)
 
-        self._utt_counters = np.zeros((self._nb_utts)).astype(int)
-        self._user_utt_history = dict()
+        self._system_names = list(systems.keys())
+        self._counters = np.zeros((len(self._system_names), self._nb_utts)).astype(int)
+        self._user_counters = dict()
         self._user_history = dict()
-
-    def select_user_systems(self, user_history: dict[str, list[str]], nb_systems: int) -> list[str]:
-        """Select the systems which have been the least selected
-
-        The strategy is as follows:
-          1. list the least seen systems by the current user
-          2. if 1. leads to more than one system, select among these candidates the one the overall least seen systems
-          3. if 2. leads to more than one system, shuffle and select the first one
-
-        Parameters
-        ----------
-        user_history : dict[str, list[str]]
-            The current user history
-        nb_systems : int
-            The number of systems (for now only 1)
-
-        Returns
-        -------
-        list[str]
-            The list of selected systems (for now a list of one element)
-        """
-
-        assert nb_systems == 1
-
-        # Sort systems by user visibility and list all least seen systems
-        system_count_list = [(sys_name, len(seen_samples)) for sys_name, seen_samples in user_history.items()]
-        system_count_list.sort(key=lambda x: x[1])
-
-        cut_idx = 1
-        start_count = system_count_list[0][1]
-        for cut_idx, cur_elt in enumerate(system_count_list[1:], 1):
-            if cur_elt[1] != start_count:
-                break
-
-        # If more than one system, check the overall least seen systems
-        if cut_idx > 1:
-            system_count_list = system_count_list[:cut_idx]
-            random.shuffle(system_count_list)
-            system_count_list = [
-                (user_sys_count[0], self._system_counters[user_sys_count[0]])
-                for user_sys_count in system_count_list[:cut_idx]
-            ]
-            system_count_list.sort(key=lambda x: x[1])
-
-            cut_idx = 1
-            start_count = system_count_list[0][1]
-            for cut_idx, cur_elt in enumerate(system_count_list[1:], 1):
-                if cur_elt[1] != start_count:
-                    break
-
-        # Subset and shuffle
-        pool_systems = system_count_list[:cut_idx]
-        if cut_idx > 1:
-            random.shuffle(pool_systems)
-        pool_systems = [pool_systems[0][0]]
-
-        # Update overall system history
-        for sys_name in pool_systems:
-            self._system_counters[sys_name] += 1
-
-        return pool_systems
-
-    def user_select_samples(
-        self, user_history: list[str], user_utt_history: NDArray[np.int64], system_name: str, nb_samples: int
-    ) -> list[Sample]:
-        """Select the samples of a given system which have been the least selected
-
-        The strategy is as follows:
-          1. list the least seen samples by the current user
-          2. if 1. leads to more than one sample, select among these candidates the one the overall least seen samples
-          3. if 2. leads to more than one sample, shuffle and select the first one
-
-        Parameters
-        ----------
-        user_history : dict[str, list[str]]
-            The current user history
-        user_utt_history: NDArray[np.int64]
-            The utterance history for the current user
-        system_name: str
-            The name of the current system
-        nb_samples: int
-            The desired number of sample (for now = 1)
-
-        Returns
-        -------
-        list[Sample]
-            The list of selected samples (for now a list of one Sample)
-        """
-
-        assert nb_samples == 1
-
-        # List utterance candidates (the ones which has been the least seen)
-        utt_candidates_idx = np.where(user_utt_history == user_utt_history.min())[0]
-        np.random.shuffle(utt_candidates_idx)
-
-        if utt_candidates_idx.shape[0] > 1:
-            min_utt_counter = self._utt_counters[utt_candidates_idx].min()
-            utt_candidates_idx = utt_candidates_idx[self._utt_counters[utt_candidates_idx] == min_utt_counter]
-            np.random.shuffle(utt_candidates_idx)
-
-        candidates = [(self.systems[system_name].samples[i], user_utt_history[i], i) for i in utt_candidates_idx]
-
-        # If more than one sample, check the overall least seen samples
-        if len(candidates) > 1:
-            sample_count_list = [(utt[0], self._sample_counters[utt[0].id], utt[2]) for utt in candidates]
-            sample_count_list.sort(key=lambda x: x[1])
-            candidates = sample_count_list
-
-            cut_idx = 1
-            start_count = candidates[0][1]
-            for cut_idx, cur_elt in enumerate(candidates[1:], 1):
-                if cur_elt[1] != start_count:
-                    break
-
-            # Subset and shuffle
-            candidates = candidates[:cut_idx]
-            if cut_idx > 1:
-                random.shuffle(candidates)
-
-        pool_samples = [candidates[0][0]]
-        user_utt_history[candidates[0][2]] += 1
-        self._utt_counters[candidates[0][2]] += 1
-
-        # Update overall sample history
-        for sample in pool_samples:  # FIXME: this is a loop but in reality this only one value!
-            self._sample_counters[sample.id] += 1
-            user_history.append(sample[0])
-
-        return pool_samples
 
     def _select_samples(self, user: User, id_step: int, nb_systems: int, nb_samples: int) -> dict[str, list[Sample]]:
         """Method to select a given number of samples for a given number of systems for a specific user
@@ -582,23 +453,55 @@ class LeastSeenMixedSelection(LeastSeenSelection):
 
         if user.id not in self._user_history:
             self._user_history[user.id] = dict([(cur_system, list()) for cur_system in self.systems.keys()])
-            self._user_utt_history[user.id] = np.zeros((self._nb_utts)).astype(int)
-        # self._logger.warning(f"[{user.id}] History status: {self._user_history[user.id]}")
-        self._logger.warning(f"[{user.id}] Utt history status: {self._user_utt_history[user.id]}")
-        self._logger.warning(f"[=] Utt history status: {self._utt_counters}")
+            self._user_counters[user.id] = np.zeros((len(self._systems), self._nb_utts)).astype(int)
+        user_counters = self._user_counters[user.id]
 
-        # Select the systems
+        # 1. Select the systems to balance them
         self._logger.debug(f"Select systems for user {user.user_id}")
-        pool_systems = self.select_user_systems(self._user_history[user.id], nb_systems)
+        system_counters = np.sum(user_counters, axis=1)
+        pool_systems = np.where(system_counters == system_counters.min())[0].astype(int)
+
+        # 2. select the utt to balance them
+        utt_counters = np.sum(user_counters, axis=0)
+        pool_utts = np.where(utt_counters == utt_counters.min())[0].astype(int)
 
         # Select the samples
         self._logger.debug(f"Select samples for user {user.user_id}")
+
+        # Generate user mask using wanted system
+        mask = np.argwhere(user_counters == np.min(user_counters))
+        mask = mask[np.isin(mask[:, 0], pool_systems), :]
+        mask = mask[np.isin(mask[:, 1], pool_utts), :]
+
+        # Merge with overall mask based on overall cunter
+        if mask.shape[0] > 1:
+            min_overall_counters = np.min(self._counters[mask[:, 0], mask[:, 1]])
+            overall_mask = np.argwhere(self._counters == min_overall_counters)
+            overall_mask = overall_mask[np.isin(overall_mask[:, 0], mask[:, 0]), :]
+            mask = overall_mask[np.isin(overall_mask[:, 1], mask[:, 1]), :]
+
+        # Randomize and select the first sample
+        np.random.shuffle(mask)
+        mask = mask[0]
+
+        # Update counters
+        user_counters[mask[0], mask[1]] += 1
+        self._counters[mask[0], mask[1]] += 1
+
+        # And now get the samples
+        pool_samples = [self.systems[self._system_names[mask[0]]].samples[mask[1]]]
         dict_samples = dict()
-        for system_name in pool_systems:
-            dict_samples[system_name] = self.user_select_samples(
-                self._user_history[user.id][system_name], self._user_utt_history[user.id], system_name, nb_samples
-            )
+        for sample in pool_samples:
+            if sample.system not in dict_samples:
+                dict_samples[sample.system] = []
+            dict_samples[sample.system].append(sample)
+            self._system_counters[sample.system] += 1
+            self._sample_counters[sample.id] += 1
 
         self._logger.info(f"This is what we will give to {user.user_id}: {dict_samples}")
+
+        # self._logger.warning(f"[{user.id}] History status: {self._user_history[user.id]}")
+        self._logger.warning(f"[{user.id}] Utt history status:\n {self._user_counters[user.id]}")
+        self._logger.warning(f"[=] Utt history status:\n {self._counters}\n")
 
         return dict_samples
