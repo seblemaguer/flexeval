@@ -66,6 +66,8 @@ with campaign_instance.register_stage_module(__name__) as sm:
             form_stage = ModelFactory().create(stage.name, Form)
         else:
             form_stage = ModelFactory().get(stage.name, Form)
+            assert form_stage is not None  # NOTE: why is this needed?
+
         user.addRelationship(form_stage.__name__, form_stage, uselist=False)
 
         user = sm.auth_provider.user
@@ -75,16 +77,24 @@ with campaign_instance.register_stage_module(__name__) as sm:
             resp = form_stage.create(user_id=user.id)
             try:
                 for field_key in request.form.keys():
+                    if field_key.endswith("[]"):
+                        value = request.form.getlist(field_key)
+                        field_key = field_key.replace("[]", "")
+                        value = ", ".join(value)
+                    else:
+                        value = request.form[field_key]
+
                     form_stage.addColumn(field_key, db.String)
-                    resp.update(**{field_key: request.form[field_key]})
+                    resp.update(**{field_key: value})
 
                 for field_key in request.files.keys():
                     form_stage.addColumn(field_key, db.BLOB)
                     with request.files[field_key].stream as f:
                         resp.update(**{field_key: f.read()})
 
-            except Exception:
+            except Exception as ex:
                 resp.delete()
+                raise ex
 
         sem_form.release()
 
