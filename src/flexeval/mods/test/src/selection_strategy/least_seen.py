@@ -479,16 +479,22 @@ class LeastSeenMixedSelection(LeastSeenSelection):
         if overall_mask.shape[0] != 0:
             mask = overall_mask
 
-        # Randomize and select the first sample
+        # No luck up to now, just select a random samples, but put a priority on the system
+        if mask.shape[0] == 0:
+            mask = np.argwhere(user_counters == np.min(user_counters))
+            subset_cells = np.isin(mask[:, 0], pool_systems)
+            mask = mask[subset_cells, :]
+
+        # NOTE: for debug
+        if mask.shape[0] == 0:
+            self._logger.warning(f"[{user.id}] For whatever reason, we don't have any available slot")
+            self._logger.warning(f"[{user.id}] Here is the user counter status:\n")
+            self._logger.warning(f"{user_counters}")
+            self._logger.warning(f"[{user.id}] Here is the the overall counter:\n")
+            self._logger.warning(f"{self._counters}")
+            raise Exception("This make no sense")
+
         np.random.shuffle(mask)
-        # # NOTE: this was used for debugging purposes
-        # cur_sample = self.systems[self._system_names[mask[0][0]]].samples[mask[0][1]]
-        # if cur_sample.id in self._user_history[user.id]:
-        #     raise Exception(
-        #         f"The sample {cur_sample.id} is already evaluated by the listener"
-        #         + f" - Here is the current user history [{user.id}]: {self._user_counters[user.id]}\n"
-        #         + f" - Here is the current user mask    [{user.id}]: {mask}\n"
-        #     )
         mask = mask[0]
 
         # Update counters
