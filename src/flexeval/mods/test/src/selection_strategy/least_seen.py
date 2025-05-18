@@ -507,7 +507,7 @@ class LeastSeenMixedSelection(LeastSeenSelection):
         self._logger.info(f"This is what we will give to {user.user_id}: {dict_samples}")
 
         # self._logger.warning(f"[{user.id}] History status: {self._user_history[user.id]}")
-        self._logger.warning(f"[{user.id}] Utt history status:\n {self._user_counters[user.id]}")
-        self._logger.warning(f"[=] Utt history status:\n {self._counters}\n")
+        self._logger.debug(f"[{user.id}] Utt history status:\n {self._user_counters[user.id]}")
+        self._logger.debug(f"[=] Utt history status:\n {self._counters}\n")
 
         return dict_samples
