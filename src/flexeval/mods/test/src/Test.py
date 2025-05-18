@@ -94,14 +94,15 @@ class SampleModelInTransaction:
         if value is None:
             raise Exception(f'The column "{name}" doesn\'t exist')
 
-        self._logger.debug(f"{type(self._systemsample)} [{name}] -> {value} not in ({self._systemsample})")
+        if len(value) > 100:  # NOTE: 100 characters is a really long filename, so not valid!
+            return (value, str(mime))
 
         # Infer a possible file path, and if not a file, just return the value
         file_path = value
         if not (file_path[0] == "/"):
             file_path = "/" + file_path
-        cur_sample_path = Path(current_app.config["FLEXEVAL_INSTANCE_DIR"] + "/systems" + file_path)
 
+        cur_sample_path = Path(current_app.config["FLEXEVAL_INSTANCE_DIR"] + "/systems" + file_path)
         if not cur_sample_path.is_file():
             return (value, str(mime))
 
