@@ -451,37 +451,44 @@ class LeastSeenMixedSelection(LeastSeenSelection):
             nb_samples == 1
         ), f"Only 1 sample (not {nb_samples}) for 1 system (not {nb_systems}) is supported for this selection mode"
 
-        if user.id not in self._user_history:
-            self._user_history[user.id] = dict([(cur_system, list()) for cur_system in self.systems.keys()])
+        # Retrieve user history
+        if user.id not in self._user_counters:
+            # self._user_history[user.id] = dict([(cur_system, list()) for cur_system in self.systems.keys()])
+            self._user_history[user.id] = []
             self._user_counters[user.id] = np.zeros((len(self._systems), self._nb_utts)).astype(int)
         user_counters = self._user_counters[user.id]
 
-        # 1. Select the systems to balance them
-        self._logger.debug(f"Select systems for user {user.user_id}")
+        # Prepare some helpers to refine the filtering
         system_counters = np.sum(user_counters, axis=1)
         pool_systems = np.where(system_counters == system_counters.min())[0].astype(int)
-
-        # 2. select the utt to balance them
         utt_counters = np.sum(user_counters, axis=0)
         pool_utts = np.where(utt_counters == utt_counters.min())[0].astype(int)
 
-        # Select the samples
-        self._logger.debug(f"Select samples for user {user.user_id}")
+        # First get the minimal seen information (=> generate overall mask)
+        min_overall_counters = np.min(self._counters)
+        overall_mask = np.argwhere(self._counters == min_overall_counters)
 
-        # Generate user mask using wanted system
+        # Generate the user mask
         mask = np.argwhere(user_counters == np.min(user_counters))
-        mask = mask[np.isin(mask[:, 0], pool_systems), :]
-        mask = mask[np.isin(mask[:, 1], pool_utts), :]
+        subset_cells = np.isin(mask[:, 0], pool_systems) & np.isin(mask[:, 1], pool_utts)
+        mask = mask[subset_cells, :]
 
-        # Merge with overall mask based on overall cunter
-        if mask.shape[0] > 1:
-            min_overall_counters = np.min(self._counters[mask[:, 0], mask[:, 1]])
-            overall_mask = np.argwhere(self._counters == min_overall_counters)
-            overall_mask = overall_mask[np.isin(overall_mask[:, 0], mask[:, 0]), :]
-            mask = overall_mask[np.isin(overall_mask[:, 1], mask[:, 1]), :]
+        # Apply user mask to overall mask
+        subset_cells = np.isin(overall_mask[:, 0], mask[:, 0]) & np.isin(overall_mask[:, 1], mask[:, 1])
+        overall_mask = overall_mask[subset_cells, :]
+        if overall_mask.shape[0] != 0:
+            mask = overall_mask
 
         # Randomize and select the first sample
         np.random.shuffle(mask)
+        # # NOTE: this was used for debugging purposes
+        # cur_sample = self.systems[self._system_names[mask[0][0]]].samples[mask[0][1]]
+        # if cur_sample.id in self._user_history[user.id]:
+        #     raise Exception(
+        #         f"The sample {cur_sample.id} is already evaluated by the listener"
+        #         + f" - Here is the current user history [{user.id}]: {self._user_counters[user.id]}\n"
+        #         + f" - Here is the current user mask    [{user.id}]: {mask}\n"
+        #     )
         mask = mask[0]
 
         # Update counters
@@ -495,8 +502,7 @@ class LeastSeenMixedSelection(LeastSeenSelection):
             if sample.system not in dict_samples:
                 dict_samples[sample.system] = []
             dict_samples[sample.system].append(sample)
-            self._system_counters[sample.system] += 1
-            self._sample_counters[sample.id] += 1
+            self._user_history[user.id].append(sample.id)
 
         self._logger.info(f"This is what we will give to {user.user_id}: {dict_samples}")
 
