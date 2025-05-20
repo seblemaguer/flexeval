@@ -37,7 +37,7 @@
       {% set syssample = get_variable("syssamples")[0] %}
       <div class="form-group" style="margin-bottom:10px;">
         {% set name_field = get_variable("field_name",name="MOS_score",syssamples=[syssample]) %}
-        {% set content,mimetype = syssample.get(num=0)  %}
+        {% set content,mimetype = syssample.get('audio')  %}
 
         <center>
           <label for="score@{{syssample.ID}}">

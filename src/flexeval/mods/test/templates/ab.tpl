@@ -38,7 +38,7 @@
       <div class="form-group">
         {% set field_name = get_variable("field_name", name="ChoiceBetween") %}
         {% for syssample in get_variable("syssamples") %}
-          {% set content,mimetype = syssample.get(num=0) %}
+          {% set content,mimetype = syssample.get('audio') %}
 
           <div class="form-check" style="margin-bottom:10px;">
             <input class="form-check-input" type="radio" name="{{field_name}}" id="ID@{{syssample.ID}}" value="{{syssample.ID}}" required>

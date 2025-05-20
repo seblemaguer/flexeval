@@ -219,11 +219,11 @@
     {% endblock %}
 
     {% set sysref_sample = get_variable("syssamples", get_variable("sysref"))[0] %}
-    {% set sysref_content, sysref_mimetype = sysref_sample.get(num=0) %}
+    {% set sysref_content, sysref_mimetype = sysref_sample.get('audio') %}
 
     const list_audios = [
         {% for syssample in sample_list %}
-        {% set content,mimetype = syssample.get(num=0)  %}
+        {% set content,mimetype = syssample.get('audio')  %}
         {% if mimetype.startswith("audio") %}
         ["{{syssample}}", "{{content}}"],
         {% endif %}

@@ -50,7 +50,7 @@
       {% for syssample in get_variable("syssamples") %}
         <div class="form-group" style="margin-bottom:10px;">
           {% set name_field = get_variable("field_name",name="transcription",syssamples=[syssample]) %}
-          {% set content,mimetype = syssample.get(num=0)  %}
+          {% set content,mimetype = syssample.get('audio')  %}
 
           <label for="score@{{syssample.ID}}">
               {% block player_view scoped %}
